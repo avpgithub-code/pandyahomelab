@@ -1,0 +1,26 @@
+You → SSH → 192.168.1.152 (NAS host)
+     → docker exec -it ml-iris-knn /bin/sh
+     → you're now inside the iris-knn container
+
+# 1. SSH into the NAS (you already do this for admin)
+ssh archit@192.168.1.152
+
+# 2. List running containers
+docker ps
+
+# 3. Drop into a shell inside a specific container
+docker exec -it ml-iris-knn /bin/sh
+
+# Now you're inside the container. Look around:
+ls /app
+cat /app/main.py
+ps aux
+env | grep MLFLOW
+
+# You can also run one-shot commands without an interactive shell:
+docker exec ml-iris-knn cat /app/logs/error.log
+docker exec ml-iris-knn python -c "import sklearn; print(sklearn.__version__)"
+
+# And you can stream logs without entering the container at all:
+docker logs -f ml-iris-knn
+

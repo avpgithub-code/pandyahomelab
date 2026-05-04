@@ -1,0 +1,188 @@
+# pandyaHomeLab .gitignore
+#
+# Patterns are sourced from ADR decisions and standard development hygiene.
+# Each section indicates the source ADR or rationale.
+
+# =========================================================================
+# Runtime data directories (per ADR-009)
+# These are populated at container runtime; never in Git.
+# =========================================================================
+data-dev-nas/
+data-prod-nas/
+
+# =========================================================================
+# Secrets (per ADR-010)
+# .env files hold environment-specific credentials.
+# Canonical store is the password manager, not Git.
+# =========================================================================
+.env
+.env.dev-nas
+.env.prod-nas
+.env.local
+.env.*.local
+
+# =========================================================================
+# Authentication credentials (per ADR-012)
+# htpasswd files for Basic Auth at Nginx.
+# =========================================================================
+.htpasswd
+.htpasswd-*
+
+# =========================================================================
+# Synology system folders
+# Auto-created by DSM; not user content.
+# =========================================================================
+@eaDir/
+*/@eaDir/
+\#recycle/
+*/\#recycle/
+
+# =========================================================================
+# OS-specific artifacts
+# =========================================================================
+# Windows
+Thumbs.db
+desktop.ini
+*.lnk
+~$*
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
+# =========================================================================
+# Editor and IDE state
+# =========================================================================
+# VS Code
+.vscode/
+*.code-workspace
+
+# JetBrains
+.idea/
+*.iml
+
+# Vim
+*.swp
+*.swo
+*~
+
+# =========================================================================
+# Python (most demos)
+# =========================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.env/
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Test and coverage artifacts
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+
+# Type checker
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints/
+
+# =========================================================================
+# Node.js (for demos using JavaScript-based frameworks)
+# =========================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json.bak
+
+# =========================================================================
+# Docker artifacts
+# =========================================================================
+# Local build artifacts (images live in registry, not in repo)
+*.tar
+*.tar.gz
+.docker/
+
+# =========================================================================
+# Model artifacts and large data files
+# Large model weights, datasets, and trained artifacts are stored in
+# MinIO / S3 — not in Git. Sample data for tests can be tracked.
+# =========================================================================
+*.h5
+*.pkl
+*.pickle
+*.joblib
+*.onnx
+*.pt
+*.pth
+*.bin
+*.safetensors
+models/*.pt
+models/*.h5
+
+# =========================================================================
+# Logs (containers stream to stdout per ADR-011; runtime logs not in repo)
+# =========================================================================
+*.log
+logs/
+log/
+
+# =========================================================================
+# Backup and temporary files
+# =========================================================================
+*.bak
+*.tmp
+*.temp
+.backup/
+
+# =========================================================================
+# Local override files
+# Developer-specific configs that shouldn't affect the repo.
+# =========================================================================
+*.local
+local.*
+override.*
+docker-compose.override.yml
