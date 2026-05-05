@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pandyaHomeLab — Personal AI Learning Platform</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0f14;
+      --surface:   #13161e;
+      --surface2:  #1a1e2a;
+      --border:    #252a38;
+      --accent-ml: #4f8ef7;
+      --accent-dl: #f97316;
+      --accent-go: #22c55e;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --radius:    12px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem;
+      height: 100px;
+      background: rgba(13,15,20,.85);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-brand { display: flex; align-items: center; text-decoration: none; }
+    .nav-brand img {
+      height: 83px; width: auto; display: block;
+      border-radius: 8px;
+      border: 2px solid #fff;
+      padding: 3px 8px;
+      margin-top: 15px;
+    }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      color: var(--muted); text-decoration: none; font-size: .875rem;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* ── HERO ── */
+    .hero {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 7rem 2rem 5rem;
+      text-align: center;
+      background:
+        radial-gradient(ellipse 70% 50% at 20% 40%, rgba(79,142,247,.07) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 60%, rgba(249,115,22,.06) 0%, transparent 60%),
+        var(--bg);
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 99px; padding: .35rem 1rem;
+      font-size: .75rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase;
+      margin-bottom: 1.75rem;
+    }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-go);
+           box-shadow: 0 0 6px var(--accent-go); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    .hero h1 {
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      font-weight: 800; letter-spacing: -.03em; line-height: 1.1;
+      margin-bottom: 1.25rem;
+    }
+    .hero h1 em { font-style: normal; color: var(--accent-ml); }
+    .hero p.subtitle {
+      max-width: 780px; color: var(--muted); font-size: 1.05rem; margin-bottom: 2.5rem;
+    }
+    .cta-row { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+    .btn {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .7rem 1.6rem; border-radius: var(--radius);
+      font-size: .9rem; font-weight: 600; cursor: pointer;
+      text-decoration: none; border: none; transition: transform .15s, box-shadow .15s;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-ml { background: var(--accent-ml); color: #fff; box-shadow: 0 4px 20px rgba(79,142,247,.35); }
+    .btn-ml:hover { box-shadow: 0 6px 28px rgba(79,142,247,.55); }
+    .btn-dl { background: var(--accent-dl); color: #fff; box-shadow: 0 4px 20px rgba(249,115,22,.35); }
+    .btn-dl:hover { box-shadow: 0 6px 28px rgba(249,115,22,.55); }
+    .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: var(--surface2); }
+
+    /* ── SECTION ── */
+    section { padding: 0 2rem 5rem; max-width: 1100px; margin: 0 auto; }
+    .section-label {
+      font-size: .7rem; letter-spacing: .15em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: .75rem;
+    }
+    .section-title {
+      font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 700;
+      letter-spacing: -.02em; margin-bottom: 1rem;
+    }
+    .section-desc { color: var(--muted); max-width: 580px; margin-bottom: 3rem; }
+
+    /* ── MODULE CARDS ── */
+    .modules-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    .module-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 2rem;
+      transition: border-color .2s, transform .2s;
+      cursor: pointer; text-decoration: none; color: inherit;
+      display: flex; flex-direction: column;
+    }
+    .module-card:hover { transform: translateY(-4px); }
+    .module-card.ml { border-top: 3px solid var(--accent-ml); }
+    .module-card.ml:hover { border-color: var(--accent-ml); }
+    .module-card.dl { border-top: 3px solid var(--accent-dl); }
+    .module-card.dl:hover { border-color: var(--accent-dl); }
+    .module-icon {
+      width: 48px; height: 48px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; margin-bottom: 1.25rem;
+    }
+    .ml .module-icon { background: rgba(79,142,247,.12); }
+    .dl .module-icon { background: rgba(249,115,22,.12); }
+    .module-card h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: .5rem; }
+    .module-card p { color: var(--muted); font-size: .89rem; flex: 1; }
+    .module-tag {
+      display: inline-block; margin-top: 1.25rem; padding: .25rem .75rem;
+      border-radius: 99px; font-size: .72rem; font-weight: 600; letter-spacing: .05em;
+    }
+    .ml .module-tag  { background: rgba(79,142,247,.15);  color: var(--accent-ml); }
+    .dl .module-tag  { background: rgba(249,115,22,.15);  color: var(--accent-dl); }
+    .route-badge {
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: .75rem; color: var(--muted); margin-top: .4rem; display: block;
+    }
+
+    /* ── ARCH STRIP ── */
+    .arch-strip {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 2rem;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 1.5rem; margin-top: 4rem;
+    }
+    .arch-item { display: flex; flex-direction: column; gap: .3rem; }
+    .arch-item .label { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; }
+    .arch-item .value { font-size: .9rem; font-weight: 600; }
+    .arch-item .value.green { color: var(--accent-go); }
+    .arch-item .value.blue  { color: var(--accent-ml); }
+    .arch-item .value.orange{ color: var(--accent-dl); }
+
+    /* ── TOPICS ── */
+    .topics-section { padding-top: 0; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+    @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+    .topic-panel {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.75rem;
+    }
+    .topic-panel h4 {
+      font-size: 1rem; font-weight: 700; margin-bottom: 1.1rem;
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .topic-panel h4 span { font-size: 1.1rem; }
+    .topic-list { list-style: none; display: flex; flex-direction: column; gap: .6rem; }
+    .topic-list li {
+      display: flex; align-items: center; gap: .6rem;
+      font-size: .875rem; color: var(--muted);
+    }
+    .topic-list li::before { content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .topic-panel.ml .topic-list li::before { background: var(--accent-ml); }
+    .topic-panel.dl .topic-list li::before { background: var(--accent-dl); }
+
+    /* ── STACK ── */
+    .stack-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 1rem; margin-top: 0;
+    }
+    .stack-chip {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: .9rem 1rem;
+      display: flex; flex-direction: column; align-items: center; gap: .4rem;
+      font-size: .8rem; font-weight: 500; text-align: center; color: var(--muted);
+      transition: border-color .2s;
+    }
+    .stack-chip:hover { border-color: var(--accent-ml); color: var(--text); }
+    .stack-chip .chip-icon { font-size: 1.5rem; }
+
+    /* ══════════════════════════════════════════════════
+       ── PROJECT SHOWCASE SECTION (NEW) ──
+    ══════════════════════════════════════════════════ */
+    .projects-section { padding-top: 0; }
+
+    /* Split header row with section tags on right */
+    .projects-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .projects-header-left {}
+    .projects-header-right {
+      display: flex;
+      gap: .6rem;
+      flex-shrink: 0;
+    }
+    .section-tag {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .35rem .9rem; border-radius: 99px;
+      font-size: .72rem; font-weight: 700; letter-spacing: .07em;
+      text-transform: uppercase; cursor: pointer;
+      transition: all .2s; text-decoration: none;
+      border: 1px solid;
+    }
+    .section-tag.ml-tag {
+      background: rgba(79,142,247,.12);
+      color: var(--accent-ml);
+      border-color: rgba(79,142,247,.3);
+    }
+    .section-tag.ml-tag:hover {
+      background: rgba(79,142,247,.22);
+      border-color: var(--accent-ml);
+    }
+    .section-tag.dl-tag {
+      background: rgba(249,115,22,.12);
+      color: var(--accent-dl);
+      border-color: rgba(249,115,22,.3);
+    }
+    .section-tag.dl-tag:hover {
+      background: rgba(249,115,22,.22);
+      border-color: var(--accent-dl);
+    }
+    .tag-dot {
+      width: 6px; height: 6px; border-radius: 50();
+      background: currentColor; flex-shrink: 0;
+    }
+
+    /* Two-column project layout */
+    .projects-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+    @media (max-width: 760px) { .projects-columns { grid-template-columns: 1fr; } }
+
+    /* Column header */
+    .proj-col-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem; padding-bottom: .75rem;
+      border-bottom: 2px solid;
+    }
+    .proj-col-header.ml-col { border-color: var(--accent-ml); }
+    .proj-col-header.dl-col { border-color: var(--accent-dl); }
+
+    .proj-col-title {
+      display: flex; align-items: center; gap: .5rem;
+      font-size: 1rem; font-weight: 700;
+    }
+    .proj-col-count {
+      font-size: .75rem; color: var(--muted);
+      background: var(--surface2); border: 1px solid var(--border);
+      padding: .15rem .6rem; border-radius: 99px;
+    }
+
+    /* Individual project card */
+    .proj-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: .85rem;
+      overflow: hidden;
+      transition: transform .2s, border-color .2s;
+    }
+    .proj-card:last-child { margin-bottom: 0; }
+    .proj-card:hover { transform: translateY(-2px); }
+    .proj-card.ml-card:hover { border-color: rgba(79,142,247,.5); }
+    .proj-card.dl-card:hover { border-color: rgba(249,115,22,.5); }
+
+    .proj-card-inner {
+      display: flex; align-items: stretch;
+    }
+    .proj-card-accent {
+      width: 3px; flex-shrink: 0;
+    }
+    .ml-card .proj-card-accent { background: var(--accent-ml); }
+    .dl-card .proj-card-accent { background: var(--accent-dl); }
+
+    .proj-card-body {
+      flex: 1; padding: 1rem 1.1rem;
+      display: flex; flex-direction: column; gap: .4rem;
+    }
+    .proj-card-top {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: .5rem;
+    }
+    .proj-name {
+      font-size: .92rem; font-weight: 700; color: var(--text);
+      line-height: 1.3;
+    }
+
+    /* Status badge */
+    .proj-status {
+      font-size: .65rem; font-weight: 700; letter-spacing: .06em;
+      text-transform: uppercase; padding: .18rem .6rem;
+      border-radius: 99px; flex-shrink: 0; border: 1px solid;
+      white-space: nowrap;
+    }
+    .status-live    { background: rgba(34,197,94,.12);  color: var(--accent-go);  border-color: rgba(34,197,94,.3);  }
+    .status-wip     { background: rgba(250,204,21,.1);  color: #facc15;            border-color: rgba(250,204,21,.3); }
+    .status-planned { background: rgba(100,116,139,.1); color: var(--muted);       border-color: rgba(100,116,139,.3);}
+
+    .proj-desc {
+      font-size: .8rem; color: var(--muted); line-height: 1.5;
+    }
+
+    .proj-card-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: .5rem; flex-wrap: wrap; margin-top: .3rem;
+    }
+    .proj-tags { display: flex; gap: .3rem; flex-wrap: wrap; }
+    .proj-tag {
+      font-size: .67rem; font-weight: 500;
+      padding: .15rem .55rem; border-radius: 4px;
+      background: var(--surface2); color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    /* The main action link */
+    .proj-link {
+      display: inline-flex; align-items: center; gap: .35rem;
+      font-size: .78rem; font-weight: 600; text-decoration: none;
+      padding: .32rem .85rem; border-radius: 8px;
+      transition: all .2s; flex-shrink: 0;
+      border: 1px solid;
+    }
+    .ml-link {
+      color: var(--accent-ml);
+      border-color: rgba(79,142,247,.35);
+      background: rgba(79,142,247,.08);
+    }
+    .ml-link:hover {
+      background: rgba(79,142,247,.2);
+      border-color: var(--accent-ml);
+    }
+    .dl-link {
+      color: var(--accent-dl);
+      border-color: rgba(249,115,22,.35);
+      background: rgba(249,115,22,.08);
+    }
+    .dl-link:hover {
+      background: rgba(249,115,22,.2);
+      border-color: var(--accent-dl);
+    }
+    .proj-link-disabled {
+      color: var(--muted);
+      border-color: var(--border);
+      background: transparent;
+      cursor: not-allowed;
+      opacity: .5;
+    }
+
+    /* route pill below link */
+    .proj-route {
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: .67rem; color: var(--muted);
+      display: block; margin-top: .15rem;
+    }
+
+    /* Add new project card */
+    .proj-card-add {
+      background: transparent;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      padding: .9rem 1.1rem;
+      display: flex; align-items: center; gap: .6rem;
+      color: var(--muted); font-size: .82rem;
+      opacity: .6;
+    }
+    .proj-card-add-icon {
+      width: 26px; height: 26px; border-radius: 50%;
+      border: 1px dashed currentColor;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; flex-shrink: 0;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      text-align: center; padding: 2rem;
+      font-size: .8rem; color: var(--muted);
+    }
+    footer a { color: var(--accent-ml); text-decoration: none; }
+
+    @media (max-width: 560px) { .nav-links { display: none; } }
+
+    /* ── FADE-IN ANIMATION ── */
+    @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+    .proj-card { animation: fadeUp .4s ease both; }
+    .proj-card:nth-child(1){animation-delay:.05s}
+    .proj-card:nth-child(2){animation-delay:.10s}
+    .proj-card:nth-child(3){animation-delay:.15s}
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-brand" href="#">
+    <img src="pandya-home-lab-logo.png" alt="pandyaHomeLab" />
+  </a>
+  <ul class="nav-links">
+    <li><a href="#modules">Modules</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#topics">Topics</a></li>
+    <li><a href="#stack">Stack</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">
+    <div class="dot"></div>
+    End-to-End AI Lifecycle Platform
+  </div>
+  <p style="font-size:1.19rem;font-weight:700;letter-spacing:.02em;margin-bottom:.5rem;">
+    <span style="color:var(--text)">pandya<span style="color:var(--accent-ml)">HomeLab</span></span>
+  </p>
+  <h1 style="font-size:clamp(0.46rem,5vw,2.06rem);"><span style="font-size:clamp(1.15rem,5vw,2.75rem);">A Home Lab Platform</span><br>Nurturing <em>AI/ML</em> Ideas</h1>
+  <p class="subtitle">
+    A personal learning platform showcasing Machine Learning and Deep Learning Models<br>
+    &mdash; From Theory to Production: Learn &amp; Develop on Synology NAS &amp; Deploy to AWS.
+  </p>
+  <div class="cta-row">
+    <a href="#ml-projects" class="btn btn-ml">&#129504; ML Projects</a>
+    <a href="#dl-projects" class="btn btn-dl">&#127760; DL Projects</a>
+  </div>
+
+  <!-- Platform Architecture Infographic -->
+  <div id="architecture" style="width:100%;max-width:720px;margin:3rem auto 0.5rem;text-align:center;">
+    <div style="font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:var(--text);margin-bottom:.6rem;">Platform Architecture</div>
+    <div style="
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--surface);
+      box-shadow: 0 8px 40px rgba(0,0,0,.5), inset 0 4px 18px rgba(0,0,0,.7), inset 0 -2px 8px rgba(0,0,0,.4);
+      outline: 2px solid var(--accent-ml);
+      outline-offset: 4px;
+    ">
+      <img
+        src="pandyaHomeLab - AI Platform.png"
+        alt="pandyaHomeLab — Cost Effective, Secure &amp; Scalable Home Lab AI Platform architecture diagram"
+        style="width:100%;display:block;"
+        loading="lazy"
+      />
+    </div>
+  </div>
+</div>
+
+<!-- MODULES -->
+<section id="modules">
+  <div class="section-label">Learning Paths</div>
+  <h2 class="section-title">Two Focused Modules</h2>
+  <p class="section-desc">
+    Each module is a self-contained learning track with its own cloud backend,
+    serving structured lessons, notebooks, and model demos.
+  </p>
+  <div class="modules-grid">
+    <a href="#ml-projects" class="module-card ml" id="ml">
+      <div class="module-icon">&#129504;</div>
+      <h3>Machine Learning</h3>
+      <p>
+        Classical ML algorithms, feature engineering, model evaluation,
+        and scikit-learn workflows. Foundational concepts through hands-on projects.
+      </p>
+      <span class="module-tag">PyTorch · scikit-learn · Flask</span>
+      <span class="route-badge">pandyahomelab.com/ml</span>
+    </a>
+    <a href="#dl-projects" class="module-card dl" id="dl">
+      <div class="module-icon">&#127760;</div>
+      <h3>Deep Learning</h3>
+      <p>
+        Neural networks, CNNs, RNNs, Transformers, and beyond.
+        TensorFlow-powered experiments deployed to private cloud backends.
+      </p>
+      <span class="module-tag">TensorFlow · FastAPI · Docker</span>
+      <span class="route-badge">pandyahomelab.com/dl</span>
+    </a>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════
+     PROJECT SHOWCASE  ← NEW SECTION
+══════════════════════════════════════════════════ -->
+<section id="projects" class="projects-section">
+
+  <!-- Header row with section tags on the RIGHT -->
+  <div class="projects-header">
+    <div class="projects-header-left">
+      <div class="section-label">Live Deployments &amp; Work-in-Progress</div>
+      <h2 class="section-title">Projects</h2>
+      <p class="section-desc" style="margin-bottom:0">
+        Each project is a containerized microservice — built on NAS, deployed to AWS.
+        Click any live project to interact with the model API directly.
+      </p>
+    </div>
+    <!-- SECTION TAGS — right side, as you asked -->
+    <div class="projects-header-right">
+      <a href="#ml-projects" class="section-tag ml-tag">
+        <span class="tag-dot"></span>&#129504; ML Projects
+      </a>
+      <a href="#dl-projects" class="section-tag dl-tag">
+        <span class="tag-dot"></span>&#127760; DL Projects
+      </a>
+    </div>
+  </div>
+
+  <!-- Two columns: ML left, DL right -->
+  <div class="projects-columns">
+
+    <!-- ── ML COLUMN ── -->
+    <div id="ml-projects">
+      <div class="proj-col-header ml-col">
+        <div class="proj-col-title">
+          <span>&#129504;</span>
+          <span style="color:var(--accent-ml)">Machine Learning</span>
+        </div>
+        <span class="proj-col-count">0 live · 2 planned</span>
+      </div>
+
+      <!-- CNN Image Classifier moved to DL column (CNN = Deep Learning) -->
+
+      <!-- Project 2 — WIP -->
+      <div class="proj-card ml-card">
+        <div class="proj-card-inner">
+          <div class="proj-card-accent"></div>
+          <div class="proj-card-body">
+            <div class="proj-card-top">
+              <span class="proj-name">Linear Regression</span>
+              <span class="proj-status status-wip">⧗ In Progress</span>
+            </div>
+            <p class="proj-desc">
+              End-to-end regression pipeline with feature engineering,
+              cross-validation, and a Flask API for real-time predictions.
+            </p>
+            <div class="proj-card-footer">
+              <div>
+                <div class="proj-tags">
+                  <span class="proj-tag">scikit-learn</span>
+                  <span class="proj-tag">Flask</span>
+                  <span class="proj-tag">Docker</span>
+                </div>
+                <span class="proj-route">pandyahomelab.com/ml/linear-regression</span>
+              </div>
+              <span class="proj-link proj-link-disabled">Coming soon</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project 3 — Planned -->
+      <div class="proj-card ml-card">
+        <div class="proj-card-inner">
+          <div class="proj-card-accent" style="background:var(--border)"></div>
+          <div class="proj-card-body">
+            <div class="proj-card-top">
+              <span class="proj-name">Random Forest Classifier</span>
+              <span class="proj-status status-planned">Planned</span>
+            </div>
+            <p class="proj-desc">
+              Ensemble learning with decision trees — feature importance
+              visualisation and model explainability via SHAP.
+            </p>
+            <div class="proj-card-footer">
+              <div>
+                <div class="proj-tags">
+                  <span class="proj-tag">scikit-learn</span>
+                  <span class="proj-tag">SHAP</span>
+                  <span class="proj-tag">Flask</span>
+                </div>
+                <span class="proj-route">pandyahomelab.com/ml/random-forest</span>
+              </div>
+              <span class="proj-link proj-link-disabled">Planned</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="proj-card-add">
+        <div class="proj-card-add-icon">+</div>
+        More ML projects coming as learning progresses...
+      </div>
+    </div>
+
+    <!-- ── DL COLUMN ── -->
+    <div id="dl-projects">
+      <div class="proj-col-header dl-col">
+        <div class="proj-col-title">
+          <span>&#127760;</span>
+          <span style="color:var(--accent-dl)">Deep Learning</span>
+        </div>
+        <span class="proj-col-count">1 live · 2 planned</span>
+      </div>
+
+            <!-- Project 1 — CNN LIVE (moved from ML — CNN is Deep Learning) -->
+            <div class="proj-card dl-card">
+              <div class="proj-card-inner">
+                <div class="proj-card-accent"></div>
+                <div class="proj-card-body">
+                  <div class="proj-card-top">
+                    <span class="proj-name">CNN Image Classifier</span>
+                    <span class="proj-status status-live">● Live</span>
+                  </div>
+                  <p class="proj-desc">
+                    Convolutional neural network that classifies images into categories.
+                    Upload any image — get a prediction with confidence score instantly.
+                  </p>
+                  <div class="proj-card-footer">
+                    <div>
+                      <div class="proj-tags">
+                        <span class="proj-tag">PyTorch</span>
+                        <span class="proj-tag">FastAPI</span>
+                        <span class="proj-tag">Docker</span>
+                      </div>
+                      <span class="proj-route">pandyahomelab.com/dl/cnn-classifier</span>
+                    </div>
+                    <a href="/dl/cnn-classifier.html" class="proj-link dl-link">
+                      Check it out &#8599;
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+      <div class="proj-card dl-card">
+        <div class="proj-card-inner">
+          <div class="proj-card-accent"></div>
+          <div class="proj-card-body">
+            <div class="proj-card-top">
+              <span class="proj-name">LSTM Time-Series Forecast</span>
+              <span class="proj-status status-wip">⧗ In Progress</span>
+            </div>
+            <p class="proj-desc">
+              Long Short-Term Memory network for sequential data forecasting.
+              Predicts trends from historical time-series inputs.
+            </p>
+            <div class="proj-card-footer">
+              <div>
+                <div class="proj-tags">
+                  <span class="proj-tag">PyTorch</span>
+                  <span class="proj-tag">FastAPI</span>
+                  <span class="proj-tag">Docker</span>
+                </div>
+                <span class="proj-route">pandyahomelab.com/dl/lstm-forecast</span>
+              </div>
+              <span class="proj-link proj-link-disabled">Coming soon</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DL Project 2 — Planned -->
+      <div class="proj-card dl-card">
+        <div class="proj-card-inner">
+          <div class="proj-card-accent" style="background:var(--border)"></div>
+          <div class="proj-card-body">
+            <div class="proj-card-top">
+              <span class="proj-name">Transformer NLP</span>
+              <span class="proj-status status-planned">Planned</span>
+            </div>
+            <p class="proj-desc">
+              Fine-tuned transformer model for text classification
+              and sentiment analysis using HuggingFace and FastAPI.
+            </p>
+            <div class="proj-card-footer">
+              <div>
+                <div class="proj-tags">
+                  <span class="proj-tag">HuggingFace</span>
+                  <span class="proj-tag">FastAPI</span>
+                  <span class="proj-tag">Docker</span>
+                </div>
+                <span class="proj-route">pandyahomelab.com/dl/transformer-nlp</span>
+              </div>
+              <span class="proj-link proj-link-disabled">Planned</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DL Project 3 — Planned -->
+      <div class="proj-card dl-card">
+        <div class="proj-card-inner">
+          <div class="proj-card-accent" style="background:var(--border)"></div>
+          <div class="proj-card-body">
+            <div class="proj-card-top">
+              <span class="proj-name">Object Detection (YOLO)</span>
+              <span class="proj-status status-planned">Planned</span>
+            </div>
+            <p class="proj-desc">
+              Real-time object detection API. Upload an image — get bounding
+              boxes and class labels back as JSON or annotated image.
+            </p>
+            <div class="proj-card-footer">
+              <div>
+                <div class="proj-tags">
+                  <span class="proj-tag">YOLOv8</span>
+                  <span class="proj-tag">FastAPI</span>
+                  <span class="proj-tag">Docker</span>
+                </div>
+                <span class="proj-route">pandyahomelab.com/dl/object-detection</span>
+              </div>
+              <span class="proj-link proj-link-disabled">Planned</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="proj-card-add">
+        <div class="proj-card-add-icon">+</div>
+        More DL projects coming as learning progresses...
+      </div>
+    </div>
+
+  </div><!-- end projects-columns -->
+</section>
+
+<!-- TOPICS -->
+<section id="topics" class="topics-section">
+  <div class="section-label">Curriculum</div>
+  <h2 class="section-title">What You'll Explore</h2>
+  <p class="section-desc">
+    Each module covers core theory, practical implementation, and real deployment patterns.
+  </p>
+  <div class="two-col">
+    <div class="topic-panel ml">
+      <h4><span>&#129504;</span> Machine Learning</h4>
+      <ul class="topic-list">
+        <li>Supervised &amp; Unsupervised Learning</li>
+        <li>Linear / Logistic Regression</li>
+        <li>Decision Trees &amp; Ensemble Methods</li>
+        <li>Feature Engineering &amp; Selection</li>
+        <li>Model Evaluation &amp; Cross-Validation</li>
+        <li>Pipeline Design with scikit-learn</li>
+        <li>Deploying Models via Flask API</li>
+        <li>AWS EC2 Private Subnet Hosting</li>
+      </ul>
+    </div>
+    <div class="topic-panel dl">
+      <h4><span>&#127760;</span> Deep Learning</h4>
+      <ul class="topic-list">
+        <li>Neural Network Fundamentals</li>
+        <li>Convolutional Neural Networks (CNN)</li>
+        <li>Recurrent Networks &amp; LSTMs</li>
+        <li>Transfer Learning &amp; Fine-Tuning</li>
+        <li>Attention Mechanisms &amp; Transformers</li>
+        <li>TensorFlow Model Training Workflows</li>
+        <li>FastAPI Model Serving</li>
+        <li>Docker Containerization on AWS</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- STACK -->
+<section id="stack">
+  <div class="section-label">Technology Stack</div>
+  <h2 class="section-title">Built With</h2>
+  <p class="section-desc">Production-grade tools used across both learning modules.</p>
+  <div class="stack-grid">
+    <div class="stack-chip"><span class="chip-icon">&#129504;</span>PyTorch</div>
+    <div class="stack-chip"><span class="chip-icon">&#127760;</span>TensorFlow</div>
+    <div class="stack-chip"><span class="chip-icon">&#128736;</span>scikit-learn</div>
+    <div class="stack-chip"><span class="chip-icon">&#128640;</span>FastAPI</div>
+    <div class="stack-chip"><span class="chip-icon">&#127381;</span>Flask</div>
+    <div class="stack-chip"><span class="chip-icon">&#128025;</span>Docker</div>
+    <div class="stack-chip"><span class="chip-icon">&#9729;</span>AWS EC2</div>
+    <div class="stack-chip"><span class="chip-icon">&#128230;</span>Amazon S3</div>
+    <div class="stack-chip"><span class="chip-icon">&#128274;</span>Nginx SSL</div>
+    <div class="stack-chip"><span class="chip-icon">&#128279;</span>GitHub</div>
+    <div class="stack-chip"><span class="chip-icon">&#128187;</span>Synology NAS</div>
+    <div class="stack-chip"><span class="chip-icon">&#127760;</span>Hostinger DNS</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>
+    &copy; 2026 <strong>pandyaHomeLab</strong> &mdash;
+    <a href="https://architpandya.com">architpandya.com</a> &nbsp;·&nbsp;
+    <a href="https://pandyahomelab.com/ml">ML Projects</a> &nbsp;·&nbsp;
+    <a href="https://pandyahomelab.com/dl">DL Projects</a>
+  </p>
+  <p style="margin-top:.5rem; font-size:.72rem;">
+    Hosted on AWS VPC · DNS by Hostinger · Local Dev on Synology NAS
+  </p>
+</footer>
+
+</body>
+</html>

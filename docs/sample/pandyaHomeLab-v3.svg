@@ -1,0 +1,715 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 3400" font-family="'SF Mono', 'Monaco', 'Menlo', 'Consolas', monospace" font-size="11">
+  <defs>
+    <style>
+      .bg { fill: #0a0e1a; }
+      .panel { fill: #111827; stroke: #1f2937; stroke-width: 1; rx: 8; }
+      .panel-dark { fill: #0d1220; stroke: #1f2937; stroke-width: 1; }
+      .title { fill: #f8fafc; font-size: 48px; font-weight: 700; font-family: 'Inter', 'Helvetica', sans-serif; }
+      .title-accent { fill: #a78bfa; font-size: 48px; font-weight: 700; font-family: 'Inter', 'Helvetica', sans-serif; }
+      .subtitle { fill: #64748b; font-size: 11px; letter-spacing: 1.5px; }
+      .breadcrumb { fill: #475569; font-size: 11px; font-family: 'SF Mono', monospace; }
+      .header-tag { fill: #1e293b; stroke: #334155; stroke-width: 1; rx: 3; }
+      .header-tag-text { fill: #94a3b8; font-size: 9px; letter-spacing: 1px; }
+      .legend-bg { fill: #0d1220; stroke: #1e293b; stroke-width: 1; rx: 4; }
+      .legend-text { fill: #cbd5e1; font-size: 9px; letter-spacing: 1px; font-weight: 600; }
+      .section-label { fill: #64748b; font-size: 9px; letter-spacing: 1.5px; font-weight: 600; }
+      .section-title { fill: #f1f5f9; font-size: 18px; font-weight: 700; font-family: 'Inter', sans-serif; }
+      .section-desc { fill: #94a3b8; font-size: 11px; }
+      .key-rule { fill: #cbd5e1; font-size: 11px; }
+      .key-rule-bold { fill: #f1f5f9; font-size: 11px; font-weight: 700; }
+      .folder { fill: #fbbf24; font-size: 12px; font-weight: 600; }
+      .folder-name { fill: #fcd34d; font-size: 12px; font-weight: 600; }
+      .file { fill: #cbd5e1; font-size: 11px; }
+      .file-dim { fill: #64748b; font-size: 10px; }
+      .arrow { fill: #475569; }
+      .comment { fill: #64748b; font-size: 10px; font-style: italic; }
+      .badge { rx: 3; }
+      .badge-text { fill: #f1f5f9; font-size: 8px; font-weight: 700; letter-spacing: 0.5px; }
+      .tree { fill: #475569; font-family: 'SF Mono', monospace; font-size: 11px; }
+      .layer-p { fill: #10b981; }
+      .layer-a { fill: #3b82f6; }
+      .layer-d { fill: #f97316; }
+      .layer-x { fill: #ef4444; }
+      .layer-label { fill: #f8fafc; font-size: 11px; font-weight: 700; }
+      .divider { stroke: #1e293b; stroke-width: 1; }
+      .accent-line { stroke: #334155; stroke-width: 1; }
+    </style>
+
+    <!-- Color dot defs -->
+    <symbol id="dot-green"><circle r="4" fill="#10b981"/></symbol>
+    <symbol id="dot-blue"><circle r="4" fill="#3b82f6"/></symbol>
+    <symbol id="dot-orange"><circle r="4" fill="#f97316"/></symbol>
+    <symbol id="dot-red"><circle r="4" fill="#ef4444"/></symbol>
+    <symbol id="dot-purple"><circle r="4" fill="#a78bfa"/></symbol>
+    <symbol id="dot-yellow"><circle r="4" fill="#fbbf24"/></symbol>
+    <symbol id="dot-cyan"><circle r="4" fill="#06b6d4"/></symbol>
+    <symbol id="dot-pink"><circle r="4" fill="#ec4899"/></symbol>
+  </defs>
+
+  <!-- Background -->
+  <rect class="bg" width="1400" height="3400"/>
+
+  <!-- ============ HEADER ============ -->
+  <g transform="translate(60, 50)">
+    <text class="subtitle" y="0">— PANDYAHOMELAB · SYNOLOGY NAS · V3.0</text>
+    <text class="title" y="55">Complete <tspan class="title-accent">Folder</tspan></text>
+    <text class="title" y="105">Structure</text>
+    <text class="breadcrumb" y="140">/volume1/pandyaHomeLab/  ·  3-Layer Architecture  ·  NAS → GitHub → AWS</text>
+  </g>
+
+  <!-- Header right tags -->
+  <g transform="translate(1080, 45)">
+    <rect class="header-tag" width="240" height="22" rx="3"/>
+    <text class="header-tag-text" x="12" y="15">/VOLUME1/PANDYAHOMELAB</text>
+
+    <rect class="header-tag" width="240" height="22" y="30" rx="3"/>
+    <text class="header-tag-text" x="12" y="45">GITHUB: AVPGITHUB-CODE</text>
+
+    <rect class="header-tag" width="240" height="22" y="60" rx="3"/>
+    <text class="header-tag-text" x="12" y="75">PANDYAHOMELAB.COM</text>
+
+    <rect class="header-tag" width="240" height="22" y="90" rx="3"/>
+    <text class="header-tag-text" x="12" y="105">2026 · CANONICAL</text>
+  </g>
+
+  <!-- ============ LEGEND ============ -->
+  <g transform="translate(60, 180)">
+    <rect class="legend-bg" width="1280" height="38" rx="6"/>
+    <g transform="translate(20, 24)">
+      <use href="#dot-green" x="6"/>
+      <text class="legend-text" x="18" y="3">PRESENTATION-LOGIC</text>
+
+      <use href="#dot-blue" x="160"/>
+      <text class="legend-text" x="172" y="3">APPLICATION-LOGIC</text>
+
+      <use href="#dot-orange" x="310"/>
+      <text class="legend-text" x="322" y="3">DB-LOGIC / DATA</text>
+
+      <use href="#dot-red" x="445"/>
+      <text class="legend-text" x="457" y="3">SHARED / CROSS-CUTTING</text>
+
+      <use href="#dot-purple" x="630"/>
+      <text class="legend-text" x="642" y="3">GITHUB TRACKED</text>
+
+      <use href="#dot-cyan" x="780"/>
+      <text class="legend-text" x="792" y="3">S3 ONLY</text>
+
+      <use href="#dot-pink" x="880"/>
+      <text class="legend-text" x="892" y="3">ECR (IMAGES)</text>
+
+      <use href="#dot-yellow" x="1000"/>
+      <text class="legend-text" x="1012" y="3">NAS ONLY</text>
+    </g>
+  </g>
+
+  <!-- ============ LEFT SIDEBAR ============ -->
+  <g transform="translate(60, 250)">
+    <rect class="panel" width="260" height="280" rx="8"/>
+
+    <text class="section-label" x="20" y="25">ROOT · NAS SHARED FOLDER</text>
+
+    <g transform="translate(20, 50)">
+      <text class="folder-name" x="0" y="0">📁 pandyaHomeLab/</text>
+    </g>
+
+    <!-- Folder list -->
+    <g transform="translate(20, 80)" font-size="11">
+      <use href="#dot-green" x="4" y="0"/>
+      <text class="file" x="20" y="4">ml/</text>
+      <text class="file-dim" x="200" y="4" text-anchor="end">ML Projects</text>
+
+      <use href="#dot-blue" x="4" y="22"/>
+      <text class="file" x="20" y="26">dl/</text>
+      <text class="file-dim" x="200" y="26" text-anchor="end">DL Projects</text>
+
+      <use href="#dot-red" x="4" y="44"/>
+      <text class="file" x="20" y="48">shared/</text>
+      <text class="file-dim" x="200" y="48" text-anchor="end">Common Utils</text>
+
+      <use href="#dot-purple" x="4" y="66"/>
+      <text class="file" x="20" y="70">deployment/</text>
+      <text class="file-dim" x="200" y="70" text-anchor="end">Compose+Nginx</text>
+
+      <use href="#dot-orange" x="4" y="88"/>
+      <text class="file" x="20" y="92">infra/</text>
+      <text class="file-dim" x="200" y="92" text-anchor="end">IaC+CI/CD</text>
+
+      <use href="#dot-cyan" x="4" y="110"/>
+      <text class="file" x="20" y="114">website/</text>
+      <text class="file-dim" x="200" y="114" text-anchor="end">pandyahomelab.com</text>
+
+      <use href="#dot-pink" x="4" y="132"/>
+      <text class="file" x="20" y="136">docs/</text>
+      <text class="file-dim" x="200" y="136" text-anchor="end">ADRs+Runbooks</text>
+
+      <use href="#dot-yellow" x="4" y="154"/>
+      <text class="file" x="20" y="158">experiments/</text>
+      <text class="file-dim" x="200" y="158" text-anchor="end">NAS only</text>
+    </g>
+
+    <line class="divider" x1="20" y1="250" x2="240" y2="250"/>
+  </g>
+
+  <!-- Root files committed -->
+  <g transform="translate(60, 545)">
+    <rect class="panel" width="260" height="135" rx="8"/>
+    <text class="section-label" x="20" y="22">ROOT FILES (COMMITTED)</text>
+    <g transform="translate(20, 42)" font-family="'SF Mono', monospace" font-size="11" fill="#94a3b8">
+      <text y="0">— README.md</text>
+      <text y="16">— .gitignore</text>
+      <text y="32">— Makefile</text>
+      <text y="48">— CHANGELOG.md</text>
+      <text y="64">— docker-compose.yml</text>
+      <text y="80">— .env.example</text>
+      <text y="96">— .github/workflows/</text>
+    </g>
+  </g>
+
+  <!-- ============ ML SECTION ============ -->
+  <g transform="translate(345, 250)">
+    <rect class="panel" width="995" height="580" rx="8"/>
+
+    <text class="section-label" x="24" y="24">MACHINE LEARNING PROJECTS</text>
+
+    <g transform="translate(24, 50)">
+      <text class="section-title">🧠 ml/</text>
+      <text class="section-desc" x="0" y="22">Classical ML  ·  scikit-learn  ·  PyTorch  ·  Flask/FastAPI  ·  one project = one container</text>
+    </g>
+
+    <!-- Right badges -->
+    <g transform="translate(740, 50)">
+      <rect class="badge" width="50" height="18" fill="#6d28d9"/>
+      <text class="badge-text" x="25" y="13" text-anchor="middle">GITHUB</text>
+
+      <rect class="badge" x="58" width="40" height="18" fill="#be185d"/>
+      <text class="badge-text" x="78" y="13" text-anchor="middle">ECR</text>
+
+      <rect class="badge" x="106" width="120" height="18" fill="#0e7490"/>
+      <text class="badge-text" x="166" y="13" text-anchor="middle">S3 (MODELS+DATA)</text>
+    </g>
+
+    <!-- Key rule -->
+    <g transform="translate(24, 110)">
+      <text class="key-rule-bold">Key rule: <tspan class="key-rule">Each project under </tspan><tspan fill="#fbbf24" font-weight="600">ml/</tspan><tspan class="key-rule"> is fully self-contained — its own 3 layers, its own container, its own API. The </tspan><tspan class="layer-p" font-weight="700">presentation-</tspan></text>
+      <text class="key-rule" y="16"><tspan class="layer-p" font-weight="700">logic/</tspan> + <tspan class="layer-a" font-weight="700">application-logic/</tspan> + <tspan class="layer-d" font-weight="700">db-logic/</tspan> are all packaged into ONE Docker image. Model weights and data live outside — mounted</text>
+      <text class="key-rule" y="32">from NAS (dev) or pulled from S3 (AWS).</text>
+    </g>
+
+    <!-- ml-cnn-image-classifier sub-panel -->
+    <g transform="translate(24, 170)">
+      <rect width="950" height="295" rx="6" fill="#0d1220" stroke="#1e293b" stroke-width="1"/>
+      <text class="folder-name" x="16" y="22">📁 ml / ml-cnn-image-classifier/  <tspan class="comment" font-weight="400">← sample project 1</tspan></text>
+
+      <!-- Presentation layer -->
+      <g transform="translate(16, 38)">
+        <rect width="920" height="50" rx="4" fill="#0a1310" stroke="#10b981" stroke-width="0" />
+        <line x1="0" y1="0" x2="0" y2="50" stroke="#10b981" stroke-width="3"/>
+        <rect x="10" y="8" width="22" height="18" fill="#065f46" rx="3"/>
+        <text x="21" y="21" text-anchor="middle" fill="#10b981" font-size="11" font-weight="700">P</text>
+        <text x="42" y="20" class="layer-label" fill="#10b981">presentation-logic/</text>
+        <text x="42" y="36" class="file" font-size="10">api/  →  main.py  ·  routes.py  ·  schemas.py  ·  middleware.py  ·  dependencies.py</text>
+        <text x="42" y="48" class="file" font-size="10">errors/  →  handlers.py  ·  exceptions.py</text>
+      </g>
+      <text x="50" y="100" class="comment">↑ calls application-logic/ only  ·  never touches db-logic/ directly</text>
+
+      <!-- Application layer -->
+      <g transform="translate(16, 110)">
+        <rect width="920" height="62" rx="4" fill="#0a1020" stroke="#3b82f6" stroke-width="0"/>
+        <line x1="0" y1="0" x2="0" y2="62" stroke="#3b82f6" stroke-width="3"/>
+        <rect x="10" y="8" width="22" height="18" fill="#1e3a8a" rx="3"/>
+        <text x="21" y="21" text-anchor="middle" fill="#3b82f6" font-size="11" font-weight="700">A</text>
+        <text x="42" y="20" class="layer-label" fill="#3b82f6">application-logic/</text>
+        <text x="42" y="36" class="file" font-size="10">model/  →  architecture.py  ·  trainer.py  ·  predictor.py  ·  evaluator.py</text>
+        <text x="42" y="48" class="file" font-size="10">pipeline/  →  training_pipeline.py  ·  inference_pipeline.py</text>
+        <text x="42" y="60" class="file" font-size="10">services/  →  prediction_service.py  ·  training_service.py</text>
+      </g>
+      <text x="50" y="184" class="comment">↑ calls db-logic/ only  ·  pure ML logic  ·  no HTTP awareness</text>
+
+      <!-- DB layer -->
+      <g transform="translate(16, 194)">
+        <rect width="920" height="62" rx="4" fill="#1a1208" stroke="#f97316" stroke-width="0"/>
+        <line x1="0" y1="0" x2="0" y2="62" stroke="#f97316" stroke-width="3"/>
+        <rect x="10" y="8" width="22" height="18" fill="#7c2d12" rx="3"/>
+        <text x="21" y="21" text-anchor="middle" fill="#f97316" font-size="11" font-weight="700">D</text>
+        <text x="42" y="20" class="layer-label" fill="#f97316">db-logic/</text>
+        <text x="42" y="36" class="file" font-size="10">loaders/  →  local_loader.py  ·  s3_loader.py  ·  db_loader.py</text>
+        <text x="42" y="48" class="file" font-size="10">transforms/  →  preprocessor.py  ·  augmentor.py</text>
+        <text x="42" y="60" class="file" font-size="10">repository/  →  base_repository.py  ·  prediction_repository.py  ·  model_repository.py</text>
+      </g>
+      <g transform="translate(16, 256)">
+        <text x="34" y="14" class="file" font-size="10">migrations/  →  Alembic versions/</text>
+        <text x="34" y="28" class="comment">↑ called by application-logic/  ·  abstracts disk / S3 / PostgreSQL</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Shared layer (continued from ml-cnn) -->
+  <g transform="translate(369, 760)">
+    <rect width="950" height="50" rx="4" fill="#1a0a0a" stroke="#ef4444" stroke-width="0"/>
+    <line x1="0" y1="0" x2="0" y2="50" stroke="#ef4444" stroke-width="3"/>
+    <rect x="10" y="8" width="22" height="18" fill="#7f1d1d" rx="3"/>
+    <text x="21" y="21" text-anchor="middle" fill="#ef4444" font-size="11" font-weight="700">X</text>
+    <text x="42" y="20" class="layer-label" fill="#ef4444">shared/</text>
+    <text x="42" y="36" class="file" font-size="10">config.py  ·  logger.py  ·  metrics.py  ·  constants.py  ·  exceptions.py  ·  utils.py</text>
+    <text x="50" y="68" class="comment">↑ used by all 3 layers  ·  no layer-specific logic here</text>
+  </g>
+
+  <!-- Project sub-folders list -->
+  <g transform="translate(369, 850)" font-size="10">
+    <g transform="translate(0, 0)">
+      <text class="folder" x="0" y="0">📁</text>
+      <text class="file" x="14" y="0" font-weight="600">notebooks/</text>
+      <text class="file" x="115" y="0">01_eda.ipynb  ·  02_model_experiments.ipynb  ·  03_evaluation.ipynb</text>
+      <rect x="635" y="-10" width="170" height="14" rx="2" fill="#1e293b"/>
+      <text x="720" y="0" text-anchor="middle" class="badge-text" fill="#cbd5e1" font-size="8">DEV ONLY · NOT IN CONTAINER</text>
+    </g>
+    <g transform="translate(0, 22)">
+      <text class="folder" x="0" y="0">📁</text>
+      <text class="file" x="14" y="0" font-weight="600">tests/</text>
+      <text class="file" x="115" y="0">presentation/  ·  application/  ·  db/  ·  conftest.py  ·  fixtures/</text>
+    </g>
+    <g transform="translate(0, 44)">
+      <text class="folder" x="0" y="0" fill="#06b6d4">📁</text>
+      <text class="file" x="14" y="0" font-weight="600">data/</text>
+      <text class="file" x="115" y="0">raw/  ·  processed/  ·  splits/  </text>
+      <rect x="335" y="-10" width="120" height="14" rx="2" fill="#0e7490"/>
+      <text x="395" y="0" text-anchor="middle" class="badge-text" font-size="8">GITIGNORED · NAS vol + S3</text>
+    </g>
+    <g transform="translate(0, 66)">
+      <text class="folder" x="0" y="0" fill="#06b6d4">📁</text>
+      <text class="file" x="14" y="0" font-weight="600">models/</text>
+      <text class="file" x="115" y="0">checkpoints/  ·  artifacts/  ·  pulled from S3 at container startup via entrypoint.sh</text>
+      <rect x="635" y="-10" width="120" height="14" rx="2" fill="#be185d"/>
+      <text x="695" y="0" text-anchor="middle" class="badge-text" font-size="8">GITIGNORED · S3 ONLY</text>
+    </g>
+    <g transform="translate(0, 88)">
+      <text class="folder" x="0" y="0">📁</text>
+      <text class="file" x="14" y="0" font-weight="600">configs/</text>
+      <text class="file" x="115" y="0">training.yaml  ·  model.yaml  ·  api.yaml  ·  logging.yaml</text>
+    </g>
+    <g transform="translate(0, 110)">
+      <text class="folder" x="0" y="0">🐳</text>
+      <text class="file" x="14" y="0" font-weight="600">docker/</text>
+      <text class="file" x="115" y="0">Dockerfile (multi-stage)  ·  Dockerfile.dev  ·  .dockerignore  ·  entrypoint.sh</text>
+    </g>
+    <g transform="translate(0, 132)">
+      <text class="file" x="0" y="0" font-weight="600">📄 root files</text>
+      <text class="file" x="115" y="0">pyproject.toml  ·  requirements.txt  ·  requirements-dev.txt  ·  Makefile  ·  .env.example  ·  README.md</text>
+    </g>
+  </g>
+
+  <!-- ml-linear-regression panel -->
+  <g transform="translate(369, 1010)">
+    <rect width="950" height="80" rx="6" fill="#0d1220" stroke="#1e293b"/>
+    <text class="folder-name" x="16" y="24">📁 ml / ml-linear-regression/   <tspan class="comment" font-weight="400">← same 3-layer structure</tspan></text>
+    <text class="file-dim" x="16" y="46" font-size="10">Identical structure: <tspan class="layer-p" font-weight="700">presentation-logic/</tspan>  ·  <tspan class="layer-a" font-weight="700">application-logic/</tspan>  ·  <tspan class="layer-d" font-weight="700">db-logic/</tspan>  ·  <tspan class="layer-x" font-weight="700">shared/</tspan></text>
+    <text class="file-dim" x="16" y="62" font-size="10">+ notebooks/  ·  tests/  ·  data/  ·  models/  ·  configs/  ·  docker/  ·  pyproject.toml  ·  Makefile</text>
+  </g>
+
+  <!-- Other ML projects -->
+  <g transform="translate(369, 1110)" font-size="10">
+    <text class="folder" x="0" y="14">📁 ml-decision-trees/</text>
+    <text class="folder" x="170" y="14">📁 ml-clustering-kmeans/</text>
+    <text class="folder" x="360" y="14">📁 ml-random-forest/</text>
+    <text class="folder" x="535" y="14">📁 _templates/  <tspan class="comment" font-weight="400">← copy to scaffold a new project instantly</tspan></text>
+  </g>
+
+  <!-- ============ DL SECTION ============ -->
+  <g transform="translate(345, 1175)">
+    <rect class="panel" width="995" height="510" rx="8"/>
+
+    <text class="section-label" x="24" y="24">DEEP LEARNING PROJECTS</text>
+
+    <g transform="translate(24, 50)">
+      <text class="section-title">🌐 dl/</text>
+      <text class="section-desc" x="0" y="22">Neural networks  ·  TensorFlow  ·  PyTorch  ·  FastAPI  ·  Transformers</text>
+    </g>
+
+    <!-- DL Right badges -->
+    <g transform="translate(740, 50)">
+      <rect class="badge" width="50" height="18" fill="#6d28d9"/>
+      <text class="badge-text" x="25" y="13" text-anchor="middle">GITHUB</text>
+
+      <rect class="badge" x="58" width="40" height="18" fill="#be185d"/>
+      <text class="badge-text" x="78" y="13" text-anchor="middle">ECR</text>
+
+      <rect class="badge" x="106" width="130" height="18" fill="#0e7490"/>
+      <text class="badge-text" x="171" y="13" text-anchor="middle">S3 (CHECKPOINTS)</text>
+    </g>
+
+    <!-- DL Key rule -->
+    <g transform="translate(24, 100)">
+      <text class="key-rule-bold">Same pattern as ml/ <tspan class="key-rule">— each DL project is self-contained with the identical 3-layer structure. Model checkpoints (.pt / .h5) are</tspan></text>
+      <text class="key-rule" y="16">gitignored and S3-synced. dl- prefix on project names avoids ambiguity when browsing GitHub.</text>
+    </g>
+
+    <!-- dl-lstm-time-series sub-panel -->
+    <g transform="translate(24, 150)">
+      <rect width="950" height="335" rx="6" fill="#0d1220" stroke="#1e293b"/>
+      <text class="folder-name" x="16" y="22">📁 dl / dl-lstm-time-series/  <tspan class="comment" font-weight="400">← sample project 1</tspan></text>
+
+      <!-- Presentation layer -->
+      <g transform="translate(16, 38)">
+        <rect width="920" height="50" rx="4" fill="#0a1310"/>
+        <line x1="0" y1="0" x2="0" y2="50" stroke="#10b981" stroke-width="3"/>
+        <rect x="10" y="8" width="22" height="18" fill="#065f46" rx="3"/>
+        <text x="21" y="21" text-anchor="middle" fill="#10b981" font-size="11" font-weight="700">P</text>
+        <text x="42" y="20" class="layer-label" fill="#10b981">presentation-logic/</text>
+        <text x="42" y="36" class="file" font-size="10">api/  →  main.py  ·  routes.py  ·  schemas.py  ·  middleware.py</text>
+        <text x="42" y="48" class="file" font-size="10">errors/  →  handlers.py  ·  exceptions.py</text>
+      </g>
+      <text x="50" y="100" class="comment">↑ calls application-logic/ only</text>
+
+      <!-- Application layer -->
+      <g transform="translate(16, 108)">
+        <rect width="920" height="62" rx="4" fill="#0a1020"/>
+        <line x1="0" y1="0" x2="0" y2="62" stroke="#3b82f6" stroke-width="3"/>
+        <rect x="10" y="8" width="22" height="18" fill="#1e3a8a" rx="3"/>
+        <text x="21" y="21" text-anchor="middle" fill="#3b82f6" font-size="11" font-weight="700">A</text>
+        <text x="42" y="20" class="layer-label" fill="#3b82f6">application-logic/</text>
+        <text x="42" y="36" class="file" font-size="10">model/  →  lstm_architecture.py  ·  trainer.py  ·  predictor.py</text>
+        <text x="42" y="48" class="file" font-size="10">pipeline/  →  training_pipeline.py  ·  inference_pipeline.py</text>
+        <text x="42" y="60" class="file" font-size="10">services/  →  forecast_service.py</text>
+      </g>
+      <text x="50" y="182" class="comment">↑ calls db-logic/ only  ·  pure DL logic</text>
+
+      <!-- DB layer -->
+      <g transform="translate(16, 192)">
+        <rect width="920" height="50" rx="4" fill="#1a1208"/>
+        <line x1="0" y1="0" x2="0" y2="50" stroke="#f97316" stroke-width="3"/>
+        <rect x="10" y="8" width="22" height="18" fill="#7c2d12" rx="3"/>
+        <text x="21" y="21" text-anchor="middle" fill="#f97316" font-size="11" font-weight="700">D</text>
+        <text x="42" y="20" class="layer-label" fill="#f97316">db-logic/</text>
+        <text x="42" y="36" class="file" font-size="10">loaders/  →  local_loader.py  ·  s3_loader.py</text>
+        <text x="42" y="48" class="file" font-size="10">transforms/  →  time_series_preprocessor.py  ·  scaler.py</text>
+      </g>
+      <g transform="translate(16, 244)">
+        <text x="34" y="14" class="file" font-size="10">repository/  →  forecast_repository.py</text>
+        <text x="34" y="28" class="comment">↑ abstracts all data sources for the application layer</text>
+      </g>
+
+      <!-- Shared layer -->
+      <g transform="translate(16, 280)">
+        <rect width="920" height="44" rx="4" fill="#1a0a0a"/>
+        <line x1="0" y1="0" x2="0" y2="44" stroke="#ef4444" stroke-width="3"/>
+        <rect x="10" y="8" width="22" height="18" fill="#7f1d1d" rx="3"/>
+        <text x="21" y="21" text-anchor="middle" fill="#ef4444" font-size="11" font-weight="700">X</text>
+        <text x="42" y="20" class="layer-label" fill="#ef4444">shared/</text>
+        <text x="42" y="36" class="file" font-size="10">config.py  ·  logger.py  ·  metrics.py  ·  constants.py  ·  utils.py</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- DL project files -->
+  <g transform="translate(369, 1700)" font-size="10">
+    <text class="file" x="0" y="0">notebooks/  ·  tests/presentation/  ·  tests/application/  ·  tests/db/  ·  data/  ·  models/  ·  configs/  ·  docker/</text>
+    <text class="file" x="0" y="16">·  pyproject.toml  ·  Makefile  ·  README.md</text>
+  </g>
+
+  <!-- Other DL projects -->
+  <g transform="translate(369, 1740)" font-size="10">
+    <text class="folder" x="0" y="14">📁 dl-transformer-nlp/</text>
+    <text class="folder" x="180" y="14">📁 dl-cnn-object-detection/</text>
+    <text class="folder" x="380" y="14">📁 dl-gan-image-gen/</text>
+    <text class="folder" x="555" y="14">📁 _templates/  <tspan class="comment" font-weight="400">← copy to scaffold a new project</tspan></text>
+  </g>
+
+  <!-- ============ SHARED SECTION ============ -->
+  <g transform="translate(345, 1800)">
+    <rect class="panel" width="995" height="195" rx="8"/>
+
+    <text class="section-label" x="24" y="24">COMMON RESOURCES · CROSS-PROJECT</text>
+
+    <g transform="translate(24, 50)">
+      <text class="section-title">🔗 shared/</text>
+      <text class="section-desc" x="0" y="22">Utilities, datasets, scripts shared across all ML and DL projects</text>
+    </g>
+
+    <!-- Right badges -->
+    <g transform="translate(800, 50)">
+      <rect class="badge" width="50" height="18" fill="#6d28d9"/>
+      <text class="badge-text" x="25" y="13" text-anchor="middle">GITHUB</text>
+
+      <rect class="badge" x="58" width="100" height="18" fill="#0e7490"/>
+      <text class="badge-text" x="108" y="13" text-anchor="middle">S3 (DATASETS)</text>
+    </g>
+
+    <text class="folder-name" x="24" y="100">shared/</text>
+
+    <g transform="translate(40, 118)" font-family="'SF Mono', monospace" font-size="11">
+      <text class="tree" y="0">├──</text>
+      <text class="folder" x="32" y="0">datasets/</text>
+      <text class="comment" x="130" y="0">— common datasets across projects · gitignored · NAS + S3</text>
+
+      <text class="tree" y="18">├──</text>
+      <text class="folder" x="32" y="18">utils/</text>
+      <text class="comment" x="130" y="18">— shared helper functions, logging wrappers, common transforms</text>
+
+      <text class="tree" y="36">├──</text>
+      <text class="folder" x="32" y="36">scripts/</text>
+      <text class="comment" x="130" y="36">— data prep, batch processing, evaluation scripts</text>
+
+      <text class="tree" y="54">├──</text>
+      <text class="folder" x="32" y="54">configs/</text>
+      <text class="comment" x="130" y="54">— cross-project YAML defaults, base model configs</text>
+
+      <text class="tree" y="72">└──</text>
+      <text class="folder" x="32" y="72">tests/</text>
+      <text class="comment" x="130" y="72">— unit tests for shared utils</text>
+    </g>
+  </g>
+
+  <!-- ============ DEPLOYMENT SECTION ============ -->
+  <g transform="translate(345, 2015)">
+    <rect class="panel" width="995" height="335" rx="8"/>
+
+    <text class="section-label" x="24" y="24">ORCHESTRATION · SERVING · ENVIRONMENTS</text>
+
+    <g transform="translate(24, 50)">
+      <text class="section-title">🚀 deployment/</text>
+      <text class="section-desc" x="0" y="22">Docker Compose stacks  ·  Nginx proxy  ·  dev / staging / prod env configs</text>
+    </g>
+
+    <g transform="translate(880, 50)">
+      <rect class="badge" width="50" height="18" fill="#6d28d9"/>
+      <text class="badge-text" x="25" y="13" text-anchor="middle">GITHUB</text>
+    </g>
+
+    <text class="folder-name" x="24" y="100">deployment/</text>
+
+    <g transform="translate(40, 118)" font-family="'SF Mono', monospace" font-size="11">
+      <text class="tree" y="0">├──</text>
+      <text class="file" x="32" y="0" font-weight="600">docker-compose.yml</text>
+      <text class="comment" x="220" y="0">— base: npm-app · npm-db · personal-website · ml-db (postgres)</text>
+
+      <text class="tree" y="18">├──</text>
+      <text class="file" x="32" y="18" font-weight="600">docker-compose.dev.yml</text>
+      <text class="comment" x="220" y="18">— adds ml-cnn-api · dl-lstm-api · NAS volume mounts</text>
+
+      <text class="tree" y="36">├──</text>
+      <text class="file" x="32" y="36" font-weight="600">docker-compose.staging.yml</text>
+      <text class="comment" x="220" y="36">— AWS staging EC2 overrides</text>
+
+      <text class="tree" y="54">├──</text>
+      <text class="file" x="32" y="54" font-weight="600">docker-compose.prod.yml</text>
+      <text class="comment" x="220" y="54">— AWS production EC2 overrides</text>
+
+      <text class="tree" y="72">├──</text>
+      <text class="folder" x="32" y="72">nginx/</text>
+
+      <text class="tree" x="32" y="90">├──</text>
+      <text class="file" x="64" y="90">dev.conf</text>
+      <text class="comment" x="220" y="90">— /ml/cnn-classifier · cnn-api:8000 · /dl/lstm · lstm-api:8000</text>
+
+      <text class="tree" x="32" y="108">├──</text>
+      <text class="file" x="64" y="108">staging.conf</text>
+
+      <text class="tree" x="32" y="126">└──</text>
+      <text class="file" x="64" y="126">prod.conf</text>
+
+      <text class="tree" y="148">└──</text>
+      <text class="folder" x="32" y="148">envs/</text>
+      <text class="comment" x="130" y="148">— all .env files gitignored · only .example files committed</text>
+
+      <text class="file" x="32" y="170" font-size="10">.env.dev &amp; .env.dev.example</text>
+      <text class="file" x="32" y="186" font-size="10">.env.staging &amp; .env.staging.example</text>
+      <text class="file" x="32" y="202" font-size="10">.env.prod &amp; .env.prod.example</text>
+    </g>
+  </g>
+
+  <!-- ============ INFRA SECTION ============ -->
+  <g transform="translate(345, 2370)">
+    <rect class="panel" width="995" height="280" rx="8"/>
+
+    <text class="section-label" x="24" y="24">INFRASTRUCTURE · CI/CD · AWS</text>
+
+    <g transform="translate(24, 50)">
+      <text class="section-title">☁ infra/</text>
+      <text class="section-desc" x="0" y="22">IaC  ·  GitHub Actions  ·  AWS configs  ·  Monitoring  ·  Sync scripts</text>
+    </g>
+
+    <g transform="translate(880, 50)">
+      <rect class="badge" width="50" height="18" fill="#6d28d9"/>
+      <text class="badge-text" x="25" y="13" text-anchor="middle">GITHUB</text>
+    </g>
+
+    <text class="folder-name" x="24" y="100">infra/</text>
+
+    <g transform="translate(40, 118)" font-family="'SF Mono', monospace" font-size="11">
+      <text class="tree" y="0">├──</text>
+      <text class="folder" x="32" y="0">aws/</text>
+      <text class="comment" x="130" y="0">— CloudFormation / Terraform IaC — VPC · EC2 · S3 · IAM · ALB · ECS</text>
+
+      <text class="tree" y="18">├──</text>
+      <text class="folder" x="32" y="18">cicd/</text>
+      <text class="comment" x="130" y="18">— GitHub Actions workflow templates + secrets documentation</text>
+
+      <text class="tree" y="36">├──</text>
+      <text class="folder" x="32" y="36">sync_to_s3/</text>
+      <text class="comment" x="170" y="36">— scripts to sync models/ + data/ → S3 staging / prod buckets</text>
+
+      <text class="tree" y="54">├──</text>
+      <text class="folder" x="32" y="54">scripts/</text>
+      <text class="comment" x="130" y="54">— health-check.sh · backup.sh · deploy.sh · setup-nas.sh</text>
+
+      <text class="tree" y="72">└──</text>
+      <text class="folder" x="32" y="72">monitoring/</text>
+      <text class="comment" x="150" y="72">— Prometheus · Grafana configs · CloudWatch dashboards · alert rules</text>
+    </g>
+
+    <g transform="translate(24, 220)">
+      <text class="folder-name">.github/workflows/  <tspan class="comment" font-weight="400">(at repo root):</tspan></text>
+      <text class="file" y="20" font-size="10">ci-test.yml  ·  deploy-staging.yml  ·  deploy-prod.yml  ·  sync-models.yml  ·  deploy-website.yml</text>
+    </g>
+  </g>
+
+  <!-- ============ WEBSITE SECTION ============ -->
+  <g transform="translate(345, 2670)">
+    <rect class="panel" width="995" height="220" rx="8"/>
+
+    <text class="section-label" x="24" y="24">PUBLIC SHOWCASE SITE</text>
+
+    <g transform="translate(24, 50)">
+      <text class="section-title">🌐 website/</text>
+      <text class="section-desc" x="0" y="22">pandyahomelab.com source  ·  maps to your existing personal-website container  ·  CI/CD</text>
+      <text class="section-desc" x="0" y="38">auto-deploys on push to main</text>
+    </g>
+
+    <g transform="translate(800, 50)">
+      <rect class="badge" width="50" height="18" fill="#6d28d9"/>
+      <text class="badge-text" x="25" y="13" text-anchor="middle">GITHUB</text>
+
+      <rect class="badge" x="58" width="120" height="18" fill="#0e7490"/>
+      <text class="badge-text" x="118" y="13" text-anchor="middle">S3 + CLOUDFRONT</text>
+    </g>
+
+    <text class="folder-name" x="24" y="120">website/</text>
+
+    <g transform="translate(40, 138)" font-family="'SF Mono', monospace" font-size="11">
+      <text class="tree" y="0">├──</text>
+      <text class="folder" x="32" y="0">html/</text>
+      <text class="comment" x="130" y="0">— maps to /volume1/docker/my-website/html (your existing nginx container mount)</text>
+
+      <text class="file" x="64" y="18">index.html  ·  styles/  ·  scripts/  ·  assets/  ·  images/</text>
+
+      <text class="tree" y="36">├──</text>
+      <text class="folder" x="32" y="36">pages/</text>
+      <text class="comment" x="130" y="36">— ml/ · dl/ · architecture/ · about/ · sub-pages</text>
+
+      <text class="tree" y="54">└──</text>
+      <text class="folder" x="32" y="54">deploy/</text>
+      <text class="comment" x="130" y="54">— S3+CloudFront config · AWS Amplify alternative</text>
+    </g>
+  </g>
+
+  <!-- ============ DOCS SECTION ============ -->
+  <g transform="translate(345, 2910)">
+    <rect class="panel" width="995" height="200" rx="8"/>
+
+    <text class="section-label" x="24" y="24">DOCUMENTATION · GITHUB PAGES READY</text>
+
+    <g transform="translate(24, 50)">
+      <text class="section-title">📘 docs/</text>
+      <text class="section-desc" x="0" y="22">ADRs  ·  Runbooks  ·  Learning journal  ·  References  ·  Architecture diagrams</text>
+    </g>
+
+    <g transform="translate(880, 50)">
+      <rect class="badge" width="50" height="18" fill="#6d28d9"/>
+      <text class="badge-text" x="25" y="13" text-anchor="middle">GITHUB</text>
+    </g>
+
+    <text class="folder-name" x="24" y="100">docs/</text>
+
+    <g transform="translate(40, 118)" font-family="'SF Mono', monospace" font-size="11">
+      <text class="tree" y="0">├──</text>
+      <text class="folder" x="32" y="0">architecture/</text>
+      <text class="comment" x="160" y="0">— ADRs · platform diagrams · 3-layer decision record · this infographic</text>
+
+      <text class="tree" y="18">├──</text>
+      <text class="folder" x="32" y="18">runbooks/</text>
+      <text class="comment" x="160" y="18">— NAS setup · Docker ops · AWS deploy · backup/restore · SSL renewal</text>
+
+      <text class="tree" y="36">├──</text>
+      <text class="folder" x="32" y="36">learning-journal/</text>
+      <text class="comment" x="180" y="36">— weekly notes · experiment results · model benchmarks · lessons</text>
+
+      <text class="tree" y="54">└──</text>
+      <text class="folder" x="32" y="54">references/</text>
+      <text class="comment" x="160" y="54">— papers · courses · links organised by ML/DL topic</text>
+    </g>
+  </g>
+
+  <!-- ============ EXPERIMENTS SECTION ============ -->
+  <g transform="translate(345, 3130)">
+    <rect class="panel" width="995" height="180" rx="8"/>
+
+    <text class="section-label" x="24" y="24">SCRATCH SPACE · NAS ONLY · GITIGNORED</text>
+
+    <g transform="translate(24, 50)">
+      <text class="section-title">🧪 experiments/</text>
+      <text class="section-desc" x="0" y="22">Free-form WIP sandbox  ·  promoted to ml/ or dl/ when mature  ·  never tracked in GitHub</text>
+    </g>
+
+    <g transform="translate(800, 50)">
+      <rect class="badge" width="180" height="18" fill="#a16207"/>
+      <text class="badge-text" x="90" y="13" text-anchor="middle">NAS ONLY · GITIGNORED</text>
+    </g>
+
+    <text class="folder-name" x="24" y="100">experiments/</text>
+
+    <g transform="translate(40, 118)" font-family="'SF Mono', monospace" font-size="11">
+      <text class="tree" y="0">├──</text>
+      <text class="folder" x="32" y="0">sandbox/</text>
+      <text class="comment" x="140" y="0">— free-form scratch notebooks and throwaway scripts</text>
+
+      <text class="tree" y="18">├──</text>
+      <text class="folder" x="32" y="18">wip/</text>
+      <text class="comment" x="140" y="18">— work-in-progress · copy to ml/ or dl/ when 3-layer structure is ready</text>
+
+      <text class="tree" y="36">└──</text>
+      <text class="folder" x="32" y="36">archive/</text>
+      <text class="comment" x="140" y="36">— completed experiments kept for local NAS reference only</text>
+    </g>
+  </g>
+
+  <!-- ============ FOOTER LIFECYCLE ============ -->
+  <g transform="translate(60, 3340)">
+    <text class="section-label">FULL LIFECYCLE</text>
+    <g transform="translate(140, -14)" font-family="'SF Mono', monospace">
+      <rect width="120" height="22" rx="3" fill="#065f46"/>
+      <text x="60" y="15" text-anchor="middle" class="badge-text" font-size="9">NAS · DEV BRANCH</text>
+
+      <text x="125" y="15" fill="#475569" font-size="14">→</text>
+
+      <rect x="140" width="100" height="22" rx="3" fill="#6d28d9"/>
+      <text x="190" y="15" text-anchor="middle" class="badge-text" font-size="9">GITHUB PUSH</text>
+
+      <text x="245" y="15" fill="#475569" font-size="14">→</text>
+
+      <rect x="260" width="110" height="22" rx="3" fill="#1e3a8a"/>
+      <text x="315" y="15" text-anchor="middle" class="badge-text" font-size="9">CI: TEST + LINT</text>
+
+      <text x="375" y="15" fill="#475569" font-size="14">→</text>
+
+      <rect x="390" width="100" height="22" rx="3" fill="#7c2d12"/>
+      <text x="440" y="15" text-anchor="middle" class="badge-text" font-size="9">DOCKER → ECR</text>
+
+      <text x="495" y="15" fill="#475569" font-size="14">→</text>
+
+      <rect x="510" width="110" height="22" rx="3" fill="#0e7490"/>
+      <text x="565" y="15" text-anchor="middle" class="badge-text" font-size="9">S3 MODEL SYNC</text>
+
+      <text x="625" y="15" fill="#475569" font-size="14">→</text>
+
+      <rect x="640" width="100" height="22" rx="3" fill="#a16207"/>
+      <text x="690" y="15" text-anchor="middle" class="badge-text" font-size="9">AWS STAGING</text>
+
+      <text x="745" y="15" fill="#94a3b8" font-size="11">→ git tag →</text>
+
+      <rect x="820" width="120" height="22" rx="3" fill="#be185d"/>
+      <text x="880" y="15" text-anchor="middle" class="badge-text" font-size="9">AWS PRODUCTION</text>
+    </g>
+  </g>
+
+</svg>
