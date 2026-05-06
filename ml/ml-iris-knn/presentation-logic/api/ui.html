@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Iris KNN Classifier — pandyaHomeLab</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f14;
+      --surface: #13161e;
+      --surface2: #1a1e2a;
+      --border: #252a38;
+      --accent: #4f8ef7;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --radius: 12px;
+      --setosa: #22c55e;
+      --versicolor: #4f8ef7;
+      --virginica: #a855f7;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+
+    header {
+      width: 100%;
+      max-width: 700px;
+      margin-bottom: 2rem;
+    }
+
+    .back-link {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      margin-bottom: 1.5rem;
+      transition: color .2s;
+    }
+    .back-link:hover { color: var(--text); }
+
+    h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -.02em; }
+    h1 em { font-style: normal; color: var(--accent); }
+    .subtitle { color: var(--muted); font-size: .95rem; margin-top: .4rem; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      width: 100%;
+      max-width: 700px;
+      margin-bottom: 1.5rem;
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      margin-bottom: 1.5rem;
+      font-size: .75rem;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 500px) { .feature-grid { grid-template-columns: 1fr; } }
+
+    .feature-group label {
+      display: flex;
+      justify-content: space-between;
+      font-size: .85rem;
+      margin-bottom: .5rem;
+      color: #cbd5e1;
+    }
+    .feature-group label span {
+      font-family: monospace;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    input[type=range] {
+      width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: .7rem;
+      color: var(--muted);
+      margin-top: .25rem;
+    }
+
+    .btn {
+      width: 100%;
+      padding: .9rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .2s, transform .15s;
+      margin-top: 1.5rem;
+    }
+    .btn:hover { opacity: .9; transform: translateY(-1px); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    .result-card {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      width: 100%;
+      max-width: 700px;
+    }
+    .result-card.visible { display: block; }
+
+    .species-badge {
+      display: inline-block;
+      padding: .4rem 1.2rem;
+      border-radius: 99px;
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: -.01em;
+      margin-bottom: 1rem;
+    }
+    .species-badge.setosa    { background: rgba(34,197,94,.15);  color: var(--setosa); }
+    .species-badge.versicolor { background: rgba(79,142,247,.15); color: var(--versicolor); }
+    .species-badge.virginica  { background: rgba(168,85,247,.15); color: var(--virginica); }
+
+    .confidence-label {
+      font-size: .85rem;
+      color: var(--muted);
+      margin-bottom: .4rem;
+    }
+    .confidence-bar-bg {
+      background: var(--surface2);
+      border-radius: 99px;
+      height: 10px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    .confidence-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width .6s ease;
+    }
+    .confidence-bar-fill.setosa    { background: var(--setosa); }
+    .confidence-bar-fill.versicolor { background: var(--versicolor); }
+    .confidence-bar-fill.virginica  { background: var(--virginica); }
+
+    .probabilities { display: flex; flex-direction: column; gap: .75rem; }
+    .prob-row { display: flex; align-items: center; gap: .75rem; font-size: .85rem; }
+    .prob-label { width: 90px; color: #cbd5e1; }
+    .prob-bar-bg { flex: 1; background: var(--surface2); border-radius: 99px; height: 6px; overflow: hidden; }
+    .prob-bar-fill { height: 100%; border-radius: 99px; transition: width .6s ease; }
+    .prob-bar-fill.setosa    { background: var(--setosa); }
+    .prob-bar-fill.versicolor { background: var(--versicolor); }
+    .prob-bar-fill.virginica  { background: var(--virginica); }
+    .prob-value { width: 42px; text-align: right; color: var(--muted); font-family: monospace; font-size: .8rem; }
+
+    .error-msg {
+      display: none;
+      color: #f87171;
+      background: rgba(248,113,113,.1);
+      border: 1px solid rgba(248,113,113,.2);
+      border-radius: 8px;
+      padding: .75rem 1rem;
+      font-size: .85rem;
+      margin-top: 1rem;
+    }
+    .error-msg.visible { display: block; }
+
+    .example-row {
+      display: flex;
+      gap: .5rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+    .example-btn {
+      padding: .35rem .9rem;
+      border-radius: 99px;
+      border: 1px solid;
+      font-size: .75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+      background: transparent;
+    }
+    .example-btn.setosa    { color: var(--setosa);     border-color: rgba(34,197,94,.3); }
+    .example-btn.setosa:hover    { background: rgba(34,197,94,.1); }
+    .example-btn.versicolor { color: var(--versicolor); border-color: rgba(79,142,247,.3); }
+    .example-btn.versicolor:hover { background: rgba(79,142,247,.1); }
+    .example-btn.virginica  { color: var(--virginica);  border-color: rgba(168,85,247,.3); }
+    .example-btn.virginica:hover  { background: rgba(168,85,247,.1); }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="back-link" href="/">← pandyaHomeLab</a>
+  <h1>Iris <em>KNN</em> Classifier</h1>
+  <p class="subtitle">K-Nearest Neighbors (k=3) · Iris dataset · 3 species · >90% accuracy</p>
+</header>
+
+<!-- Input Card -->
+<div class="card">
+  <h2>Input Features (cm)</h2>
+  <div class="feature-grid">
+    <div class="feature-group">
+      <label>Sepal Length <span id="sl-val">5.1</span> cm</label>
+      <input type="range" id="sl" min="4.3" max="7.9" step="0.1" value="5.1" oninput="update('sl')">
+      <div class="range-labels"><span>4.3</span><span>7.9</span></div>
+    </div>
+    <div class="feature-group">
+      <label>Sepal Width <span id="sw-val">3.5</span> cm</label>
+      <input type="range" id="sw" min="2.0" max="4.4" step="0.1" value="3.5" oninput="update('sw')">
+      <div class="range-labels"><span>2.0</span><span>4.4</span></div>
+    </div>
+    <div class="feature-group">
+      <label>Petal Length <span id="pl-val">1.4</span> cm</label>
+      <input type="range" id="pl" min="1.0" max="6.9" step="0.1" value="1.4" oninput="update('pl')">
+      <div class="range-labels"><span>1.0</span><span>6.9</span></div>
+    </div>
+    <div class="feature-group">
+      <label>Petal Width <span id="pw-val">0.2</span> cm</label>
+      <input type="range" id="pw" min="0.1" max="2.5" step="0.1" value="0.2" oninput="update('pw')">
+      <div class="range-labels"><span>0.1</span><span>2.5</span></div>
+    </div>
+  </div>
+
+  <div>
+    <p style="font-size:.75rem;color:var(--muted);margin-top:1.5rem;margin-bottom:.4rem">Try an example:</p>
+    <div class="example-row">
+      <button class="example-btn setosa"     onclick="loadExample(5.1,3.5,1.4,0.2)">Setosa</button>
+      <button class="example-btn versicolor" onclick="loadExample(6.4,3.2,4.5,1.5)">Versicolor</button>
+      <button class="example-btn virginica"  onclick="loadExample(6.5,3.0,5.8,2.2)">Virginica</button>
+    </div>
+  </div>
+
+  <button class="btn" id="classify-btn" onclick="classify()">Classify</button>
+  <div class="error-msg" id="error-msg">Prediction failed. Please try again.</div>
+</div>
+
+<!-- Result Card -->
+<div class="result-card" id="result-card">
+  <div class="species-badge" id="species-badge"></div>
+  <p class="confidence-label">Confidence: <strong id="confidence-pct"></strong></p>
+  <div class="confidence-bar-bg">
+    <div class="confidence-bar-fill" id="conf-bar"></div>
+  </div>
+  <div class="probabilities" id="probabilities"></div>
+</div>
+
+<script>
+  function update(id) {
+    const el = document.getElementById(id);
+    document.getElementById(id + '-val').textContent = parseFloat(el.value).toFixed(1);
+  }
+
+  function loadExample(sl, sw, pl, pw) {
+    document.getElementById('sl').value = sl;
+    document.getElementById('sw').value = sw;
+    document.getElementById('pl').value = pl;
+    document.getElementById('pw').value = pw;
+    ['sl','sw','pl','pw'].forEach(update);
+    classify();
+  }
+
+  async function classify() {
+    const btn = document.getElementById('classify-btn');
+    const errEl = document.getElementById('error-msg');
+    errEl.classList.remove('visible');
+    btn.disabled = true;
+    btn.textContent = 'Classifying…';
+
+    const data = [
+      parseFloat(document.getElementById('sl').value),
+      parseFloat(document.getElementById('sw').value),
+      parseFloat(document.getElementById('pl').value),
+      parseFloat(document.getElementById('pw').value),
+    ];
+
+    try {
+      const res = await fetch('/ml/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data })
+      });
+
+      if (!res.ok) throw new Error('Request failed');
+      const result = await res.json();
+      showResult(result);
+    } catch (e) {
+      errEl.classList.add('visible');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Classify';
+    }
+  }
+
+  function showResult(r) {
+    const card = document.getElementById('result-card');
+    const badge = document.getElementById('species-badge');
+    const confBar = document.getElementById('conf-bar');
+    const confPct = document.getElementById('confidence-pct');
+    const probsEl = document.getElementById('probabilities');
+
+    badge.textContent = r.species.charAt(0).toUpperCase() + r.species.slice(1);
+    badge.className = 'species-badge ' + r.species;
+
+    const pct = Math.round(r.confidence * 100);
+    confPct.textContent = pct + '%';
+    confBar.className = 'confidence-bar-fill ' + r.species;
+    confBar.style.width = pct + '%';
+
+    probsEl.innerHTML = Object.entries(r.probabilities).map(([species, prob]) => `
+      <div class="prob-row">
+        <span class="prob-label">${species.charAt(0).toUpperCase() + species.slice(1)}</span>
+        <div class="prob-bar-bg">
+          <div class="prob-bar-fill ${species}" style="width:${Math.round(prob*100)}%"></div>
+        </div>
+        <span class="prob-value">${Math.round(prob*100)}%</span>
+      </div>
+    `).join('');
+
+    card.classList.add('visible');
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+</script>
+</body>
+</html>

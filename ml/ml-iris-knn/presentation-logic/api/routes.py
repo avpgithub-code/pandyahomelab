@@ -1,10 +1,12 @@
-"""API routes: /health and /predict endpoints."""
+"""API routes: /health, /predict, and demo UI endpoints."""
 import uuid
 import logging
 from datetime import datetime
+from pathlib import Path
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Header
+from fastapi.responses import HTMLResponse
 
 from presentation_logic.api.schemas import HealthResponse, PredictionRequest, PredictionResponse
 from application_logic.services.prediction_service import PredictionService
@@ -12,8 +14,14 @@ from application_logic.services.prediction_service import PredictionService
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-# Shared service instance (trained once on first request)
 _service = PredictionService()
+
+_UI_PATH = Path(__file__).parent / "ui.html"
+
+
+@router.get("/", response_class=HTMLResponse)
+async def demo_ui():
+    return _UI_PATH.read_text()
 
 
 @router.get("/health", response_model=HealthResponse)
