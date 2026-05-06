@@ -1,4 +1,10 @@
 """Pytest configuration and shared fixtures."""
+import sys
+import os
+
+# Add project root to path so db_logic, application_logic, presentation_logic are importable
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import pytest
 
 

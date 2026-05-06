@@ -1,45 +1,47 @@
-"""Data loaders: load from local filesystem, S3, or database."""
+"""Data loaders for the Iris KNN classifier."""
+import os
 from abc import ABC, abstractmethod
+from typing import List, Optional, Tuple
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
 
 
 class BaseDataLoader(ABC):
-    """Abstract base class for data loaders."""
-
     @abstractmethod
-    def load(self):
-        """Load data."""
+    def load(self) -> pd.DataFrame:
         pass
 
 
 class LocalDataLoader(BaseDataLoader):
-    """Load data from local filesystem."""
+    """Load Iris dataset from a local CSV file."""
 
-    def __init__(self, path):
-        self.path = path
+    FEATURE_COLS = ["sepal_length", "sepal_width", "petal_length", "petal_width"]
+    TARGET_COL = "species"
+    LABEL_MAP = {"setosa": 0, "versicolor": 1, "virginica": 2}
 
-    def load(self):
-        """Load CSV or Parquet from disk."""
-        pass
+    def __init__(self, path: Optional[str] = None):
+        if path is None:
+            path = os.path.join(os.path.dirname(__file__), "../../data/iris.csv")
+        self.path = os.path.abspath(path)
 
+    def load(self) -> pd.DataFrame:
+        df = pd.read_csv(self.path)
+        df[self.TARGET_COL] = df[self.TARGET_COL].map(self.LABEL_MAP)
+        return df
 
-class S3DataLoader(BaseDataLoader):
-    """Load data from MinIO/S3."""
+    def get_features(self, df: pd.DataFrame) -> pd.DataFrame:
+        return df[self.FEATURE_COLS]
 
-    def __init__(self, bucket, key):
-        self.bucket = bucket
-        self.key = key
+    def get_target(self, df: pd.DataFrame) -> pd.Series:
+        return df[self.TARGET_COL]
 
-    def load(self):
-        """Load from MinIO."""
-        pass
+    def get_feature_names(self) -> List[str]:
+        return self.FEATURE_COLS
 
-
-class DatabaseDataLoader(BaseDataLoader):
-    """Load data from PostgreSQL."""
-
-    def __init__(self, query):
-        self.query = query
-
-    def load(self):
-        """Load from database."""
-        pass
+    def split(
+        self, df: pd.DataFrame, test_size: float = 0.2, random_state: int = 42
+    ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
+        X = self.get_features(df)
+        y = self.get_target(df)
+        return train_test_split(X, y, test_size=test_size, random_state=random_state)
