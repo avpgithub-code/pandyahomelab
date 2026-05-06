@@ -1,0 +1,34 @@
+version: '3.8'
+
+# Dev overlay: adds ml-iris-knn to the ml-network infrastructure stack
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+
+services:
+  ml-iris-knn:
+    image: ml-iris-knn:latest
+    container_name: ml-iris-knn
+    environment:
+      PYTHONPATH: /app
+    ports:
+      - "8001:8000"
+    networks:
+      ml-network:
+        ipv4_address: 172.20.0.10
+    depends_on:
+      ml-postgres:
+        condition: service_healthy
+      ml-redis:
+        condition: service_healthy
+      ml-minio:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
