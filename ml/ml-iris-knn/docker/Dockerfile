@@ -2,41 +2,37 @@ FROM python:3.11-slim AS builder
 
 WORKDIR /app
 
-# Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements
 COPY requirements.txt .
-
-# Build wheels
-RUN pip install --user --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Runtime stage
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Copy Python dependencies from builder
-COPY --from=builder /root/.local /root/.local
-
-# Set PATH
-ENV PATH=/root/.local/bin:$PATH
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /usr/local/bin/uvicorn /usr/local/bin/uvicorn
+ENV PYTHONPATH=/app
 
 # Copy application code
 COPY . .
 
-# Create non-root user
+# Create symlinks for Python imports (folders use hyphens, Python needs underscores)
+RUN ln -s /app/db-logic /app/db_logic && \
+    ln -s /app/application-logic /app/application_logic && \
+    ln -s /app/presentation-logic /app/presentation_logic
+
+# Non-root user
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser
 
-# Expose port
 EXPOSE 8000
 
-# Health check
 HEALTHCHECK --interval=10s --timeout=5s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
-# Run application
-CMD ["uvicorn", "presentation_logic.api.main:create_app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "presentation_logic.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
