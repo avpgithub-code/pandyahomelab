@@ -1,61 +1,47 @@
-"""API routes: health check, prediction, training endpoints."""
-from fastapi import APIRouter, HTTPException, Header
+"""API routes: /health and /predict endpoints."""
+import uuid
+import logging
 from datetime import datetime
 from typing import Optional
-import uuid
 
-from .schemas import HealthResponse, PredictionRequest, PredictionResponse
-from ...shared.logger import logger
-from ...shared.config import get_config
+from fastapi import APIRouter, HTTPException, Header
+
+from presentation_logic.api.schemas import HealthResponse, PredictionRequest, PredictionResponse
+from application_logic.services.prediction_service import PredictionService
 
 router = APIRouter()
-config = get_config()
+logger = logging.getLogger(__name__)
+
+# Shared service instance (trained once on first request)
+_service = PredictionService()
 
 
 @router.get("/health", response_model=HealthResponse)
 async def health_check(x_request_id: Optional[str] = Header(None)):
-    """Liveness and readiness probe for Kubernetes/Docker."""
     request_id = x_request_id or str(uuid.uuid4())
-    logger.info(f"[{request_id}] Health check", extra={"request_id": request_id})
-
     return HealthResponse(
         status="healthy",
         timestamp=datetime.utcnow().isoformat(),
-        version="1.0.0",
+        version="1.0.0-alpha1",
         request_id=request_id,
     )
 
 
 @router.post("/predict", response_model=PredictionResponse)
-async def predict(request: PredictionRequest, x_request_id: Optional[str] = Header(None)):
-    """Make a prediction using trained model."""
+async def predict(
+    request: PredictionRequest,
+    x_request_id: Optional[str] = Header(None),
+):
     request_id = x_request_id or str(uuid.uuid4())
-    logger.info(
-        f"[{request_id}] Prediction request",
-        extra={"request_id": request_id, "data": request.data},
-    )
-
     try:
-        # TODO: Import and use predictor service
-        # from ...application_logic.services.prediction_service import PredictionService
-        # predictor = PredictionService()
-        # result = await predictor.predict(request.data)
-
-        result = {"prediction": 0.5, "confidence": 0.95}
-
-        logger.info(
-            f"[{request_id}] Prediction successful",
-            extra={"request_id": request_id, "result": result},
-        )
-
+        result = _service.predict(request.data)
         return PredictionResponse(
             prediction=result["prediction"],
+            species=result["species"],
             confidence=result["confidence"],
+            probabilities=result["probabilities"],
             request_id=request_id,
         )
     except Exception as e:
-        logger.error(
-            f"[{request_id}] Prediction failed: {str(e)}",
-            extra={"request_id": request_id, "error": str(e)},
-        )
+        logger.error(f"[{request_id}] Prediction failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
