@@ -1,0 +1,53 @@
+version: '3.8'
+
+# Nginx Reverse Proxy — pandyaHomeLab
+# Per ADR-016: Nginx lives on pandya-proxy-network (172.24.0.0/24)
+# and connects to each domain network as services are deployed.
+#
+# Usage:
+#   docker-compose up -d
+#
+# Add new domain networks here as phases are completed:
+#   Phase 1 (ML):      connects to ml_ml-network       ✅ active
+#   Phase 2 (DL):      connects to dl_dl-network       (add when Phase 2 starts)
+#   Phase 3 (NLP):     connects to nlp_nlp-network     (add when Phase 3 starts)
+#   Phase 4 (Agentic): connects to agentic_ag-network  (add when Phase 4 starts)
+
+networks:
+  pandya-proxy-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.24.0.0/24
+          gateway: 172.24.0.1
+
+  # External domain networks (created by their respective docker-compose stacks)
+  ml_ml-network:
+    external: true
+
+services:
+  pandya-nginx:
+    image: pandya-nginx:latest
+    container_name: pandya-nginx
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - /volume1/pandya-homelab/website:/var/www/html:ro
+    networks:
+      pandya-proxy-network:
+        ipv4_address: 172.24.0.2
+      ml_ml-network:
+        ipv4_address: 172.20.0.20
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
