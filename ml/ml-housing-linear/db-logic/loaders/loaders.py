@@ -1,45 +1,29 @@
-"""Data loaders: load from local filesystem, S3, or database."""
-from abc import ABC, abstractmethod
+from sklearn.datasets import fetch_california_housing
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from typing import List, Tuple
 
 
-class BaseDataLoader(ABC):
-    """Abstract base class for data loaders."""
+class LocalDataLoader:
+    FEATURE_COLS = [
+        "MedInc", "HouseAge", "AveRooms", "AveBedrms",
+        "Population", "AveOccup", "Latitude", "Longitude",
+    ]
+    TARGET_COL = "MedHouseVal"
 
-    @abstractmethod
-    def load(self):
-        """Load data."""
-        pass
+    def load(self) -> pd.DataFrame:
+        data = fetch_california_housing(as_frame=True)
+        return data.frame
 
+    def get_feature_names(self) -> List[str]:
+        return self.FEATURE_COLS
 
-class LocalDataLoader(BaseDataLoader):
-    """Load data from local filesystem."""
-
-    def __init__(self, path):
-        self.path = path
-
-    def load(self):
-        """Load CSV or Parquet from disk."""
-        pass
-
-
-class S3DataLoader(BaseDataLoader):
-    """Load data from MinIO/S3."""
-
-    def __init__(self, bucket, key):
-        self.bucket = bucket
-        self.key = key
-
-    def load(self):
-        """Load from MinIO."""
-        pass
-
-
-class DatabaseDataLoader(BaseDataLoader):
-    """Load data from PostgreSQL."""
-
-    def __init__(self, query):
-        self.query = query
-
-    def load(self):
-        """Load from database."""
-        pass
+    def split(
+        self,
+        df: pd.DataFrame,
+        test_size: float = 0.2,
+        random_state: int = 42,
+    ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
+        X = df[self.FEATURE_COLS]
+        y = df[self.TARGET_COL]
+        return train_test_split(X, y, test_size=test_size, random_state=random_state)

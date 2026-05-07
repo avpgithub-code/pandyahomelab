@@ -1,17 +1,28 @@
-"""Data preprocessing and feature engineering."""
+import numpy as np
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
 
 
 class DataPreprocessor:
-    """Handles data cleaning, normalization, feature engineering."""
+    """Normalizes features using StandardScaler (zero mean, unit variance)."""
 
-    def fit(self, X):
-        """Learn preprocessing parameters (e.g., scaler mean/std)."""
-        pass
+    def __init__(self):
+        self._scaler = StandardScaler()
+        self._fitted = False
 
-    def transform(self, X):
-        """Apply preprocessing to data."""
-        pass
+    def fit(self, X: pd.DataFrame) -> "DataPreprocessor":
+        self._scaler.fit(X)
+        self._fitted = True
+        return self
 
-    def fit_transform(self, X):
-        """Fit and transform in one step."""
-        pass
+    def transform(self, X: pd.DataFrame) -> np.ndarray:
+        if not self._fitted:
+            raise RuntimeError("Preprocessor must be fitted before calling transform.")
+        return self._scaler.transform(X)
+
+    def fit_transform(self, X: pd.DataFrame) -> np.ndarray:
+        return self.fit(X).transform(X)
+
+    @property
+    def is_fitted(self) -> bool:
+        return self._fitted
