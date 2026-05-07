@@ -1,24 +1,31 @@
-"""Pydantic request/response schemas."""
-from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import Dict, List, Optional
+from pydantic import BaseModel, Field, validator
 
 
 class HealthResponse(BaseModel):
-    """Health check response."""
-    status: str = Field(..., description="Service status: 'healthy' or 'unhealthy'")
+    status: str = Field(..., description="Service status")
     timestamp: str = Field(..., description="ISO 8601 timestamp")
     version: str = Field(..., description="API version")
     request_id: Optional[str] = Field(None, description="Request tracking ID")
 
 
 class PredictionRequest(BaseModel):
-    """Prediction request."""
-    data: List[float] = Field(..., description="Input features for prediction")
-    model_version: Optional[str] = Field(None, description="Model version to use")
+    data: List[float] = Field(
+        ...,
+        description="8 California Housing features: MedInc, HouseAge, AveRooms, AveBedrms, Population, AveOccup, Latitude, Longitude",
+    )
+
+    @validator("data")
+    def validate_features(cls, v):
+        if len(v) != 8:
+            raise ValueError(
+                "Exactly 8 features required: MedInc, HouseAge, AveRooms, AveBedrms, Population, AveOccup, Latitude, Longitude"
+            )
+        return v
 
 
 class PredictionResponse(BaseModel):
-    """Prediction response."""
-    prediction: float = Field(..., description="Predicted value")
-    confidence: float = Field(..., description="Prediction confidence (0-1)")
+    prediction: float = Field(..., description="Predicted median house value (in $100,000s)")
+    prediction_usd: str = Field(..., description="Human-readable price e.g. '$245,000'")
+    unit: str = Field(..., description="Unit of the raw prediction value")
     request_id: Optional[str] = Field(None, description="Request tracking ID")

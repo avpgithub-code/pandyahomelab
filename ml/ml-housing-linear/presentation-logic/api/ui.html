@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Housing Price Predictor — pandyaHomeLab</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f14;
+      --surface: #13161e;
+      --surface2: #1a1e2a;
+      --border: #252a38;
+      --accent: #4f8ef7;
+      --accent2: #22c55e;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+
+    header {
+      width: 100%;
+      max-width: 760px;
+      margin-bottom: 2rem;
+    }
+
+    .back-link {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      margin-bottom: 1.5rem;
+      transition: color .2s;
+    }
+    .back-link:hover { color: var(--text); }
+
+    h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -.02em; }
+    h1 em { font-style: normal; color: var(--accent); }
+    .subtitle { color: var(--muted); font-size: .95rem; margin-top: .4rem; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      width: 100%;
+      max-width: 760px;
+      margin-bottom: 1.5rem;
+    }
+
+    .card h2 {
+      font-size: .75rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      margin-bottom: 1.5rem;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 520px) { .feature-grid { grid-template-columns: 1fr; } }
+
+    .feature-group label {
+      display: flex;
+      justify-content: space-between;
+      font-size: .85rem;
+      margin-bottom: .5rem;
+      color: #cbd5e1;
+    }
+    .feature-group label span {
+      font-family: monospace;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    input[type=range] {
+      width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: .7rem;
+      color: var(--muted);
+      margin-top: .25rem;
+    }
+
+    .btn {
+      width: 100%;
+      padding: .9rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .2s, transform .15s;
+      margin-top: 1.5rem;
+    }
+    .btn:hover { opacity: .9; transform: translateY(-1px); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    .example-row {
+      display: flex;
+      gap: .5rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+    .example-btn {
+      padding: .35rem .9rem;
+      border-radius: 99px;
+      border: 1px solid rgba(79,142,247,.3);
+      font-size: .75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+      background: transparent;
+      color: var(--accent);
+    }
+    .example-btn:hover { background: rgba(79,142,247,.1); }
+
+    .result-card {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      width: 100%;
+      max-width: 760px;
+      text-align: center;
+    }
+    .result-card.visible { display: block; }
+
+    .price-display {
+      font-size: 3rem;
+      font-weight: 900;
+      letter-spacing: -.03em;
+      color: var(--accent2);
+      margin-bottom: .5rem;
+    }
+
+    .price-sub {
+      font-size: .9rem;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .metric-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .75rem;
+    }
+    .metric-label { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+    .metric-value { font-size: 1.1rem; font-weight: 700; color: var(--text); font-family: monospace; margin-top: .25rem; }
+
+    .error-msg {
+      display: none;
+      color: #f87171;
+      background: rgba(248,113,113,.1);
+      border: 1px solid rgba(248,113,113,.2);
+      border-radius: 8px;
+      padding: .75rem 1rem;
+      font-size: .85rem;
+      margin-top: 1rem;
+    }
+    .error-msg.visible { display: block; }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="back-link" href="/">← pandyaHomeLab</a>
+  <h1>Housing <em>Linear</em> Regression</h1>
+  <p class="subtitle">Linear Regression · California Housing dataset · 20,640 samples</p>
+</header>
+
+<div class="card">
+  <h2>Input Features</h2>
+  <div class="feature-grid">
+    <div class="feature-group">
+      <label>Median Income <span id="medinc-val">8.33</span></label>
+      <input type="range" id="medinc" min="0.5" max="15" step="0.1" value="8.33" oninput="update('medinc')">
+      <div class="range-labels"><span>0.5</span><span>15</span></div>
+    </div>
+    <div class="feature-group">
+      <label>House Age <span id="houseage-val">41</span> yrs</label>
+      <input type="range" id="houseage" min="1" max="52" step="1" value="41" oninput="update('houseage')">
+      <div class="range-labels"><span>1</span><span>52</span></div>
+    </div>
+    <div class="feature-group">
+      <label>Avg Rooms <span id="averooms-val">6.98</span></label>
+      <input type="range" id="averooms" min="1" max="15" step="0.1" value="6.98" oninput="update('averooms')">
+      <div class="range-labels"><span>1</span><span>15</span></div>
+    </div>
+    <div class="feature-group">
+      <label>Avg Bedrooms <span id="avebedrms-val">1.02</span></label>
+      <input type="range" id="avebedrms" min="0.5" max="5" step="0.05" value="1.02" oninput="update('avebedrms')">
+      <div class="range-labels"><span>0.5</span><span>5</span></div>
+    </div>
+    <div class="feature-group">
+      <label>Population <span id="population-val">322</span></label>
+      <input type="range" id="population" min="3" max="3500" step="10" value="322" oninput="update('population')">
+      <div class="range-labels"><span>3</span><span>3500</span></div>
+    </div>
+    <div class="feature-group">
+      <label>Avg Occupancy <span id="aveoccup-val">2.56</span></label>
+      <input type="range" id="aveoccup" min="1" max="10" step="0.1" value="2.56" oninput="update('aveoccup')">
+      <div class="range-labels"><span>1</span><span>10</span></div>
+    </div>
+    <div class="feature-group">
+      <label>Latitude <span id="latitude-val">37.88</span>°</label>
+      <input type="range" id="latitude" min="32.5" max="42" step="0.1" value="37.88" oninput="update('latitude')">
+      <div class="range-labels"><span>32.5°</span><span>42°</span></div>
+    </div>
+    <div class="feature-group">
+      <label>Longitude <span id="longitude-val">-122.23</span>°</label>
+      <input type="range" id="longitude" min="-124.4" max="-114.3" step="0.1" value="-122.23" oninput="update('longitude')">
+      <div class="range-labels"><span>-124.4°</span><span>-114.3°</span></div>
+    </div>
+  </div>
+
+  <div>
+    <p style="font-size:.75rem;color:var(--muted);margin-top:1.5rem;margin-bottom:.4rem">Try an example:</p>
+    <div class="example-row">
+      <button class="example-btn" onclick="loadExample(8.3252,41,6.984,1.024,322,2.556,37.88,-122.23)">San Francisco Bay</button>
+      <button class="example-btn" onclick="loadExample(3.5,20,5.2,1.1,900,3.1,34.05,-118.25)">Los Angeles</button>
+      <button class="example-btn" onclick="loadExample(1.5,35,4.5,1.3,500,2.8,36.7,-119.8)">Central Valley</button>
+    </div>
+  </div>
+
+  <button class="btn" id="predict-btn" onclick="predict()">Predict Price</button>
+  <div class="error-msg" id="error-msg">Prediction failed. Please try again.</div>
+</div>
+
+<div class="result-card" id="result-card">
+  <div class="price-display" id="price-display"></div>
+  <div class="price-sub">Predicted median house value</div>
+  <div class="metrics-grid" id="metrics-grid"></div>
+</div>
+
+<script>
+  function update(id) {
+    const el = document.getElementById(id);
+    const val = parseFloat(el.value);
+    document.getElementById(id + '-val').textContent = Number.isInteger(val) ? val : val.toFixed(id === 'longitude' || id === 'latitude' ? 2 : 2);
+  }
+
+  function loadExample(medinc, houseage, averooms, avebedrms, population, aveoccup, latitude, longitude) {
+    const vals = { medinc, houseage, averooms, avebedrms, population, aveoccup, latitude, longitude };
+    Object.entries(vals).forEach(([id, val]) => {
+      document.getElementById(id).value = val;
+      update(id);
+    });
+    predict();
+  }
+
+  async function predict() {
+    const btn = document.getElementById('predict-btn');
+    const errEl = document.getElementById('error-msg');
+    errEl.classList.remove('visible');
+    btn.disabled = true;
+    btn.textContent = 'Predicting…';
+
+    const ids = ['medinc','houseage','averooms','avebedrms','population','aveoccup','latitude','longitude'];
+    const data = ids.map(id => parseFloat(document.getElementById(id).value));
+
+    try {
+      const res = await fetch('/ml/housing-linear/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data })
+      });
+
+      if (!res.ok) throw new Error('Request failed');
+      const result = await res.json();
+      showResult(result);
+    } catch (e) {
+      errEl.classList.add('visible');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Predict Price';
+    }
+  }
+
+  function showResult(r) {
+    document.getElementById('price-display').textContent = r.prediction_usd;
+
+    const metrics = r.metrics || {};
+    const metricsEl = document.getElementById('metrics-grid');
+    metricsEl.innerHTML = `
+      <div class="metric-box"><div class="metric-label">R²</div><div class="metric-value">${metrics.r2 ?? '—'}</div></div>
+      <div class="metric-box"><div class="metric-label">RMSE</div><div class="metric-value">${metrics.rmse ?? '—'}</div></div>
+      <div class="metric-box"><div class="metric-label">MAE</div><div class="metric-value">${metrics.mae ?? '—'}</div></div>
+    `;
+
+    const card = document.getElementById('result-card');
+    card.classList.add('visible');
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+</script>
+</body>
+</html>
