@@ -95,11 +95,16 @@ services:
     image: ghcr.io/mlflow/mlflow:latest
     container_name: ml-mlflow
     environment:
-      BACKEND_STORE_URI: ${ML_BACKEND_STORE_URI:-sqlite:///mlflow/mlruns.db}
       MLFLOW_S3_ENDPOINT_URL: http://ml-minio:9000
       AWS_ACCESS_KEY_ID: ${ML_MINIO_ROOT_USER:-minioadmin}
       AWS_SECRET_ACCESS_KEY: ${ML_MINIO_ROOT_PASSWORD}
-      ARTIFACT_ROOT: s3://ml-artifacts/artifacts
+    command: >
+      mlflow server
+      --backend-store-uri sqlite:///mlflow/mlruns.db
+      --default-artifact-root s3://ml-artifacts/artifacts
+      --serve-artifacts
+      --host 0.0.0.0
+      --port 5000
     ports:
       - "5000:5000"
     volumes:
@@ -109,7 +114,7 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
-      interval: 10s
+      interval: 15s
       timeout: 5s
       retries: 5
     networks:
