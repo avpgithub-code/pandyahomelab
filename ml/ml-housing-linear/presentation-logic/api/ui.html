@@ -194,6 +194,53 @@
       margin-top: 1rem;
     }
     .error-msg.visible { display: block; }
+
+    .model-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem 2rem;
+      width: 100%;
+      max-width: 760px;
+      margin-top: 1.5rem;
+    }
+    .model-card h2 {
+      font-size: .75rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      margin-bottom: 1rem;
+    }
+    .model-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: .75rem;
+      margin-bottom: 1rem;
+    }
+    @media (max-width: 520px) { .model-stats { grid-template-columns: repeat(2, 1fr); } }
+    .stat-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .6rem .75rem;
+    }
+    .stat-label { font-size: .65rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+    .stat-value { font-size: 1rem; font-weight: 700; color: var(--text); font-family: monospace; margin-top: .2rem; }
+    .mlflow-link {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .4rem 1rem;
+      border-radius: 99px;
+      border: 1px solid rgba(79,142,247,.3);
+      color: var(--accent);
+      font-size: .8rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all .2s;
+    }
+    .mlflow-link:hover { background: rgba(79,142,247,.1); border-color: var(--accent); }
   </style>
 </head>
 <body>
@@ -262,6 +309,20 @@
   <div class="error-msg" id="error-msg">Prediction failed. Please try again.</div>
 </div>
 
+<!-- Model Card -->
+<div class="model-card" id="model-card">
+  <h2>Model Card</h2>
+  <div class="model-stats">
+    <div class="stat-box"><div class="stat-label">Model</div><div class="stat-value" id="mc-model">—</div></div>
+    <div class="stat-box"><div class="stat-label">Dataset</div><div class="stat-value" id="mc-dataset">—</div></div>
+    <div class="stat-box"><div class="stat-label">R²</div><div class="stat-value" id="mc-r2">—</div></div>
+    <div class="stat-box"><div class="stat-label">RMSE</div><div class="stat-value" id="mc-rmse">—</div></div>
+  </div>
+  <a class="mlflow-link" id="mlflow-link" href="#" target="_blank" style="display:none">
+    ↗ View in MLflow
+  </a>
+</div>
+
 <div class="result-card" id="result-card">
   <div class="price-display" id="price-display"></div>
   <div class="price-sub">Predicted median house value</div>
@@ -269,6 +330,25 @@
 </div>
 
 <script>
+  async function loadModelCard() {
+    try {
+      const res = await fetch('/ml/housing-linear/model-info');
+      if (!res.ok) return;
+      const info = await res.json();
+      document.getElementById('mc-model').textContent = 'LinearReg';
+      document.getElementById('mc-dataset').textContent = `CA Housing`;
+      document.getElementById('mc-r2').textContent = info.metrics.r2 ?? '—';
+      document.getElementById('mc-rmse').textContent = info.metrics.rmse ?? '—';
+      if (info.mlflow_url) {
+        const link = document.getElementById('mlflow-link');
+        link.href = info.mlflow_url;
+        link.style.display = 'inline-flex';
+      }
+    } catch (e) { /* MLflow unavailable — card stays with dashes */ }
+  }
+
+  window.addEventListener('DOMContentLoaded', loadModelCard);
+
   function update(id) {
     const el = document.getElementById(id);
     const val = parseFloat(el.value);

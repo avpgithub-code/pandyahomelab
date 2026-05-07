@@ -29,3 +29,15 @@ class PredictionResponse(BaseModel):
     prediction_usd: str = Field(..., description="Human-readable price e.g. '$245,000'")
     unit: str = Field(..., description="Unit of the raw prediction value")
     request_id: Optional[str] = Field(None, description="Request tracking ID")
+
+
+class ModelInfoResponse(BaseModel):
+    model_type: str
+    dataset: str
+    n_samples: int
+    n_features: int
+    parameters: Dict
+    metrics: Dict
+    run_id: Optional[str] = None
+    experiment_id: Optional[str] = None
+    mlflow_url: Optional[str] = None

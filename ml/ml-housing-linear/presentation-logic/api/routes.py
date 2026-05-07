@@ -7,14 +7,15 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Header
 from fastapi.responses import HTMLResponse
 
-from presentation_logic.api.schemas import HealthResponse, PredictionRequest, PredictionResponse
+from presentation_logic.api.schemas import (
+    HealthResponse, PredictionRequest, PredictionResponse, ModelInfoResponse
+)
 from application_logic.services.prediction_service import PredictionService
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 _service = PredictionService()
-
 _UI_PATH = Path(__file__).parent / "ui.html"
 
 
@@ -50,4 +51,13 @@ async def predict(
         )
     except Exception as e:
         logger.error(f"[{request_id}] Prediction failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/model-info", response_model=ModelInfoResponse)
+async def model_info():
+    try:
+        return _service.get_model_info()
+    except Exception as e:
+        logger.error(f"Model info failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))

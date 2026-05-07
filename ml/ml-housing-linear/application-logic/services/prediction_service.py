@@ -1,9 +1,16 @@
-from typing import Dict, List
+import logging
+import os
+from typing import Dict, List, Optional
 import pandas as pd
 
 from db_logic.loaders.loaders import LocalDataLoader
 from db_logic.transforms.preprocessor import DataPreprocessor
 from application_logic.model.classifier import HousingRegressor
+
+logger = logging.getLogger(__name__)
+
+_MLFLOW_URI = os.environ.get("MLFLOW_TRACKING_URI", "http://ml-mlflow:5000")
+_EXPERIMENT = "ml-housing-linear"
 
 
 class PredictionService:
@@ -14,6 +21,8 @@ class PredictionService:
         self._preprocessor = DataPreprocessor()
         self._regressor = HousingRegressor()
         self._metrics: Dict = {}
+        self._run_id: Optional[str] = None
+        self._experiment_id: Optional[str] = None
         self._ready = False
 
     def train(self) -> Dict:
@@ -24,6 +33,28 @@ class PredictionService:
         self._regressor.train(X_train_scaled, y_train)
         self._metrics = self._regressor.evaluate(X_test_scaled, y_test)
         self._ready = True
+
+        try:
+            import mlflow
+            import mlflow.sklearn
+            mlflow.set_tracking_uri(_MLFLOW_URI)
+            mlflow.set_experiment(_EXPERIMENT)
+            with mlflow.start_run() as run:
+                mlflow.log_params({
+                    "model": "LinearRegression",
+                    "dataset": "california_housing",
+                    "n_samples": len(df),
+                    "n_features": 8,
+                    "test_size": 0.2,
+                    "random_state": 42,
+                })
+                mlflow.log_metrics(self._metrics)
+                mlflow.sklearn.log_model(self._regressor._model, "model")
+                self._run_id = run.info.run_id
+                self._experiment_id = str(run.info.experiment_id)
+        except Exception as e:
+            logger.warning(f"MLflow logging skipped: {e}")
+
         return self._metrics
 
     def predict(self, features: List[float]) -> Dict:
@@ -38,6 +69,28 @@ class PredictionService:
             "prediction_usd": usd,
             "unit": "$100,000s",
             "metrics": self._metrics,
+        }
+
+    def get_model_info(self) -> Dict:
+        if not self._ready:
+            self.train()
+        return {
+            "model_type": "LinearRegression",
+            "dataset": "California Housing",
+            "n_samples": 20640,
+            "n_features": 8,
+            "parameters": {
+                "model": "LinearRegression",
+                "test_size": 0.2,
+                "random_state": 42,
+            },
+            "metrics": self._metrics,
+            "run_id": self._run_id,
+            "experiment_id": self._experiment_id,
+            "mlflow_url": (
+                f"/mlflow/#/experiments/{self._experiment_id}/runs/{self._run_id}"
+                if self._run_id else None
+            ),
         }
 
     @property

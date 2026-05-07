@@ -35,3 +35,21 @@ def test_predict_returns_positive_value():
     data = response.json()
     assert data["prediction"] > 0
     assert data["prediction_usd"].startswith("$")
+
+
+def test_model_info_returns_200():
+    response = client.get("/model-info")
+    assert response.status_code == 200
+
+
+def test_model_info_has_metrics():
+    response = client.get("/model-info")
+    data = response.json()
+    assert "r2" in data["metrics"]
+    assert "rmse" in data["metrics"]
+    assert "mae" in data["metrics"]
+
+
+def test_model_info_r2_above_threshold():
+    response = client.get("/model-info")
+    assert response.json()["metrics"]["r2"] > 0.55
