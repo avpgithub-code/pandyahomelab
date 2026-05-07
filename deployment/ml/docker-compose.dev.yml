@@ -9,6 +9,7 @@ services:
     container_name: ml-iris-knn
     environment:
       PYTHONPATH: /app
+      MLFLOW_TRACKING_URI: http://ml-mlflow:5000
     ports:
       - "8001:8000"
     networks:
@@ -20,6 +21,8 @@ services:
       ml-redis:
         condition: service_healthy
       ml-minio:
+        condition: service_healthy
+      ml-mlflow:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
@@ -38,6 +41,7 @@ services:
     container_name: ml-housing-linear
     environment:
       PYTHONPATH: /app
+      MLFLOW_TRACKING_URI: http://ml-mlflow:5000
     ports:
       - "8002:8000"
     networks:
@@ -49,6 +53,8 @@ services:
       ml-redis:
         condition: service_healthy
       ml-minio:
+        condition: service_healthy
+      ml-mlflow:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
