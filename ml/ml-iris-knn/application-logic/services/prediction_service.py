@@ -49,9 +49,12 @@ class PredictionService:
                     "test_size": 0.2,
                 })
                 mlflow.log_metrics(self._metrics)
-                mlflow.sklearn.log_model(self._classifier._model, "model")
                 self._run_id = run.info.run_id
                 self._experiment_id = str(run.info.experiment_id)
+                try:
+                    mlflow.sklearn.log_model(self._classifier._model, "model")
+                except Exception as artifact_err:
+                    logger.warning(f"MLflow artifact logging skipped: {artifact_err}")
         except Exception as e:
             logger.warning(f"MLflow logging skipped: {e}")
 
