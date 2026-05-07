@@ -56,3 +56,19 @@ class TestPredictEndpoint:
         response = client.post("/predict", json=self.SETOSA)
         confidence = response.json()["confidence"]
         assert 0.0 <= confidence <= 1.0
+
+
+class TestModelInfoEndpoint:
+    def test_model_info_returns_200(self):
+        response = client.get("/model-info")
+        assert response.status_code == 200
+
+    def test_model_info_has_metrics(self):
+        response = client.get("/model-info")
+        data = response.json()
+        assert "accuracy" in data["metrics"]
+        assert "f1_macro" in data["metrics"]
+
+    def test_model_info_accuracy_above_threshold(self):
+        response = client.get("/model-info")
+        assert response.json()["metrics"]["accuracy"] > 0.9

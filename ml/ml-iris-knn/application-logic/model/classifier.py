@@ -4,7 +4,7 @@ from typing import Dict, List
 
 import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 
 class BaseClassifier(ABC):
@@ -27,7 +27,7 @@ class IrisClassifier(BaseClassifier):
     CLASSES = {0: "setosa", 1: "versicolor", 2: "virginica"}
 
     def __init__(self, n_neighbors: int = 3):
-        self._model = KNeighborsClassifier(n_neighbors=n_neighbors)
+        self._model = KNeighborsClassifier(n_neighbors=n_neighbors, algorithm="ball_tree")
         self._trained = False
 
     def train(self, X_train, y_train) -> "IrisClassifier":
@@ -47,8 +47,10 @@ class IrisClassifier(BaseClassifier):
         self._check_trained()
         y_pred = self._model.predict(X_test)
         return {
-            "accuracy": round(accuracy_score(y_test, y_pred), 4),
-            "report": classification_report(y_test, y_pred, target_names=list(self.CLASSES.values())),
+            "accuracy":         round(float(accuracy_score(y_test, y_pred)), 4),
+            "precision_macro":  round(float(precision_score(y_test, y_pred, average="macro")), 4),
+            "recall_macro":     round(float(recall_score(y_test, y_pred, average="macro")), 4),
+            "f1_macro":         round(float(f1_score(y_test, y_pred, average="macro")), 4),
         }
 
     @property

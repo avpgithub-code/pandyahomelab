@@ -28,3 +28,16 @@ class PredictionResponse(BaseModel):
     confidence: float = Field(..., description="Prediction confidence (0-1)")
     probabilities: Dict[str, float] = Field(..., description="Per-class probabilities")
     request_id: Optional[str] = Field(None, description="Request tracking ID")
+
+
+class ModelInfoResponse(BaseModel):
+    model_type: str
+    dataset: str
+    n_samples: int
+    n_features: int
+    classes: List[str]
+    parameters: Dict
+    metrics: Dict
+    run_id: Optional[str] = None
+    experiment_id: Optional[str] = None
+    mlflow_url: Optional[str] = None
