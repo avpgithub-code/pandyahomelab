@@ -207,6 +207,60 @@
     .stack-chip:hover { border-color: var(--accent-ml); color: var(--text); }
     .stack-chip .chip-icon { font-size: 1.5rem; }
 
+    /* — PLATFORM TOOLS — */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1.25rem;
+    }
+    .tool-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: .75rem;
+      transition: border-color .2s;
+    }
+    .tool-card:hover { border-color: var(--accent-ml); }
+    .tool-card-top {
+      display: flex; align-items: center; gap: .75rem;
+    }
+    .tool-icon-wrap {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; flex-shrink: 0;
+    }
+    .tool-icon-wrap.mlflow   { background: rgba(79,142,247,.12); }
+    .tool-icon-wrap.minio    { background: rgba(249,115,22,.12); }
+    .tool-icon-wrap.postgres { background: rgba(34,197,94,.12); }
+    .tool-icon-wrap.redis    { background: rgba(168,85,247,.12); }
+    .tool-name { font-size: 1rem; font-weight: 700; }
+    .tool-badge {
+      display: inline-block; padding: .2rem .6rem;
+      border-radius: 99px; font-size: .65rem; font-weight: 600;
+      letter-spacing: .05em;
+    }
+    .tool-badge.live     { background: rgba(34,197,94,.15); color: var(--accent-nlp); }
+    .tool-badge.internal { background: rgba(100,116,139,.1); color: var(--muted); }
+    .tool-desc {
+      font-size: .82rem; color: #94a3b8; line-height: 1.5; flex: 1;
+    }
+    .tool-link-btn {
+      display: inline-flex; align-items: center; gap: .35rem;
+      font-size: .8rem; font-weight: 600; text-decoration: none;
+      padding: .4rem 1rem; border-radius: 8px;
+      border: 1px solid rgba(79,142,247,.35);
+      color: var(--accent-ml); background: rgba(79,142,247,.08);
+      transition: all .2s; align-self: flex-start;
+    }
+    .tool-link-btn:hover { background: rgba(79,142,247,.2); border-color: var(--accent-ml); }
+    .tool-link-internal {
+      font-size: .75rem; color: var(--muted);
+      font-family: 'Courier New', monospace;
+    }
+
     /* — FOOTER — */
     footer {
       border-top: 1px solid var(--border);
@@ -235,6 +289,7 @@
     <li><a href="#nlp">NLP</a></li>
     <li><a href="#agentic">Agentic</a></li>
     <li><a href="#stack">Stack</a></li>
+    <li><a href="#tools">Tools</a></li>
   </ul>
 </nav>
 
@@ -392,6 +447,63 @@
     <div class="stack-chip"><span class="chip-icon">📈</span>MLflow</div>
     <div class="stack-chip"><span class="chip-icon">🏠</span>Synology NAS</div>
     <div class="stack-chip"><span class="chip-icon">🔁</span>Nginx</div>
+  </div>
+</section>
+
+<section id="tools">
+  <div class="section-label">Platform Tools</div>
+  <h2 class="section-title">MLOps Infrastructure</h2>
+  <p class="section-desc">Shared services powering all ML experiments and model tracking.</p>
+  <div class="tools-grid">
+
+    <div class="tool-card">
+      <div class="tool-card-top">
+        <div class="tool-icon-wrap mlflow">📈</div>
+        <div>
+          <div class="tool-name">MLflow</div>
+          <span class="tool-badge live">✓ Live</span>
+        </div>
+      </div>
+      <p class="tool-desc">Experiment tracking, run history, parameters, metrics, and model artifact storage for all ML projects.</p>
+      <a href="/mlflow/" class="tool-link-btn" target="_blank">Open MLflow →</a>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-card-top">
+        <div class="tool-icon-wrap minio">💾</div>
+        <div>
+          <div class="tool-name">MinIO</div>
+          <span class="tool-badge live">✓ Live</span>
+        </div>
+      </div>
+      <p class="tool-desc">S3-compatible object storage for model artifacts, datasets, and MLflow experiment outputs.</p>
+      <span class="tool-link-internal">ml-minio:9000 · internal</span>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-card-top">
+        <div class="tool-icon-wrap postgres">🐘</div>
+        <div>
+          <div class="tool-name">PostgreSQL</div>
+          <span class="tool-badge live">✓ Live</span>
+        </div>
+      </div>
+      <p class="tool-desc">Shared relational database for prediction audit trails and structured ML project data.</p>
+      <span class="tool-link-internal">ml-postgres:5432 · internal</span>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-card-top">
+        <div class="tool-icon-wrap redis">⚡</div>
+        <div>
+          <div class="tool-name">Redis</div>
+          <span class="tool-badge live">✓ Live</span>
+        </div>
+      </div>
+      <p class="tool-desc">In-memory cache for inference results, rate limiting, and session state across ML services.</p>
+      <span class="tool-link-internal">ml-redis:6379 · internal</span>
+    </div>
+
   </div>
 </section>
 
