@@ -7,6 +7,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
+# pycaret 3.3.1 pins pyyaml==5.4.1 which has no cp310 wheel.
+# Its setup.py breaks with setuptools>=65 (missing cython_sources attribute).
+# Pre-downgrade setuptools, then install pyyaml without build isolation so
+# the build uses the compatible setuptools instead of pip's isolated env.
+RUN pip install --no-cache-dir "setuptools<65" && \
+    pip install --user --no-cache-dir --no-build-isolation "pyyaml==5.4.1"
+
 COPY requirements.txt .
 RUN pip install --user --no-cache-dir -r requirements.txt
 
