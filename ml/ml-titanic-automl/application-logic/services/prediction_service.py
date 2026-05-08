@@ -48,7 +48,14 @@ class PredictionService:
             n_jobs=1,
         )
 
-        top_models = compare_models(n_select=5, sort="AUC", verbose=False)
+        # Limit to 7 algorithms to keep training time under Nginx's read timeout.
+        # Default compare_models tests 18+ algorithms; we only need these 7.
+        top_models = compare_models(
+            include=["lr", "rf", "xgboost", "dt", "knn", "nb", "svm"],
+            n_select=5,
+            sort="AUC",
+            verbose=False,
+        )
         leaderboard_df = pull()
         self._leaderboard = leaderboard_df.head(5).to_dict(orient="records")
 
