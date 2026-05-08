@@ -67,3 +67,34 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+  ml-titanic-automl:
+    image: ml-titanic-automl:latest
+    container_name: ml-titanic-automl
+    environment:
+      PYTHONPATH: /app
+      MLFLOW_TRACKING_URI: http://ml-mlflow:5000
+      DATABASE_URL: postgresql://postgres:${ML_POSTGRES_PASSWORD}@ml-postgres:5432/mldb
+    ports:
+      - "8003:8000"
+    networks:
+      ml-network:
+        ipv4_address: 172.20.0.12
+    depends_on:
+      ml-postgres:
+        condition: service_healthy
+      ml-redis:
+        condition: service_healthy
+      ml-mlflow:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
