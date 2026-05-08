@@ -35,7 +35,9 @@ async def health_check(x_request_id: Optional[str] = Header(None)):
 
 
 @router.post("/predict", response_model=PredictionResponse)
-async def predict(request: PredictionRequest, x_request_id: Optional[str] = Header(None)):
+def predict(request: PredictionRequest, x_request_id: Optional[str] = Header(None)):
+    # sync def — FastAPI runs this in a thread pool, required for PyCaret's
+    # ThreadLocalVariable which breaks when called from the async event loop
     request_id = x_request_id or str(uuid.uuid4())
     try:
         svc = _get_service()
@@ -46,7 +48,7 @@ async def predict(request: PredictionRequest, x_request_id: Optional[str] = Head
 
 
 @router.get("/model-info", response_model=ModelInfoResponse)
-async def model_info():
+def model_info():
     try:
         svc = _get_service()
         return ModelInfoResponse(**svc.get_model_info())
