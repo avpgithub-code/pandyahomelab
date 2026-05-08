@@ -48,11 +48,11 @@ class PredictionService:
             n_jobs=1,
         )
 
-        top_models = compare_models(n_select=5, sort="AUC", verbose=False, n_jobs=1)
+        top_models = compare_models(n_select=5, sort="AUC", verbose=False)
         leaderboard_df = pull()
         self._leaderboard = leaderboard_df.head(5).to_dict(orient="records")
 
-        tuned = tune_model(top_models[0], optimize="AUC", verbose=False, n_jobs=1)
+        tuned = tune_model(top_models[0], optimize="AUC", verbose=False)
         self._best_model_name = type(tuned).__name__
 
         self._model = finalize_model(tuned)
