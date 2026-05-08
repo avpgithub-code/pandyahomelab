@@ -1,6 +1,6 @@
 """Pydantic request/response schemas for Iris KNN API."""
 from typing import Dict, List, Optional
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class HealthResponse(BaseModel):
@@ -13,7 +13,8 @@ class HealthResponse(BaseModel):
 class PredictionRequest(BaseModel):
     data: List[float] = Field(..., description="4 iris features: sepal_length, sepal_width, petal_length, petal_width")
 
-    @validator("data")
+    @field_validator("data")
+    @classmethod
     def validate_features(cls, v):
         if len(v) != 4:
             raise ValueError("Exactly 4 features required: sepal_length, sepal_width, petal_length, petal_width")

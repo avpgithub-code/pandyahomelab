@@ -1,5 +1,5 @@
 from typing import Dict, List, Optional
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class HealthResponse(BaseModel):
@@ -15,7 +15,8 @@ class PredictionRequest(BaseModel):
         description="8 California Housing features: MedInc, HouseAge, AveRooms, AveBedrms, Population, AveOccup, Latitude, Longitude",
     )
 
-    @validator("data")
+    @field_validator("data")
+    @classmethod
     def validate_features(cls, v):
         if len(v) != 8:
             raise ValueError(
