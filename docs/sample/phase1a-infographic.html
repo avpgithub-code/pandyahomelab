@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>pandyaHomeLab — Phase 1a</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #0d0f14;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+
+  .card {
+    width: 900px;
+    background: #13161e;
+    border-radius: 24px;
+    border: 1px solid #252a38;
+    overflow: hidden;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #0d1525 0%, #131b2e 50%, #1a1230 100%);
+    padding: 2.5rem 3rem 2rem;
+    border-bottom: 1px solid #252a38;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(79,142,247,.15) 0%, transparent 70%);
+    top: -100px; right: -50px;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(168,85,247,.08) 0%, transparent 70%);
+    bottom: -80px; left: 100px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    background: rgba(79,142,247,.12);
+    border: 1px solid rgba(79,142,247,.25);
+    border-radius: 99px;
+    padding: .35rem 1rem;
+    font-size: .72rem;
+    color: #93c5fd;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: #4f8ef7; box-shadow: 0 0 6px #4f8ef7; }
+  .header h1 {
+    font-size: 2.4rem;
+    font-weight: 900;
+    color: #f1f5f9;
+    letter-spacing: -.03em;
+    line-height: 1.1;
+    margin-bottom: .5rem;
+  }
+  .header h1 em { font-style: normal; color: #4f8ef7; }
+  .header p { color: #64748b; font-size: .95rem; }
+  .header .url {
+    font-family: 'JetBrains Mono', monospace;
+    color: #4f8ef7;
+    font-size: .85rem;
+    margin-top: .75rem;
+    display: inline-block;
+  }
+
+  /* BODY */
+  .body { padding: 2rem 3rem 2.5rem; }
+
+  /* TIER GATES */
+  .tier-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .tier {
+    background: #1a1e2a;
+    border: 1px solid #252a38;
+    border-radius: 14px;
+    padding: 1.25rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .tier::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .tier.t1::before { background: #22c55e; }
+  .tier.t2::before { background: #4f8ef7; }
+  .tier.t3::before { background: #a855f7; }
+
+  .tier-label {
+    font-size: .65rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-bottom: .5rem;
+  }
+  .t1 .tier-label { color: #22c55e; }
+  .t2 .tier-label { color: #4f8ef7; }
+  .t3 .tier-label { color: #a855f7; }
+
+  .tier-title { font-size: .95rem; font-weight: 700; color: #e2e8f0; margin-bottom: .75rem; }
+  .tier-items { list-style: none; display: flex; flex-direction: column; gap: .35rem; }
+  .tier-items li {
+    font-size: .78rem;
+    color: #94a3b8;
+    display: flex;
+    align-items: flex-start;
+    gap: .4rem;
+  }
+  .tier-items li::before { content: '✓'; flex-shrink: 0; font-weight: 700; }
+  .t1 .tier-items li::before { color: #22c55e; }
+  .t2 .tier-items li::before { color: #4f8ef7; }
+  .t3 .tier-items li::before { color: #a855f7; }
+
+  /* ARCHITECTURE */
+  .section-label {
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-bottom: 1rem;
+  }
+
+  .arch-row {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin-bottom: 2rem;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid #252a38;
+  }
+  .arch-layer {
+    flex: 1;
+    padding: 1.1rem 1.2rem;
+    background: #1a1e2a;
+    border-right: 1px solid #252a38;
+  }
+  .arch-layer:last-child { border-right: none; }
+  .arch-layer-name {
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: .5rem;
+  }
+  .layer-presentation .arch-layer-name { color: #f97316; }
+  .layer-application .arch-layer-name  { color: #4f8ef7; }
+  .layer-db .arch-layer-name           { color: #22c55e; }
+
+  .arch-file {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .7rem;
+    color: #64748b;
+    margin-bottom: .2rem;
+  }
+  .arch-file span { color: #94a3b8; }
+
+  .arch-arrow {
+    display: flex;
+    align-items: center;
+    padding: 0 .5rem;
+    background: #13161e;
+    color: #4f8ef7;
+    font-size: 1.2rem;
+    border-right: 1px solid #252a38;
+    border-left: 1px solid #252a38;
+  }
+
+  /* STACK */
+  .stack-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: .6rem;
+    margin-bottom: 2rem;
+  }
+  .stack-chip {
+    background: #1a1e2a;
+    border: 1px solid #252a38;
+    border-radius: 10px;
+    padding: .65rem .5rem;
+    text-align: center;
+    font-size: .72rem;
+    color: #94a3b8;
+    font-weight: 600;
+  }
+  .stack-chip .icon { font-size: 1.2rem; display: block; margin-bottom: .3rem; }
+
+  /* METRICS */
+  .metrics-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .metric {
+    background: #1a1e2a;
+    border: 1px solid #252a38;
+    border-radius: 14px;
+    padding: 1.2rem;
+    text-align: center;
+  }
+  .metric-value {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: #4f8ef7;
+    letter-spacing: -.03em;
+    line-height: 1;
+    margin-bottom: .3rem;
+  }
+  .metric-label { font-size: .72rem; color: #64748b; font-weight: 600; }
+
+  /* ROADMAP */
+  .roadmap {
+    display: flex;
+    gap: 0;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid #252a38;
+  }
+  .phase {
+    flex: 1;
+    padding: .9rem 1rem;
+    background: #1a1e2a;
+    border-right: 1px solid #252a38;
+    text-align: center;
+  }
+  .phase:last-child { border-right: none; }
+  .phase.active { background: rgba(79,142,247,.08); border-top: 2px solid #4f8ef7; }
+  .phase-label { font-size: .65rem; font-weight: 700; color: #64748b; letter-spacing: .08em; text-transform: uppercase; margin-bottom: .3rem; }
+  .phase.active .phase-label { color: #4f8ef7; }
+  .phase-name { font-size: .78rem; font-weight: 700; color: #94a3b8; }
+  .phase.active .phase-name { color: #e2e8f0; }
+
+  /* FOOTER */
+  .footer {
+    padding: 1.2rem 3rem;
+    border-top: 1px solid #252a38;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #0d0f14;
+  }
+  .footer-brand { font-size: .85rem; font-weight: 800; color: #e2e8f0; }
+  .footer-brand em { font-style: normal; color: #4f8ef7; }
+  .footer-meta { font-size: .72rem; color: #475569; }
+  .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .7rem;
+    background: rgba(79,142,247,.1);
+    color: #4f8ef7;
+    border: 1px solid rgba(79,142,247,.2);
+    border-radius: 6px;
+    padding: .2rem .6rem;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="badge"><div class="dot"></div> Phase 1a Complete · May 2026</div>
+    <h1>pandya<em>HomeLab</em></h1>
+    <p>First production ML project shipped — Iris KNN Classifier live on NAS</p>
+    <span class="url">→ pandyahomelab.com/ml/</span>
+  </div>
+
+  <div class="body">
+
+    <!-- TIER GATES -->
+    <div class="section-label">Readiness Gates Passed</div>
+    <div class="tier-row">
+      <div class="tier t1">
+        <div class="tier-label">TIER 1 · Code</div>
+        <div class="tier-title">27 Tests Passing</div>
+        <ul class="tier-items">
+          <li>DB Logic: 9 tests</li>
+          <li>Application Logic: 9 tests</li>
+          <li>Presentation Logic: 9 tests</li>
+          <li>Coverage &gt;70% all layers</li>
+        </ul>
+      </div>
+      <div class="tier t2">
+        <div class="tier-label">TIER 2 · Docker</div>
+        <div class="tier-title">Image Ships Clean</div>
+        <ul class="tier-items">
+          <li>Multi-stage build (515 MB)</li>
+          <li>Non-root appuser</li>
+          <li>/health returns 200 OK</li>
+          <li>Python urllib healthcheck</li>
+        </ul>
+      </div>
+      <div class="tier t3">
+        <div class="tier-label">TIER 3 · Integration</div>
+        <div class="tier-title">Full Stack Wired</div>
+        <ul class="tier-items">
+          <li>ml-network 172.20.0.0/24</li>
+          <li>Nginx /ml/ → ml-iris-knn</li>
+          <li>Cloudflare Tunnel HTTPS</li>
+          <li>Public demo live</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ARCHITECTURE -->
+    <div class="section-label">3-Layer Architecture (ADR-013)</div>
+    <div class="arch-row">
+      <div class="arch-layer layer-presentation">
+        <div class="arch-layer-name">Presentation Logic</div>
+        <div class="arch-file">routes.py <span>· /health /predict /</span></div>
+        <div class="arch-file">schemas.py <span>· Pydantic v2</span></div>
+        <div class="arch-file">ui.html <span>· Interactive demo</span></div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-layer layer-application">
+        <div class="arch-layer-name">Application Logic</div>
+        <div class="arch-file">classifier.py <span>· k-NN k=3</span></div>
+        <div class="arch-file">prediction_service.py</div>
+        <div class="arch-file">inference_pipeline.py</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-layer layer-db">
+        <div class="arch-layer-name">DB Logic</div>
+        <div class="arch-file">loaders.py <span>· iris.csv</span></div>
+        <div class="arch-file">preprocessor.py <span>· StandardScaler</span></div>
+        <div class="arch-file">repository.py <span>· predictions</span></div>
+      </div>
+    </div>
+
+    <!-- METRICS -->
+    <div class="section-label">Key Numbers</div>
+    <div class="metrics-row">
+      <div class="metric">
+        <div class="metric-value">&gt;90%</div>
+        <div class="metric-label">Classifier Accuracy</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value">27</div>
+        <div class="metric-label">Tests Passing</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value">20</div>
+        <div class="metric-label">ADRs Locked</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value">8</div>
+        <div class="metric-label">Commits · main</div>
+      </div>
+    </div>
+
+    <!-- STACK -->
+    <div class="section-label">Technology Stack</div>
+    <div class="stack-grid">
+      <div class="stack-chip"><span class="icon">📊</span>scikit-learn</div>
+      <div class="stack-chip"><span class="icon">⚡</span>FastAPI</div>
+      <div class="stack-chip"><span class="icon">🐳</span>Docker</div>
+      <div class="stack-chip"><span class="icon">🔁</span>Nginx</div>
+      <div class="stack-chip"><span class="icon">☁️</span>Cloudflare</div>
+      <div class="stack-chip"><span class="icon">🏠</span>Synology NAS</div>
+    </div>
+
+    <!-- ROADMAP -->
+    <div class="section-label">Platform Roadmap</div>
+    <div class="roadmap">
+      <div class="phase active">
+        <div class="phase-label">Phase 1a ✓</div>
+        <div class="phase-name">Iris KNN</div>
+      </div>
+      <div class="phase">
+        <div class="phase-label">Phase 1b</div>
+        <div class="phase-name">ML Housing</div>
+      </div>
+      <div class="phase">
+        <div class="phase-label">Phase 2</div>
+        <div class="phase-name">Deep Learning</div>
+      </div>
+      <div class="phase">
+        <div class="phase-label">Phase 3</div>
+        <div class="phase-name">NLP</div>
+      </div>
+      <div class="phase">
+        <div class="phase-label">Phase 4</div>
+        <div class="phase-name">Agentic AI</div>
+      </div>
+      <div class="phase">
+        <div class="phase-label">Phase 6</div>
+        <div class="phase-name">AWS Deploy</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-brand">pandya<em>HomeLab</em></div>
+    <span class="tag">v.ml-iris-knn-1.0.0</span>
+    <div class="footer-meta">pandyahomelab.com · May 2026</div>
+  </div>
+
+</div>
+</body>
+</html>
