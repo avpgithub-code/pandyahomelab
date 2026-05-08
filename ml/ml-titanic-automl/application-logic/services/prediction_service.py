@@ -32,18 +32,19 @@ class PredictionService:
         df = self._loader.load()
 
         mlflow.set_tracking_uri(_MLFLOW_URI)
+        mlflow.set_experiment(_EXPERIMENT)
 
+        # log_experiment=False, log_plots=False — avoids PyCaret deepcopying the
+        # experiment object for MLflow serialization, which fails because
+        # ThreadLocalVariable doesn't implement __copy__/__deepcopy__
         setup(
             data=df,
             target="survived",
             session_id=42,
-            log_experiment=True,
-            experiment_name=_EXPERIMENT,
-            log_plots=True,
+            log_experiment=False,
+            log_plots=False,
             verbose=False,
             html=False,
-            # n_jobs=1 prevents parallel execution — PyCaret's ThreadLocalVariable
-            # can't be pickled/copied across joblib worker threads/processes
             n_jobs=1,
         )
 
@@ -66,13 +67,22 @@ class PredictionService:
         }
         self._ready = True
 
+        # Log to MLflow manually — safe, no deepcopy of experiment state
         try:
-            run = mlflow.last_active_run()
-            if run:
+            with mlflow.start_run() as run:
                 self._run_id = run.info.run_id
                 self._experiment_id = str(run.info.experiment_id)
+                mlflow.log_params({
+                    "best_model": self._best_model_name,
+                    "n_algorithms_compared": 5,
+                    "optimized_for": "AUC",
+                    "session_id": 42,
+                })
+                mlflow.log_metrics(self._metrics)
+                mlflow.set_tag("dataset", "titanic")
+                mlflow.set_tag("framework", "pycaret-3.3.1")
         except Exception as e:
-            logger.warning(f"MLflow run_id capture skipped: {e}")
+            logger.warning(f"MLflow logging skipped: {e}")
 
         return self._metrics
 
@@ -82,8 +92,8 @@ class PredictionService:
 
         X = pd.DataFrame([features])
 
-        # Call the sklearn Pipeline from finalize_model() directly — avoids
-        # PyCaret's predict_model() which requires thread-local experiment context
+        # Call sklearn Pipeline directly — avoids PyCaret's predict_model() which
+        # requires thread-local experiment context that may not exist in this thread
         pred_label = int(self._model.predict(X)[0])
 
         if hasattr(self._model, "predict_proba"):
