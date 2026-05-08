@@ -1,7 +1,7 @@
 import os
 import logging
 import pandas as pd
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 from db_logic.loaders.loaders import LocalDataLoader
 
@@ -25,7 +25,7 @@ class PredictionService:
     def train(self) -> Dict:
         from pycaret.classification import (
             setup, compare_models, tune_model,
-            finalize_model, pull, predict_model
+            finalize_model, pull
         )
         import mlflow
 
@@ -42,13 +42,16 @@ class PredictionService:
             log_plots=True,
             verbose=False,
             html=False,
+            # n_jobs=1 prevents parallel execution — PyCaret's ThreadLocalVariable
+            # can't be pickled/copied across joblib worker threads/processes
+            n_jobs=1,
         )
 
-        top_models = compare_models(n_select=5, sort="AUC", verbose=False)
+        top_models = compare_models(n_select=5, sort="AUC", verbose=False, n_jobs=1)
         leaderboard_df = pull()
         self._leaderboard = leaderboard_df.head(5).to_dict(orient="records")
 
-        tuned = tune_model(top_models[0], optimize="AUC", verbose=False)
+        tuned = tune_model(top_models[0], optimize="AUC", verbose=False, n_jobs=1)
         self._best_model_name = type(tuned).__name__
 
         self._model = finalize_model(tuned)
@@ -76,15 +79,23 @@ class PredictionService:
     def predict(self, features: Dict) -> Dict:
         if not self._ready:
             self.train()
-        from pycaret.classification import predict_model
+
         X = pd.DataFrame([features])
-        result = predict_model(self._model, data=X, verbose=False)
-        pred = int(result["prediction_label"].iloc[0])
-        score = round(float(result["prediction_score"].iloc[0]), 4)
+
+        # Call the sklearn Pipeline from finalize_model() directly — avoids
+        # PyCaret's predict_model() which requires thread-local experiment context
+        pred_label = int(self._model.predict(X)[0])
+
+        if hasattr(self._model, "predict_proba"):
+            proba = self._model.predict_proba(X)[0]
+            score = round(float(max(proba)), 4)
+        else:
+            score = 1.0
+
         return {
-            "prediction": pred,
-            "survived": bool(pred),
-            "survival_label": "Survived" if pred == 1 else "Did Not Survive",
+            "prediction": pred_label,
+            "survived": bool(pred_label),
+            "survival_label": "Survived" if pred_label == 1 else "Did Not Survive",
             "confidence": score,
         }
 
