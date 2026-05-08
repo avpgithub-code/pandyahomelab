@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Titanic AutoML — pandyaHomeLab</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f14;
+      --surface: #13161e;
+      --surface2: #1a1e2a;
+      --border: #252a38;
+      --accent: #4f8ef7;
+      --survived: #22c55e;
+      --died: #f87171;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+
+    header { width: 100%; max-width: 760px; margin-bottom: 2rem; }
+
+    .back-link {
+      color: var(--muted); text-decoration: none; font-size: .85rem;
+      display: inline-flex; align-items: center; gap: .4rem;
+      margin-bottom: 1.5rem; transition: color .2s;
+    }
+    .back-link:hover { color: var(--text); }
+
+    h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -.02em; }
+    h1 em { font-style: normal; color: var(--accent); }
+    .subtitle { color: var(--muted); font-size: .95rem; margin-top: .4rem; }
+
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 2rem;
+      width: 100%; max-width: 760px; margin-bottom: 1.5rem;
+    }
+    .card h2 {
+      font-size: .75rem; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .1em; margin-bottom: 1.5rem;
+    }
+
+    /* Leaderboard */
+    .leaderboard-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    .leaderboard-table th {
+      text-align: left; font-size: .7rem; font-weight: 600;
+      color: var(--muted); text-transform: uppercase; letter-spacing: .08em;
+      padding: .4rem .75rem; border-bottom: 1px solid var(--border);
+    }
+    .leaderboard-table td {
+      padding: .6rem .75rem; border-bottom: 1px solid rgba(37,42,56,.5);
+      font-family: monospace;
+    }
+    .leaderboard-table tr:last-child td { border-bottom: none; }
+    .leaderboard-table tr.best-row td { color: var(--survived); font-weight: 700; }
+    .leaderboard-table tr.best-row td:first-child::before { content: "★ "; color: var(--survived); }
+    .lb-placeholder { color: var(--muted); font-size: .85rem; font-style: italic; }
+
+    /* Form */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    @media (max-width: 520px) { .form-grid { grid-template-columns: 1fr; } }
+
+    .form-group label {
+      display: flex; justify-content: space-between;
+      font-size: .85rem; margin-bottom: .5rem; color: #cbd5e1;
+    }
+    .form-group label span { font-family: monospace; color: var(--accent); font-weight: 700; }
+
+    input[type=range] { width: 100%; accent-color: var(--accent); cursor: pointer; }
+    .range-labels {
+      display: flex; justify-content: space-between;
+      font-size: .7rem; color: var(--muted); margin-top: .25rem;
+    }
+
+    select {
+      width: 100%; padding: .5rem .75rem;
+      background: var(--surface2); color: var(--text);
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: .9rem; cursor: pointer; appearance: none;
+    }
+    select:focus { outline: 2px solid var(--accent); }
+
+    .btn {
+      width: 100%; padding: .9rem;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: var(--radius);
+      font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: opacity .2s, transform .15s;
+      margin-top: 1.5rem;
+    }
+    .btn:hover { opacity: .9; transform: translateY(-1px); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    .example-row { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: 1rem; }
+    .example-btn {
+      padding: .35rem .9rem; border-radius: 99px;
+      border: 1px solid rgba(79,142,247,.3);
+      font-size: .75rem; font-weight: 600;
+      cursor: pointer; transition: all .2s;
+      background: transparent; color: var(--accent);
+    }
+    .example-btn:hover { background: rgba(79,142,247,.1); }
+
+    /* Result */
+    .result-card {
+      display: none; background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 2rem; width: 100%; max-width: 760px;
+      text-align: center; margin-bottom: 1.5rem;
+    }
+    .result-card.visible { display: block; }
+
+    .verdict { font-size: 2.4rem; font-weight: 900; letter-spacing: -.02em; margin-bottom: .4rem; }
+    .verdict.survived { color: var(--survived); }
+    .verdict.died { color: var(--died); }
+
+    .confidence-bar-wrap { margin: 1.2rem auto 0; max-width: 340px; }
+    .confidence-label {
+      display: flex; justify-content: space-between;
+      font-size: .8rem; color: var(--muted); margin-bottom: .4rem;
+    }
+    .confidence-bar { height: 8px; border-radius: 99px; background: var(--surface2); overflow: hidden; }
+    .confidence-fill { height: 100%; border-radius: 99px; transition: width .5s ease; }
+    .confidence-fill.survived { background: var(--survived); }
+    .confidence-fill.died { background: var(--died); }
+
+    /* Model card */
+    .model-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.5rem 2rem;
+      width: 100%; max-width: 760px; margin-bottom: 1.5rem;
+    }
+    .model-card h2 {
+      font-size: .75rem; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .1em; margin-bottom: 1rem;
+    }
+    .model-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: .75rem; margin-bottom: 1rem; }
+    @media (max-width: 520px) { .model-stats { grid-template-columns: repeat(2, 1fr); } }
+    .stat-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: .6rem .75rem; }
+    .stat-label { font-size: .65rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+    .stat-value { font-size: 1rem; font-weight: 700; color: var(--text); font-family: monospace; margin-top: .2rem; }
+
+    .mlflow-link {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .4rem 1rem; border-radius: 99px;
+      border: 1px solid rgba(79,142,247,.3);
+      color: var(--accent); font-size: .8rem; font-weight: 600;
+      text-decoration: none; transition: all .2s;
+    }
+    .mlflow-link:hover { background: rgba(79,142,247,.1); border-color: var(--accent); }
+
+    .error-msg {
+      display: none; color: #f87171;
+      background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.2);
+      border-radius: 8px; padding: .75rem 1rem;
+      font-size: .85rem; margin-top: 1rem;
+    }
+    .error-msg.visible { display: block; }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="back-link" href="/">← pandyaHomeLab</a>
+  <h1>Titanic <em>AutoML</em> Classifier</h1>
+  <p class="subtitle">PyCaret AutoML · 5+ algorithms compared · Titanic survival dataset · 891 samples</p>
+</header>
+
+<!-- Leaderboard -->
+<div class="card" id="leaderboard-card">
+  <h2>Algorithm Leaderboard — sorted by AUC</h2>
+  <div id="leaderboard-body"><p class="lb-placeholder">Loading leaderboard…</p></div>
+</div>
+
+<!-- Input Form -->
+<div class="card">
+  <h2>Passenger Details</h2>
+  <div class="form-grid">
+    <div class="form-group">
+      <label>Passenger Class</label>
+      <select id="pclass">
+        <option value="1">1st Class</option>
+        <option value="2">2nd Class</option>
+        <option value="3" selected>3rd Class</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Sex</label>
+      <select id="sex">
+        <option value="male" selected>Male</option>
+        <option value="female">Female</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Embarked Port</label>
+      <select id="embarked">
+        <option value="S" selected>Southampton (S)</option>
+        <option value="C">Cherbourg (C)</option>
+        <option value="Q">Queenstown (Q)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Age <span id="age-val">22</span> yrs</label>
+      <input type="range" id="age" min="1" max="80" step="1" value="22" oninput="updateSlider('age')">
+      <div class="range-labels"><span>1</span><span>80</span></div>
+    </div>
+    <div class="form-group">
+      <label>Fare <span>$<span id="fare-val">7.25</span></span></label>
+      <input type="range" id="fare" min="0" max="512" step="0.5" value="7.25" oninput="updateSlider('fare')">
+      <div class="range-labels"><span>$0</span><span>$512</span></div>
+    </div>
+    <div class="form-group">
+      <label>Siblings / Spouses <span id="sibsp-val">0</span></label>
+      <input type="range" id="sibsp" min="0" max="8" step="1" value="0" oninput="updateSlider('sibsp')">
+      <div class="range-labels"><span>0</span><span>8</span></div>
+    </div>
+    <div class="form-group">
+      <label>Parents / Children <span id="parch-val">0</span></label>
+      <input type="range" id="parch" min="0" max="6" step="1" value="0" oninput="updateSlider('parch')">
+      <div class="range-labels"><span>0</span><span>6</span></div>
+    </div>
+  </div>
+
+  <div>
+    <p style="font-size:.75rem;color:var(--muted);margin-top:1.5rem;margin-bottom:.4rem">Try an example:</p>
+    <div class="example-row">
+      <button class="example-btn" onclick="loadExample(1,'female',28,0,0,100,'S')">Rose — 1st class female</button>
+      <button class="example-btn" onclick="loadExample(3,'male',20,0,0,7.25,'S')">Jack — 3rd class male</button>
+      <button class="example-btn" onclick="loadExample(2,'female',35,1,1,26,'C')">2nd class family</button>
+    </div>
+  </div>
+
+  <button class="btn" id="predict-btn" onclick="predict()">Predict Survival</button>
+  <div class="error-msg" id="error-msg"></div>
+</div>
+
+<!-- Model Card -->
+<div class="model-card">
+  <h2>Model Card</h2>
+  <div class="model-stats">
+    <div class="stat-box"><div class="stat-label">Best Model</div><div class="stat-value" id="mc-model">—</div></div>
+    <div class="stat-box"><div class="stat-label">Accuracy</div><div class="stat-value" id="mc-accuracy">—</div></div>
+    <div class="stat-box"><div class="stat-label">AUC</div><div class="stat-value" id="mc-auc">—</div></div>
+    <div class="stat-box"><div class="stat-label">F1</div><div class="stat-value" id="mc-f1">—</div></div>
+  </div>
+  <a class="mlflow-link" id="mlflow-link" href="#" target="_blank" style="display:none">
+    ↗ View in MLflow
+  </a>
+</div>
+
+<!-- Result -->
+<div class="result-card" id="result-card">
+  <div class="verdict" id="verdict-text"></div>
+  <div style="color:var(--muted);font-size:.9rem;margin-top:.25rem" id="verdict-sub"></div>
+  <div class="confidence-bar-wrap">
+    <div class="confidence-label">
+      <span>Confidence</span>
+      <span id="confidence-pct"></span>
+    </div>
+    <div class="confidence-bar">
+      <div class="confidence-fill" id="confidence-fill" style="width:0%"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function updateSlider(id) {
+    const val = parseFloat(document.getElementById(id).value);
+    document.getElementById(id + '-val').textContent =
+      id === 'fare' ? val.toFixed(2) : val;
+  }
+
+  function loadExample(pclass, sex, age, sibsp, parch, fare, embarked) {
+    document.getElementById('pclass').value = pclass;
+    document.getElementById('sex').value = sex;
+    document.getElementById('embarked').value = embarked;
+    document.getElementById('age').value = age;    updateSlider('age');
+    document.getElementById('fare').value = fare;  updateSlider('fare');
+    document.getElementById('sibsp').value = sibsp; updateSlider('sibsp');
+    document.getElementById('parch').value = parch; updateSlider('parch');
+    predict();
+  }
+
+  function fmtNum(v) {
+    if (v == null) return '—';
+    const n = parseFloat(v);
+    return isNaN(n) ? '—' : n.toFixed(4);
+  }
+
+  function renderLeaderboard(rows) {
+    const headers = ['Model', 'Accuracy', 'AUC', 'F1'];
+    let html = '<table class="leaderboard-table"><thead><tr>';
+    headers.forEach(h => { html += `<th>${h}</th>`; });
+    html += '</tr></thead><tbody>';
+    rows.slice(0, 5).forEach((row, i) => {
+      const cls = i === 0 ? ' class="best-row"' : '';
+      const model = row['Model'] ?? row['model'] ?? '—';
+      const acc   = fmtNum(row['Accuracy'] ?? row['accuracy']);
+      const auc   = fmtNum(row['AUC'] ?? row['auc']);
+      const f1    = fmtNum(row['F1'] ?? row['f1']);
+      html += `<tr${cls}><td>${model}</td><td>${acc}</td><td>${auc}</td><td>${f1}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    document.getElementById('leaderboard-body').innerHTML = html;
+  }
+
+  async function loadModelCard() {
+    try {
+      const res = await fetch('/ml/titanic-automl/model-info');
+      if (!res.ok) return;
+      const info = await res.json();
+      document.getElementById('mc-model').textContent    = info.best_model ?? '—';
+      document.getElementById('mc-accuracy').textContent = info.metrics?.accuracy ?? '—';
+      document.getElementById('mc-auc').textContent      = info.metrics?.auc ?? '—';
+      document.getElementById('mc-f1').textContent       = info.metrics?.f1 ?? '—';
+      if (info.mlflow_url) {
+        const link = document.getElementById('mlflow-link');
+        link.href = info.mlflow_url;
+        link.style.display = 'inline-flex';
+      }
+      if (info.leaderboard && info.leaderboard.length > 0) {
+        renderLeaderboard(info.leaderboard);
+      }
+    } catch (e) { /* card stays with dashes */ }
+  }
+
+  async function predict() {
+    const btn   = document.getElementById('predict-btn');
+    const errEl = document.getElementById('error-msg');
+    errEl.classList.remove('visible');
+    btn.disabled = true;
+    btn.textContent = 'Predicting…';
+
+    const payload = {
+      pclass:   parseInt(document.getElementById('pclass').value),
+      sex:      document.getElementById('sex').value,
+      age:      parseFloat(document.getElementById('age').value),
+      sibsp:    parseInt(document.getElementById('sibsp').value),
+      parch:    parseInt(document.getElementById('parch').value),
+      fare:     parseFloat(document.getElementById('fare').value),
+      embarked: document.getElementById('embarked').value,
+    };
+
+    try {
+      const res = await fetch('/ml/titanic-automl/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || 'Request failed');
+      }
+      showResult(await res.json());
+    } catch (e) {
+      errEl.textContent = e.message || 'Prediction failed. Please try again.';
+      errEl.classList.add('visible');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Predict Survival';
+    }
+  }
+
+  function showResult(r) {
+    const survived = r.survived;
+    const pct = Math.round(r.confidence * 100);
+
+    const verdictEl = document.getElementById('verdict-text');
+    verdictEl.textContent = r.survival_label;
+    verdictEl.className = 'verdict ' + (survived ? 'survived' : 'died');
+
+    document.getElementById('verdict-sub').textContent =
+      survived ? 'This passenger likely survived.' : 'This passenger likely did not survive.';
+
+    document.getElementById('confidence-pct').textContent = pct + '%';
+    const fill = document.getElementById('confidence-fill');
+    fill.style.width = pct + '%';
+    fill.className = 'confidence-fill ' + (survived ? 'survived' : 'died');
+
+    const card = document.getElementById('result-card');
+    card.classList.add('visible');
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  window.addEventListener('DOMContentLoaded', loadModelCard);
+</script>
+</body>
+</html>
