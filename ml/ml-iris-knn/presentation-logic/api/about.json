@@ -1,0 +1,144 @@
+{
+  "title": "About Iris KNN",
+  "tagline": "How a 1936 dataset, K-Nearest Neighbors, and a 4-layer architecture come together on pandyaHomeLab.",
+  "sections": [
+    {
+      "id": "problem",
+      "title": "The Problem",
+      "icon": "🎯",
+      "body": [
+        "The Iris dataset (Fisher, 1936) is one of the most famous benchmarks in machine learning. It contains 150 flowers across three species — *setosa*, *versicolor*, and *virginica* — each with four measurements: sepal length, sepal width, petal length, and petal width.",
+        "The classification problem: given those four measurements for an unseen flower, predict its species. It's small, clean, and beautifully balanced (50 samples per class), which makes it a perfect teaching example for supervised classification."
+      ]
+    },
+    {
+      "id": "approach",
+      "title": "Approach — Why KNN?",
+      "icon": "🧭",
+      "body": [
+        "K-Nearest Neighbors is a non-parametric, instance-based algorithm. To classify a new flower, it:",
+        "1. Computes the Euclidean distance from the new sample to every training sample",
+        "2. Picks the **k=3** nearest neighbors",
+        "3. Returns the majority species among those three"
+      ],
+      "bullets": [
+        {"label": "Why KNN here", "text": "150 samples is small — KNN's O(n) lookup is trivial, and there's no overfitting from too few neighbors."},
+        {"label": "Why k=3", "text": "An odd k avoids ties; small k captures local structure since the species clusters are well-separated in petal-length × petal-width space."},
+        {"label": "Why no scaling", "text": "All four features are in centimeters — already on the same scale. No StandardScaler needed."}
+      ]
+    },
+    {
+      "id": "architecture",
+      "title": "Architecture",
+      "icon": "🏗️",
+      "body": [
+        "Every project on pandyaHomeLab follows the **per-project 4-layer architecture** (ADR-013) — each domain is autonomous, with no cross-project imports."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph TB\n  Client[\"Browser\"] -->|HTTPS| Nginx[\"Nginx Proxy\"]\n  Nginx -->|\"/ml/iris-knn/*\"| App[\"ml-iris-knn container\"]\n  subgraph App\n    direction TB\n    Pres[\"presentation-logic<br/>FastAPI · Pydantic v2\"] --> AppLogic[\"application-logic<br/>PredictionService\"]\n    AppLogic --> Model[\"KNN Classifier<br/>(scikit-learn)\"]\n    AppLogic --> DB[\"db-logic<br/>Iris dataset loader\"]\n    Shared[\"shared/<br/>config · logger · metrics\"] -.- Pres\n    Shared -.- AppLogic\n    Shared -.- DB\n  end\n  AppLogic -.->|run logging| MLflow[\"ml-mlflow<br/>experiment tracking\"]\n\n  classDef container fill:#13161e,stroke:#4f8ef7,color:#e2e8f0\n  classDef external fill:#1a1e2a,stroke:#64748b,color:#cbd5e1\n  class Pres,AppLogic,Model,DB,Shared container\n  class Nginx,Client,MLflow external"
+      }
+    },
+    {
+      "id": "network",
+      "title": "Network & Deployment",
+      "icon": "🌐",
+      "body": [
+        "The platform uses Docker bridge networks for domain isolation (ADR-016). The ML domain has its own subnet — services there can talk to each other directly, but external traffic must pass through the proxy network."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph LR\n  User([\"🌍 Visitor\"]) --> CF[\"Cloudflare Tunnel<br/>pandyahomelab.com\"]\n  CF --> NX[\"Nginx<br/>:8443\"]\n  subgraph PROXY[\"pandya-proxy-network · 172.24.0.0/24\"]\n    NX\n  end\n  subgraph ML[\"ml-network · 172.20.0.0/24\"]\n    IRIS[\"ml-iris-knn<br/>172.20.0.10:8000\"]\n    HOUS[\"ml-housing-linear<br/>172.20.0.11:8000\"]\n    TIT[\"ml-titanic-automl<br/>172.20.0.12:8000\"]\n    PG[\"ml-postgres<br/>172.20.0.2\"]\n    MF[\"ml-mlflow<br/>172.20.0.5\"]\n  end\n  NX --> IRIS\n  NX --> HOUS\n  NX --> TIT\n  NX --> MF\n  IRIS -.->|MLflow runs| MF\n\n  classDef live fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef infra fill:#1a1e2a,stroke:#64748b,color:#cbd5e1\n  class IRIS live\n  class HOUS,TIT,PG,MF infra"
+      },
+      "facts": [
+        {"label": "Container", "value": "ml-iris-knn"},
+        {"label": "Container IP", "value": "172.20.0.10"},
+        {"label": "Network", "value": "ml-network"},
+        {"label": "CIDR", "value": "172.20.0.0/24"},
+        {"label": "Host port", "value": "8001 → 8000"},
+        {"label": "Public URL", "value": "/ml/iris-knn/"}
+      ]
+    },
+    {
+      "id": "stack",
+      "title": "Tech Stack",
+      "icon": "🧰",
+      "items": [
+        {"name": "FastAPI 0.104", "purpose": "Async HTTP API framework"},
+        {"name": "Pydantic v2", "purpose": "Schema validation — Annotated types, @field_validator"},
+        {"name": "scikit-learn 1.3", "purpose": "KNN classifier and the Iris dataset loader"},
+        {"name": "uvicorn", "purpose": "ASGI server, runs inside the container"},
+        {"name": "Docker", "purpose": "Multi-stage build, ~150MB final image"},
+        {"name": "Nginx 1.25", "purpose": "Reverse proxy, TLS termination, route fan-out"},
+        {"name": "MLflow 3.x", "purpose": "Run logging, parameter and metric tracking"},
+        {"name": "Synology DSM", "purpose": "Host OS — Docker engine, persistent volumes"}
+      ]
+    },
+    {
+      "id": "metrics",
+      "title": "Performance",
+      "icon": "📊",
+      "problem_type": "Multi-class classification · balanced dataset",
+      "body": [
+        "Trained on a 80/20 split with `random_state=42`. Iris is famously easy — 100% test accuracy is achievable with most algorithms because the species are well-separated in petal feature space.",
+        "Because the dataset is **balanced** (50 samples per species), accuracy is an honest measure here. We use *macro* averaging for precision/recall/F1 so each species counts equally."
+      ],
+      "facts": [
+        {"label": "Train samples", "value": "120"},
+        {"label": "Test samples", "value": "30"},
+        {"label": "Training time", "value": "<1 second"},
+        {"label": "Tracked in", "value": "MLflow ↗"}
+      ],
+      "confusion_matrix": {
+        "labels": ["setosa", "versicolor", "virginica"],
+        "matrix": [[10, 0, 0], [0, 10, 0], [0, 0, 10]],
+        "annotation": "All 30 test flowers classified correctly — a pure diagonal. Petal length and width separate the three species cleanly, and KNN's nearest-neighbor lookup never crosses class boundaries on this test set."
+      },
+      "metrics_detail": [
+        {
+          "name": "Accuracy",
+          "value": "100%",
+          "what": "Fraction of test flowers classified correctly — the most intuitive measure of overall correctness.",
+          "formula": "(correct predictions) / (total predictions) = 30 / 30",
+          "why_chosen": "Iris is perfectly balanced (50/50/50). When classes are equal, accuracy is honest and easy to explain. On imbalanced data it can lie — a model that always predicts the majority class might score 95% while learning nothing.",
+          "watch_out": "Doesn't reveal *which* species the model confuses with which — for that, look at per-class precision and recall."
+        },
+        {
+          "name": "Precision (macro)",
+          "value": "1.000",
+          "what": "When the model predicts a species, how often is it right? Averaged equally across all three species.",
+          "formula": "TP / (TP + FP), averaged across classes",
+          "why_chosen": "*Macro* averaging treats every species equally regardless of sample count — appropriate here since all three species have 50 samples each. Catches false positives, e.g. mislabelling a *versicolor* as *virginica*.",
+          "watch_out": "High precision alone can hide missed positives — always pair with recall."
+        },
+        {
+          "name": "Recall (macro)",
+          "value": "1.000",
+          "what": "Of the actual flowers of a species, what fraction did the model correctly find?",
+          "formula": "TP / (TP + FN), averaged across classes",
+          "why_chosen": "Catches missed positives. If the model never predicted *virginica*, that class's recall would be 0 — even with otherwise high accuracy. Macro averaging ensures rare classes aren't drowned out.",
+          "watch_out": "High recall can come at the cost of false alarms — always pair with precision."
+        },
+        {
+          "name": "F1 (macro)",
+          "value": "1.000",
+          "what": "Harmonic mean of precision and recall — penalises models that only do one well.",
+          "formula": "2 × (P × R) / (P + R), averaged across classes",
+          "why_chosen": "A single number that captures both error types. Because it's a *harmonic* mean (not arithmetic), F1 collapses if **either** P or R is poor. F1 = 1.0 truly means both are perfect, not just on-average decent.",
+          "watch_out": "Doesn't account for true negatives — it's a per-class measure, not a global correctness measure like accuracy."
+        }
+      ]
+    },
+    {
+      "id": "learn",
+      "title": "Learn More",
+      "icon": "🔗",
+      "links": [
+        {"label": "View live MLflow run", "url": "/mlflow/", "external": false},
+        {"label": "Source on GitHub", "url": "https://github.com/avpgithub-code/pandyahomelab", "external": true},
+        {"label": "Iris dataset (UCI)", "url": "https://archive.ics.uci.edu/dataset/53/iris", "external": true},
+        {"label": "Fisher's original 1936 paper", "url": "https://onlinelibrary.wiley.com/doi/10.1111/j.1469-1809.1936.tb02137.x", "external": true}
+      ]
+    }
+  ]
+}
