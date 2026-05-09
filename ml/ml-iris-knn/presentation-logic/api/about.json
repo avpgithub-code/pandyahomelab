@@ -75,6 +75,25 @@
       ]
     },
     {
+      "id": "walkthrough",
+      "title": "Read the Code Walkthrough",
+      "icon": "📖",
+      "body": [
+        "For a guided tour of how this service is actually built — file by file, layer by layer — read the **ML Project Walkthrough**. It uses iris-knn as the worked example throughout (~1,200 lines), with real code excerpts pulled directly from this codebase."
+      ],
+      "bullets": [
+        {"label": "Project anatomy", "text": "Annotated file tree — what every file is and why it's there."},
+        {"label": "Request flow", "text": "A `/predict` request traced hop-by-hop from browser through all four layers, with the actual code at each step."},
+        {"label": "Training flow", "text": "What happens the very first time anyone calls `/predict` — load → split → fit → train → log to MLflow."},
+        {"label": "Per-layer patterns", "text": "Factory pattern, ABC contracts, lazy init, `__file__`-relative paths, and the hyphen-vs-underscore symlink trick."},
+        {"label": "Python modular approach", "text": "Packages vs modules, absolute imports, `try: import X` for optional deps, structured JSON logging."},
+        {"label": "MLflow integration", "text": "How runs are logged, why graceful degradation matters, hard-won lessons from getting it wrong."}
+      ],
+      "links": [
+        {"label": "Read the full walkthrough on GitHub", "url": "https://github.com/avpgithub-code/pandyahomelab/blob/main/docs/ML_PROJECT_WALKTHROUGH.md", "external": true}
+      ]
+    },
+    {
       "id": "metrics",
       "title": "Performance",
       "icon": "📊",
