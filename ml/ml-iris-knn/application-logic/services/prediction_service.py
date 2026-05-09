@@ -21,6 +21,9 @@ class PredictionService:
         self._preprocessor = DataPreprocessor()
         self._classifier = IrisClassifier(n_neighbors=3)
         self._metrics: Dict = {}
+        self._confusion_matrix: List[List[int]] = []
+        self._train_size: int = 0
+        self._test_size: int = 0
         self._run_id: Optional[str] = None
         self._experiment_id: Optional[str] = None
         self._ready = False
@@ -32,6 +35,9 @@ class PredictionService:
         X_test_scaled = self._preprocessor.transform(X_test)
         self._classifier.train(X_train_scaled, y_train)
         self._metrics = self._classifier.evaluate(X_test_scaled, y_test)
+        self._confusion_matrix = self._classifier.confusion_matrix(X_test_scaled, y_test)
+        self._train_size = len(y_train)
+        self._test_size = len(y_test)
         self._ready = True
 
         try:
@@ -81,6 +87,7 @@ class PredictionService:
     def get_model_info(self) -> Dict:
         if not self._ready:
             self.train()
+        m = self._metrics
         return {
             "model_type": "KNeighborsClassifier",
             "dataset": "Iris",
@@ -88,7 +95,21 @@ class PredictionService:
             "n_features": 4,
             "classes": list(IrisClassifier.CLASSES.values()),
             "parameters": {"n_neighbors": 3, "algorithm": "ball_tree"},
-            "metrics": self._metrics,
+            "metrics": m,
+            "metrics_display": {
+                "accuracy":        f"{m['accuracy'] * 100:.1f}%",
+                "precision_macro": f"{m['precision_macro']:.3f}",
+                "recall_macro":    f"{m['recall_macro']:.3f}",
+                "f1_macro":        f"{m['f1_macro']:.3f}",
+            },
+            "confusion_matrix": {
+                "labels": list(IrisClassifier.CLASSES.values()),
+                "matrix": self._confusion_matrix,
+            },
+            "split": {
+                "train_samples": self._train_size,
+                "test_samples": self._test_size,
+            },
             "run_id": self._run_id,
             "experiment_id": self._experiment_id,
             "mlflow_url": (

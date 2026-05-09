@@ -84,20 +84,20 @@
         "Because the dataset is **balanced** (50 samples per species), accuracy is an honest measure here. We use *macro* averaging for precision/recall/F1 so each species counts equally."
       ],
       "facts": [
-        {"label": "Train samples", "value": "120"},
-        {"label": "Test samples", "value": "30"},
+        {"label": "Train samples", "value": "{{split.train_samples}}"},
+        {"label": "Test samples", "value": "{{split.test_samples}}"},
         {"label": "Training time", "value": "<1 second"},
         {"label": "Tracked in", "value": "MLflow ↗"}
       ],
       "confusion_matrix": {
-        "labels": ["setosa", "versicolor", "virginica"],
-        "matrix": [[10, 0, 0], [0, 10, 0], [0, 0, 10]],
-        "annotation": "All 30 test flowers classified correctly — a pure diagonal. Petal length and width separate the three species cleanly, and KNN's nearest-neighbor lookup never crosses class boundaries on this test set."
+        "labels": "{{confusion_matrix.labels}}",
+        "matrix": "{{confusion_matrix.matrix}}",
+        "annotation": "Petal length and width separate the three species cleanly. When the diagonal accounts for every test sample, KNN's nearest-neighbor lookup never crosses a class boundary on this split."
       },
       "metrics_detail": [
         {
           "name": "Accuracy",
-          "value": "100%",
+          "value": "{{metrics_display.accuracy}}",
           "what": "Fraction of test flowers classified correctly — the most intuitive measure of overall correctness.",
           "formula": "(correct predictions) / (total predictions) = 30 / 30",
           "why_chosen": "Iris is perfectly balanced (50/50/50). When classes are equal, accuracy is honest and easy to explain. On imbalanced data it can lie — a model that always predicts the majority class might score 95% while learning nothing.",
@@ -105,7 +105,7 @@
         },
         {
           "name": "Precision (macro)",
-          "value": "1.000",
+          "value": "{{metrics_display.precision_macro}}",
           "what": "When the model predicts a species, how often is it right? Averaged equally across all three species.",
           "formula": "TP / (TP + FP), averaged across classes",
           "why_chosen": "*Macro* averaging treats every species equally regardless of sample count — appropriate here since all three species have 50 samples each. Catches false positives, e.g. mislabelling a *versicolor* as *virginica*.",
@@ -113,7 +113,7 @@
         },
         {
           "name": "Recall (macro)",
-          "value": "1.000",
+          "value": "{{metrics_display.recall_macro}}",
           "what": "Of the actual flowers of a species, what fraction did the model correctly find?",
           "formula": "TP / (TP + FN), averaged across classes",
           "why_chosen": "Catches missed positives. If the model never predicted *virginica*, that class's recall would be 0 — even with otherwise high accuracy. Macro averaging ensures rare classes aren't drowned out.",
@@ -121,7 +121,7 @@
         },
         {
           "name": "F1 (macro)",
-          "value": "1.000",
+          "value": "{{metrics_display.f1_macro}}",
           "what": "Harmonic mean of precision and recall — penalises models that only do one well.",
           "formula": "2 × (P × R) / (P + R), averaged across classes",
           "why_chosen": "A single number that captures both error types. Because it's a *harmonic* mean (not arithmetic), F1 collapses if **either** P or R is poor. F1 = 1.0 truly means both are perfect, not just on-average decent.",

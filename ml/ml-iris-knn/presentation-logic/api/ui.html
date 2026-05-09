@@ -711,12 +711,46 @@
     _mermaidReady = true;
   }
 
+  // Walk an arbitrary JSON value and replace "{{dotted.path}}" tokens with values from `data`.
+  // - A string that is *entirely* a single token is replaced with the raw value (preserves arrays/objects).
+  // - A string with embedded tokens does string substitution.
+  function getPath(obj, path) {
+    return path.split('.').reduce((o, k) => (o == null ? undefined : o[k]), obj);
+  }
+  function substituteTokens(value, data) {
+    if (typeof value === 'string') {
+      const wholeMatch = value.match(/^\{\{\s*([^}]+?)\s*\}\}$/);
+      if (wholeMatch) {
+        const v = getPath(data, wholeMatch[1]);
+        return v === undefined ? value : v;
+      }
+      return value.replace(/\{\{\s*([^}]+?)\s*\}\}/g, (_, p) => {
+        const v = getPath(data, p);
+        return v == null ? '' : String(v);
+      });
+    }
+    if (Array.isArray(value)) return value.map(v => substituteTokens(v, data));
+    if (value && typeof value === 'object') {
+      const out = {};
+      for (const [k, v] of Object.entries(value)) out[k] = substituteTokens(v, data);
+      return out;
+    }
+    return value;
+  }
+
   async function loadAbout() {
     if (_aboutLoaded) return;
     try {
-      const res = await fetch('/ml/iris-knn/about');
-      if (!res.ok) throw new Error('about fetch failed');
-      const data = await res.json();
+      const [aboutRes, infoRes] = await Promise.all([
+        fetch('/ml/iris-knn/about'),
+        fetch('/ml/iris-knn/model-info'),
+      ]);
+      if (!aboutRes.ok) throw new Error('about fetch failed');
+      let data = await aboutRes.json();
+      if (infoRes.ok) {
+        const info = await infoRes.json();
+        data = substituteTokens(data, info);
+      }
       document.getElementById('about-title').textContent = data.title || 'About';
       document.getElementById('about-tagline').textContent = data.tagline || '';
       document.getElementById('about-body').innerHTML = data.sections.map(renderSection).join('');

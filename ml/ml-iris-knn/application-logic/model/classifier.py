@@ -4,7 +4,10 @@ from typing import Dict, List
 
 import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import (
+    accuracy_score, precision_score, recall_score, f1_score,
+    confusion_matrix as sk_confusion_matrix,
+)
 
 
 class BaseClassifier(ABC):
@@ -52,6 +55,11 @@ class IrisClassifier(BaseClassifier):
             "recall_macro":     round(float(recall_score(y_test, y_pred, average="macro")), 4),
             "f1_macro":         round(float(f1_score(y_test, y_pred, average="macro")), 4),
         }
+
+    def confusion_matrix(self, X_test, y_test) -> List[List[int]]:
+        self._check_trained()
+        y_pred = self._model.predict(X_test)
+        return sk_confusion_matrix(y_test, y_pred).tolist()
 
     @property
     def is_trained(self) -> bool:
