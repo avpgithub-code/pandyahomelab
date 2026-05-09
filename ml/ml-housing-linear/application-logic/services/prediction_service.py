@@ -21,6 +21,8 @@ class PredictionService:
         self._preprocessor = DataPreprocessor()
         self._regressor = HousingRegressor()
         self._metrics: Dict = {}
+        self._train_size: int = 0
+        self._test_size: int = 0
         self._run_id: Optional[str] = None
         self._experiment_id: Optional[str] = None
         self._ready = False
@@ -32,6 +34,8 @@ class PredictionService:
         X_test_scaled = self._preprocessor.transform(X_test)
         self._regressor.train(X_train_scaled, y_train)
         self._metrics = self._regressor.evaluate(X_test_scaled, y_test)
+        self._train_size = len(y_train)
+        self._test_size = len(y_test)
         self._ready = True
 
         try:
@@ -77,6 +81,7 @@ class PredictionService:
     def get_model_info(self) -> Dict:
         if not self._ready:
             self.train()
+        m = self._metrics
         return {
             "model_type": "LinearRegression",
             "dataset": "California Housing",
@@ -87,7 +92,16 @@ class PredictionService:
                 "test_size": 0.2,
                 "random_state": 42,
             },
-            "metrics": self._metrics,
+            "metrics": m,
+            "metrics_display": {
+                "rmse": f"{m['rmse']:.4f}",
+                "mae":  f"{m['mae']:.4f}",
+                "r2":   f"{m['r2']:.4f}",
+            },
+            "split": {
+                "train_samples": self._train_size,
+                "test_samples": self._test_size,
+            },
             "run_id": self._run_id,
             "experiment_id": self._experiment_id,
             "mlflow_url": (

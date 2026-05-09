@@ -62,6 +62,7 @@ class ModelInfoResponse(BaseModel):
     optimized_for:       str
     leaderboard:         List[Dict]
     metrics:             Dict
+    metrics_display:     Optional[Dict] = None
     run_id:              Optional[str] = None
     experiment_id:       Optional[str] = None
     mlflow_url:          Optional[str] = None

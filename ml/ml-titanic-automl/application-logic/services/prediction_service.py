@@ -119,6 +119,7 @@ class PredictionService:
     def get_model_info(self) -> Dict:
         if not self._ready:
             self.train()
+        m = self._metrics
         return {
             "model_type": "AutoML Classifier",
             "best_model": self._best_model_name,
@@ -128,7 +129,14 @@ class PredictionService:
             "algorithms_compared": 5,
             "optimized_for": "AUC",
             "leaderboard": self._leaderboard,
-            "metrics": self._metrics,
+            "metrics": m,
+            "metrics_display": {
+                "auc":       f"{m.get('auc', 0):.4f}",
+                "accuracy":  f"{m.get('accuracy', 0) * 100:.1f}%",
+                "f1":        f"{m.get('f1', 0):.4f}",
+                "precision": f"{m.get('precision', 0):.4f}",
+                "recall":    f"{m.get('recall', 0):.4f}",
+            },
             "run_id": self._run_id,
             "experiment_id": self._experiment_id,
             "mlflow_url": (

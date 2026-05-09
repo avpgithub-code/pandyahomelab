@@ -1,3 +1,4 @@
+import json
 import uuid
 import logging
 from datetime import datetime
@@ -5,7 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Header
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 
 from presentation_logic.api.schemas import (
     HealthResponse, PredictionRequest, PredictionResponse, ModelInfoResponse
@@ -17,11 +18,17 @@ logger = logging.getLogger(__name__)
 
 _service = PredictionService()
 _UI_PATH = Path(__file__).parent / "ui.html"
+_ABOUT_PATH = Path(__file__).parent / "about.json"
 
 
 @router.get("/", response_class=HTMLResponse)
 async def demo_ui():
     return _UI_PATH.read_text()
+
+
+@router.get("/about")
+async def about():
+    return JSONResponse(content=json.loads(_ABOUT_PATH.read_text()))
 
 
 @router.get("/health", response_model=HealthResponse)

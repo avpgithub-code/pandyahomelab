@@ -1,0 +1,166 @@
+{
+  "title": "About Titanic AutoML",
+  "tagline": "How a 1912 disaster, AutoML model selection, and an imbalanced binary classification problem come together on pandyaHomeLab.",
+  "sections": [
+    {
+      "id": "problem",
+      "title": "The Problem",
+      "icon": "🎯",
+      "body": [
+        "The Titanic dataset (891 passengers from the 1912 disaster) is the canonical introduction to **imbalanced binary classification**. Each row is one passenger with seven features — class, sex, age, siblings/spouses aboard, parents/children aboard, fare, port of embarkation — and the label is whether they survived.",
+        "About **38%** of passengers survived. That imbalance matters: a lazy model that predicts \"died\" for everyone scores 62% accuracy without learning anything. The whole game is choosing a metric that doesn't fall for that trick."
+      ]
+    },
+    {
+      "id": "approach",
+      "title": "Approach — Why AutoML?",
+      "icon": "🧭",
+      "body": [
+        "**PyCaret** automates the model-selection step: train a panel of candidate algorithms, cross-validate each, rank by a chosen metric, then pick a winner. We compare seven classifiers — LR, Random Forest, XGBoost, Decision Tree, KNN, Naive Bayes, SVM — and let AUC pick the best."
+      ],
+      "bullets": [
+        {"label": "Why AUC is the primary metric", "text": "On imbalanced data, accuracy lies. AUC measures whether the model can rank survivors *above* non-survivors, regardless of where you draw the survival threshold. It's threshold-independent."},
+        {"label": "Why limit to 7 algorithms", "text": "PyCaret's default trains 18+ classifiers. With `n_jobs=1` (required to avoid PyCaret's `ThreadLocalVariable` issues) that took >2 min — past Nginx's read timeout. Seven is the sweet spot."},
+        {"label": "Why finalize_model", "text": "After picking the winner from cross-validation, we retrain it on **all** the data — training plus validation. That's the model that ships."},
+        {"label": "Why we bypass predict_model", "text": "PyCaret's `predict_model()` looks up its experiment in thread-local storage. FastAPI's thread pool gives us a different thread per request, so we call the underlying sklearn Pipeline directly."}
+      ]
+    },
+    {
+      "id": "architecture",
+      "title": "Architecture",
+      "icon": "🏗️",
+      "body": [
+        "Same per-project 4-layer architecture (ADR-013) as the other ML demos — but with one twist: **db-logic persists the dataset to PostgreSQL** on first load. Subsequent container restarts read from the database, not from seaborn."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph TB\n  Client[\"Browser\"] -->|HTTPS| Nginx[\"Nginx Proxy\"]\n  Nginx -->|\"/ml/titanic-automl/*\"| App[\"ml-titanic-automl container\"]\n  subgraph App\n    direction TB\n    Pres[\"presentation-logic<br/>FastAPI · Pydantic v2\"] --> AppLogic[\"application-logic<br/>PredictionService\"]\n    AppLogic --> PyCaret[\"PyCaret 3.3<br/>compare · tune · finalize\"]\n    AppLogic --> DB[\"db-logic<br/>seaborn → PostgreSQL\"]\n  end\n  DB -.->|first load| PG[\"ml-postgres<br/>titanic table\"]\n  DB -.->|subsequent loads| PG\n  AppLogic -.->|run logging| MLflow[\"ml-mlflow<br/>experiment tracking\"]\n\n  classDef container fill:#13161e,stroke:#4f8ef7,color:#e2e8f0\n  classDef external fill:#1a1e2a,stroke:#64748b,color:#cbd5e1\n  class Pres,AppLogic,PyCaret,DB container\n  class Nginx,Client,MLflow,PG external"
+      }
+    },
+    {
+      "id": "network",
+      "title": "Network & Deployment",
+      "icon": "🌐",
+      "body": [
+        "Lives in the ML domain alongside iris-knn and housing-linear. Unlike them, this one has a real database dependency — the container talks to ml-postgres on the same network for persistent dataset storage and to ml-mlflow for experiment logging."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph LR\n  User([\"🌍 Visitor\"]) --> CF[\"Cloudflare Tunnel\"]\n  CF --> NX[\"Nginx<br/>:8443\"]\n  subgraph PROXY[\"pandya-proxy-network · 172.24.0.0/24\"]\n    NX\n  end\n  subgraph ML[\"ml-network · 172.20.0.0/24\"]\n    IRIS[\"ml-iris-knn<br/>172.20.0.10\"]\n    HOUS[\"ml-housing-linear<br/>172.20.0.11\"]\n    TIT[\"ml-titanic-automl<br/>172.20.0.12:8000\"]\n    PG[\"ml-postgres<br/>172.20.0.2\"]\n    MF[\"ml-mlflow<br/>172.20.0.5\"]\n  end\n  NX --> TIT\n  TIT -.->|titanic table| PG\n  TIT -.->|MLflow runs| MF\n\n  classDef live fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef infra fill:#1a1e2a,stroke:#64748b,color:#cbd5e1\n  class TIT live\n  class IRIS,HOUS,PG,MF infra"
+      },
+      "facts": [
+        {"label": "Container", "value": "ml-titanic-automl"},
+        {"label": "Container IP", "value": "172.20.0.12"},
+        {"label": "Network", "value": "ml-network"},
+        {"label": "CIDR", "value": "172.20.0.0/24"},
+        {"label": "Host port", "value": "8003 → 8000"},
+        {"label": "Persisted in", "value": "ml-postgres"}
+      ]
+    },
+    {
+      "id": "stack",
+      "title": "Tech Stack",
+      "icon": "🧰",
+      "items": [
+        {"name": "FastAPI 0.104", "purpose": "Async HTTP API framework — but `/predict` is sync (PyCaret threading)"},
+        {"name": "Pydantic v2", "purpose": "Strict validation — `@model_validator` enforces the 1st-class fare floor business rule"},
+        {"name": "PyCaret 3.3.1", "purpose": "AutoML — setup, compare, tune, finalize"},
+        {"name": "scikit-learn", "purpose": "Underlying classifiers (LR, RF, DT, KNN, NB, SVM)"},
+        {"name": "XGBoost + LightGBM", "purpose": "Gradient-boosted decision tree members of the comparison panel"},
+        {"name": "PostgreSQL", "purpose": "Persistent storage for the cleaned Titanic dataset"},
+        {"name": "MLflow 3.x", "purpose": "Manual run logging — params, metrics, tags (no auto-logging due to deepcopy issues)"},
+        {"name": "Synology DSM", "purpose": "Host OS — Docker engine, persistent volumes"}
+      ]
+    },
+    {
+      "id": "walkthrough",
+      "title": "Read the Code Walkthrough",
+      "icon": "📖",
+      "body": [
+        "The **ML Project Walkthrough** uses iris-knn as the worked example (~1,200 lines), but the pattern applies here too. The interesting differences in titanic-automl are the AutoML pattern (PyCaret), the PostgreSQL persistence twist, and several PyCaret-specific gotchas hard-won during Phase 1d."
+      ],
+      "bullets": [
+        {"label": "Project anatomy", "text": "Same 4-layer structure as iris-knn — file tree and patterns are identical."},
+        {"label": "Request flow", "text": "A `/predict` request traced hop-by-hop. Note: route handlers are `def`, not `async def`."},
+        {"label": "Per-layer patterns", "text": "Same factory pattern, ABC contracts, lazy init — read once, applies everywhere."},
+        {"label": "PyCaret gotchas", "text": "`pycaret[full]` causes pip resolver hell · pyyaml 5.4.1 needs setuptools<65 · `log_experiment=False` to avoid deepcopy of ThreadLocalVariable · sync routes only."},
+        {"label": "MLflow integration", "text": "Manual logging this time — PyCaret's auto-logging trips on deepcopy of thread-local state."}
+      ],
+      "links": [
+        {"label": "Read the full walkthrough on GitHub", "url": "https://github.com/avpgithub-code/pandyahomelab/blob/main/docs/ML_PROJECT_WALKTHROUGH.md", "external": true},
+        {"label": "PyCaret operational lessons", "url": "https://github.com/avpgithub-code/pandyahomelab", "external": true}
+      ]
+    },
+    {
+      "id": "metrics",
+      "title": "Performance",
+      "icon": "📊",
+      "problem_type": "Binary classification · imbalanced (~38% positive)",
+      "body": [
+        "Metrics come from PyCaret's 10-fold cross-validation across the seven candidate algorithms. The leaderboard is visible on the main page — what's below explains *why* AUC is the primary metric and what each one teaches.",
+        "**Key insight: a model predicting \"died\" for everyone scores 62% accuracy.** That's why we don't optimize for accuracy on imbalanced data."
+      ],
+      "facts": [
+        {"label": "Total samples", "value": "891"},
+        {"label": "Survival rate", "value": "~38%"},
+        {"label": "Algorithms compared", "value": "7"},
+        {"label": "Optimized for", "value": "AUC"},
+        {"label": "CV folds", "value": "10"},
+        {"label": "Tracked in", "value": "MLflow ↗"}
+      ],
+      "metrics_detail": [
+        {
+          "name": "AUC",
+          "value": "{{metrics_display.auc}}",
+          "what": "Area Under the ROC Curve — the probability that a random survivor gets a higher predicted score than a random non-survivor.",
+          "formula": "∫ TPR(t) d(FPR(t)),  threshold t ∈ [0,1]",
+          "why_chosen": "**The primary metric we optimized for.** AUC is *threshold-independent* — it measures the model's ability to rank, regardless of where you set the survival cutoff. Critical for imbalanced data: a model can have 70% accuracy by predicting the majority class while having no real ranking ability (AUC ≈ 0.5).",
+          "watch_out": "AUC = 0.5 means random guessing; below 0.5 means worse than random (and you can flip predictions to get above 0.5). AUC near 1.0 on training data is suspicious — likely overfitting."
+        },
+        {
+          "name": "Accuracy",
+          "value": "{{metrics_display.accuracy}}",
+          "what": "Fraction of passengers correctly classified.",
+          "formula": "(TP + TN) / (TP + TN + FP + FN)",
+          "why_chosen": "Easy to communicate — but reported here as *context*, not as the optimization target. With ~62% mortality, predicting \"all died\" already scores 62%. Our model needs to beat that meaningfully to be worth anything.",
+          "watch_out": "**The classic trap on imbalanced data.** A 79% accuracy that comes from \"always predict majority\" is worthless. Always sanity-check accuracy against the majority-class baseline."
+        },
+        {
+          "name": "F1",
+          "value": "{{metrics_display.f1}}",
+          "what": "Harmonic mean of precision and recall on the survivor class.",
+          "formula": "2 × (P × R) / (P + R)",
+          "why_chosen": "Balances \"did we falsely predict survival\" (precision) against \"did we miss real survivors\" (recall). On imbalanced data, F1 is a much stronger signal than accuracy because it focuses on the minority class.",
+          "watch_out": "F1 weights precision and recall equally. If you cared more about one (e.g. search & rescue values recall over precision), use F-beta with β ≠ 1."
+        },
+        {
+          "name": "Precision",
+          "value": "{{metrics_display.precision}}",
+          "what": "When the model predicts \"survived\", how often is it right?",
+          "formula": "TP / (TP + FP)",
+          "why_chosen": "If a downstream action is taken on positive predictions (e.g. notifying families of survivors), precision tells you the false-positive risk. Higher = fewer false survivor predictions.",
+          "watch_out": "You can trivially maximize precision by only predicting \"survived\" for the very most confident cases — but recall plummets. Always paired with recall."
+        },
+        {
+          "name": "Recall",
+          "value": "{{metrics_display.recall}}",
+          "what": "Of the actual survivors, what fraction did the model find?",
+          "formula": "TP / (TP + FN)",
+          "why_chosen": "If the cost of *missing* a real survivor is high (the search-and-rescue analogy), recall dominates the metric choice. ~71% means we're catching most real survivors.",
+          "watch_out": "You can trivially maximize recall by predicting \"survived\" for everyone — but precision drops to 38% (the base rate). Always paired with precision."
+        }
+      ]
+    },
+    {
+      "id": "learn",
+      "title": "Learn More",
+      "icon": "🔗",
+      "links": [
+        {"label": "View live MLflow run", "url": "/mlflow/", "external": false},
+        {"label": "Source on GitHub", "url": "https://github.com/avpgithub-code/pandyahomelab", "external": true},
+        {"label": "Titanic dataset (Kaggle)", "url": "https://www.kaggle.com/c/titanic/data", "external": true},
+        {"label": "PyCaret documentation", "url": "https://pycaret.gitbook.io/docs/", "external": true}
+      ]
+    }
+  ]
+}

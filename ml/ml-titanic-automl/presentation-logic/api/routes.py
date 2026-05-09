@@ -1,6 +1,8 @@
 """API routes for ml-titanic-automl."""
+import json
+import os
 from fastapi import APIRouter, HTTPException, Header
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from datetime import datetime
 from typing import Optional
 import uuid
@@ -10,6 +12,13 @@ from .schemas import (
 )
 
 router = APIRouter()
+_ABOUT_PATH = os.path.join(os.path.dirname(__file__), "about.json")
+
+
+@router.get("/about")
+async def about():
+    with open(_ABOUT_PATH) as f:
+        return JSONResponse(content=json.loads(f.read()))
 
 # Single shared service instance — trained once on first request
 _service = None

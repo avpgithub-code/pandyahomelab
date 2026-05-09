@@ -1,0 +1,147 @@
+{
+  "title": "About Housing Linear Regression",
+  "tagline": "How a 1990 census dataset, ordinary least squares, and an interpretable baseline come together on pandyaHomeLab.",
+  "sections": [
+    {
+      "id": "problem",
+      "title": "The Problem",
+      "icon": "🎯",
+      "body": [
+        "The California Housing dataset (1990 US census, 20,640 census blocks) ships with scikit-learn. Each row describes one block group — median income, house age, room counts, population, location — and the label is the **median home value** in that block, capped at $500,000.",
+        "The task is **regression**: given the eight features for an unseen block, predict its median home value. Unlike classification, the output is a continuous number, not a category."
+      ]
+    },
+    {
+      "id": "approach",
+      "title": "Approach — Why Linear Regression?",
+      "icon": "🧭",
+      "body": [
+        "Ordinary Least Squares (OLS) finds the line (in 8 dimensions, the hyperplane) that minimises the sum of squared residuals between predicted and actual home values. It's the simplest regression model — and that's its superpower."
+      ],
+      "bullets": [
+        {"label": "Why this baseline first", "text": "Linear regression sets the floor. Any fancier model (random forest, gradient boosting) needs to *beat* this baseline to justify its complexity."},
+        {"label": "Why it's interpretable", "text": "Each feature gets one coefficient — a bigger one means a bigger effect. You can read the model and tell a story about it. Black-box models can't do that."},
+        {"label": "Why scaling matters here", "text": "Coefficients only become comparable if features are on the same scale. We use `StandardScaler` so a 1-unit move in any feature has equal weight at training time."},
+        {"label": "Where it falls short", "text": "Real housing prices aren't linear in income or location. A 0.58 R² is honest but unspectacular — Random Forest typically reaches 0.80+ on this dataset."}
+      ]
+    },
+    {
+      "id": "architecture",
+      "title": "Architecture",
+      "icon": "🏗️",
+      "body": [
+        "Every project on pandyaHomeLab follows the **per-project 4-layer architecture** (ADR-013) — each domain is autonomous, with no cross-project imports."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph TB\n  Client[\"Browser\"] -->|HTTPS| Nginx[\"Nginx Proxy\"]\n  Nginx -->|\"/ml/housing-linear/*\"| App[\"ml-housing-linear container\"]\n  subgraph App\n    direction TB\n    Pres[\"presentation-logic<br/>FastAPI · Pydantic v2\"] --> AppLogic[\"application-logic<br/>PredictionService\"]\n    AppLogic --> Model[\"LinearRegression<br/>(scikit-learn)\"]\n    AppLogic --> Pre[\"db-logic<br/>StandardScaler\"]\n    AppLogic --> DB[\"db-logic<br/>fetch_california_housing\"]\n    Shared[\"shared/<br/>config · logger\"] -.- Pres\n    Shared -.- AppLogic\n  end\n  AppLogic -.->|run logging| MLflow[\"ml-mlflow<br/>experiment tracking\"]\n\n  classDef container fill:#13161e,stroke:#4f8ef7,color:#e2e8f0\n  classDef external fill:#1a1e2a,stroke:#64748b,color:#cbd5e1\n  class Pres,AppLogic,Model,Pre,DB,Shared container\n  class Nginx,Client,MLflow external"
+      }
+    },
+    {
+      "id": "network",
+      "title": "Network & Deployment",
+      "icon": "🌐",
+      "body": [
+        "Lives in the ML domain alongside iris-knn and titanic-automl. Direct Docker DNS resolution to ml-mlflow for experiment logging — no external network needed."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph LR\n  User([\"🌍 Visitor\"]) --> CF[\"Cloudflare Tunnel<br/>pandyahomelab.com\"]\n  CF --> NX[\"Nginx<br/>:8443\"]\n  subgraph PROXY[\"pandya-proxy-network · 172.24.0.0/24\"]\n    NX\n  end\n  subgraph ML[\"ml-network · 172.20.0.0/24\"]\n    IRIS[\"ml-iris-knn<br/>172.20.0.10:8000\"]\n    HOUS[\"ml-housing-linear<br/>172.20.0.11:8000\"]\n    TIT[\"ml-titanic-automl<br/>172.20.0.12:8000\"]\n    MF[\"ml-mlflow<br/>172.20.0.5\"]\n  end\n  NX --> HOUS\n  NX --> IRIS\n  NX --> TIT\n  NX --> MF\n  HOUS -.->|MLflow runs| MF\n\n  classDef live fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef infra fill:#1a1e2a,stroke:#64748b,color:#cbd5e1\n  class HOUS live\n  class IRIS,TIT,MF infra"
+      },
+      "facts": [
+        {"label": "Container", "value": "ml-housing-linear"},
+        {"label": "Container IP", "value": "172.20.0.11"},
+        {"label": "Network", "value": "ml-network"},
+        {"label": "CIDR", "value": "172.20.0.0/24"},
+        {"label": "Host port", "value": "8002 → 8000"},
+        {"label": "Public URL", "value": "/ml/housing-linear/"}
+      ]
+    },
+    {
+      "id": "stack",
+      "title": "Tech Stack",
+      "icon": "🧰",
+      "items": [
+        {"name": "FastAPI 0.104", "purpose": "Async HTTP API framework"},
+        {"name": "Pydantic v2", "purpose": "Schema validation — `@field_validator` enforces the 8-feature contract"},
+        {"name": "scikit-learn 1.3", "purpose": "LinearRegression + StandardScaler + the California Housing dataset"},
+        {"name": "uvicorn", "purpose": "ASGI server, runs inside the container"},
+        {"name": "Docker", "purpose": "Multi-stage build, ~150MB final image"},
+        {"name": "Nginx 1.25", "purpose": "Reverse proxy, TLS termination, route fan-out"},
+        {"name": "MLflow 3.x", "purpose": "Run logging, parameter and metric tracking"},
+        {"name": "Synology DSM", "purpose": "Host OS — Docker engine, persistent volumes"}
+      ]
+    },
+    {
+      "id": "walkthrough",
+      "title": "Read the Code Walkthrough",
+      "icon": "📖",
+      "body": [
+        "The **ML Project Walkthrough** uses iris-knn as the worked example (~1,200 lines), but the pattern applies identically here. The differences in housing-linear are the model (LinearRegression), the loader (`fetch_california_housing` instead of CSV), and the metrics (RMSE/MAE/R² instead of accuracy/F1)."
+      ],
+      "bullets": [
+        {"label": "Project anatomy", "text": "Annotated file tree — same 4-layer structure as iris-knn."},
+        {"label": "Request flow", "text": "A `/predict` request traced hop-by-hop from browser through all four layers."},
+        {"label": "Per-layer patterns", "text": "Factory pattern, ABC contracts, lazy init, the hyphen-vs-underscore symlink trick."},
+        {"label": "Python modular approach", "text": "Packages vs modules, absolute imports, `try: import X` for optional deps."},
+        {"label": "MLflow integration", "text": "How runs are logged, why graceful degradation matters."}
+      ],
+      "links": [
+        {"label": "Read the full walkthrough on GitHub", "url": "https://github.com/avpgithub-code/pandyahomelab/blob/main/docs/ML_PROJECT_WALKTHROUGH.md", "external": true}
+      ]
+    },
+    {
+      "id": "metrics",
+      "title": "Performance",
+      "icon": "📊",
+      "problem_type": "Regression · continuous output",
+      "body": [
+        "Trained on a 80/20 split with `random_state=42`. Linear regression on this dataset is famously *just okay* — the relationship between income/location and price is highly non-linear, especially for the cap at $500,000. We report it honestly as a baseline.",
+        "**Regression has no confusion matrix.** Instead, we look at error magnitude (RMSE, MAE) and how much variance the model explains (R²). For deeper diagnostics — residual plots, actual-vs-predicted scatter — open the run in MLflow."
+      ],
+      "facts": [
+        {"label": "Train samples", "value": "{{split.train_samples}}"},
+        {"label": "Test samples", "value": "{{split.test_samples}}"},
+        {"label": "Training time", "value": "<2 seconds"},
+        {"label": "Tracked in", "value": "MLflow ↗"}
+      ],
+      "metrics_detail": [
+        {
+          "name": "RMSE",
+          "value": "{{metrics_display.rmse}}",
+          "what": "Root Mean Squared Error — typical prediction error in target units ($100K).",
+          "formula": "√( mean( (y_pred − y_true)² ) )",
+          "why_chosen": "Same units as the prediction (so 0.75 = $75K typical error), and squaring penalises big misses harder than small ones — undervaluing a $500K home should hurt more than missing by $5K.",
+          "watch_out": "Sensitive to outliers. One $500K-capped block predicted as $300K dominates the RMSE far more than a hundred small misses."
+        },
+        {
+          "name": "MAE",
+          "value": "{{metrics_display.mae}}",
+          "what": "Mean Absolute Error — the average size of prediction errors, treating all errors equally.",
+          "formula": "mean( |y_pred − y_true| )",
+          "why_chosen": "Easier to communicate to non-experts (\"typical error is $53K\") and less sensitive to outliers than RMSE. When MAE and RMSE diverge a lot, it tells you the errors are heavy-tailed.",
+          "watch_out": "Treats a $5K miss the same as five $1K misses. If big mistakes are *especially* costly in your domain, RMSE is the safer training objective."
+        },
+        {
+          "name": "R²",
+          "value": "{{metrics_display.r2}}",
+          "what": "Coefficient of determination — what fraction of the variance in home prices the model explains. 0 = no better than predicting the mean. 1 = perfect.",
+          "formula": "1 − ( SS_residual / SS_total )",
+          "why_chosen": "Unitless, lets you compare across datasets and across models. ~0.58 means the model captures about 58% of the variance — decent for OLS, but Random Forest typically reaches 0.80+ here, which tells you a lot about the non-linearity in this dataset.",
+          "watch_out": "R² can be misleadingly high on training data (overfitting) and misleadingly negative when the model is worse than the mean. Always report on a held-out test set."
+        }
+      ]
+    },
+    {
+      "id": "learn",
+      "title": "Learn More",
+      "icon": "🔗",
+      "links": [
+        {"label": "View live MLflow run", "url": "/mlflow/", "external": false},
+        {"label": "Source on GitHub", "url": "https://github.com/avpgithub-code/pandyahomelab", "external": true},
+        {"label": "California Housing dataset (sklearn)", "url": "https://scikit-learn.org/stable/datasets/real_world.html#california-housing-dataset", "external": true},
+        {"label": "Pace & Barry (1997) — original paper", "url": "https://www.sciencedirect.com/science/article/abs/pii/S016771529600140X", "external": true}
+      ]
+    }
+  ]
+}

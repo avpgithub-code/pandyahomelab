@@ -39,6 +39,8 @@ class ModelInfoResponse(BaseModel):
     n_features: int
     parameters: Dict
     metrics: Dict
+    metrics_display: Optional[Dict] = None
+    split: Optional[Dict] = None
     run_id: Optional[str] = None
     experiment_id: Optional[str] = None
     mlflow_url: Optional[str] = None
