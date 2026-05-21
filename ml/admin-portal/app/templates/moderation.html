@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>pandyaHomeLab — Feedback Moderation</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:       #0d0f14;
+    --surface:  #13161e;
+    --surface2: #1a1e2a;
+    --border:   #252a38;
+    --accent:   #4f8ef7;
+    --green:    #22c55e;
+    --amber:    #facc15;
+    --red:      #f87171;
+    --text:     #e2e8f0;
+    --muted:    #64748b;
+    --radius:   8px;
+  }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg); color: var(--text);
+    padding: 2rem 1rem; line-height: 1.5; min-height: 100vh;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  header {
+    display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 1rem;
+    margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border);
+  }
+  h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -.01em; }
+  h1 em { font-style: normal; color: var(--accent); }
+  .meta { color: var(--muted); font-size: .85rem; }
+  .meta a { color: var(--accent); text-decoration: none; margin-left: .8rem; }
+  .meta strong { color: var(--text); }
+
+  h2 {
+    font-size: .75rem; text-transform: uppercase; letter-spacing: .1em;
+    color: var(--muted); font-weight: 700; margin: 2rem 0 .85rem;
+  }
+
+  .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .75rem; }
+  @media (max-width: 720px) { .summary-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.15rem; }
+  .card-label { font-size: .65rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
+  .card-value { font-size: 1.6rem; font-weight: 800; color: var(--accent); margin-top: .35rem; font-family: 'SF Mono', Consolas, monospace; }
+  .card.hidden .card-value { color: var(--amber); }
+  .card.visible .card-value { color: var(--green); }
+
+  .comments-list { display: flex; flex-direction: column; gap: .75rem; }
+  .comment {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1rem 1.25rem;
+    transition: opacity .15s, background .15s;
+  }
+  .comment.hidden-row {
+    opacity: .55; background: var(--surface2);
+    border-left: 3px solid var(--amber);
+  }
+  .comment-head {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap;
+    margin-bottom: .55rem; padding-bottom: .55rem; border-bottom: 1px solid var(--border);
+  }
+  .comment-meta { font-size: .8rem; color: var(--muted); }
+  .comment-meta strong { color: var(--text); font-weight: 700; }
+  .comment-meta code { font-family: 'SF Mono', Consolas, monospace; color: var(--accent); font-size: .78rem; }
+  .comment-body {
+    font-size: .92rem; color: var(--text); line-height: 1.55;
+    margin-bottom: .65rem; white-space: pre-wrap; word-break: break-word;
+  }
+  .comment-foot {
+    display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+    font-size: .72rem; color: var(--muted);
+  }
+  .ip-hash { font-family: 'SF Mono', Consolas, monospace; }
+
+  .btn {
+    padding: .35rem .9rem; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--surface2);
+    color: var(--text); font-size: .76rem; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+    transition: all .15s;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn.hide { color: var(--amber); border-color: rgba(250,204,21,.3); }
+  .btn.hide:hover { background: rgba(250,204,21,.1); border-color: var(--amber); }
+  .btn.show { color: var(--green); border-color: rgba(34,197,94,.3); }
+  .btn.show:hover { background: rgba(34,197,94,.1); border-color: var(--green); }
+
+  .status-pill {
+    display: inline-block; padding: .15rem .55rem; border-radius: 99px;
+    font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+  }
+  .status-pill.visible { background: rgba(34,197,94,.15); color: var(--green); }
+  .status-pill.hidden  { background: rgba(250,204,21,.15); color: var(--amber); }
+
+  .empty-card {
+    padding: 2rem; text-align: center; color: var(--muted);
+    background: var(--surface); border: 1px dashed var(--border);
+    border-radius: var(--radius); font-size: .9rem;
+  }
+
+  footer {
+    margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: .75rem; text-align: center;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>pandya<em>HomeLab</em> · Feedback Moderation</h1>
+    <div class="meta">
+      Signed in as <strong>{{ admin }}</strong>
+      <a href="/admin/">← Dashboard</a>
+    </div>
+  </header>
+
+  <h2>📊 Summary</h2>
+  <div class="summary-grid">
+    <div class="card">
+      <div class="card-label">Total comments</div>
+      <div class="card-value">{{ summary.total_comments or 0 }}</div>
+    </div>
+    <div class="card visible">
+      <div class="card-label">Visible</div>
+      <div class="card-value">{{ summary.visible_comments or 0 }}</div>
+    </div>
+    <div class="card hidden">
+      <div class="card-label">Hidden</div>
+      <div class="card-value">{{ summary.hidden_comments or 0 }}</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Total likes</div>
+      <div class="card-value">{{ summary.total_likes or 0 }}</div>
+    </div>
+  </div>
+
+  <h2>💬 Most recent {{ limit }} comments</h2>
+  {% if comments %}
+  <div class="comments-list">
+    {% for c in comments %}
+    <div class="comment {% if c.hidden %}hidden-row{% endif %}">
+      <div class="comment-head">
+        <div class="comment-meta">
+          <strong>{{ c.name or 'anonymous' }}</strong>
+          on <code>{{ c.page_id }}</code>
+        </div>
+        <span class="status-pill {% if c.hidden %}hidden{% else %}visible{% endif %}">
+          {% if c.hidden %}hidden{% else %}visible{% endif %}
+        </span>
+      </div>
+      <div class="comment-body">{{ c.body }}</div>
+      <div class="comment-foot">
+        <span>{{ c.created_at.strftime('%Y-%m-%d %H:%M') }} UTC · ip <span class="ip-hash">{{ c.ip_hash[:8] }}…</span></span>
+        <form method="POST" action="/admin/feedback/{{ c.id }}/hide" style="display:inline">
+          {% if c.hidden %}
+          <button type="submit" class="btn show">↻ Make visible</button>
+          {% else %}
+          <button type="submit" class="btn hide">🚫 Hide</button>
+          {% endif %}
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-card">No comments yet. Once visitors submit feedback they'll show up here.</div>
+  {% endif %}
+
+  <footer>
+    pandya<em>HomeLab</em> · admin-portal moderation v1.0.4 ·
+    <a href="/admin/">← back to dashboard</a>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -109,6 +109,9 @@ services:
       DATABASE_URL: postgresql://postgres:${ML_POSTGRES_PASSWORD}@ml-postgres:5432/mldb
       ADMIN_USERNAME: ${ADMIN_USERNAME}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      # Same salt as the analytics-ingester — keeps ip_hash values consistent
+      # so rate-limiting can match a visitor across the two services.
+      ANALYTICS_IP_SALT: ${ANALYTICS_IP_SALT}
     networks:
       ml-network:
         ipv4_address: 172.20.0.31
