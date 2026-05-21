@@ -1,8 +1,8 @@
 """Public feedback API — POST /feedback/likes, POST /feedback/comments, GET /feedback/likes.
 
 Anonymous; rate-limited at the DB layer by `ip_hash`:
-  - likes:    1 per IP per page per day  (silent dedup, current count still returned)
-  - comments: 1 per IP per hour          (429 returned on excess)
+  - likes:    1 per IP per page per day   (silent dedup, current count still returned)
+  - comments: 3 per IP per page per 5-min sliding window  (429 returned on excess)
 """
 import logging
 from typing import Optional
@@ -77,12 +77,12 @@ async def post_like(payload: LikeRequest, request: Request):
 
 @router.post("/comments")
 async def post_comment(payload: CommentRequest, request: Request):
-    """Record a comment. 429 if this IP has commented within the last hour."""
+    """Record a comment. 429 if this IP has 3+ comments on this page in the last 5 minutes."""
     ip_hash = hash_request_ip(request)
-    if not can_comment(ip_hash):
+    if not can_comment(ip_hash, payload.page_id):
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail="One comment per hour, please. Try again later.",
+            detail="Up to 3 comments per page per 5 minutes. Please wait a moment.",
         )
     cid = insert_comment(payload.page_id, ip_hash, payload.name, payload.body)
     logger.info(

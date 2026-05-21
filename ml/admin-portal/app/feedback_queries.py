@@ -28,8 +28,11 @@ COMMENT_RATE_CHECK_SQL = """
 SELECT count(*) AS recent
 FROM analytics.feedback_comments
 WHERE ip_hash    = %s
-  AND created_at > NOW() - INTERVAL '1 hour'
+  AND page_id    = %s
+  AND created_at > NOW() - INTERVAL '5 minutes'
 """
+
+COMMENT_RATE_LIMIT_PER_WINDOW = 3
 
 COMMENT_INSERT_SQL = """
 INSERT INTO analytics.feedback_comments (page_id, ip_hash, name, body)
@@ -53,11 +56,11 @@ def count_likes(page_id: str) -> int:
         return int(cur.fetchone()["total"])
 
 
-def can_comment(ip_hash: str) -> bool:
-    """True if this IP has NOT commented in the last hour."""
+def can_comment(ip_hash: str, page_id: str) -> bool:
+    """True if this IP has made fewer than 3 comments on this page in the last 5 minutes."""
     with get_cursor() as cur:
-        cur.execute(COMMENT_RATE_CHECK_SQL, (ip_hash,))
-        return int(cur.fetchone()["recent"]) == 0
+        cur.execute(COMMENT_RATE_CHECK_SQL, (ip_hash, page_id))
+        return int(cur.fetchone()["recent"]) < COMMENT_RATE_LIMIT_PER_WINDOW
 
 
 def insert_comment(page_id: str, ip_hash: str, name: Optional[str], body: str) -> int:
