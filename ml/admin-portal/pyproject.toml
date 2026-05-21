@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "admin-portal"
+version = "1.0.0-alpha1"
+description = "pandyaHomeLab admin dashboard — visitor analytics views (FastAPI + Jinja2)"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{name = "Archit Pandya", email = "architpandya@yahoo.com"}]
+dependencies = [
+    "fastapi==0.104.1",
+    "uvicorn[standard]==0.24.0",
+    "jinja2==3.1.6",
+    "psycopg2-binary==2.9.9",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]

@@ -99,6 +99,34 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  # ─── Platform service: admin-portal ──────────────────────────────────────────
+  # Admin-only dashboard at /admin/ — reads from analytics.visitor_events,
+  # renders Jinja2 HTML, protected by HTTP Basic Auth.
+  admin-portal:
+    image: admin-portal:latest
+    container_name: admin-portal
+    environment:
+      DATABASE_URL: postgresql://postgres:${ML_POSTGRES_PASSWORD}@ml-postgres:5432/mldb
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+    networks:
+      ml-network:
+        ipv4_address: 172.20.0.31
+    depends_on:
+      ml-postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   # ─── Platform service: analytics-ingester ────────────────────────────────────
   # Tails Nginx JSON log → enriches (IP hash + bot detection) → writes to
   # analytics.visitor_events in ml-postgres. Cross-cutting infra, not a demo.

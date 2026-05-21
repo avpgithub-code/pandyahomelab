@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>pandyaHomeLab — Admin Dashboard</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:       #0d0f14;
+    --surface:  #13161e;
+    --surface2: #1a1e2a;
+    --border:   #252a38;
+    --accent:   #4f8ef7;
+    --green:    #22c55e;
+    --amber:    #facc15;
+    --text:     #e2e8f0;
+    --muted:    #64748b;
+    --radius:   8px;
+  }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 2rem 1rem;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  header {
+    display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 1rem;
+    margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border);
+  }
+  h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -.01em; }
+  h1 em { font-style: normal; color: var(--accent); }
+  .meta { color: var(--muted); font-size: .85rem; display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
+  .meta strong { color: var(--text); }
+
+  .window-selector { display: inline-flex; gap: .35rem; }
+  .window-selector a {
+    padding: .25rem .8rem; border-radius: 99px;
+    border: 1px solid var(--border); color: var(--muted);
+    font-size: .75rem; font-weight: 600;
+    text-decoration: none; transition: all .15s;
+  }
+  .window-selector a:hover { color: var(--text); border-color: var(--muted); }
+  .window-selector a.active {
+    color: var(--accent); border-color: var(--accent);
+    background: rgba(79,142,247,.1);
+  }
+
+  h2 {
+    font-size: .75rem; text-transform: uppercase; letter-spacing: .1em;
+    color: var(--muted); font-weight: 700;
+    margin: 2.2rem 0 .85rem;
+  }
+
+  .summary-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: .75rem;
+  }
+  @media (max-width: 720px) { .summary-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.15rem;
+  }
+  .card-label {
+    font-size: .65rem; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .08em;
+    font-weight: 600;
+  }
+  .card-value {
+    font-size: 1.6rem; font-weight: 800;
+    color: var(--accent); margin-top: .35rem;
+    font-family: 'SF Mono', Consolas, monospace;
+    letter-spacing: -.02em;
+  }
+  .card.bots .card-value { color: var(--amber); }
+  .card.real .card-value { color: var(--green); }
+
+  table {
+    width: 100%; border-collapse: collapse;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+  }
+  th, td {
+    padding: .6rem .9rem; text-align: left;
+    font-size: .85rem; border-bottom: 1px solid rgba(37,42,56,.6);
+  }
+  th {
+    background: var(--surface2); color: var(--muted);
+    font-size: .68rem; text-transform: uppercase; letter-spacing: .08em;
+    font-weight: 700;
+  }
+  td code {
+    font-family: 'SF Mono', Consolas, monospace;
+    font-size: .82rem; color: var(--accent);
+  }
+  td.num {
+    font-family: 'SF Mono', Consolas, monospace;
+    text-align: right; font-weight: 600;
+  }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: rgba(79,142,247,.04); }
+
+  .empty {
+    padding: 2rem; text-align: center; color: var(--muted);
+    background: var(--surface); border: 1px dashed var(--border);
+    border-radius: var(--radius); font-size: .85rem;
+  }
+
+  footer {
+    margin-top: 3rem; padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted); font-size: .75rem;
+    text-align: center;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>pandya<em>HomeLab</em> · Admin Dashboard</h1>
+    <div class="meta">
+      Signed in as <strong>{{ admin }}</strong> · Window:
+      <span class="window-selector">
+        <a href="?days=7"   class="{% if days == 7 %}active{% endif %}">7d</a>
+        <a href="?days=30"  class="{% if days == 30 %}active{% endif %}">30d</a>
+        <a href="?days=90"  class="{% if days == 90 %}active{% endif %}">90d</a>
+        <a href="?days=365" class="{% if days == 365 %}active{% endif %}">1y</a>
+      </span>
+    </div>
+  </header>
+
+  <h2>📊 Last {{ days }} days · summary</h2>
+  <div class="summary-grid">
+    <div class="card">
+      <div class="card-label">Total events</div>
+      <div class="card-value">{{ summary.total_events or 0 }}</div>
+    </div>
+    <div class="card real">
+      <div class="card-label">Real visits</div>
+      <div class="card-value">{{ summary.real_events or 0 }}</div>
+    </div>
+    <div class="card bots">
+      <div class="card-label">Bot visits</div>
+      <div class="card-value">{{ summary.bot_events or 0 }}</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Unique visitors</div>
+      <div class="card-value">{{ summary.unique_visitors or 0 }}</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Unique paths</div>
+      <div class="card-value">{{ summary.unique_paths or 0 }}</div>
+    </div>
+  </div>
+
+  <h2>📅 Daily breakdown</h2>
+  {% if daily %}
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th style="text-align:right">Events</th>
+        <th style="text-align:right">Real visits</th>
+        <th style="text-align:right">Unique visitors</th>
+        <th style="text-align:right">Bots</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in daily %}
+      <tr>
+        <td>{{ row.day }}</td>
+        <td class="num">{{ row.events }}</td>
+        <td class="num" style="color: var(--green)">{{ row.real_events }}</td>
+        <td class="num">{{ row.unique_visitors }}</td>
+        <td class="num" style="color: var(--amber)">{{ row.bot_events }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">No events recorded in the last {{ days }} days.</div>
+  {% endif %}
+
+  <h2>🔝 Top 5 paths (real visitors only)</h2>
+  {% if top_paths %}
+  <table>
+    <thead>
+      <tr>
+        <th>Path</th>
+        <th style="text-align:right">Visits</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in top_paths %}
+      <tr>
+        <td><code>{{ row.path }}</code></td>
+        <td class="num">{{ row.visits }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">No real visitor activity in the last {{ days }} days.</div>
+  {% endif %}
+
+  <footer>
+    pandya<em>HomeLab</em> · admin-portal v1.0.0-alpha1 · Step 2.5 will add charts and per-country / referrer / hour-of-day views ·
+    <a href="/">← back to landing</a>
+  </footer>
+
+</div>
+</body>
+</html>
