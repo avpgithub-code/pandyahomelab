@@ -277,21 +277,130 @@
     .proj-card:nth-child(2){animation-delay:.10s}
     .proj-card:nth-child(3){animation-delay:.15s}
     .proj-card:nth-child(4){animation-delay:.20s}
+
+    /* — Nav right group + About trigger — */
+    .nav-right { display: flex; align-items: center; gap: 1.5rem; }
+    .about-trigger {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .45rem 1rem; border-radius: 99px;
+      border: 1px solid rgba(79,142,247,.35);
+      background: rgba(79,142,247,.1); color: var(--accent-ml);
+      font-size: .82rem; font-weight: 600; cursor: pointer;
+      transition: all .2s;
+      font-family: inherit;
+    }
+    .about-trigger:hover { background: rgba(79,142,247,.22); border-color: var(--accent-ml); transform: translateY(-1px); }
+
+    /* — About drawer (platform) — */
+    .about-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,.7);
+      opacity: 0; pointer-events: none; transition: opacity .25s ease; z-index: 1000;
+    }
+    .about-backdrop.visible { opacity: 1; pointer-events: auto; }
+    .about-drawer {
+      position: fixed; top: 0; right: 0; bottom: 0;
+      width: 100%; max-width: 620px;
+      background: var(--surface); border-left: 1px solid var(--border);
+      box-shadow: -8px 0 24px rgba(0,0,0,.4);
+      transform: translateX(100%); transition: transform .3s ease;
+      z-index: 1001; overflow-y: auto;
+      padding: 1.5rem 1.75rem 3rem;
+    }
+    .about-drawer.visible { transform: translateX(0); }
+    .about-header {
+      position: sticky; top: 0; z-index: 1;
+      background: var(--surface); padding: .25rem 0 1rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;
+    }
+    .about-title { font-size: 1.35rem; font-weight: 800; letter-spacing: -.01em; color: var(--text); }
+    .about-tagline { font-size: .85rem; color: var(--muted); margin-top: .35rem; line-height: 1.5; }
+    .about-close {
+      flex-shrink: 0; width: 32px; height: 32px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--surface2);
+      color: var(--muted); cursor: pointer; font-size: 1.1rem; line-height: 1;
+      transition: all .15s;
+    }
+    .about-close:hover { color: var(--text); border-color: var(--accent-ml); }
+    .about-section { margin-bottom: 2rem; }
+    .about-section h3 {
+      display: flex; align-items: center; gap: .5rem;
+      font-size: .98rem; font-weight: 700; color: var(--text);
+      margin-bottom: .8rem;
+    }
+    .about-section h3 .icon { font-size: 1.15rem; }
+    .about-section p { font-size: .85rem; color: #cbd5e1; line-height: 1.65; margin-bottom: .7rem; }
+    .about-section p:last-child { margin-bottom: 0; }
+    .about-section em { font-style: italic; color: var(--text); }
+    .about-section strong { color: var(--text); }
+    .about-section code {
+      font-family: 'SF Mono', Consolas, monospace;
+      background: var(--surface2); padding: .1rem .4rem;
+      border-radius: 4px; font-size: .8em; color: var(--accent-ml);
+    }
+    .about-bullets { list-style: none; padding: 0; margin: .5rem 0 0; }
+    .about-bullets li {
+      padding: .65rem .9rem; margin-bottom: .5rem;
+      background: var(--surface2); border-left: 2px solid var(--accent-ml);
+      border-radius: 4px; font-size: .83rem; line-height: 1.6; color: #cbd5e1;
+    }
+    .about-bullets li b { color: var(--accent-ml); font-weight: 700; }
+    .about-facts { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin-top: .85rem; }
+    .about-fact { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: .55rem .7rem; }
+    .about-fact-label { font-size: .65rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+    .about-fact-value { font-size: .85rem; font-weight: 700; color: var(--text); font-family: 'SF Mono', Consolas, monospace; margin-top: .15rem; }
+    .about-stack { display: flex; flex-direction: column; gap: .5rem; }
+    .about-stack-item { display: flex; flex-direction: column; padding: .65rem .85rem; background: var(--surface2); border-radius: 6px; border-left: 2px solid var(--accent-ml); }
+    .about-stack-name { font-size: .85rem; font-weight: 700; color: var(--text); }
+    .about-stack-purpose { font-size: .75rem; color: var(--muted); margin-top: .15rem; }
+    .about-links { display: flex; flex-direction: column; gap: .45rem; }
+    .about-link {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .55rem .9rem; border-radius: 6px;
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--accent-ml); font-size: .83rem; font-weight: 600;
+      text-decoration: none; transition: all .15s;
+    }
+    .about-link:hover { background: rgba(79,142,247,.1); border-color: var(--accent-ml); }
+    .about-diagram {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 1rem; margin-top: .85rem; overflow-x: auto;
+    }
+    .about-diagram svg { max-width: 100%; height: auto; }
   </style>
 </head>
 <body>
 
 <nav>
   <a class="nav-brand" href="#home"><span>pandya<em>HomeLab</em></span></a>
-  <ul class="nav-links">
-    <li><a href="#ml">ML</a></li>
-    <li><a href="#dl">DL</a></li>
-    <li><a href="#nlp">NLP</a></li>
-    <li><a href="#agentic">Agentic</a></li>
-    <li><a href="#stack">Stack</a></li>
-    <li><a href="#tools">Tools</a></li>
-  </ul>
+  <div class="nav-right">
+    <ul class="nav-links">
+      <li><a href="#ml">ML</a></li>
+      <li><a href="#dl">DL</a></li>
+      <li><a href="#nlp">NLP</a></li>
+      <li><a href="#agentic">Agentic</a></li>
+      <li><a href="#stack">Stack</a></li>
+      <li><a href="#tools">Tools</a></li>
+    </ul>
+    <button class="about-trigger" id="about-trigger" type="button">
+      <span>ⓘ</span> About pandyaHomeLab
+    </button>
+  </div>
 </nav>
+
+<!-- About platform drawer -->
+<div class="about-backdrop" id="about-backdrop"></div>
+<aside class="about-drawer" id="about-drawer" aria-hidden="true" role="dialog" aria-labelledby="about-title">
+  <div class="about-header">
+    <div>
+      <div class="about-title" id="about-title">Loading…</div>
+      <div class="about-tagline" id="about-tagline"></div>
+    </div>
+    <button class="about-close" id="about-close" type="button" aria-label="Close">✕</button>
+  </div>
+  <div id="about-body"></div>
+</aside>
 
 <div class="hero" id="home">
   <div class="hero-eyebrow"><div class="dot"></div>End-to-End AI Platform</div>
@@ -318,7 +427,7 @@
     <div class="domain-header ml">
       <span class="domain-icon">📊</span>
       <span class="domain-title">Machine Learning</span>
-      <span class="domain-count">3 live · 1 planned</span>
+      <span class="domain-count">2 live · 1 planned</span>
     </div>
     <div class="projects-grid">
       <div class="proj-card ml">
@@ -338,12 +447,12 @@
         <a href="/ml/housing-linear/" class="proj-link ml-link">Try it →</a>
       </div>
       <div class="proj-card ml">
-        <div class="proj-icon">🚢</div>
-        <h3>Titanic AutoML Classifier</h3>
-        <span class="proj-status status-live">✓ Live</span>
-        <p>PyCaret AutoML compares 5+ algorithms on Titanic survival. Best model auto-tuned by AUC with full leaderboard.</p>
-        <span class="proj-route">/ml/titanic-automl/</span>
-        <a href="/ml/titanic-automl/" class="proj-link ml-link">Try it →</a>
+        <div class="proj-icon">🌳</div>
+        <h3>Random Forest Classifier</h3>
+        <span class="proj-status status-planned">Planned</span>
+        <p>Ensemble learning with feature importance and SHAP-based explainability.</p>
+        <span class="proj-route">/ml/random-forest</span>
+        <span class="proj-link proj-link-disabled">Planned</span>
       </div>
     </div>
   </div>
@@ -436,7 +545,6 @@
   <p class="section-desc">Production-grade tools across all domains.</p>
   <div class="stack-grid">
     <div class="stack-chip"><span class="chip-icon">📊</span>scikit-learn</div>
-    <div class="stack-chip"><span class="chip-icon">🔬</span>PyCaret</div>
     <div class="stack-chip"><span class="chip-icon">🔥</span>PyTorch</div>
     <div class="stack-chip"><span class="chip-icon">🧠</span>TensorFlow</div>
     <div class="stack-chip"><span class="chip-icon">🤗</span>HuggingFace</div>
@@ -514,6 +622,80 @@
     Built on Synology NAS · Deploying to AWS · <a href="/health">Health Check</a>
   </p>
 </footer>
+
+<script>
+  // ——— About platform drawer ———
+  let _aboutLoaded = false;
+  let _mermaidReady = false;
+
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function renderInline(text) {
+    let s = escapeHtml(text);
+    s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    s = s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+    s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+    s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" style="color:var(--accent-ml);">$1</a>');
+    return s;
+  }
+  function renderSection(s) {
+    let html = `<section class="about-section"><h3><span class="icon">${s.icon || ''}</span>${escapeHtml(s.title)}</h3>`;
+    if (s.body) s.body.forEach(p => html += `<p>${renderInline(p)}</p>`);
+    if (s.bullets) {
+      html += '<ul class="about-bullets">';
+      s.bullets.forEach(b => html += `<li><b>${escapeHtml(b.label)}:</b> ${renderInline(b.text)}</li>`);
+      html += '</ul>';
+    }
+    if (s.diagram && s.diagram.type === 'mermaid') html += `<div class="about-diagram"><div class="mermaid">${escapeHtml(s.diagram.code)}</div></div>`;
+    if (s.facts) { html += '<div class="about-facts">'; s.facts.forEach(f => html += `<div class="about-fact"><div class="about-fact-label">${escapeHtml(f.label)}</div><div class="about-fact-value">${escapeHtml(f.value)}</div></div>`); html += '</div>'; }
+    if (s.items) { html += '<div class="about-stack">'; s.items.forEach(it => html += `<div class="about-stack-item"><div class="about-stack-name">${escapeHtml(it.name)}</div><div class="about-stack-purpose">${escapeHtml(it.purpose)}</div></div>`); html += '</div>'; }
+    if (s.links) {
+      html += '<div class="about-links">';
+      s.links.forEach(l => { const target = l.external ? ' target="_blank" rel="noopener"' : ''; const arrow = l.external ? ' ↗' : ' →'; html += `<a class="about-link" href="${escapeHtml(l.url)}"${target}>${escapeHtml(l.label)}${arrow}</a>`; });
+      html += '</div>';
+    }
+    html += '</section>';
+    return html;
+  }
+  async function ensureMermaid() {
+    if (_mermaidReady) return;
+    await new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js'; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+    mermaid.initialize({ startOnLoad: false, theme: 'dark', themeVariables: { background: '#13161e', primaryColor: '#1a1e2a', primaryTextColor: '#e2e8f0', primaryBorderColor: '#4f8ef7', lineColor: '#64748b', secondaryColor: '#252a38', tertiaryColor: '#0d0f14' } });
+    _mermaidReady = true;
+  }
+  async function loadAbout() {
+    if (_aboutLoaded) return;
+    try {
+      const res = await fetch('/about-platform.json');
+      if (!res.ok) throw new Error('about fetch failed');
+      const data = await res.json();
+      document.getElementById('about-title').textContent = data.title || 'About';
+      document.getElementById('about-tagline').textContent = data.tagline || '';
+      document.getElementById('about-body').innerHTML = data.sections.map(renderSection).join('');
+      const hasDiagrams = data.sections.some(s => s.diagram && s.diagram.type === 'mermaid');
+      if (hasDiagrams) { await ensureMermaid(); await mermaid.run({ querySelector: '#about-drawer .mermaid' }); }
+      _aboutLoaded = true;
+    } catch (e) {
+      document.getElementById('about-body').innerHTML = '<p style="color:#f87171">Could not load About content. Please try again later.</p>';
+    }
+  }
+  function openAbout() {
+    document.getElementById('about-drawer').classList.add('visible');
+    document.getElementById('about-drawer').setAttribute('aria-hidden', 'false');
+    document.getElementById('about-backdrop').classList.add('visible');
+    document.body.style.overflow = 'hidden';
+    loadAbout();
+  }
+  function closeAbout() {
+    document.getElementById('about-drawer').classList.remove('visible');
+    document.getElementById('about-drawer').setAttribute('aria-hidden', 'true');
+    document.getElementById('about-backdrop').classList.remove('visible');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('about-trigger').addEventListener('click', openAbout);
+  document.getElementById('about-close').addEventListener('click', closeAbout);
+  document.getElementById('about-backdrop').addEventListener('click', closeAbout);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAbout(); });
+</script>
 
 </body>
 </html>

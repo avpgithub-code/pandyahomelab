@@ -1,0 +1,135 @@
+{
+  "title": "About pandyaHomeLab",
+  "tagline": "A live, end-to-end AI engineering platform — built on a Synology NAS, fronted by Cloudflare Tunnel. Every demo is production-style: not a notebook, not a screenshot.",
+  "sections": [
+    {
+      "id": "mission",
+      "title": "The Mission",
+      "icon": "🎯",
+      "body": [
+        "pandyaHomeLab is a personal AI engineering platform that pairs **learning** with **building**. Every demo is a working production-style service — proper architecture, schema validation, container networking, experiment tracking, observability.",
+        "The platform is intentionally **domain-organised**: ML, DL, NLP, and Agentic AI each get their own Docker network, URL prefix, and project set — all following the same disciplined 4-layer pattern (per ADR-013)."
+      ]
+    },
+    {
+      "id": "journey",
+      "title": "The Journey — Business Intelligence → Artificial Intelligence",
+      "icon": "🧭",
+      "body": [
+        "After **20+ years in Business Intelligence**, I'm transitioning into **Artificial Intelligence** — not just a new domain, but a new way to *build*.",
+        "For most of my career, building meant typing every line. That craft taught me how things actually work, and that foundation still matters.",
+        "But I'm building differently now. I'm **pair-programming with an AI agent (Claude Code)** — describing intent, reviewing what's generated, asking *why* each choice was made, course-correcting when needed. The architecture is mine. The judgement is mine. The taste is mine. The typing — mostly, isn't.",
+        "*The shift in one line: from **writing code** to **generating efficient code, with intent**.*"
+      ]
+    },
+    {
+      "id": "architecture",
+      "title": "Platform Architecture",
+      "icon": "🏗️",
+      "body": [
+        "Four AI domains sit on isolated Docker bridge networks, each fronted by a shared Nginx reverse proxy. Each domain has its own shared infrastructure (PostgreSQL, MinIO, Redis, MLflow) so domains never cross-contaminate. Every project inside a domain follows the same 4-layer internal structure."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph TB\n  User([🌍 Internet Visitor]) -->|HTTPS| CF[Cloudflare Tunnel<br/>pandyahomelab.com]\n  CF --> NX[Nginx Reverse Proxy<br/>TLS termination · path routing]\n  NX --> ML[🧪 ML Domain<br/>3 live demos]\n  NX --> DL[🧠 DL Domain<br/>Phase 2]\n  NX --> NLP[💬 NLP Domain<br/>Phase 3]\n  NX --> AG[🤖 Agentic Domain<br/>Phase 4]\n  NX --> MF[MLflow UI<br/>experiment tracking]\n  ML -.->|run logging| MF\n  ML -.->|persistence| PG[(PostgreSQL)]\n  ML -.->|artifacts| MN[(MinIO)]\n  ML -.->|cache| RD[(Redis)]\n\n  classDef live fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef planned fill:#1a1e2a,stroke:#64748b,color:#94a3b8\n  classDef infra fill:#13161e,stroke:#4f8ef7,color:#cbd5e1\n  class ML live\n  class DL,NLP,AG planned\n  class CF,NX,MF,PG,MN,RD infra"
+      }
+    },
+    {
+      "id": "network",
+      "title": "Network Topology",
+      "icon": "🌐",
+      "body": [
+        "Per **ADR-016**, each AI domain gets its own dedicated /24 subnet — letting services within a domain talk freely while keeping clean boundaries between domains. Nginx is the only crossing point from the proxy network into any domain network."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph LR\n  User([🌍 Internet]) --> CF[Cloudflare Tunnel]\n  CF --> NX[Nginx<br/>172.24.0.2]\n  subgraph PROXY[pandya-proxy-network · 172.24.0.0/24]\n    NX\n  end\n  subgraph ML[ml-network · 172.20.0.0/24]\n    IRIS[ml-iris-knn<br/>172.20.0.10]\n    HOUS[ml-housing-linear<br/>172.20.0.11]\n    TIT[ml-titanic-automl<br/>172.20.0.12]\n    MF[ml-mlflow<br/>172.20.0.5]\n    PG[ml-postgres<br/>172.20.0.2]\n  end\n  subgraph DL[dl-network · 172.21.0.0/24]\n    DLP[Phase 2 planned]\n  end\n  subgraph NLP[nlp-network · 172.22.0.0/24]\n    NLPP[Phase 3 planned]\n  end\n  subgraph AG[agentic-network · 172.23.0.0/24]\n    AGP[Phase 4 planned]\n  end\n  NX --> IRIS\n  NX --> HOUS\n  NX --> TIT\n  NX --> MF\n\n  classDef live fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef planned fill:#1a1e2a,stroke:#64748b,color:#94a3b8\n  classDef infra fill:#13161e,stroke:#4f8ef7,color:#cbd5e1\n  class IRIS,HOUS,TIT,MF,PG live\n  class DLP,NLPP,AGP planned\n  class CF,NX infra"
+      },
+      "facts": [
+        {"label": "Proxy network", "value": "172.24.0.0/24"},
+        {"label": "ml-network", "value": "172.20.0.0/24"},
+        {"label": "dl-network", "value": "172.21.0.0/24"},
+        {"label": "nlp-network", "value": "172.22.0.0/24"},
+        {"label": "agentic-network", "value": "172.23.0.0/24"},
+        {"label": "Entry point", "value": "Nginx :8443"}
+      ]
+    },
+    {
+      "id": "pattern",
+      "title": "The 4-Layer Project Pattern",
+      "icon": "📐",
+      "body": [
+        "Every project on pandyaHomeLab — regardless of domain — follows the same per-project 4-layer architecture (locked by ADR-013). Read iris-knn once and you can navigate any other demo immediately."
+      ],
+      "bullets": [
+        {"label": "presentation-logic", "text": "FastAPI routes, Pydantic v2 schemas, error handlers, demo UI."},
+        {"label": "application-logic", "text": "Workflow orchestration (the *what should happen, in what order*) + the model itself."},
+        {"label": "db-logic", "text": "Data loading, train/test splits, preprocessing, persistence."},
+        {"label": "shared", "text": "Cross-cutting utilities: config, structured logger, exceptions, constants."}
+      ],
+      "links": [
+        {"label": "Read the full ML Project Walkthrough (~1,200 lines, iris-knn as the worked example)", "url": "https://github.com/avpgithub-code/pandyahomelab/blob/main/docs/ML_PROJECT_WALKTHROUGH.md", "external": true}
+      ]
+    },
+    {
+      "id": "demos",
+      "title": "Live Demos",
+      "icon": "🚀",
+      "body": [
+        "All three ML demos are live. Click any to try it, or open the **About this project** drawer inside each demo for a deep dive on architecture, metrics, and code patterns."
+      ],
+      "links": [
+        {"label": "🌸 Iris KNN Classifier — multi-class classification, balanced data", "url": "/ml/iris-knn/", "external": false},
+        {"label": "🏠 Housing Linear Regression — continuous prediction, 20,640 census blocks", "url": "/ml/housing-linear/", "external": false},
+        {"label": "🚢 Titanic AutoML — binary classification on imbalanced data, PyCaret AutoML", "url": "/ml/titanic-automl/", "external": false},
+        {"label": "📈 MLflow — experiment tracking for every run", "url": "/mlflow/", "external": false}
+      ]
+    },
+    {
+      "id": "roadmap",
+      "title": "Roadmap",
+      "icon": "🗺️",
+      "body": [
+        "Phase 1 (ML) is complete. The platform now grows along two dimensions: **more domains** (DL, NLP, Agentic) and **production maturity** (CI/CD, AWS deployment, observability)."
+      ],
+      "bullets": [
+        {"label": "Phase 2 — Deep Learning", "text": "CNN on MNIST handwritten digits → image classification → object detection. PyTorch + interactive draw-a-digit UI."},
+        {"label": "Phase 3 — Natural Language Processing", "text": "Sentiment analysis, Named Entity Recognition, transformer-based models from HuggingFace."},
+        {"label": "Phase 4 — Agentic AI", "text": "Claude API in production. Multi-step reasoning, tool use, structured outputs."},
+        {"label": "Stage 3 — CI/CD", "text": "GitHub Actions pipelines, automated test gates, container image registry."},
+        {"label": "Stage 4 — AWS deployment", "text": "Migrate from NAS to ECS with RDS PostgreSQL, S3 artifact storage, ElastiCache Redis."},
+        {"label": "Stage 5 — TLS + Observability", "text": "Let's Encrypt certificates, Prometheus + Grafana, distributed tracing."}
+      ]
+    },
+    {
+      "id": "about-archit",
+      "title": "About Archit",
+      "icon": "👤",
+      "body": [
+        "**Archit Pandya** — a seasoned technologist with **20+ years across enterprise BI, data engineering, and analytics**. Most recently **Manager Projects at Cognizant** (2021–2023), preceded by a **decade as BI Analytics Supervisor at Becton Dickinson** (2010–2020) and **12 years as BI Analytics Supervisor at C.R. Bard** (1998–2010) — delivering data-driven solutions for Finance, Supply Chain, Sales, and Marketing functions across Fortune-500 medical-device organisations.",
+        "**Education:** M.B.A. Finance (Fairleigh Dickinson University, 2005) · M.S. Computer Science (NJIT, 1994). **Certifications:** AWS Certified Cloud Practitioner; MicroStrategy CRD, CPA, CDP.",
+        "After decades of building enterprise BI solutions, Archit is now extending his career into **Advanced Analytics and Machine Learning** — currently through Analytics Vidhya's mentorship program, applying stacked regression ensembles to retail sales forecasting and benchmarked regression models to used-car pricing.",
+        "pandyaHomeLab is the work and the proof of the work: every demo here was built by pairing two decades of *\"how things actually ship\"* engineering judgement with the velocity of an AI coding agent. The platform's **depth** reflects experience; the **pace** reflects what becomes possible when a senior engineer pair-programs with a capable AI."
+      ],
+      "bullets": [
+        {"label": "📺 Acknowledgements", "text": "Dedicated in part to **CampusX** ([@campusx-official](https://www.youtube.com/@campusx-official)) and **Krish Naik** ([@krishnaik06](https://www.youtube.com/@krishnaik06)) — relentless inspiration for going beyond just *training a model* into *engineering a production-quality solution*. \"More than a model.\""}
+      ],
+      "links": [
+        {"label": "LinkedIn — Archit Pandya", "url": "https://www.linkedin.com/in/architpandya/", "external": true},
+        {"label": "Source on GitHub", "url": "https://github.com/avpgithub-code/pandyahomelab", "external": true}
+      ]
+    },
+    {
+      "id": "learn",
+      "title": "Learn More",
+      "icon": "🔗",
+      "links": [
+        {"label": "ML Project Walkthrough — the canonical iris-knn tour", "url": "https://github.com/avpgithub-code/pandyahomelab/blob/main/docs/ML_PROJECT_WALKTHROUGH.md", "external": true},
+        {"label": "Architecture Decision Records (20 ADRs)", "url": "https://github.com/avpgithub-code/pandyahomelab/tree/main/docs/adr", "external": true},
+        {"label": "Development Runbook (daily commands)", "url": "https://github.com/avpgithub-code/pandyahomelab/blob/main/docs/DEVELOPMENT_RUNBOOK.md", "external": true},
+        {"label": "Network CIDR Summary", "url": "https://github.com/avpgithub-code/pandyahomelab/blob/main/docs/NETWORK_CIDR_SUMMARY.md", "external": true},
+        {"label": "MLflow — live experiment tracking", "url": "/mlflow/", "external": false}
+      ]
+    }
+  ]
+}
