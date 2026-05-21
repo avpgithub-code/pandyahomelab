@@ -11,8 +11,14 @@
 **Target accuracy:** ≥98%  
 **Demo UI:** HTML5 canvas — draw a digit, get prediction with confidence bars
 
-All Phase 1 infrastructure is already running. Follow top-to-bottom without deviation.  
-Read `mlflow_operational_lessons.md` in memory before starting — all MLflow gotchas are pre-solved.
+All Phase 1 infrastructure is already running. Follow top-to-bottom without deviation.
+Read these memories before starting — every gotcha worth knowing is pre-solved:
+- `mlflow_operational_lessons` — MLflow routing + artifact config
+- `deployment_image_rebuild_rules` — bind-mount vs. baked-image, `docker compose build` is a no-op trap, Nginx 502 cooldown
+- `feedback_widget_v1` — one-line embed for the bottom-of-page widget
+- `pycaret_docker_lessons` — adjacent pattern for fussy framework wheels (PyTorch wheels are similarly large)
+
+Also read `docs/PHASE_2_MASTER_PLAN.md` first — it covers cross-cutting decisions (dl-network, MLflow attachment, About drawer, feedback widget, landing-page card flip) that apply to **every** DL sub-phase so 2b/2c don't repeat them.
 
 ---
 
@@ -27,7 +33,7 @@ sudo docker ps | grep -E "iris|housing|mlflow|nginx"  # All healthy
 
 ---
 
-## Phase 2a.1 — DL Domain Infrastructure
+## Phase 2a.1 — DL Domain Infrastructure (domain-local per V3)
 
 ### Create branch
 ```bash
@@ -35,13 +41,15 @@ cd /volume1/pandya-homelab
 git checkout -b dl-mnist-cnn/scaffold
 ```
 
-### Create `deployment/dl/docker-compose.yml`
+### Create `deployment/dl/docker-compose.yml` (infrastructure — postgres/minio/redis/mlflow)
+
+Domain-autonomous: dl-network has its **own** postgres/minio/redis/mlflow stack, mirroring ml-network. No cross-network reach-back into ml-network.
 
 ```yaml
 version: '3.8'
 
 # DL Domain Infrastructure
-# dl-network: 172.21.0.0/24 (isolated per ADR-016)
+# dl-network: 172.21.0.0/24 (isolated per ADR-016, full V3 domain autonomy)
 
 networks:
   dl-network:
@@ -52,15 +60,80 @@ networks:
         - subnet: 172.21.0.0/24
           gateway: 172.21.0.1
 
-  # Shared ML infra network (for MLflow access)
-  ml_ml-network:
-    external: true
-
 services:
-  # Placeholder — project containers added in docker-compose.dev.yml
+  dl-postgres:
+    image: postgres:16-alpine
+    container_name: dl-postgres
+    environment:
+      POSTGRES_DB: ${DL_POSTGRES_DB:-dldb}
+      POSTGRES_USER: ${DL_POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${DL_POSTGRES_PASSWORD}
+    ports:
+      - "5434:5432"          # host 5434 — ml-postgres already on 5433
+    volumes:
+      - dl_postgres_data:/var/lib/postgresql/data
+    networks:
+      dl-network:
+        ipv4_address: 172.21.0.2
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+
+  dl-minio:
+    image: minio/minio:latest
+    container_name: dl-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${DL_MINIO_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${DL_MINIO_PASSWORD}
+    ports:
+      - "9002:9000"          # host 9002 — ml-minio on 9000
+      - "9003:9001"          # host 9003 — ml-minio console on 9001
+    volumes:
+      - dl_minio_data:/data
+    networks:
+      dl-network:
+        ipv4_address: 172.21.0.3
+    restart: unless-stopped
+
+  dl-redis:
+    image: redis:7-alpine
+    container_name: dl-redis
+    ports:
+      - "6380:6379"          # host 6380 — ml-redis on 6379
+    networks:
+      dl-network:
+        ipv4_address: 172.21.0.4
+    restart: unless-stopped
+
+  dl-mlflow:
+    image: pandya-mlflow:latest   # reuse the same image that powers ml-mlflow
+    container_name: dl-mlflow
+    environment:
+      MLFLOW_BACKEND_STORE_URI: postgresql://postgres:${DL_POSTGRES_PASSWORD}@dl-postgres:5432/dldb
+      MLFLOW_ARTIFACT_ROOT: s3://dl-mlflow-artifacts/
+      AWS_ACCESS_KEY_ID: ${DL_MINIO_USER:-minioadmin}
+      AWS_SECRET_ACCESS_KEY: ${DL_MINIO_PASSWORD}
+      MLFLOW_S3_ENDPOINT_URL: http://dl-minio:9000
+    networks:
+      dl-network:
+        ipv4_address: 172.21.0.5
+    depends_on:
+      dl-postgres:
+        condition: service_healthy
+      dl-minio:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  dl_postgres_data:
+  dl_minio_data:
 ```
 
-### Create `deployment/dl/docker-compose.dev.yml`
+**Re-apply every MLflow gotcha from [mlflow_operational_lessons](../../memory/mlflow_operational_lessons.md)** to this new instance — artifact root, --serve-artifacts flag, healthcheck path. Don't assume the ml-mlflow Dockerfile is copy-pasteable without re-reading the lessons.
+
+### Create `deployment/dl/docker-compose.dev.yml` (the demo overlay)
 
 ```yaml
 version: '3.8'
@@ -71,7 +144,7 @@ services:
     container_name: dl-mnist-cnn
     environment:
       PYTHONPATH: /app
-      MLFLOW_TRACKING_URI: http://ml-mlflow:5000
+      MLFLOW_TRACKING_URI: http://dl-mlflow:5000    # domain-local, not ml-mlflow
     ports:
       - "8010:8000"
     volumes:
@@ -79,8 +152,6 @@ services:
     networks:
       dl-network:
         ipv4_address: 172.21.0.10
-      ml_ml-network:
-        ipv4_address: 172.20.0.30
     depends_on: []
     restart: unless-stopped
     healthcheck:
@@ -96,6 +167,20 @@ services:
 
 volumes:
   dl_mnist_data:
+```
+
+### Bring up dl-network infrastructure first
+
+Before any DL demo:
+```bash
+cd /volume1/pandya-homelab/deployment/dl
+sudo docker compose up -d   # starts dl-postgres, dl-minio, dl-redis, dl-mlflow
+sudo docker compose ps      # all four should be healthy/running
+```
+
+Verify dl-mlflow is reachable on the network:
+```bash
+sudo docker exec dl-mlflow curl -s http://dl-mlflow:5000/health || echo "mlflow not up yet"
 ```
 
 ### Connect Nginx to dl-network
@@ -520,13 +605,21 @@ git commit -m "feat(deployment): wire dl-mnist-cnn into dl-network with Nginx ro
 
 ---
 
-## Phase 2a.8 — Landing Page Update
+## Phase 2a.8 — Landing Page + About Drawer + Feedback Widget
 
-In `website/index.html`:
+**Landing page (`website/index.html`):**
 - Change dl-mnist-cnn card from `status-planned` → `status-live`
 - Update route to `/dl/mnist-cnn/`
 - Add `dl-link` class with `href="/dl/mnist-cnn/"`
 - Update domain count: `0 live · 3 planned` → `1 live · 2 planned`
+
+**About drawer (new since this plan was written — every demo now ships with one):**
+- Create `ml/dl-mnist-cnn/presentation-logic/api/about.json` with sections: Project Summary, Dataset, CNN Architecture (with Mermaid diagram), Training, Metrics (use `{{tokens}}` for live values from `/model-info`), Code Walkthrough, Author/Credits, Learn More
+- Reuse the About drawer JS/CSS from iris-knn/housing-linear ui.html — it's the same pattern, only the JSON differs
+
+**Feedback widget (new since this plan was written):**
+- Add `<script src="/feedback-widget.js"></script>` before `</body>` in `ui.html`
+- That's the whole change — the widget auto-detects `page_id`, the Nginx `/feedback/` route already exists, and the rate limiter is shared (per-page, 3-per-5min)
 
 ```bash
 git commit -m "feat(website): mark dl-mnist-cnn as live on landing page"
@@ -562,20 +655,41 @@ git log --oneline | head -5
 
 ---
 
-## IP/Port Reference Card
+## IP/Port Reference Card (refreshed May 2026 — full V3 domain autonomy)
+
+**ml-network (172.20.0.0/24) — existing, unchanged:**
 
 | Service | Container IP | Host Port | URL Path |
 |---|---|---|---|
-| Nginx (proxy) | 172.24.0.2 | 8080/8443 | / |
 | ml-postgres | 172.20.0.2 | 5433 | — |
 | ml-minio | 172.20.0.3 | 9000/9001 | — |
 | ml-redis | 172.20.0.4 | 6379 | — |
-| ml-mlflow | 172.20.0.5 | 5000 | /mlflow/ |
+| ml-mlflow | 172.20.0.5 | — | /mlflow/ |
 | ml-iris-knn | 172.20.0.10 | 8001 | /ml/iris-knn/ |
 | ml-housing-linear | 172.20.0.11 | 8002 | /ml/housing-linear/ |
-| Nginx on ml-net | 172.20.0.20 | — | proxy only |
+| ml-titanic-automl | 172.20.0.12 | 8003 | /ml/titanic-automl/ |
+| Nginx on ml-net | 172.20.0.20 | — | proxy attachment |
+| analytics-ingester | 172.20.0.30 | — | platform service |
+| admin-portal | 172.20.0.31 | — | /admin/, /feedback/ |
+
+**dl-network (172.21.0.0/24) — instantiated by this phase:**
+
+| Service | Container IP | Host Port | URL Path |
+|---|---|---|---|
+| dl-postgres | 172.21.0.2 | 5434 | — |
+| dl-minio | 172.21.0.3 | 9002/9003 | — |
+| dl-redis | 172.21.0.4 | 6380 | — |
+| dl-mlflow | 172.21.0.5 | — | tbd (see open question) |
 | **dl-mnist-cnn** | **172.21.0.10** | **8010** | **/dl/mnist-cnn/** |
-| Nginx on dl-net | 172.21.0.20 | — | proxy only |
+| Nginx on dl-net | 172.21.0.20 | — | proxy attachment |
+
+**Pandya proxy network (172.24.0.0/24):**
+
+| Service | Container IP | Host Port | URL Path |
+|---|---|---|---|
+| pandya-nginx | 172.24.0.2 | 8080/8443 | / |
+
+**No cross-network attachments.** ml-network and dl-network are independent — DL demos cannot reach ml-mlflow or ml-postgres, and vice versa.
 
 ---
 
