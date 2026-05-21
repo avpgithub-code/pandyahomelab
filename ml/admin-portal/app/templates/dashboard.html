@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>pandyaHomeLab — Admin Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -14,6 +15,7 @@
     --accent:   #4f8ef7;
     --green:    #22c55e;
     --amber:    #facc15;
+    --purple:   #a855f7;
     --text:     #e2e8f0;
     --muted:    #64748b;
     --radius:   8px;
@@ -81,32 +83,74 @@
   .card.bots .card-value { color: var(--amber); }
   .card.real .card-value { color: var(--green); }
 
+  /* Chart container */
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+  }
+  .chart-wrap { position: relative; height: 280px; }
+
+  /* Two-column grid for countries + referrers */
+  .two-col {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+  }
+  @media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+  }
+  .panel-title {
+    font-size: .75rem; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--muted); font-weight: 700; margin-bottom: .9rem;
+  }
+
+  /* Country layout: pie left, table right */
+  .country-row { display: grid; grid-template-columns: 160px 1fr; gap: 1rem; align-items: center; }
+  @media (max-width: 480px) { .country-row { grid-template-columns: 1fr; } }
+  .country-pie-wrap { position: relative; height: 160px; }
+
   table {
     width: 100%; border-collapse: collapse;
     background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--radius); overflow: hidden;
   }
+  .panel table { background: transparent; border: none; }
   th, td {
-    padding: .6rem .9rem; text-align: left;
-    font-size: .85rem; border-bottom: 1px solid rgba(37,42,56,.6);
+    padding: .55rem .8rem; text-align: left;
+    font-size: .82rem; border-bottom: 1px solid rgba(37,42,56,.6);
   }
   th {
     background: var(--surface2); color: var(--muted);
-    font-size: .68rem; text-transform: uppercase; letter-spacing: .08em;
+    font-size: .67rem; text-transform: uppercase; letter-spacing: .08em;
     font-weight: 700;
   }
+  .panel th { background: transparent; padding-top: 0; }
   td code {
     font-family: 'SF Mono', Consolas, monospace;
-    font-size: .82rem; color: var(--accent);
+    font-size: .8rem; color: var(--accent);
   }
   td.num {
     font-family: 'SF Mono', Consolas, monospace;
     text-align: right; font-weight: 600;
   }
+  td.country-code {
+    font-family: 'SF Mono', Consolas, monospace;
+    font-weight: 700; color: var(--accent);
+    letter-spacing: .05em;
+  }
   tr:last-child td { border-bottom: none; }
   tbody tr:hover { background: rgba(79,142,247,.04); }
 
   .empty {
+    padding: 1.5rem; text-align: center; color: var(--muted);
+    font-size: .82rem; font-style: italic;
+  }
+  .empty-card {
     padding: 2rem; text-align: center; color: var(--muted);
     background: var(--surface); border: 1px dashed var(--border);
     border-radius: var(--radius); font-size: .85rem;
@@ -161,7 +205,74 @@
     </div>
   </div>
 
-  <h2>📅 Daily breakdown</h2>
+  <h2>📈 Daily traffic — real visitors vs bots</h2>
+  <div class="chart-card">
+    {% if daily %}
+    <div class="chart-wrap"><canvas id="dailyChart"></canvas></div>
+    {% else %}
+    <div class="empty">No events recorded in the last {{ days }} days.</div>
+    {% endif %}
+  </div>
+
+  <h2>🌍 Countries & 🔗 Referrers</h2>
+  <div class="two-col">
+
+    <div class="panel">
+      <div class="panel-title">🌍 Top countries (real visitors)</div>
+      {% if countries %}
+      <div class="country-row">
+        <div class="country-pie-wrap"><canvas id="countryPie"></canvas></div>
+        <table>
+          <thead>
+            <tr>
+              <th>Country</th>
+              <th style="text-align:right">Visitors</th>
+              <th style="text-align:right">Visits</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in countries %}
+            <tr>
+              <td class="country-code">{{ row.country }}</td>
+              <td class="num">{{ row.visitors }}</td>
+              <td class="num">{{ row.visits }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty">No country data yet — visitors arrive via Cloudflare with a country header attached.</div>
+      {% endif %}
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">🔗 Top referrers (real visitors)</div>
+      {% if referrers %}
+      <table>
+        <thead>
+          <tr>
+            <th>Source</th>
+            <th style="text-align:right">Visits</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in referrers %}
+          <tr>
+            <td><code>{{ row.domain }}</code></td>
+            <td class="num">{{ row.visits }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty">No referrer data yet.</div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <h2>📅 Daily breakdown (precise numbers)</h2>
   {% if daily %}
   <table>
     <thead>
@@ -186,7 +297,7 @@
     </tbody>
   </table>
   {% else %}
-  <div class="empty">No events recorded in the last {{ days }} days.</div>
+  <div class="empty-card">No events recorded in the last {{ days }} days.</div>
   {% endif %}
 
   <h2>🔝 Top 5 paths (real visitors only)</h2>
@@ -208,14 +319,119 @@
     </tbody>
   </table>
   {% else %}
-  <div class="empty">No real visitor activity in the last {{ days }} days.</div>
+  <div class="empty-card">No real visitor activity in the last {{ days }} days.</div>
   {% endif %}
 
   <footer>
-    pandya<em>HomeLab</em> · admin-portal v1.0.0-alpha1 · Step 2.5 will add charts and per-country / referrer / hour-of-day views ·
+    pandya<em>HomeLab</em> · admin-portal v1.0.1 · Step 2.5 adds Chart.js line + pie · Step 2.7+ may add hour-of-day heatmap + per-session view ·
     <a href="/">← back to landing</a>
   </footer>
 
 </div>
+
+<script>
+  const dailyData     = {{ daily_chart_json | safe }};
+  const countriesData = {{ countries_chart_json | safe }};
+
+  // Chart.js defaults for the dark theme
+  if (window.Chart) {
+    Chart.defaults.color = '#cbd5e1';
+    Chart.defaults.borderColor = '#252a38';
+    Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+  }
+
+  // 1) Daily traffic line chart
+  if (dailyData.length > 0) {
+    const ctx = document.getElementById('dailyChart');
+    if (ctx) {
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: dailyData.map(d => d.day),
+          datasets: [
+            {
+              label: 'Real visitors',
+              data: dailyData.map(d => d.real),
+              borderColor: '#22c55e',
+              backgroundColor: 'rgba(34,197,94,.15)',
+              fill: true,
+              tension: 0.25,
+              borderWidth: 2,
+              pointRadius: 3,
+              pointHoverRadius: 5,
+            },
+            {
+              label: 'Bot events',
+              data: dailyData.map(d => d.bots),
+              borderColor: '#facc15',
+              backgroundColor: 'rgba(250,204,21,.10)',
+              fill: true,
+              tension: 0.25,
+              borderWidth: 2,
+              pointRadius: 3,
+              pointHoverRadius: 5,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
+            tooltip: {
+              backgroundColor: '#13161e',
+              borderColor: '#252a38',
+              borderWidth: 1,
+              padding: 10,
+            },
+          },
+          scales: {
+            x: { grid: { color: 'rgba(37,42,56,.5)' }, ticks: { maxRotation: 0, autoSkipPadding: 20 } },
+            y: { beginAtZero: true, grid: { color: 'rgba(37,42,56,.5)' }, ticks: { precision: 0 } },
+          },
+        },
+      });
+    }
+  }
+
+  // 2) Country pie chart
+  if (countriesData.length > 0) {
+    const ctx = document.getElementById('countryPie');
+    if (ctx) {
+      const palette = ['#4f8ef7', '#22c55e', '#facc15', '#a855f7', '#f97316', '#06b6d4', '#ec4899', '#84cc16', '#8b5cf6', '#64748b'];
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: countriesData.map(d => d.country),
+          datasets: [{
+            data: countriesData.map(d => d.visitors),
+            backgroundColor: countriesData.map((_, i) => palette[i % palette.length]),
+            borderColor: '#0d0f14',
+            borderWidth: 2,
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#13161e',
+              borderColor: '#252a38',
+              borderWidth: 1,
+              padding: 10,
+              callbacks: {
+                label: (c) => `${c.label}: ${c.parsed} visitors`,
+              },
+            },
+          },
+          cutout: '55%',
+        },
+      });
+    }
+  }
+</script>
+
 </body>
 </html>
