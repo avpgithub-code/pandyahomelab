@@ -98,3 +98,34 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+  # ─── Platform service: analytics-ingester ────────────────────────────────────
+  # Tails Nginx JSON log → enriches (IP hash + bot detection) → writes to
+  # analytics.visitor_events in ml-postgres. Cross-cutting infra, not a demo.
+  analytics-ingester:
+    image: analytics-ingester:latest
+    container_name: analytics-ingester
+    environment:
+      DATABASE_URL: postgresql://postgres:${ML_POSTGRES_PASSWORD}@ml-postgres:5432/mldb
+      ANALYTICS_IP_SALT: ${ANALYTICS_IP_SALT}
+      LOG_PATH: /logs/access.json.log
+      CHECKPOINT_PATH: /checkpoint/state.json
+      POLL_INTERVAL_SECONDS: "2"
+    volumes:
+      - /volume1/pandya-homelab/logs/nginx:/logs:ro
+      - analytics_ingester_checkpoint:/checkpoint
+    networks:
+      ml-network:
+        ipv4_address: 172.20.0.30
+    depends_on:
+      ml-postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  analytics_ingester_checkpoint:
