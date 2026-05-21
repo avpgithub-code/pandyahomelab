@@ -35,6 +35,7 @@ services:
       - "8443:443"
     volumes:
       - /volume1/pandya-homelab/website:/var/www/html:ro
+      - /volume1/pandya-homelab/logs/nginx:/var/log/nginx
     networks:
       pandya-proxy-network:
         ipv4_address: 172.24.0.2
