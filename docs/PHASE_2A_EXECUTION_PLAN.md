@@ -330,24 +330,49 @@ tail -20 ~/cloudflared.log
 # Expect: "Registered tunnel connection" lines, no errors
 ```
 
-### Step 2: Add Nginx `server` block + upstream
+### Step 2: Add Nginx upstreams + server block
 
-In `deployment/nginx/nginx.conf`, add a sibling `server` block alongside the existing `pandyahomelab.com` block:
+In `deployment/nginx/nginx.conf`. Two changes here; the `/dl/mnist-cnn/` route is deferred to Phase 2a.7.
 
+**Why not batch /dl/mnist-cnn/ here:** Nginx resolves all upstream hostnames at startup (not lazily on first request, as initially assumed). Declaring `upstream dl_mnist { server dl-mnist-cnn:8000; }` before the container exists causes `nginx: [emerg] host not found in upstream "dl-mnist-cnn:8000"` and the server fails to start. Two ways around it: (i) defer the upstream + location to Phase 2a.7 when the container exists; (ii) use the variable + `resolver 127.0.0.11` pattern so DNS resolution defers to request time. Option (i) is simpler and the path taken here — one extra Nginx rebuild in Phase 2a.7 is a small cost vs. the resolver-pattern config nuance.
+
+**(a) One new upstream** (added after `ml_mlflow`):
 ```nginx
 upstream dl_mlflow {
     server dl-mlflow:5000 max_fails=3 fail_timeout=30s;
 }
+```
 
+**(b) Replace the existing `/dl/` 503 block** with the DL JSON listing (only — no `/dl/mnist-cnn/` location yet) inside the `pandyahomelab.com` server block. The comment heading for the still-pending domains becomes "NLP, Agentic — coming soon".
+
+```nginx
+location = /dl/ {
+    return 200 '{"domain":"dl","projects":["mnist-cnn"],"status":"active"}';
+    add_header Content-Type application/json;
+}
+```
+
+**(c) New `server` block** for `mlflow-dl.pandyahomelab.com`, appended at the end of the `http {}` block. Uses the existing self-signed cert at `/etc/nginx/certs/server.{crt,key}` (cloudflared has `noTLSVerify: true`, so the cert SAN coverage doesn't matter for tunnel-terminated traffic). Logging uses `combined`-only — MLflow is ops/dev surface, not visitor traffic.
+
+```nginx
 server {
-    listen 8443 ssl;
+    listen 443 ssl http2;
     server_name mlflow-dl.pandyahomelab.com;
-    ssl_certificate     /etc/nginx/ssl/pandya-nginx.crt;
-    ssl_certificate_key /etc/nginx/ssl/pandya-nginx.key;
 
-    # All MLflow routes (UI, /api/2.0/mlflow, /ajax-api/2.0/mlflow, /graphql)
-    # go to dl_mlflow here — no collision with ml_mlflow because routing is by
-    # server_name (host header), not by path.
+    ssl_certificate /etc/nginx/certs/server.crt;
+    ssl_certificate_key /etc/nginx/certs/server.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+
+    access_log /var/log/nginx/access.log combined;
+    error_log /var/log/nginx/error.log warn;
+
+    # Host-based routing means /api/2.0/mlflow, /ajax-api/2.0/mlflow, /graphql
+    # all proxy to dl_mlflow here — no collision with the ml_mlflow versions
+    # in the pandyahomelab.com server block (host header disambiguates).
     location / {
         proxy_pass http://dl_mlflow/;
         proxy_set_header Host $host;
@@ -358,7 +383,7 @@ server {
 }
 ```
 
-**Confirm the existing `server` block has `server_name pandyahomelab.com www.pandyahomelab.com;` explicitly** so it doesn't catch `mlflow-dl` requests as the default server. If it's currently using `server_name _;` or omitted, add the explicit names.
+**Existing `server_name` check:** the main HTTPS server block at the top of `nginx.conf` already has `server_name pandyahomelab.com www.pandyahomelab.com;` explicitly — no risk of it catching `mlflow-dl` requests as the default server.
 
 ### Step 3: Rebuild Nginx image and recreate
 
@@ -732,30 +757,93 @@ git commit -m "build(docker): finalize Dockerfile for dl-mnist-cnn"
 
 ## Phase 2a.7 — Integration
 
-### Step 1: Start DL infrastructure
+### Step 1: Add the dl-mnist-cnn service to the dev overlay
+
+Edit `deployment/dl/docker-compose.dev.yml` — replace the empty `services: {}` with the actual service block:
+
+```yaml
+services:
+  dl-mnist-cnn:
+    image: dl-mnist-cnn:latest
+    container_name: dl-mnist-cnn
+    environment:
+      PYTHONPATH: /app
+      MLFLOW_TRACKING_URI: http://dl-mlflow:5000
+    ports:
+      - "8010:8000"
+    networks:
+      dl-network:
+        ipv4_address: 172.21.0.10
+    depends_on:
+      dl-postgres:
+        condition: service_healthy
+      dl-redis:
+        condition: service_healthy
+      dl-minio:
+        condition: service_healthy
+      dl-mlflow:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+```
+
+### Step 2: Bring up dl-mnist-cnn (infrastructure already running)
 
 ```bash
 cd /volume1/pandya-homelab/deployment/dl/
-sudo docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
-sleep 60
-sudo docker-compose -f docker-compose.yml -f docker-compose.dev.yml ps
+sudo docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d dl-mnist-cnn
+sleep 15
+sudo docker compose -f docker-compose.yml -f docker-compose.dev.yml ps dl-mnist-cnn
+# Expect: Up X seconds (healthy)
 ```
 
-### Step 2: Rebuild Nginx with dl-network
+### Step 3: Add the deferred `/dl/mnist-cnn/` route to Nginx (deferred from Phase 2a.1b)
+
+Now that the `dl-mnist-cnn` container exists, the upstream hostname will resolve at Nginx startup. Add to `deployment/nginx/nginx.conf`:
+
+**(a) Upstream (after `dl_mlflow`):**
+```nginx
+upstream dl_mnist {
+    server dl-mnist-cnn:8000 max_fails=3 fail_timeout=30s;
+}
+```
+
+**(b) Location block (inside the `pandyahomelab.com` server block, before `location = /dl/`):**
+```nginx
+location /dl/mnist-cnn/ {
+    proxy_pass http://dl_mnist/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_connect_timeout 30s;
+    proxy_send_timeout 60s;
+    proxy_read_timeout 60s;
+}
+```
+
+### Step 4: Rebuild Nginx + recreate
 
 ```bash
 cd /volume1/pandya-homelab/deployment/nginx/
-sudo docker-compose down
 sudo docker build -t pandya-nginx:latest .
-sudo docker-compose up -d
-sleep 10
+sudo docker compose up -d --force-recreate
 ```
 
-### Step 3: Verify end-to-end
+### Step 5: Verify end-to-end
 
 ```bash
-curl -k https://localhost:8443/dl/mnist-cnn/health
-curl -k "https://localhost:8443/dl/" | python3 -m json.tool
+curl -k https://localhost:8443/dl/mnist-cnn/health        # Expect: healthy JSON
+curl -k https://localhost:8443/dl/ | python3 -m json.tool # Expect: dl listing
 ```
 
 ```bash
