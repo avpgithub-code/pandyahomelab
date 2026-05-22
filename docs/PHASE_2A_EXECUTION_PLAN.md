@@ -429,9 +429,12 @@ After this step completes, refresh [cloudflare_tunnel memory](../memory/cloudfla
 
 ## Phase 2a.2 — Project Scaffolding
 
+DL projects live at the top level under `dl/` per V3 architecture (parallel to `ml/`, `nlp/`, `agentic/`). The first DL project creates the `dl/` directory; subsequent ones (2b, 2c) just `cp -r` into it. Template source stays in `ml/_templates/` for now — the skeleton is domain-agnostic, so a separate `dl/_templates/` is premature. Can extract one later if 2b/2c reveal DL-specific defaults worth encoding.
+
 ```bash
-cp -r ml/_templates/ml-project-template/ ml/dl-mnist-cnn/
-cd ml/dl-mnist-cnn/
+mkdir -p dl
+cp -r ml/_templates/ml-project-template/ dl/dl-mnist-cnn/
+cd dl/dl-mnist-cnn/
 ln -s db-logic db_logic
 ln -s application-logic application_logic
 ln -s presentation-logic presentation_logic
@@ -734,7 +737,7 @@ RUN pip install --no-cache-dir --extra-index-url https://download.pytorch.org/wh
 **Expected image size:** ~2.5GB (PyTorch CPU is large — acceptable)
 
 ```bash
-cd /volume1/pandya-homelab/ml/dl-mnist-cnn
+cd /volume1/pandya-homelab/dl/dl-mnist-cnn
 sudo docker build -f docker/Dockerfile -t dl-mnist-cnn:latest .
 # Expected: builds cleanly
 
@@ -861,7 +864,7 @@ git commit -m "feat(deployment): wire dl-mnist-cnn into dl-network with Nginx ro
 - Update domain count: `0 live · 3 planned` → `1 live · 2 planned`
 
 **About drawer (new since this plan was written — every demo now ships with one):**
-- Create `ml/dl-mnist-cnn/presentation-logic/api/about.json` with sections: Project Summary, Dataset, CNN Architecture (with Mermaid diagram), Training, Metrics (use `{{tokens}}` for live values from `/model-info`), Code Walkthrough, Author/Credits, Learn More
+- Create `dl/dl-mnist-cnn/presentation-logic/api/about.json` with sections: Project Summary, Dataset, CNN Architecture (with Mermaid diagram), Training, Metrics (use `{{tokens}}` for live values from `/model-info`), Code Walkthrough, Author/Credits, Learn More
 - Reuse the About drawer JS/CSS from iris-knn/housing-linear ui.html — it's the same pattern, only the JSON differs
 
 **Feedback widget (new since this plan was written):**
