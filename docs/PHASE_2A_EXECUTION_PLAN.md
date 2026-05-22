@@ -45,11 +45,15 @@ git checkout -b dl-mnist-cnn/scaffold
 
 Domain-autonomous: dl-network has its **own** postgres/minio/redis/mlflow stack, mirroring ml-network. No cross-network reach-back into ml-network.
 
+**MLflow config mirrors ml-mlflow exactly** (vanilla `ghcr.io/mlflow/mlflow:latest` image, SQLite backend store, local artifact volume with `--serve-artifacts`) — this is the documented "correct combo" from [mlflow_operational_lessons](../memory/mlflow_operational_lessons.md). `dl-postgres` and `dl-minio` are stood up on the network for use by future DL demos (analytics, image storage, etc.) but are **not wired into dl-mlflow** — exactly like the ML side.
+
 ```yaml
 version: '3.8'
 
 # DL Domain Infrastructure
-# dl-network: 172.21.0.0/24 (isolated per ADR-016, full V3 domain autonomy)
+# Each service connects to dl-network (172.21.0.0/24, isolated per V3 domain autonomy).
+# Mirrors deployment/ml/docker-compose.yml structure exactly so operational knowledge
+# (MLflow gotchas, healthcheck patterns, log rotation) transfers verbatim.
 
 networks:
   dl-network:
@@ -61,6 +65,8 @@ networks:
           gateway: 172.21.0.1
 
 services:
+  # Infrastructure Services (shared by future DL projects: 2a/2b/2c)
+
   dl-postgres:
     image: postgres:16-alpine
     container_name: dl-postgres
@@ -69,104 +75,151 @@ services:
       POSTGRES_USER: ${DL_POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${DL_POSTGRES_PASSWORD}
     ports:
-      - "5434:5432"          # host 5434 — ml-postgres already on 5433
+      - "5434:5432"
     volumes:
       - dl_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DL_POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       dl-network:
         ipv4_address: 172.21.0.2
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-
-  dl-minio:
-    image: minio/minio:latest
-    container_name: dl-minio
-    command: server /data --console-address ":9001"
-    environment:
-      MINIO_ROOT_USER: ${DL_MINIO_USER:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${DL_MINIO_PASSWORD}
-    ports:
-      - "9002:9000"          # host 9002 — ml-minio on 9000
-      - "9003:9001"          # host 9003 — ml-minio console on 9001
-    volumes:
-      - dl_minio_data:/data
-    networks:
-      dl-network:
-        ipv4_address: 172.21.0.3
-    restart: unless-stopped
-
-  dl-redis:
-    image: redis:7-alpine
-    container_name: dl-redis
-    ports:
-      - "6380:6379"          # host 6380 — ml-redis on 6379
-    networks:
-      dl-network:
-        ipv4_address: 172.21.0.4
-    restart: unless-stopped
-
-  dl-mlflow:
-    image: pandya-mlflow:latest   # reuse the same image that powers ml-mlflow
-    container_name: dl-mlflow
-    environment:
-      MLFLOW_BACKEND_STORE_URI: postgresql://postgres:${DL_POSTGRES_PASSWORD}@dl-postgres:5432/dldb
-      MLFLOW_ARTIFACT_ROOT: s3://dl-mlflow-artifacts/
-      AWS_ACCESS_KEY_ID: ${DL_MINIO_USER:-minioadmin}
-      AWS_SECRET_ACCESS_KEY: ${DL_MINIO_PASSWORD}
-      MLFLOW_S3_ENDPOINT_URL: http://dl-minio:9000
-    networks:
-      dl-network:
-        ipv4_address: 172.21.0.5
-    depends_on:
-      dl-postgres:
-        condition: service_healthy
-      dl-minio:
-        condition: service_started
-    restart: unless-stopped
-
-volumes:
-  dl_postgres_data:
-  dl_minio_data:
-```
-
-**Re-apply every MLflow gotcha from [mlflow_operational_lessons](../../memory/mlflow_operational_lessons.md)** to this new instance — artifact root, --serve-artifacts flag, healthcheck path. Don't assume the ml-mlflow Dockerfile is copy-pasteable without re-reading the lessons.
-
-### Create `deployment/dl/docker-compose.dev.yml` (the demo overlay)
-
-```yaml
-version: '3.8'
-
-services:
-  dl-mnist-cnn:
-    image: dl-mnist-cnn:latest
-    container_name: dl-mnist-cnn
-    environment:
-      PYTHONPATH: /app
-      MLFLOW_TRACKING_URI: http://dl-mlflow:5000    # domain-local, not ml-mlflow
-    ports:
-      - "8010:8000"
-    volumes:
-      - dl_mnist_data:/app/data
-    networks:
-      dl-network:
-        ipv4_address: 172.21.0.10
-    depends_on: []
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
 
+  dl-minio:
+    image: minio/minio:latest
+    container_name: dl-minio
+    environment:
+      MINIO_ROOT_USER: ${DL_MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${DL_MINIO_ROOT_PASSWORD}
+    ports:
+      - "9002:9000"
+      - "9003:9001"
+    volumes:
+      - dl_minio_data:/minio_data
+    command: minio server /minio_data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      dl-network:
+        ipv4_address: 172.21.0.3
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  dl-redis:
+    image: redis:7-alpine
+    container_name: dl-redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - dl_redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      dl-network:
+        ipv4_address: 172.21.0.4
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  dl-mlflow:
+    image: ghcr.io/mlflow/mlflow:latest
+    container_name: dl-mlflow
+    environment:
+      GIT_PYTHON_REFRESH: quiet
+    command: >
+      mlflow server
+      --backend-store-uri sqlite:///mlflow/mlruns.db
+      --default-artifact-root mlflow-artifacts:/
+      --serve-artifacts
+      --host 0.0.0.0
+      --port 5000
+      --allowed-hosts "*"
+      --cors-allowed-origins "https://mlflow-dl.pandyahomelab.com"
+    volumes:
+      - dl_mlflow_data:/mlflow
+      - dl_mlartifacts_data:/mlartifacts
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 35s
+    networks:
+      dl-network:
+        ipv4_address: 172.21.0.5
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Project Services (placeholder — built from dl/dl-mnist-cnn/ in Phase 2a.6)
+  # These will be added in docker-compose.dev.yml during Phase 2a.7
+
 volumes:
-  dl_mnist_data:
+  dl_postgres_data:
+  dl_minio_data:
+  dl_redis_data:
+  dl_mlflow_data:
+  dl_mlartifacts_data:
+```
+
+### Create `deployment/dl/docker-compose.dev.yml` (empty stub now; demo containers added in 2a.7)
+
+The two-file compose pattern (`-f docker-compose.yml -f docker-compose.dev.yml`) is established from day one for shape parity with the ML stack, but the overlay stays empty until Phase 2a.7 — when `dl-mnist-cnn:latest` exists as a built image, the `dl-mnist-cnn:` service block gets added here. Writing the full block now would break `docker compose up` because the image doesn't exist yet.
+
+```yaml
+version: '3.8'
+
+# Dev overlay: DL project containers attached to dl-network.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+#
+# Services added in subsequent sub-phases:
+#   - dl-mnist-cnn               (Phase 2a.7)
+#   - dl-lstm-forecast           (Phase 2b)
+#   - dl-yolo-object-detection   (Phase 2c)
+
+services: {}
+```
+
+### Create `deployment/dl/.env.example` (template — real `.env` is gitignored, user-created)
+
+```bash
+# DL Domain Infrastructure Configuration — TEMPLATE
+# Copy this file to .env and fill in real values.
+# The .env file is gitignored to prevent secret leakage.
+
+# PostgreSQL
+DL_POSTGRES_DB=dldb
+DL_POSTGRES_USER=postgres
+DL_POSTGRES_PASSWORD=replace_me_with_strong_password
+
+# MinIO
+DL_MINIO_ROOT_USER=minioadmin
+DL_MINIO_ROOT_PASSWORD=replace_me_with_strong_password
 ```
 
 ### Bring up dl-network infrastructure first
@@ -240,6 +293,112 @@ location = /dl/ {
 ```bash
 git commit -m "feat(deployment): add dl-network infrastructure and Nginx routing for DL domain"
 ```
+
+---
+
+## Phase 2a.1b — Expose dl-mlflow via subdomain (`mlflow-dl.pandyahomelab.com`)
+
+Runs **after** 2a.1 (needs `dl-network` live, `dl-mlflow` container running, Nginx attached to `dl-network` at `172.21.0.20`). Implements the locked subdomain decision from [PHASE_2_MASTER_PLAN.md](PHASE_2_MASTER_PLAN.md). Kept as a separate sub-step because it's the only DL piece that needs Cloudflare-side work (tunnel ingress) and host-based Nginx routing (new `server` block) rather than path-based routing — easy to roll back independently if anything misbehaves.
+
+### Pre-flight already complete (platform setup, May 2026)
+- ✅ Cloudflare Universal SSL wildcard cert (`*.pandyahomelab.com, pandyahomelab.com`, free, managed, auto-renewing)
+- ✅ Wildcard DNS record (`* CNAME pandyahomelab.com`, proxied) — covers `mlflow-dl`, future `mlflow-nlp`, `mlflow-agentic`, etc.
+- ✅ Verified: `nslookup mlflow-dl.pandyahomelab.com` resolves to Cloudflare anycast IPs
+
+So the only remaining work is the tunnel ingress rule + Nginx server block.
+
+### Step 1: Add tunnel ingress rule
+
+Edit `/var/services/homes/avpadmin/.cloudflared/config.yml` — insert **before** the catch-all `http_status:404` (cloudflared evaluates ingress top-down):
+
+```yaml
+  - hostname: mlflow-dl.pandyahomelab.com
+    service: https://localhost:8443
+    originRequest:
+      noTLSVerify: true
+```
+
+Restart cloudflared (per the runbook in [cloudflare_tunnel memory](../memory/cloudflare_tunnel.md)):
+```bash
+pkill -f cloudflared && sleep 2
+nohup cloudflared tunnel run pandya-homelab >> ~/cloudflared.log 2>&1 &
+```
+
+Verify the tunnel re-registered both old and new ingress rules:
+```bash
+tail -20 ~/cloudflared.log
+# Expect: "Registered tunnel connection" lines, no errors
+```
+
+### Step 2: Add Nginx `server` block + upstream
+
+In `deployment/nginx/nginx.conf`, add a sibling `server` block alongside the existing `pandyahomelab.com` block:
+
+```nginx
+upstream dl_mlflow {
+    server dl-mlflow:5000 max_fails=3 fail_timeout=30s;
+}
+
+server {
+    listen 8443 ssl;
+    server_name mlflow-dl.pandyahomelab.com;
+    ssl_certificate     /etc/nginx/ssl/pandya-nginx.crt;
+    ssl_certificate_key /etc/nginx/ssl/pandya-nginx.key;
+
+    # All MLflow routes (UI, /api/2.0/mlflow, /ajax-api/2.0/mlflow, /graphql)
+    # go to dl_mlflow here — no collision with ml_mlflow because routing is by
+    # server_name (host header), not by path.
+    location / {
+        proxy_pass http://dl_mlflow/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+**Confirm the existing `server` block has `server_name pandyahomelab.com www.pandyahomelab.com;` explicitly** so it doesn't catch `mlflow-dl` requests as the default server. If it's currently using `server_name _;` or omitted, add the explicit names.
+
+### Step 3: Rebuild Nginx image and recreate
+
+`nginx.conf` is **baked** into the pandya-nginx image (see [deployment_image_rebuild_rules](../memory/deployment_image_rebuild_rules.md)) — every change requires a rebuild:
+
+```bash
+cd /volume1/pandya-homelab/deployment/nginx
+sudo docker build -t pandya-nginx:latest .
+
+cd /volume1/pandya-homelab/deployment/ml
+sudo docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --force-recreate pandya-nginx
+
+# Skip the 30s upstream-cooldown 502 burst
+sudo docker exec pandya-nginx nginx -s reload
+```
+
+### Step 4: Verify end-to-end
+
+```bash
+# From the NAS
+curl -kI https://mlflow-dl.pandyahomelab.com/
+# Expect: HTTP/2 200, Content-Type: text/html (the MLflow UI)
+
+# Test an MLflow API path to confirm it routes to dl_mlflow, not ml_mlflow
+curl -k https://mlflow-dl.pandyahomelab.com/api/2.0/mlflow/experiments/list | python3 -m json.tool
+# Expect: {"experiments": [...]} from dl-mlflow's empty database — NOT iris-knn experiments
+```
+
+Browser check: `https://mlflow-dl.pandyahomelab.com/` loads the dl-mlflow UI (fresh tracker, no experiments yet — the first one will appear after the dl-mnist-cnn demo runs its first training).
+
+```bash
+git commit -m "feat(deployment): expose dl-mlflow via mlflow-dl.pandyahomelab.com"
+```
+
+### Step 5: Refresh memory
+
+After this step completes, refresh [cloudflare_tunnel memory](../memory/cloudflare_tunnel.md) to capture:
+- The new `mlflow-dl.pandyahomelab.com` ingress rule
+- The subdomain pattern as the platform standard for per-domain MLflow
+- The wildcard CNAME + wildcard cert setup as the "do once, reuse forever" platform foundation
 
 ---
 
@@ -679,7 +838,7 @@ git log --oneline | head -5
 | dl-postgres | 172.21.0.2 | 5434 | — |
 | dl-minio | 172.21.0.3 | 9002/9003 | — |
 | dl-redis | 172.21.0.4 | 6380 | — |
-| dl-mlflow | 172.21.0.5 | — | tbd (see open question) |
+| dl-mlflow | 172.21.0.5 | — | https://mlflow-dl.pandyahomelab.com/ |
 | **dl-mnist-cnn** | **172.21.0.10** | **8010** | **/dl/mnist-cnn/** |
 | Nginx on dl-net | 172.21.0.20 | — | proxy attachment |
 

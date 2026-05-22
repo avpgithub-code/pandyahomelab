@@ -9,7 +9,7 @@ version: '3.8'
 #
 # Add new domain networks here as phases are completed:
 #   Phase 1 (ML):      connects to ml_ml-network       ✅ active
-#   Phase 2 (DL):      connects to dl_dl-network       (add when Phase 2 starts)
+#   Phase 2 (DL):      connects to dl_dl-network       ✅ active (Phase 2a)
 #   Phase 3 (NLP):     connects to nlp_nlp-network     (add when Phase 3 starts)
 #   Phase 4 (Agentic): connects to agentic_ag-network  (add when Phase 4 starts)
 
@@ -24,6 +24,8 @@ networks:
 
   # External domain networks (created by their respective docker-compose stacks)
   ml_ml-network:
+    external: true
+  dl_dl-network:
     external: true
 
 services:
@@ -41,6 +43,8 @@ services:
         ipv4_address: 172.24.0.2
       ml_ml-network:
         ipv4_address: 172.20.0.20
+      dl_dl-network:
+        ipv4_address: 172.21.0.20
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]

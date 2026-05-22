@@ -1,0 +1,137 @@
+version: '3.8'
+
+# DL Domain Infrastructure
+# Each service connects to dl-network (172.21.0.0/24, isolated per V3 domain autonomy).
+# Mirrors deployment/ml/docker-compose.yml structure exactly so operational knowledge
+# (MLflow gotchas, healthcheck patterns, log rotation) transfers verbatim.
+
+networks:
+  dl-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.21.0.0/24
+          gateway: 172.21.0.1
+
+services:
+  # Infrastructure Services (shared by future DL projects: 2a/2b/2c)
+
+  dl-postgres:
+    image: postgres:16-alpine
+    container_name: dl-postgres
+    environment:
+      POSTGRES_DB: ${DL_POSTGRES_DB:-dldb}
+      POSTGRES_USER: ${DL_POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${DL_POSTGRES_PASSWORD}
+    ports:
+      - "5434:5432"
+    volumes:
+      - dl_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DL_POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      dl-network:
+        ipv4_address: 172.21.0.2
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  dl-minio:
+    image: minio/minio:latest
+    container_name: dl-minio
+    environment:
+      MINIO_ROOT_USER: ${DL_MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${DL_MINIO_ROOT_PASSWORD}
+    ports:
+      - "9002:9000"
+      - "9003:9001"
+    volumes:
+      - dl_minio_data:/minio_data
+    command: minio server /minio_data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      dl-network:
+        ipv4_address: 172.21.0.3
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  dl-redis:
+    image: redis:7-alpine
+    container_name: dl-redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - dl_redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      dl-network:
+        ipv4_address: 172.21.0.4
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  dl-mlflow:
+    image: ghcr.io/mlflow/mlflow:latest
+    container_name: dl-mlflow
+    environment:
+      GIT_PYTHON_REFRESH: quiet
+    command: >
+      mlflow server
+      --backend-store-uri sqlite:///mlflow/mlruns.db
+      --default-artifact-root mlflow-artifacts:/
+      --serve-artifacts
+      --host 0.0.0.0
+      --port 5000
+      --allowed-hosts "*"
+      --cors-allowed-origins "https://mlflow-dl.pandyahomelab.com"
+    volumes:
+      - dl_mlflow_data:/mlflow
+      - dl_mlartifacts_data:/mlartifacts
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 35s
+    networks:
+      dl-network:
+        ipv4_address: 172.21.0.5
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Project Services (placeholder — built from dl/dl-mnist-cnn/ in Phase 2a.6)
+  # These will be added in docker-compose.dev.yml during Phase 2a.7
+
+volumes:
+  dl_postgres_data:
+  dl_minio_data:
+  dl_redis_data:
+  dl_mlflow_data:
+  dl_mlartifacts_data:

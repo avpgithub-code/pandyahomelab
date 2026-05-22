@@ -45,10 +45,8 @@ Each DL demo:
 - **New tracking server: `dl-mlflow:5000`** on `dl-network` at `172.21.0.5`. Separate from the ML tracking server.
 - Each demo creates its own experiment by name (`dl-mnist-cnn`, `dl-lstm-forecast`, etc.).
 - Configuration is the same as ml-mlflow — see [mlflow_operational_lessons](../memory/mlflow_operational_lessons.md). Re-apply every gotcha (artifact root, ajax/graphql Nginx routes, CORS) to the new instance.
-- **Open question:** how to expose the dl-mlflow UI. The current `/mlflow/` Nginx routes (including the un-prefixed `/api/2.0/mlflow`, `/ajax-api/2.0/mlflow`, `/graphql`) bind to *one* MLflow server. Options to decide during 2a.0:
-  - **Subdomain**: `mlflow-dl.pandyahomelab.com` (clean, needs Cloudflare DNS work + cert)
-  - **Sub-path with rewrite**: `/dl/mlflow/` — MLflow 3.x supports a base path; needs `--gunicorn-opts "--proxy-headers"` and MLflow served behind a path prefix. Cleaner than option 1 but the `/api/2.0/mlflow` collision is still there.
-  - **Internal-only**: dl-mlflow has no public UI; visitors only see `/mlflow/` (ML). Ops user uses SSH tunnel for dl-mlflow UI. Simplest; matches the spirit of "domain autonomy" (each domain's tracking is independent, no shared UI).
+- **Decision (locked May 2026):** Each domain's MLflow is exposed at `mlflow-<domain>.pandyahomelab.com` — subdomain pattern. Phase 2a stands up `mlflow-dl.pandyahomelab.com`; Phase 3 and Phase 4 will add `mlflow-nlp` and `mlflow-agentic` to the same pattern. Vanilla MLflow runs everywhere (no `--static-prefix` fragility), zero risk to the live `/mlflow/` route, no silent cross-domain leak via un-prefixed `/api/2.0/mlflow` calls. Cloudflare wildcard cert (`*.pandyahomelab.com` Universal SSL, free) and wildcard DNS (`* CNAME pandyahomelab.com`, proxied) are already in place — each new MLflow subdomain costs ~5 min: one tunnel ingress rule + one Nginx `server` block. Concrete steps: see [Phase 2a.1b](PHASE_2A_EXECUTION_PLAN.md#phase-2a1b--expose-dl-mlflow-via-subdomain).
+- **Deferred cleanup:** the existing path-based `/mlflow/` route for ml-mlflow is a Phase 1c legacy artifact and the only public MLflow not on a subdomain. A small dedicated sub-phase between Phase 2 and Phase 3 will migrate it to `mlflow-ml.pandyahomelab.com` (with a 301 redirect from `/mlflow/`), bringing all four domains under the consistent subdomain pattern.
 
 ### Feedback widget
 - All three demos add the **one-line `<script src="/feedback-widget.js">`** before `</body>` in their `ui.html`.

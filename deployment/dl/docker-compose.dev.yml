@@ -1,0 +1,11 @@
+version: '3.8'
+
+# Dev overlay: DL project containers attached to dl-network.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+#
+# Services added in subsequent sub-phases:
+#   - dl-mnist-cnn               (Phase 2a.7)
+#   - dl-lstm-forecast           (Phase 2b)
+#   - dl-yolo-object-detection   (Phase 2c)
+
+services: {}
