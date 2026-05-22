@@ -1,14 +1,7 @@
-"""Pytest configuration and shared fixtures."""
-import pytest
+"""Pytest configuration — adds project root to sys.path so the symlinked
+db_logic / application_logic / presentation_logic packages resolve without
+needing PYTHONPATH=/app in the environment."""
+import os
+import sys
 
-
-@pytest.fixture
-def sample_data():
-    """Sample data for testing."""
-    return [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]
-
-
-@pytest.fixture
-def expected_prediction():
-    """Expected prediction result."""
-    return 0.5
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

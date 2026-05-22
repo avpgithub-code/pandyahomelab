@@ -1,45 +1,43 @@
-"""Data loaders: load from local filesystem, S3, or database."""
-from abc import ABC, abstractmethod
+"""Data loader for MNIST handwritten digits (PyTorch CNN classifier).
+
+Provides DataLoader objects for training and evaluation. torchvision auto-
+downloads the dataset (~11MB) into data_dir on first call. Inference-time
+preprocessing (canvas pixel list -> tensor) lives in db_logic.transforms.
+"""
+import os
+from typing import List
+
+from torch.utils.data import DataLoader
+from torchvision import datasets, transforms
+
+from db_logic.transforms.preprocessor import MEAN, STD
 
 
-class BaseDataLoader(ABC):
-    """Abstract base class for data loaders."""
+class LocalDataLoader:
+    """Loads MNIST via torchvision (auto-downloads on first call)."""
 
-    @abstractmethod
-    def load(self):
-        """Load data."""
-        pass
+    CLASSES: List[int] = list(range(10))
+    IMG_SIZE: int = 28
+    TRAIN_BATCH_SIZE: int = 64
+    TEST_BATCH_SIZE: int = 1000
 
+    def __init__(self, data_dir: str = None):
+        if data_dir is None:
+            data_dir = os.path.join(os.path.dirname(__file__), "../../data")
+        self.data_dir = os.path.abspath(data_dir)
+        self._transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((MEAN,), (STD,)),
+        ])
 
-class LocalDataLoader(BaseDataLoader):
-    """Load data from local filesystem."""
+    def load_train(self) -> DataLoader:
+        dataset = datasets.MNIST(
+            self.data_dir, train=True, download=True, transform=self._transform
+        )
+        return DataLoader(dataset, batch_size=self.TRAIN_BATCH_SIZE, shuffle=True)
 
-    def __init__(self, path):
-        self.path = path
-
-    def load(self):
-        """Load CSV or Parquet from disk."""
-        pass
-
-
-class S3DataLoader(BaseDataLoader):
-    """Load data from MinIO/S3."""
-
-    def __init__(self, bucket, key):
-        self.bucket = bucket
-        self.key = key
-
-    def load(self):
-        """Load from MinIO."""
-        pass
-
-
-class DatabaseDataLoader(BaseDataLoader):
-    """Load data from PostgreSQL."""
-
-    def __init__(self, query):
-        self.query = query
-
-    def load(self):
-        """Load from database."""
-        pass
+    def load_test(self) -> DataLoader:
+        dataset = datasets.MNIST(
+            self.data_dir, train=False, download=True, transform=self._transform
+        )
+        return DataLoader(dataset, batch_size=self.TEST_BATCH_SIZE, shuffle=False)
