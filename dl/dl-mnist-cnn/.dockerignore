@@ -1,0 +1,32 @@
+# Local dev artifacts — never need to be inside the image
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# MNIST dataset cache from local test runs — torchvision re-downloads inside
+# the container anyway (writes to /app/data which is a runtime concern).
+data/MNIST/
+
+# Git + editor metadata
+.git/
+.gitignore
+.gitattributes
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Local secrets — .env never goes into the image
+.env
+.env.local
+.env.*.local
+
+# Docs that the running service doesn't need
+README.md
+CHANGELOG.md
+*.md
