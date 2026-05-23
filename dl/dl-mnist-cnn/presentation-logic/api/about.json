@@ -1,0 +1,156 @@
+{
+  "title": "About dl-mnist-cnn",
+  "tagline": "How a 60,000-image dataset, a small PyTorch CNN, and a 4-layer architecture turn canvas scribbles into digit predictions.",
+  "sections": [
+    {
+      "id": "problem",
+      "title": "The Problem",
+      "icon": "🎯",
+      "body": [
+        "MNIST is the canonical entry point to computer vision — 70,000 hand-written digit images (60k train, 10k test), each a 28×28 grayscale grid of pixel values 0–255. Each image has one correct label: the digit 0–9 it depicts.",
+        "The classification task: given a new 28×28 image (in this demo, whatever a visitor scribbles on the canvas), predict the digit. It's small enough to train on CPU in minutes and rich enough that simple non-CNN baselines visibly hit a ceiling — which makes it the perfect first DL demo on the platform."
+      ]
+    },
+    {
+      "id": "approach",
+      "title": "Approach — Why a CNN?",
+      "icon": "🧭",
+      "body": [
+        "A fully-connected network sees a 28×28 image as 784 disconnected numbers — it has to relearn the concept of 'pixels near each other matter together' from scratch. A **Convolutional Neural Network** bakes that prior into the architecture: small filters slide across the image, detecting local patterns (edges, then curves, then digit fragments), and weight-sharing keeps the parameter count modest.",
+        "The model used here is the classic two-conv-plus-two-FC LeNet-style design. Small enough to train to ≥98% test accuracy in 3 epochs on this NAS's CPU (~8 min); large enough to convincingly handle messy mouse-drawn digits."
+      ],
+      "bullets": [
+        {"label": "Why conv layers", "text": "Local pattern detection with shared weights — ~10× fewer parameters than an equivalent FC network for the same accuracy."},
+        {"label": "Why max-pooling", "text": "Halves the spatial dimensions (28→24→12 after conv2+pool), giving the FC layers a 9216-dim input instead of an unmanageable larger one. Also adds mild translation invariance."},
+        {"label": "Why dropout", "text": "Two dropout layers (0.25 after pool, 0.5 after fc1) regularise the network — they make the CNN robust to the noisy, off-center, idiosyncratic digits visitors will draw with a mouse."},
+        {"label": "Why Adam, lr=1e-3", "text": "Sensible defaults that train reliably without learning-rate scheduling. With this dataset size and model, the loss flattens out around epoch 3."}
+      ]
+    },
+    {
+      "id": "architecture",
+      "title": "Model Architecture",
+      "icon": "🧠",
+      "body": [
+        "Two convolutional layers extract spatial features, max-pooling halves the resolution, then two fully-connected layers map to 10 digit logits. Softmax over the logits gives per-class probabilities. ~1.2M trainable parameters."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph TB\n  Input[\"Input image<br/>1 × 28 × 28<br/>(grayscale pixels)\"]\n  C1[\"Conv2d(1→32, 3×3) + ReLU<br/>output: 32 × 26 × 26\"]\n  C2[\"Conv2d(32→64, 3×3) + ReLU<br/>output: 64 × 24 × 24\"]\n  P1[\"MaxPool2d(2)<br/>output: 64 × 12 × 12\"]\n  D1[\"Dropout(0.25)\"]\n  FL[\"Flatten<br/>output: 9216\"]\n  FC1[\"Linear(9216 → 128) + ReLU\"]\n  D2[\"Dropout(0.5)\"]\n  FC2[\"Linear(128 → 10)<br/>output: 10 logits\"]\n  SM[\"Softmax<br/>per-digit probabilities\"]\n\n  Input --> C1 --> C2 --> P1 --> D1 --> FL --> FC1 --> D2 --> FC2 --> SM\n\n  classDef io fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef layer fill:#13161e,stroke:#4f8ef7,color:#e2e8f0\n  classDef reg fill:#1a1e2a,stroke:#a855f7,color:#cbd5e1\n  class Input,SM io\n  class C1,C2,P1,FC1,FC2,FL layer\n  class D1,D2 reg"
+      }
+    },
+    {
+      "id": "service-architecture",
+      "title": "Service Architecture",
+      "icon": "🏗️",
+      "body": [
+        "Same per-project 4-layer pattern (ADR-013) used by every project on pandyaHomeLab. The canvas in your browser sends a flat 784-pixel array to the API; that's the only contract — everything below the route is interchangeable."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph TB\n  Client[\"Browser canvas\"] -->|HTTPS<br/>POST /predict| Nginx[\"Nginx Proxy\"]\n  Nginx -->|\"/dl/mnist-cnn/*\"| App[\"dl-mnist-cnn container\"]\n  subgraph App\n    direction TB\n    Pres[\"presentation-logic<br/>FastAPI · Pydantic v2\"] --> AppLogic[\"application-logic<br/>PredictionService\"]\n    AppLogic --> Model[\"DigitClassifier<br/>(PyTorch MnistCNN)\"]\n    AppLogic --> DB[\"db-logic<br/>torchvision MNIST loader<br/>+ canvas preprocessor\"]\n    Shared[\"shared/<br/>config · logger · metrics\"] -.- Pres\n    Shared -.- AppLogic\n    Shared -.- DB\n  end\n  AppLogic -.->|run logging| MLflow[\"dl-mlflow<br/>experiment tracking\"]\n\n  classDef container fill:#13161e,stroke:#4f8ef7,color:#e2e8f0\n  classDef external fill:#1a1e2a,stroke:#64748b,color:#cbd5e1\n  class Pres,AppLogic,Model,DB,Shared container\n  class Nginx,Client,MLflow external"
+      }
+    },
+    {
+      "id": "network",
+      "title": "Network & Deployment",
+      "icon": "🌐",
+      "body": [
+        "The DL domain has its own bridge network (ADR-016) — dl-postgres, dl-minio, dl-redis, and dl-mlflow live there alongside the demo container. The MLflow tracker is exposed on its own subdomain (`mlflow-dl.pandyahomelab.com`) per the locked subdomain pattern for per-domain MLflow.",
+        "No cross-network reach-back into ml-network — domain autonomy means each domain's tracking, storage, and demos are independent of every other domain's."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph LR\n  User([\"🌍 Visitor\"]) --> CF[\"Cloudflare Tunnel<br/>pandyahomelab.com<br/>+ mlflow-dl.pandyahomelab.com\"]\n  CF --> NX[\"Nginx<br/>:8443\"]\n  subgraph PROXY[\"pandya-proxy-network · 172.24.0.0/24\"]\n    NX\n  end\n  subgraph DL[\"dl-network · 172.21.0.0/24\"]\n    MNIST[\"dl-mnist-cnn<br/>172.21.0.10:8000\"]\n    PG[\"dl-postgres<br/>172.21.0.2\"]\n    MN[\"dl-minio<br/>172.21.0.3\"]\n    RD[\"dl-redis<br/>172.21.0.4\"]\n    MF[\"dl-mlflow<br/>172.21.0.5\"]\n  end\n  NX --> MNIST\n  NX --> MF\n  MNIST -.->|MLflow runs| MF\n\n  classDef live fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef infra fill:#1a1e2a,stroke:#64748b,color:#cbd5e1\n  class MNIST live\n  class PG,MN,RD,MF infra"
+      },
+      "facts": [
+        {"label": "Container", "value": "dl-mnist-cnn"},
+        {"label": "Container IP", "value": "172.21.0.10"},
+        {"label": "Network", "value": "dl-network"},
+        {"label": "CIDR", "value": "172.21.0.0/24"},
+        {"label": "Host port", "value": "8010 → 8000"},
+        {"label": "Public URL", "value": "/dl/mnist-cnn/"},
+        {"label": "MLflow tracker", "value": "mlflow-dl.pandyahomelab.com"}
+      ]
+    },
+    {
+      "id": "stack",
+      "title": "Tech Stack",
+      "icon": "🧰",
+      "items": [
+        {"name": "PyTorch 2.1 (CPU)", "purpose": "CNN training and inference — CPU-only wheels, no CUDA on the NAS"},
+        {"name": "torchvision 0.16", "purpose": "MNIST dataset auto-download + standard image normalization"},
+        {"name": "FastAPI 0.104", "purpose": "Async HTTP API framework"},
+        {"name": "Pydantic v2", "purpose": "Schema validation — 784-pixel input length check, range check"},
+        {"name": "uvicorn", "purpose": "ASGI server, runs inside the container"},
+        {"name": "Docker", "purpose": "Multi-stage build, ~2.5GB final image (dominated by PyTorch wheels)"},
+        {"name": "Nginx 1.25", "purpose": "Reverse proxy, TLS termination, route fan-out, host-based routing for mlflow-dl subdomain"},
+        {"name": "MLflow 3.x", "purpose": "Per-domain tracker on dl-mlflow:5000 — separate from ml-mlflow (V3 domain autonomy)"},
+        {"name": "Synology DSM", "purpose": "Host OS — Docker engine, persistent volumes"}
+      ]
+    },
+    {
+      "id": "walkthrough",
+      "title": "Read the Code Walkthrough",
+      "icon": "📖",
+      "body": [
+        "For a guided tour of how this service is built — file by file, layer by layer — start with the **ML Project Walkthrough** (uses iris-knn as the worked example but the 4-layer architecture is identical). A DL-specific walkthrough covering CNN training and canvas preprocessing is planned once 2b and 2c ship."
+      ],
+      "bullets": [
+        {"label": "Project anatomy", "text": "Annotated file tree — what every file is and why it's there."},
+        {"label": "Request flow", "text": "A `/predict` request traced hop-by-hop from browser through all four layers."},
+        {"label": "Training flow", "text": "What happens the first time anyone calls `/predict` — load MNIST → train CNN → evaluate → log to dl-mlflow."},
+        {"label": "Per-layer patterns", "text": "Factory pattern, ABC contracts, lazy init, `__file__`-relative paths, the hyphen-vs-underscore symlink trick."},
+        {"label": "MLflow integration", "text": "How runs are logged to the per-domain tracker; why graceful degradation matters."}
+      ],
+      "links": [
+        {"label": "ML walkthrough on GitHub", "url": "https://github.com/avpgithub-code/pandyahomelab/blob/main/docs/ML_PROJECT_WALKTHROUGH.md", "external": true}
+      ]
+    },
+    {
+      "id": "metrics",
+      "title": "Performance",
+      "icon": "📊",
+      "problem_type": "Multi-class classification · balanced (~6k samples per digit) · 10 classes",
+      "body": [
+        "Trained on the full 60,000-sample MNIST train set with Adam (lr=1e-3) for 3 epochs (~8 min on NAS CPU). Evaluated on the held-out 10,000-sample test set.",
+        "Because the dataset is **balanced** (each digit has roughly the same sample count), top-1 accuracy is an honest summary metric. MNIST's published state of the art is >99.7% with much bigger models — for a 1.2M-parameter LeNet-style CNN, 98%+ is the well-known plateau."
+      ],
+      "facts": [
+        {"label": "Train samples", "value": "{{split.train_samples}}"},
+        {"label": "Test samples", "value": "{{split.test_samples}}"},
+        {"label": "Training time", "value": "~8 minutes (CPU)"},
+        {"label": "Tracked in", "value": "dl-mlflow ↗"}
+      ],
+      "metrics_detail": [
+        {
+          "name": "Accuracy",
+          "value": "{{metrics_display.accuracy}}",
+          "what": "Fraction of test images classified correctly — the most intuitive measure of overall correctness.",
+          "formula": "(correct predictions) / (total predictions)",
+          "why_chosen": "MNIST is roughly balanced (each digit ≈ 6,000 train / 1,000 test samples). When classes are equal-ish, accuracy is honest and easy to explain. Headline number for any MNIST benchmark.",
+          "watch_out": "Doesn't reveal which digits the model confuses with which (4↔9 and 3↔5 are classic MNIST confusions). The next iteration of this demo will add a per-class confusion matrix when DigitClassifier.evaluate() is extended."
+        },
+        {
+          "name": "Correct",
+          "value": "{{metrics_display.correct}}",
+          "what": "Raw count of test images the model got right.",
+          "formula": "Σ(prediction == ground_truth)",
+          "why_chosen": "Useful sanity check — visually grounds the accuracy percentage in actual image counts.",
+          "watch_out": "Only meaningful when paired with the total (10,000)."
+        }
+      ]
+    },
+    {
+      "id": "learn",
+      "title": "Learn More",
+      "icon": "🔗",
+      "links": [
+        {"label": "View live MLflow runs", "url": "https://mlflow-dl.pandyahomelab.com/", "external": true},
+        {"label": "Source on GitHub", "url": "https://github.com/avpgithub-code/pandyahomelab", "external": true},
+        {"label": "MNIST dataset (LeCun)", "url": "http://yann.lecun.com/exdb/mnist/", "external": true},
+        {"label": "PyTorch MNIST tutorial", "url": "https://github.com/pytorch/examples/tree/main/mnist", "external": true},
+        {"label": "LeNet-5 paper (1998)", "url": "http://yann.lecun.com/exdb/publis/pdf/lecun-98.pdf", "external": true}
+      ]
+    }
+  ]
+}

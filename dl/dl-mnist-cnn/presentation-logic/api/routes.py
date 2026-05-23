@@ -1,61 +1,75 @@
-"""API routes: health check, prediction, training endpoints."""
-from fastapi import APIRouter, HTTPException, Header
-from datetime import datetime
-from typing import Optional
+"""API routes: /, /health, /predict, /model-info, /about."""
+import json
+import logging
 import uuid
+from datetime import datetime
+from pathlib import Path
+from typing import Optional
 
-from .schemas import HealthResponse, PredictionRequest, PredictionResponse
-from ...shared.logger import logger
-from ...shared.config import get_config
+from fastapi import APIRouter, Header, HTTPException
+from fastapi.responses import HTMLResponse, JSONResponse
+
+from application_logic.services.prediction_service import PredictionService
+from presentation_logic.api.schemas import (
+    HealthResponse,
+    ModelInfoResponse,
+    PredictionRequest,
+    PredictionResponse,
+)
 
 router = APIRouter()
-config = get_config()
+logger = logging.getLogger(__name__)
+
+_service = PredictionService()
+_UI_PATH = Path(__file__).parent / "ui.html"
+_ABOUT_PATH = Path(__file__).parent / "about.json"
+
+
+@router.get("/", response_class=HTMLResponse)
+async def demo_ui():
+    return _UI_PATH.read_text()
+
+
+@router.get("/about")
+async def about():
+    return JSONResponse(content=json.loads(_ABOUT_PATH.read_text()))
 
 
 @router.get("/health", response_model=HealthResponse)
 async def health_check(x_request_id: Optional[str] = Header(None)):
-    """Liveness and readiness probe for Kubernetes/Docker."""
     request_id = x_request_id or str(uuid.uuid4())
-    logger.info(f"[{request_id}] Health check", extra={"request_id": request_id})
-
     return HealthResponse(
         status="healthy",
         timestamp=datetime.utcnow().isoformat(),
-        version="1.0.0",
+        version="1.0.0-alpha1",
         request_id=request_id,
     )
 
 
 @router.post("/predict", response_model=PredictionResponse)
-async def predict(request: PredictionRequest, x_request_id: Optional[str] = Header(None)):
-    """Make a prediction using trained model."""
+async def predict(
+    request: PredictionRequest,
+    x_request_id: Optional[str] = Header(None),
+):
     request_id = x_request_id or str(uuid.uuid4())
-    logger.info(
-        f"[{request_id}] Prediction request",
-        extra={"request_id": request_id, "data": request.data},
-    )
-
     try:
-        # TODO: Import and use predictor service
-        # from ...application_logic.services.prediction_service import PredictionService
-        # predictor = PredictionService()
-        # result = await predictor.predict(request.data)
-
-        result = {"prediction": 0.5, "confidence": 0.95}
-
-        logger.info(
-            f"[{request_id}] Prediction successful",
-            extra={"request_id": request_id, "result": result},
-        )
-
+        result = _service.predict(request.pixels)
         return PredictionResponse(
             prediction=result["prediction"],
+            digit=result["digit"],
             confidence=result["confidence"],
+            probabilities=result["probabilities"],
             request_id=request_id,
         )
     except Exception as e:
-        logger.error(
-            f"[{request_id}] Prediction failed: {str(e)}",
-            extra={"request_id": request_id, "error": str(e)},
-        )
+        logger.error(f"[{request_id}] Prediction failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/model-info", response_model=ModelInfoResponse)
+async def model_info():
+    try:
+        return _service.get_model_info()
+    except Exception as e:
+        logger.error(f"Model info failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))

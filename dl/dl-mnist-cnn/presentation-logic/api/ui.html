@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dl-mnist-cnn — pandyaHomeLab</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f14;
+      --surface: #13161e;
+      --surface2: #1a1e2a;
+      --border: #252a38;
+      --accent: #4f8ef7;
+      --accent-2: #22c55e;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+
+    header {
+      width: 100%;
+      max-width: 700px;
+      margin-bottom: 2rem;
+    }
+
+    .back-link {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      margin-bottom: 1.5rem;
+      transition: color .2s;
+    }
+    .back-link:hover { color: var(--text); }
+
+    h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -.02em; }
+    h1 em { font-style: normal; color: var(--accent); }
+    .subtitle { color: var(--muted); font-size: .95rem; margin-top: .4rem; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      width: 100%;
+      max-width: 700px;
+      margin-bottom: 1.5rem;
+    }
+
+    .card h2 {
+      font-size: .75rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      margin-bottom: 1.5rem;
+    }
+
+    /* — Canvas drawing area — */
+    .canvas-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+    .canvas-frame {
+      background: #000;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: .5rem;
+      cursor: crosshair;
+      touch-action: none;  /* prevents touch scroll while drawing on mobile */
+    }
+    #draw-canvas {
+      display: block;
+      background: #000;
+      border-radius: 6px;
+    }
+    .canvas-hint {
+      font-size: .75rem;
+      color: var(--muted);
+      text-align: center;
+    }
+    .button-row {
+      display: flex;
+      gap: .75rem;
+      width: 100%;
+      margin-top: 1.25rem;
+    }
+
+    .btn {
+      flex: 1;
+      padding: .9rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .2s, transform .15s;
+    }
+    .btn:hover { opacity: .9; transform: translateY(-1px); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+    .btn.secondary {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn.secondary:hover { color: var(--text); border-color: var(--accent); background: var(--surface2); }
+
+    .result-card {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      width: 100%;
+      max-width: 700px;
+      margin-bottom: 1.5rem;
+    }
+    .result-card.visible { display: block; }
+
+    .digit-display {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      background: var(--surface2);
+      border-radius: 10px;
+    }
+    .big-digit {
+      font-family: 'SF Mono', Consolas, monospace;
+      font-size: 5rem;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--accent);
+      letter-spacing: -.04em;
+    }
+    .digit-label {
+      font-size: .8rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+    }
+
+    .confidence-label {
+      font-size: .85rem;
+      color: var(--muted);
+      margin-bottom: .4rem;
+    }
+    .confidence-bar-bg {
+      background: var(--surface2);
+      border-radius: 99px;
+      height: 10px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    .confidence-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: var(--accent);
+      transition: width .6s ease;
+    }
+
+    .prob-heading {
+      font-size: .75rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      margin-bottom: .85rem;
+    }
+
+    .probabilities { display: flex; flex-direction: column; gap: .5rem; }
+    .prob-row {
+      display: flex; align-items: center; gap: .75rem;
+      font-size: .85rem;
+      padding: .25rem .5rem;
+      border-radius: 6px;
+      transition: background .2s;
+    }
+    .prob-row.winner { background: rgba(79,142,247,.08); }
+    .prob-label {
+      width: 26px;
+      font-family: 'SF Mono', Consolas, monospace;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      text-align: center;
+    }
+    .prob-row.winner .prob-label { color: var(--accent); }
+    .prob-bar-bg { flex: 1; background: var(--surface2); border-radius: 99px; height: 6px; overflow: hidden; }
+    .prob-bar-fill { height: 100%; border-radius: 99px; background: var(--muted); transition: width .6s ease; }
+    .prob-row.winner .prob-bar-fill { background: var(--accent); }
+    .prob-value { width: 48px; text-align: right; color: var(--muted); font-family: 'SF Mono', Consolas, monospace; font-size: .8rem; }
+    .prob-row.winner .prob-value { color: var(--accent); font-weight: 700; }
+
+    .error-msg {
+      display: none;
+      color: #f87171;
+      background: rgba(248,113,113,.1);
+      border: 1px solid rgba(248,113,113,.2);
+      border-radius: 8px;
+      padding: .75rem 1rem;
+      font-size: .85rem;
+      margin-top: 1rem;
+    }
+    .error-msg.visible { display: block; }
+
+    .model-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem 2rem;
+      width: 100%;
+      max-width: 700px;
+      margin-top: 1.5rem;
+    }
+    .model-card h2 {
+      font-size: .75rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      margin-bottom: 1rem;
+    }
+    .model-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: .75rem;
+      margin-bottom: 1rem;
+    }
+    @media (max-width: 500px) { .model-stats { grid-template-columns: repeat(2, 1fr); } }
+    .stat-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .6rem .75rem;
+    }
+    .stat-label { font-size: .65rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+    .stat-value { font-size: 1rem; font-weight: 700; color: var(--text); font-family: 'SF Mono', Consolas, monospace; margin-top: .2rem; }
+    .mlflow-link {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .4rem 1rem;
+      border-radius: 99px;
+      border: 1px solid rgba(79,142,247,.3);
+      color: var(--accent);
+      font-size: .8rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all .2s;
+    }
+    .mlflow-link:hover { background: rgba(79,142,247,.1); border-color: var(--accent); }
+
+    /* — Header row: back-link + about-trigger — */
+    .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .about-trigger {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .4rem .9rem; border-radius: 99px;
+      border: 1px solid rgba(79,142,247,.35);
+      background: rgba(79,142,247,.08); color: var(--accent);
+      font-size: .8rem; font-weight: 600; cursor: pointer;
+      transition: all .2s;
+    }
+    .about-trigger:hover { background: rgba(79,142,247,.2); border-color: var(--accent); }
+
+    /* — About drawer — */
+    .about-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,.65);
+      opacity: 0; pointer-events: none; transition: opacity .25s ease;
+      z-index: 90;
+    }
+    .about-backdrop.visible { opacity: 1; pointer-events: auto; }
+
+    .about-drawer {
+      position: fixed; top: 0; right: 0; bottom: 0;
+      width: 100%; max-width: 560px;
+      background: var(--surface); border-left: 1px solid var(--border);
+      box-shadow: -8px 0 24px rgba(0,0,0,.4);
+      transform: translateX(100%); transition: transform .3s ease;
+      z-index: 100; overflow-y: auto;
+      padding: 1.5rem 1.75rem 3rem;
+    }
+    .about-drawer.visible { transform: translateX(0); }
+
+    .about-header {
+      position: sticky; top: 0; z-index: 1;
+      background: var(--surface);
+      padding: .25rem 0 1rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;
+    }
+    .about-title { font-size: 1.3rem; font-weight: 800; letter-spacing: -.01em; }
+    .about-tagline { font-size: .85rem; color: var(--muted); margin-top: .35rem; line-height: 1.45; }
+    .about-close {
+      flex-shrink: 0;
+      width: 32px; height: 32px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--surface2);
+      color: var(--muted); cursor: pointer; font-size: 1.1rem; line-height: 1;
+      transition: all .15s;
+    }
+    .about-close:hover { color: var(--text); border-color: var(--accent); }
+
+    .about-section { margin-bottom: 2rem; }
+    .about-section h3 {
+      display: flex; align-items: center; gap: .5rem;
+      font-size: .95rem; font-weight: 700; color: var(--text);
+      margin-bottom: .8rem;
+    }
+    .about-section h3 .icon { font-size: 1.1rem; }
+    .about-section p { font-size: .85rem; color: #cbd5e1; line-height: 1.6; margin-bottom: .6rem; }
+    .about-section p:last-child { margin-bottom: 0; }
+    .about-section em { font-style: italic; color: var(--text); }
+    .about-section strong { color: var(--text); }
+    .about-section code {
+      font-family: 'SF Mono', Consolas, monospace;
+      background: var(--surface2); padding: .1rem .4rem;
+      border-radius: 4px; font-size: .8em; color: var(--accent);
+    }
+
+    .about-bullets { list-style: none; padding: 0; margin: .5rem 0 0; }
+    .about-bullets li {
+      padding: .6rem .85rem; margin-bottom: .5rem;
+      background: var(--surface2); border-left: 2px solid var(--accent);
+      border-radius: 4px; font-size: .82rem; line-height: 1.55; color: #cbd5e1;
+    }
+    .about-bullets li b { color: var(--accent); font-weight: 700; }
+
+    .about-facts {
+      display: grid; grid-template-columns: 1fr 1fr; gap: .5rem;
+      margin-top: .85rem;
+    }
+    .about-fact {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; padding: .55rem .7rem;
+    }
+    .about-fact-label { font-size: .65rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+    .about-fact-value { font-size: .85rem; font-weight: 700; color: var(--text); font-family: 'SF Mono', Consolas, monospace; margin-top: .15rem; }
+
+    .about-stack { display: flex; flex-direction: column; gap: .5rem; }
+    .about-stack-item {
+      display: flex; flex-direction: column;
+      padding: .6rem .85rem; background: var(--surface2);
+      border-radius: 6px; border-left: 2px solid var(--accent);
+    }
+    .about-stack-name { font-size: .85rem; font-weight: 700; color: var(--text); }
+    .about-stack-purpose { font-size: .75rem; color: var(--muted); margin-top: .15rem; }
+
+    .about-links { display: flex; flex-direction: column; gap: .4rem; }
+    .about-link {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .5rem .85rem; border-radius: 6px;
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--accent); font-size: .82rem; font-weight: 600;
+      text-decoration: none; transition: all .15s;
+    }
+    .about-link:hover { background: rgba(79,142,247,.1); border-color: var(--accent); }
+
+    .about-diagram {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 1rem; margin-top: .85rem;
+      overflow-x: auto;
+    }
+    .about-diagram svg { max-width: 100%; height: auto; }
+    .about-diagram .mermaid-loading {
+      color: var(--muted); font-size: .8rem; font-style: italic; text-align: center;
+    }
+
+    .problem-type-badge {
+      display: inline-block;
+      padding: .2rem .6rem; margin: -.4rem 0 .8rem;
+      border-radius: 99px;
+      background: rgba(79,142,247,.1); border: 1px solid rgba(79,142,247,.3);
+      color: var(--accent); font-size: .7rem; font-weight: 600;
+      letter-spacing: .03em;
+    }
+
+    .metric-list { display: flex; flex-direction: column; gap: .6rem; margin-top: 1rem; }
+    .metric-card {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 1rem 1.1rem;
+    }
+    .metric-card-head {
+      display: flex; justify-content: space-between; align-items: baseline;
+      gap: .75rem; margin-bottom: .5rem;
+      padding-bottom: .55rem; border-bottom: 1px solid var(--border);
+    }
+    .metric-name { font-size: .95rem; font-weight: 700; color: var(--text); }
+    .metric-value {
+      font-size: 1.25rem; font-weight: 800; color: var(--accent);
+      font-family: 'SF Mono', Consolas, monospace; letter-spacing: -.02em;
+    }
+    .metric-what {
+      font-size: .82rem; color: #cbd5e1; line-height: 1.55;
+      margin-bottom: .65rem;
+    }
+    .metric-formula {
+      font-family: 'SF Mono', Consolas, monospace;
+      font-size: .76rem; color: var(--accent);
+      background: rgba(79,142,247,.07);
+      padding: .5rem .7rem; border-radius: 4px;
+      border-left: 2px solid var(--accent);
+      margin-bottom: .7rem; overflow-x: auto; white-space: nowrap;
+    }
+    .metric-block { font-size: .8rem; color: #cbd5e1; line-height: 1.55; padding: .35rem 0; }
+    .metric-block + .metric-block { border-top: 1px dashed rgba(100,116,139,.25); margin-top: .25rem; padding-top: .55rem; }
+    .metric-block-label {
+      display: block; font-size: .67rem; text-transform: uppercase;
+      letter-spacing: .09em; color: var(--muted);
+      margin-bottom: .3rem; font-weight: 700;
+    }
+    .metric-block.why .metric-block-label::before { content: "▸ "; color: var(--accent); }
+    .metric-block.watch .metric-block-label::before { content: "⚠ "; color: #facc15; }
+    .metric-block.watch .metric-block-label { color: #facc15; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-row">
+    <a class="back-link" href="/">← pandyaHomeLab</a>
+    <button class="about-trigger" id="about-trigger" type="button">
+      <span>ⓘ</span> About dl-mnist-cnn
+    </button>
+  </div>
+  <h1>Draw a <em>Digit</em></h1>
+  <p class="subtitle">PyTorch CNN · MNIST dataset · 10 classes (0-9) · &gt;=98% test accuracy</p>
+</header>
+
+<!-- About drawer -->
+<div class="about-backdrop" id="about-backdrop"></div>
+<aside class="about-drawer" id="about-drawer" aria-hidden="true" role="dialog" aria-labelledby="about-title">
+  <div class="about-header">
+    <div>
+      <div class="about-title" id="about-title">Loading…</div>
+      <div class="about-tagline" id="about-tagline"></div>
+    </div>
+    <button class="about-close" id="about-close" type="button" aria-label="Close">✕</button>
+  </div>
+  <div id="about-body"></div>
+</aside>
+
+<!-- Input Card -->
+<div class="card">
+  <h2>Draw a digit (0-9)</h2>
+  <div class="canvas-wrap">
+    <div class="canvas-frame">
+      <canvas id="draw-canvas" width="280" height="280"></canvas>
+    </div>
+    <p class="canvas-hint">Use mouse or touch to draw a single digit, centered. Predict, then Clear to try again.</p>
+  </div>
+
+  <div class="button-row">
+    <button class="btn" id="predict-btn" onclick="predict()">Predict</button>
+    <button class="btn secondary" id="clear-btn" onclick="clearCanvas()">Clear</button>
+  </div>
+  <div class="error-msg" id="error-msg">Prediction failed. Please try again.</div>
+</div>
+
+<!-- Model Card -->
+<div class="model-card" id="model-card">
+  <h2>Model Card</h2>
+  <div class="model-stats" id="model-stats">
+    <div class="stat-box"><div class="stat-label">Model</div><div class="stat-value" id="mc-model">—</div></div>
+    <div class="stat-box"><div class="stat-label">Dataset</div><div class="stat-value" id="mc-dataset">—</div></div>
+    <div class="stat-box"><div class="stat-label">Accuracy</div><div class="stat-value" id="mc-accuracy">—</div></div>
+    <div class="stat-box"><div class="stat-label">Test Samples</div><div class="stat-value" id="mc-samples">—</div></div>
+  </div>
+  <a class="mlflow-link" id="mlflow-link" href="#" target="_blank" style="display:none">
+    ↗ View in MLflow
+  </a>
+</div>
+
+<!-- Result Card -->
+<div class="result-card" id="result-card">
+  <div class="digit-display">
+    <div class="big-digit" id="big-digit">—</div>
+    <div class="digit-label">predicted digit</div>
+  </div>
+  <p class="confidence-label">Confidence: <strong id="confidence-pct"></strong></p>
+  <div class="confidence-bar-bg">
+    <div class="confidence-bar-fill" id="conf-bar"></div>
+  </div>
+  <h3 class="prob-heading">Per-digit probabilities</h3>
+  <div class="probabilities" id="probabilities"></div>
+</div>
+
+<script>
+  // ——— Model Card ———
+  async function loadModelCard() {
+    try {
+      const res = await fetch('/dl/mnist-cnn/model-info');
+      if (!res.ok) return;
+      const info = await res.json();
+      document.getElementById('mc-model').textContent = info.model_type || 'MnistCNN';
+      const trainN = (info.split && info.split.train_samples) || '?';
+      document.getElementById('mc-dataset').textContent = `MNIST (${trainN.toLocaleString ? trainN.toLocaleString() : trainN})`;
+      document.getElementById('mc-accuracy').textContent = info.metrics && info.metrics.accuracy != null
+        ? (info.metrics.accuracy * 100).toFixed(1) + '%'
+        : '—';
+      const testN = (info.split && info.split.test_samples) || '?';
+      document.getElementById('mc-samples').textContent = testN.toLocaleString ? testN.toLocaleString() : testN;
+      if (info.mlflow_url) {
+        const link = document.getElementById('mlflow-link');
+        link.href = info.mlflow_url;
+        link.style.display = 'inline-flex';
+      }
+    } catch (e) { /* MLflow / tracker unavailable — card stays with dashes */ }
+  }
+
+  // ——— About drawer ———
+  let _aboutLoaded = false;
+  let _mermaidReady = false;
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+
+  function renderInline(text) {
+    let s = escapeHtml(text);
+    s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    s = s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+    s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+    return s;
+  }
+
+  function renderSection(s) {
+    let html = `<section class="about-section"><h3><span class="icon">${s.icon || ''}</span>${escapeHtml(s.title)}</h3>`;
+    if (s.problem_type) {
+      html += `<div class="problem-type-badge">${escapeHtml(s.problem_type)}</div>`;
+    }
+    if (s.body) {
+      s.body.forEach(p => html += `<p>${renderInline(p)}</p>`);
+    }
+    if (s.bullets) {
+      html += '<ul class="about-bullets">';
+      s.bullets.forEach(b => html += `<li><b>${escapeHtml(b.label)}:</b> ${renderInline(b.text)}</li>`);
+      html += '</ul>';
+    }
+    if (s.diagram && s.diagram.type === 'mermaid') {
+      html += `<div class="about-diagram"><div class="mermaid">${escapeHtml(s.diagram.code)}</div></div>`;
+    }
+    if (s.facts) {
+      html += '<div class="about-facts">';
+      s.facts.forEach(f => html += `<div class="about-fact"><div class="about-fact-label">${escapeHtml(f.label)}</div><div class="about-fact-value">${escapeHtml(f.value)}</div></div>`);
+      html += '</div>';
+    }
+    if (s.metrics_detail) {
+      html += '<div class="metric-list">';
+      s.metrics_detail.forEach(m => {
+        html += '<div class="metric-card">';
+        html += `<div class="metric-card-head"><div class="metric-name">${escapeHtml(m.name)}</div><div class="metric-value">${escapeHtml(m.value)}</div></div>`;
+        if (m.what) html += `<div class="metric-what">${renderInline(m.what)}</div>`;
+        if (m.formula) html += `<div class="metric-formula">${escapeHtml(m.formula)}</div>`;
+        if (m.why_chosen) html += `<div class="metric-block why"><span class="metric-block-label">Why this metric</span>${renderInline(m.why_chosen)}</div>`;
+        if (m.watch_out) html += `<div class="metric-block watch"><span class="metric-block-label">Watch out</span>${renderInline(m.watch_out)}</div>`;
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+    if (s.items) {
+      html += '<div class="about-stack">';
+      s.items.forEach(it => html += `<div class="about-stack-item"><div class="about-stack-name">${escapeHtml(it.name)}</div><div class="about-stack-purpose">${escapeHtml(it.purpose)}</div></div>`);
+      html += '</div>';
+    }
+    if (s.links) {
+      html += '<div class="about-links">';
+      s.links.forEach(l => {
+        const target = l.external ? ' target="_blank" rel="noopener"' : '';
+        const arrow = l.external ? ' ↗' : ' →';
+        html += `<a class="about-link" href="${escapeHtml(l.url)}"${target}>${escapeHtml(l.label)}${arrow}</a>`;
+      });
+      html += '</div>';
+    }
+    html += '</section>';
+    return html;
+  }
+
+  async function ensureMermaid() {
+    if (_mermaidReady) return;
+    await new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'dark',
+      themeVariables: {
+        background: '#13161e',
+        primaryColor: '#1a1e2a',
+        primaryTextColor: '#e2e8f0',
+        primaryBorderColor: '#4f8ef7',
+        lineColor: '#64748b',
+        secondaryColor: '#252a38',
+        tertiaryColor: '#0d0f14',
+      },
+    });
+    _mermaidReady = true;
+  }
+
+  function getPath(obj, path) {
+    return path.split('.').reduce((o, k) => (o == null ? undefined : o[k]), obj);
+  }
+  function substituteTokens(value, data) {
+    if (typeof value === 'string') {
+      const wholeMatch = value.match(/^\{\{\s*([^}]+?)\s*\}\}$/);
+      if (wholeMatch) {
+        const v = getPath(data, wholeMatch[1]);
+        return v === undefined ? value : v;
+      }
+      return value.replace(/\{\{\s*([^}]+?)\s*\}\}/g, (_, p) => {
+        const v = getPath(data, p);
+        return v == null ? '' : String(v);
+      });
+    }
+    if (Array.isArray(value)) return value.map(v => substituteTokens(v, data));
+    if (value && typeof value === 'object') {
+      const out = {};
+      for (const [k, v] of Object.entries(value)) out[k] = substituteTokens(v, data);
+      return out;
+    }
+    return value;
+  }
+
+  async function loadAbout() {
+    if (_aboutLoaded) return;
+    try {
+      const [aboutRes, infoRes] = await Promise.all([
+        fetch('/dl/mnist-cnn/about'),
+        fetch('/dl/mnist-cnn/model-info'),
+      ]);
+      if (!aboutRes.ok) throw new Error('about fetch failed');
+      let data = await aboutRes.json();
+      if (infoRes.ok) {
+        const info = await infoRes.json();
+        data = substituteTokens(data, info);
+      }
+      document.getElementById('about-title').textContent = data.title || 'About';
+      document.getElementById('about-tagline').textContent = data.tagline || '';
+      document.getElementById('about-body').innerHTML = data.sections.map(renderSection).join('');
+
+      const hasDiagrams = data.sections.some(s => s.diagram && s.diagram.type === 'mermaid');
+      if (hasDiagrams) {
+        await ensureMermaid();
+        await mermaid.run({ querySelector: '#about-drawer .mermaid' });
+      }
+      _aboutLoaded = true;
+    } catch (e) {
+      document.getElementById('about-body').innerHTML =
+        '<p style="color:#f87171">Could not load About content. Please try again later.</p>';
+    }
+  }
+
+  function openAbout() {
+    document.getElementById('about-drawer').classList.add('visible');
+    document.getElementById('about-drawer').setAttribute('aria-hidden', 'false');
+    document.getElementById('about-backdrop').classList.add('visible');
+    document.body.style.overflow = 'hidden';
+    loadAbout();
+  }
+
+  function closeAbout() {
+    document.getElementById('about-drawer').classList.remove('visible');
+    document.getElementById('about-drawer').setAttribute('aria-hidden', 'true');
+    document.getElementById('about-backdrop').classList.remove('visible');
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('about-trigger').addEventListener('click', openAbout);
+  document.getElementById('about-close').addEventListener('click', closeAbout);
+  document.getElementById('about-backdrop').addEventListener('click', closeAbout);
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeAbout();
+  });
+
+  window.addEventListener('DOMContentLoaded', () => {
+    loadModelCard();
+    initCanvas();
+  });
+
+  // ——— Canvas drawing ———
+  const CANVAS_SIZE = 280;
+  const MNIST_SIZE = 28;
+  const PEN_WIDTH = 22;
+
+  let ctx = null;
+  let drawing = false;
+
+  function initCanvas() {
+    const canvas = document.getElementById('draw-canvas');
+    ctx = canvas.getContext('2d');
+    clearCanvas();
+
+    // Mouse events
+    canvas.addEventListener('mousedown', e => startDraw(eventCoords(e, canvas)));
+    canvas.addEventListener('mousemove', e => draw(eventCoords(e, canvas)));
+    canvas.addEventListener('mouseup', stopDraw);
+    canvas.addEventListener('mouseleave', stopDraw);
+
+    // Touch events (mobile)
+    canvas.addEventListener('touchstart', e => {
+      e.preventDefault();
+      startDraw(eventCoords(e.touches[0], canvas));
+    }, { passive: false });
+    canvas.addEventListener('touchmove', e => {
+      e.preventDefault();
+      draw(eventCoords(e.touches[0], canvas));
+    }, { passive: false });
+    canvas.addEventListener('touchend', stopDraw);
+    canvas.addEventListener('touchcancel', stopDraw);
+  }
+
+  function eventCoords(e, canvas) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: (e.clientX - rect.left) * (canvas.width / rect.width),
+      y: (e.clientY - rect.top) * (canvas.height / rect.height),
+    };
+  }
+
+  function startDraw({ x, y }) {
+    drawing = true;
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = PEN_WIDTH;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+  }
+
+  function draw({ x, y }) {
+    if (!drawing) return;
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  }
+
+  function stopDraw() { drawing = false; }
+
+  function clearCanvas() {
+    if (!ctx) return;
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    // Hide previous result if visible
+    document.getElementById('result-card').classList.remove('visible');
+    document.getElementById('error-msg').classList.remove('visible');
+  }
+
+  function getCanvasPixels() {
+    // Downscale 280x280 -> 28x28 via a temporary canvas; extract grayscale (R channel).
+    const tmp = document.createElement('canvas');
+    tmp.width = MNIST_SIZE;
+    tmp.height = MNIST_SIZE;
+    const tctx = tmp.getContext('2d');
+    tctx.drawImage(ctx.canvas, 0, 0, MNIST_SIZE, MNIST_SIZE);
+    const data = tctx.getImageData(0, 0, MNIST_SIZE, MNIST_SIZE).data;
+    const pixels = [];
+    for (let i = 0; i < data.length; i += 4) {
+      pixels.push(data[i]);  // R; for white-on-black this equals brightness
+    }
+    return pixels;
+  }
+
+  async function predict() {
+    const btn = document.getElementById('predict-btn');
+    const errEl = document.getElementById('error-msg');
+    errEl.classList.remove('visible');
+
+    const pixels = getCanvasPixels();
+    if (!pixels.some(p => p > 10)) {
+      errEl.textContent = 'Draw a digit on the canvas first.';
+      errEl.classList.add('visible');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Predicting…';
+
+    try {
+      const res = await fetch('/dl/mnist-cnn/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pixels }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const result = await res.json();
+      showResult(result);
+    } catch (e) {
+      errEl.textContent = 'Prediction failed. Please try again.';
+      errEl.classList.add('visible');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Predict';
+    }
+  }
+
+  function showResult(r) {
+    document.getElementById('big-digit').textContent = r.digit;
+    const pct = Math.round(r.confidence * 100);
+    document.getElementById('confidence-pct').textContent = pct + '%';
+    document.getElementById('conf-bar').style.width = pct + '%';
+
+    document.getElementById('probabilities').innerHTML = Object.entries(r.probabilities)
+      .sort((a, b) => Number(a[0]) - Number(b[0]))
+      .map(([digit, prob]) => {
+        const pctP = Math.round(prob * 100);
+        const isWinner = digit === r.digit;
+        return `
+          <div class="prob-row ${isWinner ? 'winner' : ''}">
+            <span class="prob-label">${digit}</span>
+            <div class="prob-bar-bg">
+              <div class="prob-bar-fill" style="width:${pctP}%"></div>
+            </div>
+            <span class="prob-value">${pctP}%</span>
+          </div>
+        `;
+      }).join('');
+
+    const card = document.getElementById('result-card');
+    card.classList.add('visible');
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+</script>
+<script src="/feedback-widget.js"></script>
+</body>
+</html>
