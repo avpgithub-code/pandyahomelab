@@ -4,8 +4,51 @@ version: '3.8'
 # Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 #
 # Services added in subsequent sub-phases:
-#   - dl-mnist-cnn               (Phase 2a.7)
+#   - dl-mnist-cnn               (Phase 2a.7) ✅ live
 #   - dl-lstm-forecast           (Phase 2b)
 #   - dl-yolo-object-detection   (Phase 2c)
 
-services: {}
+services:
+  dl-mnist-cnn:
+    image: dl-mnist-cnn:latest
+    container_name: dl-mnist-cnn
+    environment:
+      PYTHONPATH: /app
+      # Per-domain MLflow per V3 architecture (mlflow_operational_lessons).
+      # The hostname resolves over dl-network; the client only needs
+      # MLFLOW_TRACKING_URI — no AWS/boto3 env vars (server uses
+      # --serve-artifacts on a local volume).
+      MLFLOW_TRACKING_URI: http://dl-mlflow:5000
+    ports:
+      - "8010:8000"
+    volumes:
+      # Persist the MNIST archive (~11MB) across container recreates so
+      # torchvision doesn't re-download on every restart.
+      - dl_mnist_data:/app/data
+    networks:
+      dl-network:
+        ipv4_address: 172.21.0.10
+    depends_on:
+      dl-postgres:
+        condition: service_healthy
+      dl-redis:
+        condition: service_healthy
+      dl-minio:
+        condition: service_healthy
+      dl-mlflow:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      start_period: 45s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  dl_mnist_data:
