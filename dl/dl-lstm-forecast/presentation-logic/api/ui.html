@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dl-lstm-forecast — pandyaHomeLab</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f14;
+      --surface: #13161e;
+      --surface2: #1a1e2a;
+      --border: #252a38;
+      --accent: #4f8ef7;
+      --accent-2: #22c55e;
+      --warning: #f59e0b;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+
+    header {
+      width: 100%;
+      max-width: 900px;
+      margin-bottom: 2rem;
+    }
+
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .back-link {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      transition: color .2s;
+    }
+    .back-link:hover { color: var(--text); }
+
+    h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -.02em; }
+    h1 em { font-style: normal; color: var(--accent); }
+    .subtitle { color: var(--muted); font-size: .95rem; margin-top: .4rem; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      width: 100%;
+      max-width: 900px;
+      margin-bottom: 1.5rem;
+    }
+
+    .card h2 {
+      font-size: .75rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      margin-bottom: 1.25rem;
+    }
+
+    /* — Controls — */
+    .controls-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      margin-bottom: 1rem;
+    }
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: .4rem;
+    }
+    .input-group label {
+      font-size: .75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    .date-input {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .7rem .9rem;
+      font-size: .95rem;
+      font-family: 'SF Mono', Consolas, monospace;
+      color-scheme: dark;
+    }
+    .button-row {
+      display: flex;
+      gap: .75rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: .85rem 1.25rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: .95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .2s, transform .15s;
+    }
+    .btn:hover { opacity: .92; transform: translateY(-1px); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+    .btn.secondary {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn.secondary:hover { border-color: var(--accent); }
+
+    .hint {
+      font-size: .75rem;
+      color: var(--muted);
+      margin-top: .25rem;
+    }
+
+    .error-msg {
+      display: none;
+      background: rgba(239,68,68,.1);
+      border: 1px solid #ef4444;
+      color: #fca5a5;
+      padding: .75rem 1rem;
+      border-radius: 8px;
+      font-size: .85rem;
+      margin-top: .75rem;
+    }
+    .error-msg.visible { display: block; }
+
+    /* — Chart — */
+    .chart-wrap {
+      position: relative;
+      height: 380px;
+    }
+    canvas { display: block; }
+
+    .legend-row {
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 1rem;
+      font-size: .75rem;
+      color: var(--muted);
+    }
+    .legend-item { display: inline-flex; align-items: center; gap: .4rem; }
+    .legend-swatch {
+      display: inline-block;
+      width: 18px;
+      height: 3px;
+      border-radius: 2px;
+      vertical-align: middle;
+    }
+    .legend-swatch.dashed {
+      background: repeating-linear-gradient(90deg, #22c55e 0 5px, transparent 5px 9px);
+      height: 3px;
+    }
+    .legend-swatch.band {
+      height: 10px;
+      width: 18px;
+      background: rgba(245,158,11,.25);
+      border: 1px solid rgba(245,158,11,.5);
+    }
+
+    /* — Result summary — */
+    .summary-card {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 900px;
+      margin-bottom: 1.5rem;
+    }
+    .summary-card.visible { display: block; }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 1rem;
+      margin-top: .5rem;
+    }
+    .stat-box {
+      background: var(--surface2);
+      border-radius: 8px;
+      padding: 1rem;
+      border: 1px solid var(--border);
+    }
+    .stat-label {
+      font-size: .65rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    .stat-value {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-top: .25rem;
+      font-family: 'SF Mono', Consolas, monospace;
+    }
+
+    /* — Model card — */
+    .model-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 900px;
+      margin-bottom: 1.5rem;
+    }
+    .model-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+    }
+    .mlflow-link {
+      display: none;
+      margin-top: 1.25rem;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: .85rem;
+      font-weight: 600;
+      padding: .55rem .85rem;
+      border: 1px solid var(--accent);
+      border-radius: 999px;
+      transition: background .2s;
+    }
+    .mlflow-link:hover { background: rgba(79,142,247,.1); }
+
+    /* — About trigger — */
+    .about-trigger {
+      background: rgba(79,142,247,.1);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 999px;
+      padding: .35rem .9rem;
+      font-size: .8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s, border-color .2s;
+      display: inline-flex; align-items: center; gap: .4rem;
+    }
+    .about-trigger:hover { background: rgba(79,142,247,.2); border-color: var(--accent); }
+
+    /* — About drawer — */
+    .about-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.55);
+      opacity: 0; pointer-events: none;
+      transition: opacity .25s; z-index: 90;
+    }
+    .about-backdrop.visible { opacity: 1; pointer-events: auto; }
+
+    .about-drawer {
+      position: fixed; top: 0; right: 0;
+      width: min(560px, 92vw); height: 100vh;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      transform: translateX(100%);
+      transition: transform .3s cubic-bezier(.4,0,.2,1);
+      z-index: 100;
+      padding: 2rem 1.75rem 4rem;
+      overflow-y: auto;
+    }
+    .about-drawer.visible { transform: translateX(0); }
+    .about-header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: 1rem; margin-bottom: 1.5rem;
+    }
+    .about-title { font-size: 1.3rem; font-weight: 800; letter-spacing: -.01em; }
+    .about-tagline { font-size: .85rem; color: var(--muted); margin-top: .35rem; line-height: 1.45; }
+    .about-close {
+      background: transparent; color: var(--muted);
+      border: 1px solid var(--border); border-radius: 50%;
+      width: 32px; height: 32px; cursor: pointer; flex-shrink: 0;
+      transition: color .2s, border-color .2s;
+    }
+    .about-close:hover { color: var(--text); border-color: var(--accent); }
+
+    .about-section { margin-bottom: 2rem; }
+    .about-section h3 {
+      font-size: 1rem; font-weight: 700; margin-bottom: .6rem;
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .about-section h3 .icon { font-size: 1.1rem; }
+    .about-section p { font-size: .85rem; color: #cbd5e1; line-height: 1.6; margin-bottom: .6rem; }
+    .about-section p:last-child { margin-bottom: 0; }
+    .about-section em { font-style: italic; color: var(--text); }
+    .about-section strong { color: var(--text); }
+    .about-section code {
+      font-family: 'SF Mono', Consolas, monospace; font-size: .8em;
+      background: var(--surface2); padding: .1rem .35rem; border-radius: 4px;
+    }
+
+    .about-bullets { list-style: none; padding: 0; margin: .5rem 0 0; }
+    .about-bullets li {
+      font-size: .82rem; color: #cbd5e1;
+      padding: .55rem 0 .55rem 1rem; line-height: 1.5;
+      border-left: 2px solid var(--border);
+      margin-bottom: .35rem;
+    }
+    .about-bullets li b { color: var(--accent); font-weight: 700; }
+
+    .about-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .6rem; margin-top: .75rem; }
+    .about-fact { background: var(--surface2); padding: .7rem .85rem; border-radius: 8px; border: 1px solid var(--border); }
+    .about-fact-label { font-size: .65rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+    .about-fact-value { font-size: .85rem; font-weight: 700; color: var(--text); font-family: 'SF Mono', Consolas, monospace; margin-top: .15rem; }
+
+    .about-stack { display: flex; flex-direction: column; gap: .5rem; }
+    .about-stack-item {
+      background: var(--surface2); padding: .65rem .85rem; border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .about-stack-name { font-size: .85rem; font-weight: 700; color: var(--text); }
+    .about-stack-purpose { font-size: .75rem; color: var(--muted); margin-top: .15rem; }
+
+    .about-links { display: flex; flex-direction: column; gap: .4rem; }
+    .about-link {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--accent); text-decoration: none; font-size: .85rem; font-weight: 600;
+      padding: .65rem .9rem; transition: background .2s, border-color .2s;
+    }
+    .about-link:hover { background: rgba(79,142,247,.1); border-color: var(--accent); }
+
+    .about-diagram {
+      background: var(--surface2); padding: 1rem; border-radius: 8px;
+      border: 1px solid var(--border); margin-top: .85rem; overflow-x: auto;
+    }
+    .about-diagram svg { max-width: 100%; height: auto; }
+    .about-diagram .mermaid-loading { color: var(--muted); font-size: .75rem; }
+
+    .problem-type-badge {
+      display: inline-block;
+      background: rgba(79,142,247,.1);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      padding: .25rem .6rem;
+      font-size: .7rem;
+      font-weight: 600;
+      margin-bottom: .6rem;
+    }
+
+    .metric-list { display: flex; flex-direction: column; gap: 1rem; margin-top: .5rem; }
+    .metric-card {
+      background: var(--surface2); padding: 1rem; border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .metric-card-head {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: .5rem;
+    }
+    .metric-name { font-size: .85rem; font-weight: 700; color: var(--text); }
+    .metric-value {
+      font-size: 1rem; font-weight: 800;
+      color: var(--accent); font-family: 'SF Mono', Consolas, monospace;
+    }
+    .metric-what { font-size: .8rem; color: #cbd5e1; line-height: 1.5; margin-bottom: .4rem; }
+    .metric-formula {
+      font-family: 'SF Mono', Consolas, monospace; font-size: .75rem; color: var(--muted);
+      background: var(--surface); padding: .3rem .5rem; border-radius: 4px; margin-bottom: .5rem;
+      display: inline-block;
+    }
+    .metric-block {
+      font-size: .75rem; line-height: 1.5; padding: .55rem .75rem;
+      border-radius: 6px; margin-top: .35rem;
+    }
+    .metric-block-label {
+      display: block; font-size: .65rem; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; margin-bottom: .25rem;
+    }
+    .metric-block.why { background: rgba(34,197,94,.08); color: #bbf7d0; }
+    .metric-block.why .metric-block-label { color: #4ade80; }
+    .metric-block.watch { background: rgba(250,204,21,.08); color: #fde68a; }
+    .metric-block.watch .metric-block-label { color: #facc15; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-row">
+    <a class="back-link" href="/">← pandyaHomeLab</a>
+    <button class="about-trigger" id="about-trigger" type="button">
+      <span>ⓘ</span> About dl-lstm-forecast
+    </button>
+  </div>
+  <h1>Forecast NYC <em>Bike Trips</em></h1>
+  <p class="subtitle">PyTorch LSTM · CitiBike daily counts · 14-day autoregressive forecast with MC-Dropout confidence band</p>
+</header>
+
+<!-- About drawer -->
+<div class="about-backdrop" id="about-backdrop"></div>
+<aside class="about-drawer" id="about-drawer" aria-hidden="true" role="dialog" aria-labelledby="about-title">
+  <div class="about-header">
+    <div>
+      <div class="about-title" id="about-title">Loading…</div>
+      <div class="about-tagline" id="about-tagline"></div>
+    </div>
+    <button class="about-close" id="about-close" type="button" aria-label="Close">✕</button>
+  </div>
+  <div id="about-body"></div>
+</aside>
+
+<!-- Controls -->
+<div class="card">
+  <h2>Pick a date · forecast 14 days ahead</h2>
+  <div class="controls-row">
+    <div class="input-group">
+      <label for="anchor-date">Anchor date</label>
+      <input type="date" id="anchor-date" class="date-input" />
+      <div class="hint" id="date-hint">Loading historical range…</div>
+    </div>
+  </div>
+  <div class="button-row">
+    <button class="btn" id="forecast-btn" onclick="runForecast()" disabled>Forecast 14 days</button>
+    <button class="btn secondary" id="sample-btn" onclick="loadSample()" disabled>Show me a sample</button>
+  </div>
+  <div class="error-msg" id="error-msg"></div>
+</div>
+
+<!-- Chart -->
+<div class="card">
+  <h2>Daily ride counts + forecast</h2>
+  <div class="chart-wrap">
+    <canvas id="forecast-chart"></canvas>
+  </div>
+  <div class="legend-row">
+    <span class="legend-item"><span class="legend-swatch" style="background:#4f8ef7"></span>Historical trips</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:#f59e0b"></span>Forecast (mean)</span>
+    <span class="legend-item"><span class="legend-swatch band"></span>95% confidence band</span>
+    <span class="legend-item"><span class="legend-swatch dashed"></span>Actuals (when available)</span>
+  </div>
+</div>
+
+<!-- Forecast summary -->
+<div class="summary-card" id="summary-card">
+  <h2 style="font-size:.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:1rem">Forecast summary</h2>
+  <div class="summary-grid">
+    <div class="stat-box"><div class="stat-label">Anchor</div><div class="stat-value" id="sum-anchor">—</div></div>
+    <div class="stat-box"><div class="stat-label">Horizon</div><div class="stat-value" id="sum-horizon">—</div></div>
+    <div class="stat-box"><div class="stat-label">Mean forecast</div><div class="stat-value" id="sum-mean">—</div></div>
+    <div class="stat-box"><div class="stat-label">Mean band width</div><div class="stat-value" id="sum-width">—</div></div>
+  </div>
+</div>
+
+<!-- Model Card -->
+<div class="model-card">
+  <h2 style="font-size:.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:1.25rem">Model Card</h2>
+  <div class="model-stats">
+    <div class="stat-box"><div class="stat-label">Model</div><div class="stat-value" id="mc-model">—</div></div>
+    <div class="stat-box"><div class="stat-label">Dataset</div><div class="stat-value" id="mc-dataset">—</div></div>
+    <div class="stat-box"><div class="stat-label">Test MAPE</div><div class="stat-value" id="mc-mape">—</div></div>
+    <div class="stat-box"><div class="stat-label">Test RMSE</div><div class="stat-value" id="mc-rmse">—</div></div>
+  </div>
+  <a class="mlflow-link" id="mlflow-link" href="#" target="_blank">↗ View in MLflow</a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
+<script>
+  // ——— Globals ———
+  let _chart = null;
+  let _historyDates = [];
+  let _historyTrips = [];
+  let _minAnchor = null;
+  let _maxAnchor = null;
+
+  const API_BASE = '/dl/lstm-forecast';
+
+  // ——— Init ———
+  window.addEventListener('DOMContentLoaded', async () => {
+    await Promise.all([
+      loadHistoryAndChart(),
+      loadModelCard(),
+    ]);
+  });
+
+  async function loadHistoryAndChart() {
+    try {
+      const res = await fetch(`${API_BASE}/history`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      _historyDates = data.dates;
+      _historyTrips = data.trips;
+      _minAnchor = data.min_anchor;
+      _maxAnchor = data.max_anchor;
+
+      // Configure date picker.
+      const picker = document.getElementById('anchor-date');
+      picker.min = _minAnchor;
+      picker.max = _maxAnchor;
+      // Default anchor: 60 days before the last historical date — gives
+      // 14 days of forecast that all fall inside the historical record,
+      // so the actuals overlay populates fully.
+      const defaultAnchor = isoMinusDays(_maxAnchor, 60);
+      picker.value = defaultAnchor;
+      document.getElementById('date-hint').textContent =
+        `Pick any date between ${_minAnchor} and ${_maxAnchor}.`;
+      document.getElementById('forecast-btn').disabled = false;
+      document.getElementById('sample-btn').disabled = false;
+
+      renderChart();
+    } catch (e) {
+      document.getElementById('date-hint').textContent =
+        'Could not load historical data. Service may still be warming up.';
+    }
+  }
+
+  function isoMinusDays(iso, days) {
+    const d = new Date(iso + 'T00:00:00Z');
+    d.setUTCDate(d.getUTCDate() - days);
+    return d.toISOString().slice(0, 10);
+  }
+
+  // ——— Chart rendering ———
+  function renderChart(forecast) {
+    const ctx = document.getElementById('forecast-chart').getContext('2d');
+    const historyPoints = _historyDates.map((d, i) => ({ x: d, y: _historyTrips[i] }));
+
+    const datasets = [{
+      label: 'History',
+      data: historyPoints,
+      borderColor: '#4f8ef7',
+      backgroundColor: '#4f8ef7',
+      borderWidth: 1.2,
+      pointRadius: 0,
+      tension: 0.1,
+      order: 3,
+    }];
+
+    if (forecast) {
+      const upper = forecast.points.map(p => ({ x: p.date, y: p.upper }));
+      const lower = forecast.points.map(p => ({ x: p.date, y: p.lower }));
+      const mean = forecast.points.map(p => ({ x: p.date, y: p.mean }));
+      // Order matters: draw upper first, then lower with fill: '-1' so the
+      // shading fills back to the upper line.
+      datasets.push({
+        label: 'Upper bound',
+        data: upper,
+        borderColor: 'rgba(245,158,11,0)',
+        backgroundColor: 'rgba(245,158,11,0.18)',
+        pointRadius: 0,
+        fill: false,
+        order: 2,
+      });
+      datasets.push({
+        label: 'Lower bound',
+        data: lower,
+        borderColor: 'rgba(245,158,11,0)',
+        backgroundColor: 'rgba(245,158,11,0.18)',
+        pointRadius: 0,
+        fill: '-1',  // fill to previous dataset (upper)
+        order: 2,
+      });
+      datasets.push({
+        label: 'Forecast (mean)',
+        data: mean,
+        borderColor: '#f59e0b',
+        backgroundColor: '#f59e0b',
+        borderWidth: 2,
+        pointRadius: 2,
+        order: 1,
+      });
+
+      // Actuals overlay — only points where we have a real value.
+      const actualsAvailable = forecast.points.filter(p => p.actual != null);
+      if (actualsAvailable.length > 0) {
+        datasets.push({
+          label: 'Actuals',
+          data: actualsAvailable.map(p => ({ x: p.date, y: p.actual })),
+          borderColor: '#22c55e',
+          backgroundColor: '#22c55e',
+          borderWidth: 2,
+          borderDash: [6, 4],
+          pointRadius: 3,
+          order: 0,
+        });
+      }
+    }
+
+    const cfg = {
+      type: 'line',
+      data: { datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'nearest', intersect: false },
+        scales: {
+          x: {
+            type: 'time',
+            time: { unit: 'month', tooltipFormat: 'yyyy-MM-dd' },
+            ticks: { color: '#64748b', font: { size: 10 } },
+            grid: { color: '#252a38' },
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              color: '#64748b',
+              font: { size: 10 },
+              callback: v => v.toLocaleString(),
+            },
+            grid: { color: '#252a38' },
+          },
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1a1e2a',
+            titleColor: '#e2e8f0',
+            bodyColor: '#cbd5e1',
+            borderColor: '#252a38',
+            borderWidth: 1,
+            callbacks: {
+              label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()} trips`,
+            },
+          },
+        },
+      },
+    };
+
+    if (_chart) { _chart.destroy(); }
+    _chart = new Chart(ctx, cfg);
+  }
+
+  // ——— Forecast ———
+  async function runForecast() {
+    const errEl = document.getElementById('error-msg');
+    errEl.classList.remove('visible');
+    const btn = document.getElementById('forecast-btn');
+    const sampleBtn = document.getElementById('sample-btn');
+    const anchor = document.getElementById('anchor-date').value;
+    if (!anchor) {
+      showError('Pick an anchor date first.');
+      return;
+    }
+
+    btn.disabled = true; sampleBtn.disabled = true;
+    btn.textContent = 'Forecasting…';
+    try {
+      const res = await fetch(`${API_BASE}/forecast`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ anchor_date: anchor }),
+      });
+      if (!res.ok) {
+        const detail = await res.json().catch(() => ({}));
+        throw new Error(detail.detail || `HTTP ${res.status}`);
+      }
+      const forecast = await res.json();
+      renderChart(forecast);
+      showSummary(forecast);
+    } catch (e) {
+      showError(`Forecast failed: ${e.message || e}`);
+    } finally {
+      btn.disabled = false; sampleBtn.disabled = false;
+      btn.textContent = 'Forecast 14 days';
+    }
+  }
+
+  function loadSample() {
+    // Use the picker's current default (60 days before max_anchor) so all
+    // 14 forecast days have actuals for the compare-to-actuals overlay.
+    document.getElementById('anchor-date').value = isoMinusDays(_maxAnchor, 60);
+    runForecast();
+  }
+
+  function showError(msg) {
+    const errEl = document.getElementById('error-msg');
+    errEl.textContent = msg;
+    errEl.classList.add('visible');
+  }
+
+  function showSummary(forecast) {
+    const meanVals = forecast.points.map(p => p.mean);
+    const avgMean = Math.round(meanVals.reduce((a, b) => a + b, 0) / meanVals.length);
+    const widths = forecast.points.map(p => p.upper - p.lower);
+    const avgWidth = Math.round(widths.reduce((a, b) => a + b, 0) / widths.length);
+    document.getElementById('sum-anchor').textContent = forecast.anchor_date;
+    document.getElementById('sum-horizon').textContent = `${forecast.horizon} days`;
+    document.getElementById('sum-mean').textContent = avgMean.toLocaleString() + ' / day';
+    document.getElementById('sum-width').textContent = '±' + Math.round(avgWidth / 2).toLocaleString();
+    document.getElementById('summary-card').classList.add('visible');
+  }
+
+  // ——— Model card ———
+  async function loadModelCard() {
+    try {
+      const res = await fetch(`${API_BASE}/model-info`);
+      if (!res.ok) return;
+      const info = await res.json();
+      document.getElementById('mc-model').textContent = info.model_type || 'LSTMForecaster';
+      const trainN = (info.split && info.split.train_samples) || 883;
+      document.getElementById('mc-dataset').textContent =
+        `CitiBike (${trainN.toLocaleString ? trainN.toLocaleString() : trainN} days)`;
+      const m = info.metrics_display || {};
+      document.getElementById('mc-mape').textContent = m.test_mape || '—';
+      document.getElementById('mc-rmse').textContent = m.test_rmse || '—';
+      if (info.mlflow_url) {
+        const link = document.getElementById('mlflow-link');
+        link.href = info.mlflow_url;
+        link.style.display = 'inline-flex';
+      }
+    } catch (e) { /* tracker unavailable — card stays with dashes */ }
+  }
+
+  // ——— About drawer ———
+  let _aboutLoaded = false;
+  let _mermaidReady = false;
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+  function renderInline(text) {
+    let s = escapeHtml(text);
+    s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    s = s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+    s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+    return s;
+  }
+  function renderSection(s) {
+    let html = `<section class="about-section"><h3><span class="icon">${s.icon || ''}</span>${escapeHtml(s.title)}</h3>`;
+    if (s.problem_type) {
+      html += `<div class="problem-type-badge">${escapeHtml(s.problem_type)}</div>`;
+    }
+    if (s.body) { s.body.forEach(p => html += `<p>${renderInline(p)}</p>`); }
+    if (s.bullets) {
+      html += '<ul class="about-bullets">';
+      s.bullets.forEach(b => html += `<li><b>${escapeHtml(b.label)}:</b> ${renderInline(b.text)}</li>`);
+      html += '</ul>';
+    }
+    if (s.diagram && s.diagram.type === 'mermaid') {
+      html += `<div class="about-diagram"><div class="mermaid">${escapeHtml(s.diagram.code)}</div></div>`;
+    }
+    if (s.facts) {
+      html += '<div class="about-facts">';
+      s.facts.forEach(f => html += `<div class="about-fact"><div class="about-fact-label">${escapeHtml(f.label)}</div><div class="about-fact-value">${escapeHtml(f.value)}</div></div>`);
+      html += '</div>';
+    }
+    if (s.metrics_detail) {
+      html += '<div class="metric-list">';
+      s.metrics_detail.forEach(m => {
+        html += '<div class="metric-card">';
+        html += `<div class="metric-card-head"><div class="metric-name">${escapeHtml(m.name)}</div><div class="metric-value">${escapeHtml(m.value)}</div></div>`;
+        if (m.what) html += `<div class="metric-what">${renderInline(m.what)}</div>`;
+        if (m.formula) html += `<div class="metric-formula">${escapeHtml(m.formula)}</div>`;
+        if (m.why_chosen) html += `<div class="metric-block why"><span class="metric-block-label">Why this metric</span>${renderInline(m.why_chosen)}</div>`;
+        if (m.watch_out) html += `<div class="metric-block watch"><span class="metric-block-label">Watch out</span>${renderInline(m.watch_out)}</div>`;
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+    if (s.items) {
+      html += '<div class="about-stack">';
+      s.items.forEach(it => html += `<div class="about-stack-item"><div class="about-stack-name">${escapeHtml(it.name)}</div><div class="about-stack-purpose">${escapeHtml(it.purpose)}</div></div>`);
+      html += '</div>';
+    }
+    if (s.links) {
+      html += '<div class="about-links">';
+      s.links.forEach(l => {
+        const target = l.external ? ' target="_blank" rel="noopener"' : '';
+        const arrow = l.external ? ' ↗' : ' →';
+        html += `<a class="about-link" href="${escapeHtml(l.url)}"${target}>${escapeHtml(l.label)}${arrow}</a>`;
+      });
+      html += '</div>';
+    }
+    html += '</section>';
+    return html;
+  }
+
+  async function ensureMermaid() {
+    if (_mermaidReady) return;
+    await new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'dark',
+      themeVariables: {
+        background: '#13161e', primaryColor: '#1a1e2a',
+        primaryTextColor: '#e2e8f0', primaryBorderColor: '#4f8ef7',
+        lineColor: '#64748b', secondaryColor: '#252a38', tertiaryColor: '#0d0f14',
+      },
+    });
+    _mermaidReady = true;
+  }
+
+  function getPath(obj, path) {
+    return path.split('.').reduce((o, k) => (o == null ? undefined : o[k]), obj);
+  }
+  function substituteTokens(value, data) {
+    if (typeof value === 'string') {
+      const whole = value.match(/^\{\{\s*([^}]+?)\s*\}\}$/);
+      if (whole) {
+        const v = getPath(data, whole[1]);
+        return v === undefined ? value : v;
+      }
+      return value.replace(/\{\{\s*([^}]+?)\s*\}\}/g, (_, p) => {
+        const v = getPath(data, p);
+        return v == null ? '' : String(v);
+      });
+    }
+    if (Array.isArray(value)) return value.map(v => substituteTokens(v, data));
+    if (value && typeof value === 'object') {
+      const out = {};
+      for (const [k, v] of Object.entries(value)) out[k] = substituteTokens(v, data);
+      return out;
+    }
+    return value;
+  }
+
+  async function loadAbout() {
+    if (_aboutLoaded) return;
+    try {
+      const [aboutRes, infoRes] = await Promise.all([
+        fetch(`${API_BASE}/about`),
+        fetch(`${API_BASE}/model-info`),
+      ]);
+      if (!aboutRes.ok) throw new Error('about fetch failed');
+      let data = await aboutRes.json();
+      if (infoRes.ok) {
+        const info = await infoRes.json();
+        data = substituteTokens(data, info);
+      }
+      document.getElementById('about-title').textContent = data.title || 'About';
+      document.getElementById('about-tagline').textContent = data.tagline || '';
+      document.getElementById('about-body').innerHTML = data.sections.map(renderSection).join('');
+
+      const hasDiagrams = data.sections.some(s => s.diagram && s.diagram.type === 'mermaid');
+      if (hasDiagrams) {
+        await ensureMermaid();
+        await mermaid.run({ querySelector: '#about-drawer .mermaid' });
+      }
+      _aboutLoaded = true;
+    } catch (e) {
+      document.getElementById('about-body').innerHTML =
+        '<p style="color:#f87171">Could not load About content. Please try again later.</p>';
+    }
+  }
+
+  function openAbout() {
+    document.getElementById('about-drawer').classList.add('visible');
+    document.getElementById('about-drawer').setAttribute('aria-hidden', 'false');
+    document.getElementById('about-backdrop').classList.add('visible');
+    document.body.style.overflow = 'hidden';
+    loadAbout();
+  }
+  function closeAbout() {
+    document.getElementById('about-drawer').classList.remove('visible');
+    document.getElementById('about-drawer').setAttribute('aria-hidden', 'true');
+    document.getElementById('about-backdrop').classList.remove('visible');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('about-trigger').addEventListener('click', openAbout);
+  document.getElementById('about-close').addEventListener('click', closeAbout);
+  document.getElementById('about-backdrop').addEventListener('click', closeAbout);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAbout(); });
+</script>
+<script src="/feedback-widget.js"></script>
+</body>
+</html>

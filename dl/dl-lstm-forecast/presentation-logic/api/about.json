@@ -1,0 +1,212 @@
+{
+  "title": "About dl-lstm-forecast",
+  "tagline": "How an LSTM, 883 days of NYC bike-share data, and MC-Dropout uncertainty turn a date pick into a 14-day forecast with a confidence band.",
+  "sections": [
+    {
+      "id": "problem",
+      "title": "The Problem",
+      "icon": "🎯",
+      "body": [
+        "How many bikes will Citi Bike riders take out tomorrow? Next Saturday? Two weeks from today? Daily ride counts are a textbook time-series problem with three signals layered on top of each other — a strong weekly cycle (commute peaks Mon–Fri, leisure peaks on weekends), a yearly seasonal cycle (summer ridership dwarfs winter), and an overall growth trend as the bike-share system expanded.",
+        "The forecasting task: given a window of recent daily ride counts, predict the next 14 days with a confidence band that honestly reflects how much the model trusts its own guess."
+      ]
+    },
+    {
+      "id": "approach",
+      "title": "Approach — Why an LSTM?",
+      "icon": "🧭",
+      "body": [
+        "A linear regression on lagged values handles the weekly cycle but misses the trend. A SARIMA model handles both but tunes brittlely on real data. A **Long Short-Term Memory** network learns *which lags to attend to* automatically — its hidden state acts as a learned summary of the input window, and the gating mechanism decides what to keep and what to discard across timesteps.",
+        "Even with just 64 hidden units and one layer (~17K parameters), this LSTM learns the weekly periodicity from the input window without anyone telling it that the period is 7 days."
+      ],
+      "bullets": [
+        {"label": "Why a single layer", "text": "Daily counts have ~700 training days — stacked LSTMs would over-fit. One layer with hidden=64 is the standard tutorial recipe that converges quickly and generalizes well."},
+        {"label": "Why dropout = 0.2", "text": "Modest regularization, but more importantly it's the source of **MC Dropout** uncertainty estimates at inference (see Performance section)."},
+        {"label": "Why MSE loss", "text": "Penalizes large misses quadratically — appropriate when the target is a continuous count with no boundaries."},
+        {"label": "Why 28-day window", "text": "Four full weekly cycles. Long enough to capture the weekly + recent-trend signal, short enough to keep training fast."}
+      ]
+    },
+    {
+      "id": "multistep",
+      "title": "How 1-step + Autoregressive Rollout Gives a 14-Day Forecast",
+      "icon": "🔁",
+      "body": [
+        "The LSTM is trained to predict **one** day ahead. To produce a 14-day forecast, the model is rolled forward autoregressively: the prediction for day t+1 is fed back as the last value of the input window, then the model predicts day t+2, and so on for 14 steps.",
+        "This is honest about uncertainty: errors compound, and the confidence band visibly widens with horizon. A model trained directly to predict 14 days ahead would over-smooth and lose the daily-level structure."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph LR\n  W[\"Window: last 28 days\"] --> L1[\"LSTM\"] --> P1[\"ŷ(t+1)\"]\n  P1 -.->|\"shift window\"| W2[\"Window: last 27 + ŷ(t+1)\"]\n  W2 --> L2[\"LSTM\"] --> P2[\"ŷ(t+2)\"]\n  P2 -.-> Dots[\"... × 12 more steps ...\"]\n  Dots -.-> P14[\"ŷ(t+14)\"]\n\n  classDef inout fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef step fill:#13161e,stroke:#4f8ef7,color:#e2e8f0\n  class W,W2 inout\n  class L1,L2,P1,P2,P14,Dots step"
+      }
+    },
+    {
+      "id": "mc-dropout",
+      "title": "How the Confidence Band Works (MC Dropout)",
+      "icon": "📈",
+      "body": [
+        "**Monte Carlo Dropout** treats the trained LSTM as a Bayesian neural network at inference time. Normally dropout is disabled when you call `.eval()` on a PyTorch model — but if you leave it active, each forward pass becomes a stochastic sample from an implicit posterior over the model's weights.",
+        "For every step of the autoregressive rollout, the model is queried **N=30 times** with dropout active. The mean of those 30 samples is the forecast; the 2σ envelope is the confidence band. The band grows with horizon because forecast errors compound — uncertainty made visible without needing to train an ensemble of separate models."
+      ],
+      "bullets": [
+        {"label": "Why dropout-only enable", "text": "BatchNorm and other train-only layers stay in eval mode at inference (running statistics shouldn't drift). Only Dropout flips back on — there's a helper `enable_mc_dropout(model)` that does exactly this."},
+        {"label": "Why N=30 samples", "text": "Enough to get a stable variance estimate per step; 30 × 14 steps = 420 forward passes through a tiny LSTM ≈ 1.5s on NAS CPU, comfortably under Cloudflare's 100s origin-response ceiling."},
+        {"label": "What 'lower' / 'upper' mean", "text": "mean − 2σ and mean + 2σ — the 95% credible interval under the Gaussian assumption."}
+      ]
+    },
+    {
+      "id": "architecture",
+      "title": "Model Architecture",
+      "icon": "🧠",
+      "body": [
+        "One LSTM layer + one linear head. ~17K trainable parameters."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph TB\n  Input[\"Input window<br/>(batch, 28, 1)<br/>scaled trips\"]\n  LSTM[\"LSTM(input_size=1,<br/>hidden_size=64,<br/>num_layers=1)\"]\n  Last[\"Take final timestep<br/>(batch, 64)\"]\n  Drop[\"Dropout(0.2)<br/>← MC Dropout site\"]\n  FC[\"Linear(64 → 1)\"]\n  Out[\"ŷ (next-day scaled trips)\"]\n\n  Input --> LSTM --> Last --> Drop --> FC --> Out\n\n  classDef io fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef layer fill:#13161e,stroke:#4f8ef7,color:#e2e8f0\n  classDef reg fill:#1a1e2a,stroke:#a855f7,color:#cbd5e1\n  class Input,Out io\n  class LSTM,Last,FC layer\n  class Drop reg"
+      }
+    },
+    {
+      "id": "service-architecture",
+      "title": "Service Architecture",
+      "icon": "🏗️",
+      "body": [
+        "Same per-project 4-layer pattern (ADR-013) used by every project on pandyaHomeLab. The browser sends an anchor date; the server returns a JSON payload of 14 forecast points (mean / lower / upper / optional actual). The chart on the page is pure Chart.js — no framework, no build step."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph TB\n  Client[\"Browser (Chart.js)\"] -->|HTTPS<br/>POST /forecast| Nginx[\"Nginx Proxy\"]\n  Nginx -->|\"/dl/lstm-forecast/*\"| App[\"dl-lstm-forecast container\"]\n  subgraph App\n    direction TB\n    Pres[\"presentation-logic<br/>FastAPI · Pydantic v2 · Chart.js UI\"] --> AppLogic[\"application-logic<br/>PredictionService\"]\n    AppLogic --> Model[\"TimeSeriesForecaster<br/>LSTMForecaster + MC Dropout\"]\n    AppLogic --> DB[\"db-logic<br/>BikeShareLoader<br/>+ WindowScaler\"]\n    Shared[\"shared/<br/>config · logger · metrics\"] -.- Pres\n    Shared -.- AppLogic\n    Shared -.- DB\n  end\n  AppLogic -.->|run logging| MLflow[\"dl-mlflow<br/>experiment tracking\"]\n\n  classDef container fill:#13161e,stroke:#4f8ef7,color:#e2e8f0\n  classDef external fill:#1a1e2a,stroke:#64748b,color:#cbd5e1\n  class Pres,AppLogic,Model,DB,Shared container\n  class Nginx,Client,MLflow external"
+      }
+    },
+    {
+      "id": "network",
+      "title": "Network & Deployment",
+      "icon": "🌐",
+      "body": [
+        "The DL domain has its own bridge network (ADR-016) — dl-postgres, dl-minio, dl-redis, and dl-mlflow live there alongside this demo and the sibling dl-mnist-cnn. The MLflow tracker is exposed on its own subdomain (`mlflow-dl.pandyahomelab.com`) per the platform's locked subdomain pattern for per-domain MLflow.",
+        "No cross-network reach-back into ml-network — domain autonomy means each domain's tracking, storage, and demos are independent of every other domain's."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph LR\n  User([\"🌍 Visitor\"]) --> CF[\"Cloudflare Tunnel<br/>pandyahomelab.com<br/>+ mlflow-dl.pandyahomelab.com\"]\n  CF --> NX[\"Nginx<br/>:8443\"]\n  subgraph PROXY[\"pandya-proxy-network · 172.24.0.0/24\"]\n    NX\n  end\n  subgraph DL[\"dl-network · 172.21.0.0/24\"]\n    LSTM[\"dl-lstm-forecast<br/>172.21.0.11:8000\"]\n    MNIST[\"dl-mnist-cnn<br/>172.21.0.10:8000\"]\n    PG[\"dl-postgres<br/>172.21.0.2\"]\n    MN[\"dl-minio<br/>172.21.0.3\"]\n    RD[\"dl-redis<br/>172.21.0.4\"]\n    MF[\"dl-mlflow<br/>172.21.0.5\"]\n  end\n  NX --> LSTM\n  NX --> MNIST\n  NX --> MF\n  LSTM -.->|MLflow runs| MF\n  MNIST -.->|MLflow runs| MF\n\n  classDef live fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef infra fill:#1a1e2a,stroke:#64748b,color:#cbd5e1\n  class LSTM,MNIST live\n  class PG,MN,RD,MF infra"
+      },
+      "facts": [
+        {"label": "Container", "value": "dl-lstm-forecast"},
+        {"label": "Container IP", "value": "172.21.0.11"},
+        {"label": "Network", "value": "dl-network"},
+        {"label": "CIDR", "value": "172.21.0.0/24"},
+        {"label": "Host port", "value": "8011 → 8000"},
+        {"label": "Public URL", "value": "/dl/lstm-forecast/"},
+        {"label": "MLflow tracker", "value": "mlflow-dl.pandyahomelab.com"}
+      ]
+    },
+    {
+      "id": "stack",
+      "title": "Tech Stack",
+      "icon": "🧰",
+      "items": [
+        {"name": "PyTorch 2.1 (CPU)", "purpose": "LSTM training and inference — CPU-only wheels, no CUDA on the NAS"},
+        {"name": "Chart.js 4", "purpose": "Frontend line chart with shaded confidence band — no React/Vue, just vanilla JS"},
+        {"name": "scikit-learn 1.3", "purpose": "StandardScaler for input normalization (fit on train, used everywhere)"},
+        {"name": "FastAPI 0.104", "purpose": "Async HTTP API framework"},
+        {"name": "Pydantic v2", "purpose": "Schema validation — anchor-date format, horizon/n_samples bounds"},
+        {"name": "uvicorn", "purpose": "ASGI server, runs inside the container"},
+        {"name": "Docker", "purpose": "Multi-stage build, ~1.7GB final image (CPU PyTorch wheels)"},
+        {"name": "Nginx 1.25", "purpose": "Reverse proxy, TLS termination, route fan-out, host-based routing for mlflow-dl subdomain"},
+        {"name": "MLflow 3.x", "purpose": "Per-domain tracker on dl-mlflow:5000 — separate from ml-mlflow (V3 domain autonomy)"},
+        {"name": "Synology DSM", "purpose": "Host OS — Docker engine, persistent volumes"}
+      ]
+    },
+    {
+      "id": "dataset",
+      "title": "Dataset",
+      "icon": "📂",
+      "body": [
+        "NYC CitiBike daily ride counts, sourced from [toddwschneider/nyc-citibike-data](https://github.com/toddwschneider/nyc-citibike-data) — a well-known reference repo that publishes a daily-aggregated CSV of trip counts. **883 daily observations** spanning 2013-07-01 → 2015-11-30, the early-growth era of the CitiBike system.",
+        "Each row is one calendar day with the total number of bike trips across all stations. The committed CSV also includes weather/holiday columns (precipitation, temperature, dow, holiday) — v1.0.0 uses only the daily trips count, but those features are preserved on disk for a future multivariate extension."
+      ],
+      "facts": [
+        {"label": "Daily observations", "value": "883"},
+        {"label": "First day", "value": "2013-07-01"},
+        {"label": "Last day", "value": "2015-11-30"},
+        {"label": "Train days", "value": "{{split.train_samples}}"},
+        {"label": "Validation days", "value": "{{split.val_samples}}"},
+        {"label": "Test days", "value": "{{split.test_samples}}"},
+        {"label": "Source", "value": "toddwschneider/nyc-citibike-data"}
+      ]
+    },
+    {
+      "id": "walkthrough",
+      "title": "Read the Code Walkthrough",
+      "icon": "📖",
+      "body": [
+        "For a guided tour of how this service is built — file by file, layer by layer — start with the **ML Project Walkthrough** (uses iris-knn as the worked example but the 4-layer architecture is identical). A DL-specific walkthrough covering LSTM training, MC Dropout, and autoregressive forecasting is planned once 2c ships."
+      ],
+      "bullets": [
+        {"label": "Project anatomy", "text": "Annotated file tree — what every file is and why it's there."},
+        {"label": "Request flow", "text": "A `/forecast` request traced hop-by-hop from the browser through all four layers."},
+        {"label": "Training flow", "text": "What happens during eager warm-up at container startup — load CSV → fit scaler → train LSTM with early stopping → evaluate → log to dl-mlflow."},
+        {"label": "Per-layer patterns", "text": "Factory pattern, lazy init, thread-safe train lock, `__file__`-relative paths, the hyphen-vs-underscore symlink trick."},
+        {"label": "MLflow integration", "text": "How runs are logged to the per-domain tracker; graceful degradation when the tracker is briefly unreachable."}
+      ],
+      "links": [
+        {"label": "ML walkthrough on GitHub", "url": "https://github.com/avpgithub-code/pandyahomelab/blob/main/docs/ML_PROJECT_WALKTHROUGH.md", "external": true}
+      ]
+    },
+    {
+      "id": "metrics",
+      "title": "Performance",
+      "icon": "📊",
+      "problem_type": "Univariate time-series regression · single target (daily trips) · last 180 days held out",
+      "body": [
+        "Trained on roughly 613 days (everything before the final 270 days), validated on the next 90 days for early stopping, and evaluated on the final 180 days. Adam (lr=1e-3) for up to 50 epochs with patience-5 early stopping — in practice the model usually stops around epoch 15–25 once the val loss plateaus.",
+        "Because the target is a continuous count, the natural summary metrics are **MAPE** (mean absolute percentage error) and **RMSE** (root mean squared error in raw rides/day). 99%-style accuracy targets that work for MNIST don't apply here — the test window straddles a period of fast CitiBike growth, and the model sees only the lagged trip counts, with no weather or holiday features that drive much of the daily variance."
+      ],
+      "facts": [
+        {"label": "Train samples", "value": "{{split.train_samples}}"},
+        {"label": "Val samples", "value": "{{split.val_samples}}"},
+        {"label": "Test samples", "value": "{{split.test_samples}}"},
+        {"label": "Training time", "value": "~10s (CPU)"},
+        {"label": "Tracked in", "value": "mlflow-dl ↗"}
+      ],
+      "metrics_detail": [
+        {
+          "name": "Test MAPE",
+          "value": "{{metrics_display.test_mape}}",
+          "what": "Mean Absolute Percentage Error — average size of the model's relative miss across the 180-day test window.",
+          "formula": "(1/n) Σ |y - ŷ| / |y|",
+          "why_chosen": "Scale-free — interpretable as 'on average the forecast is off by X%'. Easy to compare across forecasting tasks with different units.",
+          "watch_out": "Sensitive to days with unusually low ride counts (a 1000-ride absolute miss looks worse on a 5,000-ride day than on a 30,000-ride day). MAPE in the 20%+ range here is honest for univariate LSTM on noisy daily counts without weather features."
+        },
+        {
+          "name": "Test RMSE",
+          "value": "{{metrics_display.test_rmse}}",
+          "what": "Root Mean Squared Error — typical absolute error in rides/day.",
+          "formula": "√[(1/n) Σ (y - ŷ)²]",
+          "why_chosen": "In the same units as the target (rides/day) — useful for grounding the percentage error in something tangible: 'on a typical day, the forecast is off by ~Y rides'.",
+          "watch_out": "Penalises large misses quadratically, so a few extreme weather days can dominate the average. Always read RMSE alongside MAPE."
+        },
+        {
+          "name": "Best val loss",
+          "value": "{{metrics.best_val_loss}}",
+          "what": "MSE on the validation window (90 days immediately before the test set) in scaled space.",
+          "formula": "(1/n) Σ (y_scaled - ŷ_scaled)²",
+          "why_chosen": "Drives the early-stopping decision — training halts when this stops improving for `patience` epochs.",
+          "watch_out": "In scaled space (mean 0, std 1 on train), so a value of 0.2–0.3 is typical for this dataset. Not directly comparable to RMSE in rides/day."
+        }
+      ]
+    },
+    {
+      "id": "learn",
+      "title": "Learn More",
+      "icon": "🔗",
+      "links": [
+        {"label": "View live MLflow runs", "url": "https://mlflow-dl.pandyahomelab.com/", "external": true},
+        {"label": "Source on GitHub", "url": "https://github.com/avpgithub-code/pandyahomelab", "external": true},
+        {"label": "Citi Bike System Data (official)", "url": "https://citibikenyc.com/system-data", "external": true},
+        {"label": "toddwschneider/nyc-citibike-data (dataset source)", "url": "https://github.com/toddwschneider/nyc-citibike-data", "external": true},
+        {"label": "Gal & Ghahramani, MC Dropout paper", "url": "https://arxiv.org/abs/1506.02142", "external": true},
+        {"label": "PyTorch LSTM docs", "url": "https://pytorch.org/docs/stable/generated/torch.nn.LSTM.html", "external": true}
+      ]
+    }
+  ]
+}
