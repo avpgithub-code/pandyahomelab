@@ -107,6 +107,9 @@ ENV/
 env.bak/
 venv.bak/
 
+# Stray nohup.out from background daemons (cloudflared restart, etc.)
+nohup.out
+
 # Test and coverage artifacts
 .pytest_cache/
 .coverage
