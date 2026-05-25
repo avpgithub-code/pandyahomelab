@@ -133,6 +133,25 @@ class TestPredictionService:
         assert "accuracy" in metrics
         assert metrics["total"] == 100
 
+    def test_get_model_info_when_not_trained_returns_placeholder(self):
+        """Cloudflare's free tier caps origin response at 100s. /model-info
+        must return fast even before the first training; the UI shows dashes
+        for missing metrics until /predict is called."""
+        svc = PredictionService()
+        assert svc.is_ready is False
+
+        info = svc.get_model_info()
+
+        assert svc.is_ready is False   # crucial — did NOT trigger training
+        assert info["model_type"] == "MnistCNN"
+        assert info["architecture"] == ARCHITECTURE
+        assert info["dataset"] == "MNIST"
+        assert info["classes"] == [str(i) for i in range(10)]
+        assert info["parameters"]["learning_rate"] == LEARNING_RATE
+        assert info["metrics"] == {}
+        assert info["run_id"] is None
+        assert info["mlflow_url"] is None
+
     def test_get_model_info_after_train(self, tiny_train_loader, tiny_test_loader):
         svc = PredictionService()
         svc.train(epochs=1, train_loader=tiny_train_loader, test_loader=tiny_test_loader)

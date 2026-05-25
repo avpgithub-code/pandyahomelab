@@ -70,8 +70,35 @@ class PredictionService:
         return self._classifier.predict(tensor)
 
     def get_model_info(self) -> Dict:
+        """Model metadata for the demo's Model Card. Does NOT trigger training.
+
+        Cloudflare's free tier caps origin response time at 100s; the full CNN
+        train is ~8 min. So /model-info must return fast — when the model
+        isn't trained yet, we return architectural/parameter metadata with
+        empty metrics. The UI's loadModelCard() already tolerates missing
+        accuracy/mlflow_url (shows dashes). Training is triggered explicitly
+        by /predict (which the visitor opts into), or eagerly by the
+        warm-up step after deploy.
+        """
         if not self._ready:
-            self.train()
+            return {
+                "model_type": "MnistCNN",
+                "architecture": ARCHITECTURE,
+                "dataset": "MNIST",
+                "classes": list(DigitClassifier.CLASSES),
+                "parameters": {
+                    "epochs": DEFAULT_EPOCHS,
+                    "optimizer": "adam",
+                    "learning_rate": LEARNING_RATE,
+                    "loss": "cross_entropy",
+                },
+                "metrics": {},
+                "metrics_display": {},
+                "split": None,
+                "run_id": None,
+                "experiment_id": None,
+                "mlflow_url": None,
+            }
         m = self._metrics
         return {
             "model_type": "MnistCNN",
