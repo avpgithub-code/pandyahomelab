@@ -39,7 +39,11 @@ htmlcov/
 .env.*.local
 
 # Project-specific
-data/
-models/
+# data/ at project root holds runtime caches (none currently); db-logic/data/
+# holds the committed bike_share_daily.csv so the v1.0.0 image bakes fixed
+# training data. Rule is /data/ (root-anchored) to exempt db-logic/data/.
+/data/
+/models/
+.venv/
 notebooks/.ipynb_checkpoints/
 .DS_Store

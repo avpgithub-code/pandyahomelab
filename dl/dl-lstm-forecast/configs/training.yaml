@@ -1,0 +1,45 @@
+# Training hyperparameters for the dl-lstm-forecast LSTM.
+#
+# Locked at Phase 2b sign-off (2026-05-25). Window size + horizon + MC-sample
+# count are all visible knobs the UI surfaces; touching them needs a model
+# retrain + an About-drawer copy edit + (probably) a forecast-band re-tune.
+
+dataset:
+  # All three counts are days. val_days + test_days must stay well under
+  # the total length of bike_share_daily.csv (currently 883 days).
+  val_days: 90
+  test_days: 180
+
+windowing:
+  # 4 weeks = one full weekly seasonal cycle + recent trend context.
+  window_size: 28
+  # 1-step model. The 14-step forecast is produced at inference by
+  # autoregressive rollout, NOT by training the model to predict 14 steps.
+  horizon: 1
+
+model:
+  # 1-layer LSTM, hidden=64 is what every standard time-series-LSTM tutorial
+  # converges to for daily-counts data — generous capacity without the
+  # over-fitting risk that comes with stacked LSTMs on ~700 train days.
+  hidden_size: 64
+  num_layers: 1
+  dropout: 0.2
+
+training:
+  lr: 0.001
+  batch_size: 32
+  epochs: 50
+  # Early-stop if val loss doesn't improve for this many epochs.
+  patience: 5
+  # Adam beta defaults; pinned for reproducibility.
+  optimizer: adam
+
+inference:
+  # Number of MC-Dropout forward passes per autoregressive step. 30 × 14 =
+  # 420 forwards on a hidden=64 LSTM = ~2s wall-time, comfortably under the
+  # Cloudflare 100s origin-response cap. Raising N tightens the band's noise
+  # estimate at proportional CPU cost.
+  mc_samples: 30
+  # UI forecast horizon (days ahead). Held separate from windowing.horizon
+  # because the model is trained 1-step but rolled out to 14 at inference.
+  forecast_horizon: 14

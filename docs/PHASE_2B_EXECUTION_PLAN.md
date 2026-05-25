@@ -27,7 +27,7 @@ Read these memories before starting:
 
 | # | Decision | Choice |
 |---|---|---|
-| 1 | Dataset | NYC CitiBike daily ride counts (aggregated from public trip data). Reproducible-build path: download + clean + aggregate once via `db-logic/scripts/build_dataset.py`, commit the resulting CSV. |
+| 1 | Dataset | NYC CitiBike daily ride counts, **sourced from [toddwschneider/nyc-citibike-data](https://github.com/toddwschneider/nyc-citibike-data)'s pre-aggregated `daily_citi_bike_trip_counts_and_weather.csv`** — 67 KB, 883 daily rows spanning 2013-07-01 → 2015-11-30, with `trips` + bonus weather/holiday/weekday columns. Captures strong weekly + yearly cycles + the CitiBike growth-era non-stationary trend (a useful teaching beat). Reproducible-build path: `db-logic/scripts/build_dataset.py` curls + validates + writes `db-logic/data/bike_share_daily.csv` once; CSV is committed so v1.0.0 has fixed training data forever. **Amendment 2026-05-25:** changed from raw-S3 multi-month aggregation to pre-aggregated source — sign-off discovered the raw path is ~10–20 GB with schema drift across years, while the toddwschneider source is the canonical curated equivalent. |
 | 2 | Forecast horizon | 14-day forecast, implemented as a **1-step model rolled out autoregressively** (model output for day t+1 is fed back as input for predicting day t+2, and so on for 14 steps). |
 | 3 | Demo UI | Chart.js historical line + 14-day forecast with widening confidence band (MC Dropout, N=30 stochastic forward passes per step → mean ± 2σ) + "compare to actuals" overlay activated when the visitor's chosen anchor date is inside the historical range + pre-loaded "show me a sample forecast" button. About drawer + feedback widget same as 2a. |
 | 4 | Dataset storage | Cleaned daily-aggregated CSV (`db-logic/data/bike_share_daily.csv`, < 1 MB) **baked into the image** via `COPY`. Raw CitiBike download and aggregation happens once via `db-logic/scripts/build_dataset.py`; the output CSV is committed so v1.0.0 has fixed training data forever. |
@@ -74,16 +74,20 @@ Template layer code (iris-flavored loaders/classifier/etc.) is **left in place**
 
 ## Phase 2b.2 — db-logic
 
-Files:
-- `db-logic/scripts/build_dataset.py` — downloads recent CitiBike monthly trip-data zips, sums trips per day across all stations, writes `db-logic/data/bike_share_daily.csv` with columns `date, ride_count`. Run once locally, commit the CSV. Idempotent (skips already-downloaded months).
-- `db-logic/loaders/bike_share_loader.py` — `load_daily_counts() -> pd.DataFrame`, `train_val_test_split(df, val_days=90, test_days=180) -> (train, val, test)` (time-respecting split, no shuffling).
-- `db-logic/transforms/windowing.py` — `make_windows(series, window_size, horizon=1) -> (X, y)` sliding-window arrays; `StandardScaler` wrapper that fits on train only.
-- `tests/db_logic/test_loader.py`, `test_windowing.py` — tiny-subset fixtures so suite stays fast.
+Files (file naming matches the 2a precedent — `loaders/loaders.py`, `transforms/preprocessor.py` — rather than dataset-specific filenames, for consistency across DL demos):
+
+- `db-logic/scripts/build_dataset.py` — single-URL curl from the toddwschneider raw GitHub URL, validates row count + column schema + date range, writes `db-logic/data/bike_share_daily.csv` (~67 KB). Idempotent: skips if the target CSV already exists with matching SHA-256 (or `--force` to refetch).
+- `db-logic/loaders/loaders.py` — `BikeShareLoader` class. `load_daily_counts() -> pd.DataFrame` returns the committed CSV (date + trips columns; weather columns dropped for v1.0.0). `train_val_test_split(df, val_days=90, test_days=180) -> (train, val, test)` does a time-respecting split with no shuffling.
+- `db-logic/transforms/preprocessor.py` — `make_windows(series, window_size, horizon=1) -> (X, y)` sliding-window arrays; `WindowScaler` wrapper around `sklearn.preprocessing.StandardScaler` that fits on train only and exposes `inverse_transform` for converting forecasts back to ride-count space.
+- `db-logic/repository/prediction_repository.py` — left as template placeholder (predictions aren't persisted in v1.0.0; matches 2a).
+- `configs/training.yaml` — hyperparameters: `window_size: 28`, `val_days: 90`, `test_days: 180`, `epochs: 50`, `lr: 0.001`, `hidden_size: 64`, `dropout: 0.2`, `mc_samples: 30`, `horizon: 14`.
+- `tests/db/test_loaders.py` + `tests/db/test_preprocessor.py` — synthetic tiny-fixture tests (no real CSV dependency, suite stays fast).
 
 **Design points:**
 - Window size = 28 days (4 weeks → captures weekly seasonality + recent trend). Configurable via `configs/training.yaml`.
 - Scaler fit on train, applied to val/test — locked early so the same scaler is used at inference.
-- Loader exposes `get_last_window()` for inference (current trailing N days as starting state).
+- Loader exposes `get_last_window()` and `get_window_at(anchor_date)` for inference (trailing N days ending at any historical or current date).
+- v1.0.0 uses only `date` + `trips` columns. Weather/holiday features are kept in the CSV for potential Phase 2b polish (multivariate LSTM) but unused at v1.0.0.
 
 **Commit:** `feat(dl-lstm-forecast): db-logic — CitiBike daily loader + sliding-window transforms + tests`
 
