@@ -1,0 +1,43 @@
+# Local dev artifacts — never need to be inside the image. The .venv alone is
+# ~1.7 GB; without this exclusion the docker build context bloats by ~4500×
+# (Phase 2a lesson from [[phase_2a_complete]] — 960 MB → 205 kB after fix).
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Runtime cache dirs (gitignored at project root via /data/ + /models/) — they
+# don't exist in normal builds but explicitly listed here so anyone manually
+# running models/ or data/ scratch dirs locally doesn't bloat the image.
+/data/
+/models/
+
+# IMPORTANT do NOT add db-logic/data/ — bike_share_daily.csv (~67 KB) must be
+# inside the image so the container has fixed reproducible training data
+# without any runtime download.
+
+# Git + editor metadata
+.git/
+.gitignore
+.gitattributes
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Local secrets — .env never goes into the image
+.env
+.env.local
+.env.*.local
+
+# Docs / changelog that the running service doesn't need
+README.md
+CHANGELOG.md
+*.md
+
+# Notebooks — exploratory only, image doesn't need them
+notebooks/
