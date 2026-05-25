@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Project-specific
+# data/ at project root holds runtime caches (none currently); db-logic/data/
+# holds the committed bike_share_daily.csv so the v1.0.0 image bakes fixed
+# training data. Rule is /data/ (root-anchored) to exempt db-logic/data/.
+/data/
+/models/
+.venv/
+notebooks/.ipynb_checkpoints/
+.DS_Store

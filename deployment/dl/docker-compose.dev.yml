@@ -5,7 +5,7 @@ version: '3.8'
 #
 # Services added in subsequent sub-phases:
 #   - dl-mnist-cnn               (Phase 2a.7) ✅ live
-#   - dl-lstm-forecast           (Phase 2b)
+#   - dl-lstm-forecast           (Phase 2b.6) ✅ live
 #   - dl-yolo-object-detection   (Phase 2c)
 
 services:
@@ -43,6 +43,45 @@ services:
       interval: 15s
       timeout: 5s
       start_period: 45s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  dl-lstm-forecast:
+    image: dl-lstm-forecast:latest
+    container_name: dl-lstm-forecast
+    environment:
+      PYTHONPATH: /app
+      # Per-domain MLflow per V3 architecture (mlflow_operational_lessons).
+      # Same dl-mlflow as dl-mnist-cnn — runs land as a separate experiment.
+      MLFLOW_TRACKING_URI: http://dl-mlflow:5000
+    ports:
+      - "8011:8000"
+    # No volume — bike_share_daily.csv is baked into the image (~67 KB) so the
+    # container has fixed, reproducible training data with no runtime fetch.
+    networks:
+      dl-network:
+        ipv4_address: 172.21.0.11
+    depends_on:
+      dl-postgres:
+        condition: service_healthy
+      dl-redis:
+        condition: service_healthy
+      dl-minio:
+        condition: service_healthy
+      dl-mlflow:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      # start_period covers PyTorch cold-import (~10s) + eager LSTM warm-up
+      # (~10s on the 883-day CSV). Bumped 45s → 60s vs dl-mnist-cnn.
+      start_period: 60s
       retries: 5
     logging:
       driver: "json-file"
