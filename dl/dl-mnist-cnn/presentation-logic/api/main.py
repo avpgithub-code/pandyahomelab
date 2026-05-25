@@ -21,12 +21,19 @@ logger = logging.getLogger(__name__)
 async def _eager_warm_up() -> None:
     """Train the CNN in a background thread. Idempotent — protected by
     PredictionService._train_lock — so a /predict arriving mid-warm-up
-    blocks-and-waits instead of starting a duplicate training."""
-    logger.info("[warm-up] CNN training begins in background...")
+    blocks-and-waits instead of starting a duplicate training.
+
+    Lifecycle messages use print(flush=True) instead of logger.info so they
+    appear in docker logs without setting up app-level logging.basicConfig
+    (uvicorn doesn't touch the root logger, so logger.info would be filtered
+    at WARNING by default). Failure path keeps logger.warning — that level
+    is visible regardless of basicConfig.
+    """
+    print("[warm-up] CNN training begins in background...", flush=True)
     try:
         await asyncio.to_thread(_service.train)
         acc = _service.get_model_info().get("metrics", {}).get("accuracy")
-        logger.info(f"[warm-up] Done. Test accuracy: {acc}")
+        print(f"[warm-up] Done. Test accuracy: {acc}", flush=True)
     except Exception as e:
         logger.warning(
             f"[warm-up] Failed: {e}. First /predict will train on demand."
