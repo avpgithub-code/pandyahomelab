@@ -7,6 +7,7 @@ predictions if the tracker is briefly unreachable.
 """
 import logging
 import os
+import threading
 from typing import Dict, List, Optional
 
 from db_logic.loaders.loaders import LocalDataLoader
@@ -41,6 +42,8 @@ class PredictionService:
         self._run_id: Optional[str] = None
         self._experiment_id: Optional[str] = None
         self._ready = False
+        # Guards concurrent train() callers — see _train_lock comment in train().
+        self._train_lock = threading.Lock()
 
     def train(
         self,
@@ -48,20 +51,32 @@ class PredictionService:
         train_loader=None,
         test_loader=None,
     ) -> Dict:
-        """Train and evaluate. Args allow tests to inject tiny loaders / 1 epoch."""
-        epochs = epochs if epochs is not None else DEFAULT_EPOCHS
-        train_loader = train_loader if train_loader is not None else self._loader.load_train()
-        test_loader = test_loader if test_loader is not None else self._loader.load_test()
+        """Train and evaluate. Args allow tests to inject tiny loaders / 1 epoch.
 
-        self._classifier.train(train_loader, epochs=epochs)
-        self._metrics = self._classifier.evaluate(test_loader)
-        self._train_size = len(train_loader.dataset)
-        self._test_size = len(test_loader.dataset)
-        self._epochs = epochs
-        self._ready = True
+        Thread-safe: the eager warm-up (kicked off in main.py's lifespan
+        handler via asyncio.to_thread) runs concurrently with any /predict
+        arriving during the ~8 min training window. Without the lock both
+        callers would each see `_ready=False` and start a duplicate full
+        training. With the lock, the second caller blocks on entry, then
+        finds `_ready=True` and returns the cached metrics immediately.
+        """
+        with self._train_lock:
+            if self._ready:
+                return self._metrics
 
-        self._log_to_mlflow()
-        return self._metrics
+            epochs = epochs if epochs is not None else DEFAULT_EPOCHS
+            train_loader = train_loader if train_loader is not None else self._loader.load_train()
+            test_loader = test_loader if test_loader is not None else self._loader.load_test()
+
+            self._classifier.train(train_loader, epochs=epochs)
+            self._metrics = self._classifier.evaluate(test_loader)
+            self._train_size = len(train_loader.dataset)
+            self._test_size = len(test_loader.dataset)
+            self._epochs = epochs
+            self._ready = True
+
+            self._log_to_mlflow()
+            return self._metrics
 
     def predict(self, pixels: List[float]) -> Dict:
         if not self._ready:
