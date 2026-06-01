@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<style>
+  :root{
+    --magenta:#ff2d78;--purple:#7b2ff7;--blue:#2f6bf6;--orange:#ff9e1b;
+    --teal:#0bc2ad;--lime:#a8e22a;--ink:#160726;--line:rgba(255,255,255,.18);
+    --glass:rgba(255,255,255,.08);--glass2:rgba(255,255,255,.13);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#fff;line-height:1.5;
+    background:radial-gradient(120% 90% at 10% 0%,#3a0f5e 0%,transparent 45%),
+               radial-gradient(120% 90% at 90% 10%,#15407a 0%,transparent 45%),
+               linear-gradient(160deg,#1d0a33,#0d0418);min-height:100vh;padding:22px}
+  .wrap{max-width:1080px;margin:0 auto}
+  header{display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:space-between;margin-bottom:22px}
+  h1{font-size:1.5rem;font-weight:800;letter-spacing:-.01em}
+  h1 small{display:block;font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:4px}
+  .meta{font-size:.78rem;color:rgba(255,255,255,.6);text-align:right}
+  button{font-family:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:700;transition:.15s}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  .btn{background:var(--glass2);color:#fff;border:1px solid var(--line);padding:9px 14px;font-size:.85rem}
+  .btn:hover{background:rgba(255,255,255,.2)}
+  .btn-go{background:linear-gradient(95deg,var(--magenta),var(--orange));color:#160726;padding:9px 14px;font-size:.85rem}
+  .btn-go:hover{filter:brightness(1.08)}
+  .btn-sm{padding:5px 10px;font-size:.74rem;border-radius:8px}
+  .btn-danger{background:rgba(255,60,100,.18);border:1px solid rgba(255,60,100,.5);color:#ffd2dd}
+  .btn-danger:hover{background:rgba(255,60,100,.3)}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:24px}
+  .card{background:var(--glass);border:1px solid var(--line);border-radius:18px;padding:18px 20px;backdrop-filter:blur(8px)}
+  .card .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .card h2{font-size:1.15rem;font-weight:700}
+  .pill{font-size:.66rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:999px}
+  .pill.open{background:rgba(168,226,42,.2);color:var(--lime)}
+  .pill.closed{background:rgba(255,60,100,.2);color:#ff9bb3}
+  .nums{display:flex;gap:16px;margin-bottom:12px}
+  .num .v{font-size:1.7rem;font-weight:800;line-height:1}
+  .num .k{font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:3px}
+  .num.sb .v{color:var(--orange)}
+  .bar{height:8px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden;margin-bottom:6px}
+  .bar > i{display:block;height:100%;background:linear-gradient(90deg,var(--lime),var(--teal))}
+  .barlabel{font-size:.72rem;color:rgba(255,255,255,.6);margin-bottom:12px}
+
+  .panel{background:var(--glass);border:1px solid var(--line);border-radius:18px;padding:18px 20px;margin-bottom:24px}
+  .panel h3{font-size:1rem;font-weight:700;margin-bottom:12px}
+  label{display:block;font-size:.74rem;font-weight:600;letter-spacing:.04em;color:rgba(255,255,255,.8);margin:10px 0 5px}
+  input,select,textarea{width:100%;font-family:inherit;font-size:.9rem;color:#fff;background:rgba(255,255,255,.08);
+    border:1px solid var(--line);border-radius:10px;padding:10px 12px;outline:none}
+  textarea{min-height:90px;resize:vertical}
+  select option{background:#23123d}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+  .row > div{flex:1;min-width:160px}
+
+  table{width:100%;border-collapse:collapse;font-size:.82rem}
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
+  th,td{text-align:left;padding:9px 11px;border-bottom:1px solid rgba(255,255,255,.08);white-space:nowrap}
+  th{font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.6);background:rgba(255,255,255,.04)}
+  td.notes{white-space:normal;min-width:160px;color:rgba(255,255,255,.75)}
+  .tag{font-size:.68rem;font-weight:800;padding:2px 8px;border-radius:999px}
+  .tag.Registered{background:rgba(168,226,42,.18);color:var(--lime)}
+  .tag.StandBy{background:rgba(255,158,27,.18);color:var(--orange)}
+  .tag.Cancelled{background:rgba(255,60,100,.18);color:#ff9bb3}
+  .filters{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 10px}
+  .filters select{width:auto;min-width:140px}
+
+  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#23123d;border:1px solid var(--line);
+    padding:12px 18px;border-radius:12px;font-size:.86rem;box-shadow:0 16px 40px -12px rgba(0,0,0,.7);opacity:0;pointer-events:none;transition:.25s;max-width:90vw}
+  #toast.show{opacity:1}
+  #loading{text-align:center;padding:60px 0;color:rgba(255,255,255,.6)}
+  .muted{color:rgba(255,255,255,.55)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1><small>pandyaHomeLab · Admin</small>AI Literacy — Registrations</h1>
+    <div class="meta">
+      <div id="who" class="muted"></div>
+      <div id="gen" class="muted"></div>
+      <button class="btn btn-sm" onclick="load()" style="margin-top:6px">↻ Refresh</button>
+    </div>
+  </header>
+
+  <div id="loading">Loading dashboard…</div>
+  <div id="dash" style="display:none">
+    <div class="cards" id="cards"></div>
+
+    <div class="panel">
+      <h3>✉️ Email registered students</h3>
+      <div class="row">
+        <div style="max-width:200px">
+          <label>Send to</label>
+          <select id="meScope"><option value="all">All registered</option><option value="New Jersey">New Jersey only</option><option value="California">California only</option></select>
+        </div>
+        <div>
+          <label>Subject</label>
+          <input id="meSubject" placeholder="e.g. Your AI Literacy session is confirmed">
+        </div>
+      </div>
+      <label>Message (basic HTML allowed; we add the greeting + sign-off)</label>
+      <textarea id="meBody" placeholder="Write your update here…"></textarea>
+      <div style="margin-top:12px"><button class="btn-go" id="meSend" onclick="sendMass()">Send email</button>
+        <span class="muted" style="font-size:.76rem;margin-left:8px">SMS coming in the next phase.</span></div>
+    </div>
+
+    <div class="filters">
+      <select id="fState" onchange="renderTable()"><option value="">All states</option><option>New Jersey</option><option>California</option></select>
+      <select id="fStatus" onchange="renderTable()"><option value="">All statuses</option><option>Registered</option><option>Stand By</option><option>Cancelled</option></select>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>When</th><th>State</th><th>Status</th><th>Name</th><th>Email</th><th>Phone</th><th>Experience</th><th>Notes</th><th>Action</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+  var DATA = null;
+
+  function load(){
+    document.getElementById('loading').style.display = 'block';
+    google.script.run.withSuccessHandler(onData).withFailureHandler(onErr).getData();
+  }
+  function onData(d){
+    DATA = d;
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('dash').style.display = 'block';
+    document.getElementById('who').textContent = d.admin ? ('Signed in: ' + d.admin) : '';
+    document.getElementById('gen').textContent = 'As of ' + d.generatedAt;
+    renderCards(); renderTable();
+  }
+  function onErr(e){
+    document.getElementById('loading').textContent = 'Error: ' + (e && e.message ? e.message : e);
+  }
+
+  function renderCards(){
+    var html = '';
+    DATA.summary.forEach(function(s){
+      html += '<div class="card"><div class="top"><h2>' + s.state + '</h2>' +
+        '<span class="pill ' + (s.regOpen?'open':'closed') + '">' + (s.regOpen?'Open':'Closed') + '</span></div>' +
+        '<div class="nums">' +
+          '<div class="num"><div class="v">' + s.registered + '/' + s.capacity + '</div><div class="k">Registered</div></div>' +
+          '<div class="num sb"><div class="v">' + s.standby + '</div><div class="k">Stand By</div></div>' +
+          '<div class="num"><div class="v">' + s.seatsLeft + '</div><div class="k">Seats left</div></div>' +
+        '</div>' +
+        '<div class="bar"><i style="width:' + Math.min(100,s.pctFull) + '%"></i></div>' +
+        '<div class="barlabel">' + s.pctFull + '% full</div>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+          '<button class="btn" onclick="promote(\'' + s.state + '\')"' + (s.standby?'':' disabled') + '>Promote next</button>' +
+          '<button class="btn' + (s.regOpen?' btn-danger':'') + '" onclick="toggleOpen(\'' + s.state + '\',' + (!s.regOpen) + ')">' + (s.regOpen?'Close registration':'Open registration') + '</button>' +
+        '</div>' +
+        '</div>';
+    });
+    document.getElementById('cards').innerHTML = html;
+  }
+
+  function renderTable(){
+    var fs = document.getElementById('fState').value;
+    var fst = document.getElementById('fStatus').value;
+    var rows = DATA.registrations.filter(function(x){
+      return (!fs || x.state===fs) && (!fst || x.status===fst);
+    });
+    var html = '';
+    rows.forEach(function(x){
+      var tagClass = (x.status||'').replace(/\s/g,'');
+      var statusCell = '<span class="tag ' + tagClass + '">' + (x.status||'') + (x.status==='Stand By'&&x.position?(' #'+x.position):'') + '</span>';
+      var action = x.status==='Cancelled' ? '<span class="muted">—</span>'
+        : '<button class="btn-sm btn-danger" onclick="cancelRow(' + x.row + ',\'' + jsstr(x.first+' '+x.last) + '\')">Cancel</button>';
+      html += '<tr><td>' + (x.timestamp||'') + '</td><td>' + (x.state||'') + '</td><td>' + statusCell + '</td>' +
+        '<td>' + esc(x.first) + ' ' + esc(x.last) + '</td><td>' + esc(x.email) + '</td><td>' + esc(x.phone) + '</td>' +
+        '<td>' + esc(x.level) + '</td><td class="notes">' + esc(x.notes) + '</td><td>' + action + '</td></tr>';
+    });
+    document.getElementById('rows').innerHTML = html || '<tr><td colspan="9" class="muted" style="padding:18px">No registrations match.</td></tr>';
+  }
+
+  function promote(state){
+    if (!confirm('Promote the next stand-by person for ' + state + ' to Registered and email them?')) return;
+    busy(true);
+    google.script.run.withSuccessHandler(afterAction).withFailureHandler(afterErr).promoteNext(state);
+  }
+  function cancelRow(row, name){
+    if (!confirm('Cancel the registration for ' + name + '? This frees a seat.')) return;
+    busy(true);
+    google.script.run.withSuccessHandler(afterAction).withFailureHandler(afterErr).markCancelled(row);
+  }
+  function toggleOpen(state, open){
+    if (!confirm((open?'OPEN':'CLOSE') + ' registration for ' + state + '?')) return;
+    busy(true);
+    google.script.run.withSuccessHandler(afterAction).withFailureHandler(afterErr).setRegOpen(state, open);
+  }
+  function sendMass(){
+    var scope = document.getElementById('meScope').value;
+    var subject = document.getElementById('meSubject').value.trim();
+    var body = document.getElementById('meBody').value.trim();
+    if (!subject || !body){ toast('Subject and message are required.'); return; }
+    var label = scope==='all' ? 'all registered students' : ('registered students in ' + scope);
+    if (!confirm('Send this email to ' + label + '?')) return;
+    busy(true);
+    google.script.run.withSuccessHandler(function(res){ afterAction(res); document.getElementById('meSubject').value=''; document.getElementById('meBody').value=''; })
+      .withFailureHandler(afterErr).sendMassEmail(scope, subject, body);
+  }
+
+  function afterAction(res){ busy(false); if(res){ if(res.data){DATA=res.data; renderCards(); renderTable();} toast(res.message||'Done.'); } }
+  function afterErr(e){ busy(false); toast('Error: ' + (e && e.message ? e.message : e)); }
+  function busy(on){ document.querySelectorAll('button').forEach(function(b){ b.disabled = on; }); }
+
+  var toastT;
+  function toast(m){ var t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(function(){t.classList.remove('show');},4200); }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function jsstr(s){ return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+
+  load();
+</script>
+</body>
+</html>
