@@ -188,6 +188,20 @@
   .opt{display:flex;align-items:flex-start;gap:11px;font-size:.82rem;color:rgba(255,255,255,.72);margin:2px 0 18px;cursor:pointer}
   .opt input{width:auto;flex:none;margin-top:2px;accent-color:var(--lime);width:17px;height:17px}
 
+  /* state selector */
+  .states{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media (max-width:460px){.states{grid-template-columns:1fr}}
+  .state{
+    display:flex;align-items:center;gap:9px;cursor:pointer;
+    border:1px solid rgba(255,255,255,.22);border-radius:12px;
+    padding:12px 13px;background:rgba(255,255,255,.06);font-size:.92rem;transition:.18s;
+  }
+  .state:hover{background:rgba(255,255,255,.1)}
+  .state input{width:auto;flex:none;accent-color:var(--lime);width:17px;height:17px}
+  .state:has(input:checked){border-color:var(--lime);background:rgba(168,226,42,.16);box-shadow:0 0 0 3px rgba(168,226,42,.16)}
+  .stateInfo{font-size:.8rem;color:rgba(255,255,255,.78);margin-top:9px}
+  .stateInfo.warn{color:#ffd27a}
+
   button.submit{
     width:100%;font-family:var(--body);font-size:1.02rem;font-weight:700;letter-spacing:.01em;
     color:var(--ink);cursor:pointer;border:none;border-radius:14px;padding:15px;
@@ -209,6 +223,10 @@
     width:74px;height:74px;border-radius:50%;margin:0 auto 18px;display:grid;place-items:center;
     background:linear-gradient(135deg,var(--lime),var(--teal));font-size:2.1rem;
     box-shadow:0 0 40px rgba(168,226,42,.5);
+  }
+  .success.standby .mark{
+    background:linear-gradient(135deg,var(--orange),#ff7a1b);
+    box-shadow:0 0 40px rgba(255,158,27,.5);
   }
   .success h2{font-family:var(--display);font-size:1.9rem;margin-bottom:8px}
   .success p{color:rgba(255,255,255,.82);font-size:.95rem;max-width:330px;margin:0 auto}
@@ -237,9 +255,9 @@
       <p class="lede">You've heard about AI everywhere — but what is it <i>really</i>? This one-session class gives you a grounded, honest look at artificial intelligence: how it works, where it's useful, and how to think about it clearly. <b>Spots are limited.</b></p>
 
       <div class="facts">
-        <div class="fact"><div class="k">When</div><div class="v tba">To be announced</div></div>
-        <div class="fact"><div class="k">Where</div><div class="v tba">To be announced</div></div>
-        <div class="fact"><div class="k">Cost</div><div class="v tba">To be announced</div></div>
+        <div class="fact"><div class="k">When</div><div class="v tba" id="factWhen">To be announced</div></div>
+        <div class="fact"><div class="k">Where</div><div class="v tba" id="factWhere">To be announced</div></div>
+        <div class="fact"><div class="k">Cost</div><div class="v tba" id="factCost">To be announced</div></div>
         <div class="fact"><div class="k">Format</div><div class="v">Hands-on</div></div>
       </div>
     </div>
@@ -284,6 +302,15 @@
           <span class="badge">⚡ Limited spots</span>
           <h2>Register now</h2>
           <p class="cardsub">Fill in your details and we'll email you the date, location and joining link as soon as they're confirmed.</p>
+
+          <div class="grp">
+            <label>Training location <span class="req">*</span></label>
+            <div class="states">
+              <label class="state"><input type="radio" name="state" value="New Jersey" required><span>📍 New Jersey</span></label>
+              <label class="state"><input type="radio" name="state" value="California"><span>📍 California</span></label>
+            </div>
+            <p class="stateInfo" id="stateInfo" hidden></p>
+          </div>
 
           <div class="grp row">
             <div>
@@ -333,7 +360,6 @@
           <div class="prereq">
             <div class="ptitle">✓ Please confirm you can come prepared with:</div>
             <label class="check"><input type="checkbox" name="p1" required><span>A <b>paid Claude account</b></span></label>
-            <label class="check"><input type="checkbox" name="p2" required><span>A <b>laptop with internet access</b></span></label>
             <label class="check"><input type="checkbox" name="p3" required><span><b>Basic computer skills</b></span></label>
           </div>
 
@@ -385,12 +411,54 @@
   const success = document.getElementById('success');
   const errorBox = document.getElementById('formError');
   const submitBtn = form.querySelector('button.submit');
+  const stateInfo = document.getElementById('stateInfo');
+
+  // Per-state config (capacity / dates / seats), fetched from the backend.
+  // Progressive enhancement: if the fetch is blocked or fails, the form still
+  // works and the backend remains the source of truth for capacity.
+  let CONFIG = {};
+  (async function loadConfig(){
+    try {
+      const res = await fetch(ENDPOINT, { method: 'GET' });
+      const j = await res.json();
+      if (j && j.ok && Array.isArray(j.states)) {
+        j.states.forEach(s => { CONFIG[s.state] = s; });
+      }
+    } catch (_) { /* leave facts as "To be announced" */ }
+  })();
+
+  function setFact(id, val){
+    const el = document.getElementById(id);
+    if (el && val){ el.textContent = val; el.classList.remove('tba'); }
+  }
+
+  // When a location is chosen, show its date/location/cost + seat availability.
+  form.querySelectorAll('input[name="state"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      const s = CONFIG[radio.value];
+      if (!s){ stateInfo.hidden = true; return; }
+      setFact('factWhen', s.when);
+      setFact('factWhere', s.where);
+      setFact('factCost', s.cost);
+      if (!s.regOpen){
+        stateInfo.textContent = "Registration for " + radio.value + " is currently closed.";
+        stateInfo.className = "stateInfo warn";
+      } else if (s.full){
+        stateInfo.textContent = "This batch is full — you can still join the stand-by list, and we'll email you if a spot opens up.";
+        stateInfo.className = "stateInfo warn";
+      } else {
+        stateInfo.textContent = s.seatsLeft + " of " + s.capacity + " seats remaining for " + radio.value + ".";
+        stateInfo.className = "stateInfo";
+      }
+      stateInfo.hidden = false;
+    });
+  });
 
   form.addEventListener('submit', async function(e){
     e.preventDefault();
     errorBox.hidden = true;
 
-    // native validation (covers required fields + prerequisite checkboxes)
+    // native validation (covers required fields, the state radios + checkboxes)
     if(!form.checkValidity()){ form.reportValidity(); return; }
 
     const data = Object.fromEntries(new FormData(form).entries());
@@ -407,24 +475,16 @@
         redirect: 'follow'
       });
 
-      // Try to read the JSON result; if CORS hides it but the request
-      // itself succeeded, fall back to treating a 2xx as success.
-      let ok = res.ok, errMsg = '';
-      try {
-        const j = await res.json();
-        ok = !!j.ok;
-        if (!ok) errMsg = j.error || '';
-      } catch (_) { /* opaque/redirected body — rely on res.ok */ }
+      // Read the JSON result (status: registered | standby | duplicate | closed).
+      let result = null;
+      try { result = await res.json(); } catch (_) {}
+      let ok = res.ok;
+      if (result) ok = !!result.ok;
+      if (!ok) throw new Error((result && result.error) || 'Something went wrong.');
 
-      if (!ok) throw new Error(errMsg || 'Something went wrong.');
-
-      document.getElementById('successMsg').textContent =
-        "Thanks, " + (data.first || "there") + "! You're registered. We'll email " +
-        (data.email || "you") + " the date, location, and joining details as soon as they're confirmed.";
-
-      form.style.display = 'none';
-      success.classList.add('show');
-      document.getElementById('card').scrollIntoView({behavior:'smooth', block:'center'});
+      showResult((result && result.status) || 'registered',
+                 (result && result.state) || data.state || 'the',
+                 result && result.position, data);
     } catch (err) {
       submitBtn.disabled = false;
       submitBtn.textContent = original;
@@ -434,13 +494,51 @@
     }
   });
 
+  function showResult(status, state, position, data){
+    const mark = success.querySelector('.mark');
+    const heading = success.querySelector('h2');
+    const msg = document.getElementById('successMsg');
+    const name = data.first || 'there';
+    success.classList.remove('standby');
+
+    if (status === 'standby'){
+      success.classList.add('standby');
+      mark.textContent = '⏳';
+      heading.textContent = "You're on the stand-by list";
+      msg.textContent = "Thanks, " + name + "! The " + state + " batch is currently full, so we've added you to the stand-by list" +
+        (position ? " — you're #" + position : "") +
+        ". We'll email you on a first-come basis the moment a spot opens up.";
+    } else if (status === 'duplicate'){
+      mark.textContent = '✓';
+      heading.textContent = "You're already on the list";
+      msg.textContent = "Good news, " + name + " — you're already registered for the " + state +
+        " class with this email. We'll be in touch with the details.";
+    } else if (status === 'closed'){
+      success.classList.add('standby');
+      mark.textContent = '🔒';
+      heading.textContent = "Registration closed";
+      msg.textContent = "Sorry — registration for the " + state + " class is currently closed. Please check back soon.";
+    } else {
+      mark.textContent = '✓';
+      heading.textContent = "You're on the list!";
+      msg.textContent = "Thanks, " + name + "! You're registered for the " + state + " class. We'll email " +
+        (data.email || "you") + " the date, location, and joining details as soon as they're confirmed.";
+    }
+
+    form.style.display = 'none';
+    success.classList.add('show');
+    document.getElementById('card').scrollIntoView({behavior:'smooth', block:'center'});
+  }
+
   function resetForm(){
     form.reset();
     success.classList.remove('show');
+    success.classList.remove('standby');
     form.style.display = 'block';
     submitBtn.disabled = false;
     submitBtn.textContent = 'Reserve my spot →';
     errorBox.hidden = true;
+    stateInfo.hidden = true;
   }
 </script>
 </body>
