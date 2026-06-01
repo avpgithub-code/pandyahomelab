@@ -1,0 +1,447 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register · AI Literacy Class</title>
+<meta name="description" content="Register for the AI Literacy Class — a one-session, grounded look at artificial intelligence. Open to all. Spots are limited.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --magenta:#ff2d78;
+    --pink:#e3306f;
+    --purple:#7b2ff7;
+    --blue:#2f6bf6;
+    --orange:#ff9e1b;
+    --teal:#0bc2ad;
+    --lime:#a8e22a;
+    --ink:#160726;
+    --ink-soft:#2a1342;
+    --paper:#fff6fb;
+    --glass:rgba(255,255,255,0.10);
+    --glass-strong:rgba(255,255,255,0.16);
+    --line:rgba(255,255,255,0.22);
+    --display:"Fraunces",Georgia,serif;
+    --body:"Hanken Grotesk",system-ui,sans-serif;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--body);
+    color:#fff;
+    background:var(--ink);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  /* Animated multi-band gradient field, echoing the flyer */
+  .field{
+    position:fixed;inset:0;z-index:-2;
+    background:
+      radial-gradient(120% 90% at 12% 6%, var(--magenta) 0%, transparent 42%),
+      radial-gradient(110% 80% at 88% 14%, var(--purple) 0%, transparent 45%),
+      radial-gradient(120% 90% at 78% 48%, var(--blue) 0%, transparent 46%),
+      radial-gradient(120% 90% at 18% 52%, var(--teal) 0%, transparent 44%),
+      radial-gradient(120% 100% at 86% 86%, var(--orange) 0%, transparent 40%),
+      radial-gradient(120% 100% at 10% 94%, var(--lime) 0%, transparent 38%),
+      linear-gradient(160deg,#2a0f47 0%, #160726 60%, #0d0418 100%);
+    background-size:200% 200%,200% 200%,200% 200%,200% 200%,200% 200%,200% 200%,100% 100%;
+    animation:drift 26s ease-in-out infinite alternate;
+    filter:saturate(1.05);
+  }
+  @keyframes drift{
+    0%{background-position:0% 0%,100% 0%,100% 50%,0% 50%,100% 100%,0% 100%,0 0}
+    100%{background-position:30% 20%,70% 30%,60% 70%,40% 30%,60% 70%,40% 80%,0 0}
+  }
+  /* subtle dot texture + grain */
+  .field::after{
+    content:"";position:absolute;inset:0;
+    background-image:radial-gradient(rgba(255,255,255,.10) 1px, transparent 1.4px);
+    background-size:26px 26px;
+    mask-image:linear-gradient(180deg,rgba(0,0,0,.6),transparent 70%);
+    opacity:.5;
+  }
+
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+
+  /* ---------- HERO ---------- */
+  header.hero{padding:74px 0 30px;position:relative}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:9px;
+    font-size:.72rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
+    color:#fff;background:var(--glass);border:1px solid var(--line);
+    padding:8px 15px;border-radius:999px;backdrop-filter:blur(8px);
+    animation:rise .7s .05s both;
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--lime);box-shadow:0 0 12px var(--lime);animation:pulse 1.8s infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
+
+  .hello{font-size:1.05rem;font-weight:600;color:rgba(255,255,255,.85);margin:26px 0 6px;animation:rise .7s .12s both}
+  h1{
+    font-family:var(--display);
+    font-weight:900;
+    font-size:clamp(2.9rem,8.5vw,6rem);
+    line-height:.94;
+    letter-spacing:-.02em;
+    margin:0 0 20px;
+    animation:rise .8s .18s both;
+  }
+  h1 em{font-style:italic;font-weight:400}
+  .lede{
+    max-width:620px;font-size:clamp(1.02rem,2.1vw,1.22rem);
+    color:rgba(255,255,255,.88);animation:rise .8s .26s both;
+  }
+  .lede b{font-weight:700;color:#fff}
+
+  /* facts row */
+  .facts{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px;animation:rise .8s .34s both}
+  .fact{
+    flex:1;min-width:150px;
+    background:var(--glass);border:1px solid var(--line);border-radius:16px;
+    padding:14px 16px;backdrop-filter:blur(10px);
+  }
+  .fact .k{font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.6);font-weight:700}
+  .fact .v{font-family:var(--display);font-size:1.35rem;font-weight:600;margin-top:2px}
+  .fact .v.tba{font-style:italic;color:rgba(255,255,255,.72);font-size:1.15rem}
+
+  /* ---------- LAYOUT ---------- */
+  .main{display:grid;grid-template-columns:1.05fr 1fr;gap:30px;padding:48px 0 30px;align-items:start}
+  @media (max-width:880px){.main{grid-template-columns:1fr;gap:24px}}
+
+  /* curriculum summary */
+  .summary{animation:rise .8s .1s both}
+  .summary h2{
+    font-family:var(--display);font-size:1.9rem;font-weight:600;margin-bottom:6px;letter-spacing:-.01em;
+  }
+  .summary p.sub{color:rgba(255,255,255,.7);margin-bottom:22px;font-size:.96rem}
+  .topic{
+    display:flex;gap:14px;padding:15px 0;border-top:1px solid rgba(255,255,255,.13);
+  }
+  .topic:last-child{border-bottom:1px solid rgba(255,255,255,.13)}
+  .topic .ic{
+    flex:none;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;
+    font-size:1.2rem;border:1px solid var(--line);
+  }
+  .topic:nth-child(2) .ic{background:linear-gradient(135deg,var(--orange),#ff7a1b)}
+  .topic:nth-child(3) .ic{background:linear-gradient(135deg,var(--teal),#0a9bd6)}
+  .topic:nth-child(4) .ic{background:linear-gradient(135deg,var(--magenta),var(--purple))}
+  .topic:nth-child(5) .ic{background:linear-gradient(135deg,var(--lime),var(--teal))}
+  .topic:nth-child(6) .ic{background:linear-gradient(135deg,var(--blue),var(--purple))}
+  .topic h3{font-size:1rem;font-weight:700;margin-bottom:2px}
+  .topic p{font-size:.88rem;color:rgba(255,255,255,.72);line-height:1.45}
+
+  /* ---------- FORM CARD ---------- */
+  .card{
+    background:var(--glass-strong);
+    border:1px solid var(--line);
+    border-radius:24px;
+    padding:30px 28px 28px;
+    backdrop-filter:blur(20px);
+    box-shadow:0 30px 80px -30px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.18);
+    position:sticky;top:24px;
+    animation:rise .85s .2s both;
+  }
+  .card .badge{
+    display:inline-flex;align-items:center;gap:8px;font-size:.7rem;font-weight:700;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--ink);
+    background:linear-gradient(90deg,var(--lime),#d6f54a);
+    padding:6px 13px;border-radius:999px;margin-bottom:14px;
+  }
+  .card h2{font-family:var(--display);font-size:1.75rem;font-weight:600;letter-spacing:-.01em}
+  .card .cardsub{color:rgba(255,255,255,.72);font-size:.9rem;margin:4px 0 20px}
+
+  .grp{margin-bottom:15px}
+  .grp.row{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+  @media (max-width:460px){.grp.row{grid-template-columns:1fr}}
+  label{display:block;font-size:.78rem;font-weight:600;letter-spacing:.03em;margin-bottom:6px;color:rgba(255,255,255,.92)}
+  label .req{color:var(--lime)}
+  input,select,textarea{
+    width:100%;font-family:var(--body);font-size:.95rem;color:#fff;
+    background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.2);border-radius:12px;
+    padding:12px 14px;outline:none;transition:.2s;
+  }
+  textarea{resize:vertical;min-height:70px}
+  input::placeholder,textarea::placeholder{color:rgba(255,255,255,.45)}
+  select option{background:#2a1342;color:#fff}
+  input:focus,select:focus,textarea:focus{
+    border-color:var(--lime);background:rgba(255,255,255,.12);
+    box-shadow:0 0 0 4px rgba(168,226,42,.18);
+  }
+  input:invalid:not(:placeholder-shown){border-color:rgba(255,80,120,.7)}
+
+  /* prerequisites checklist */
+  .prereq{
+    background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.14);
+    border-radius:14px;padding:14px 15px;margin:5px 0 16px;
+  }
+  .prereq .ptitle{font-size:.76rem;font-weight:700;letter-spacing:.04em;color:rgba(255,255,255,.8);margin-bottom:10px}
+  .check{display:flex;align-items:flex-start;gap:11px;padding:7px 0;cursor:pointer;font-size:.9rem}
+  .check input{width:auto;flex:none;margin-top:2px;accent-color:var(--lime);width:18px;height:18px}
+  .check span{color:rgba(255,255,255,.9)}
+
+  .opt{display:flex;align-items:flex-start;gap:11px;font-size:.82rem;color:rgba(255,255,255,.72);margin:2px 0 18px;cursor:pointer}
+  .opt input{width:auto;flex:none;margin-top:2px;accent-color:var(--lime);width:17px;height:17px}
+
+  button.submit{
+    width:100%;font-family:var(--body);font-size:1.02rem;font-weight:700;letter-spacing:.01em;
+    color:var(--ink);cursor:pointer;border:none;border-radius:14px;padding:15px;
+    background:linear-gradient(95deg,var(--magenta),var(--orange) 55%,var(--lime));
+    background-size:160% 100%;background-position:0% 0%;
+    transition:.35s;box-shadow:0 14px 34px -10px rgba(255,45,120,.6);
+  }
+  button.submit:hover{background-position:100% 0%;transform:translateY(-2px)}
+  button.submit:active{transform:translateY(0)}
+  .finehint{text-align:center;font-size:.74rem;color:rgba(255,255,255,.55);margin-top:11px}
+  .formerror{text-align:center;font-size:.82rem;color:#ffd2dd;background:rgba(255,45,120,.16);
+    border:1px solid rgba(255,45,120,.5);border-radius:11px;padding:10px 12px;margin-top:11px}
+  button.submit:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+  /* success state */
+  .success{display:none;text-align:center;padding:18px 6px 6px}
+  .success.show{display:block;animation:rise .5s both}
+  .success .mark{
+    width:74px;height:74px;border-radius:50%;margin:0 auto 18px;display:grid;place-items:center;
+    background:linear-gradient(135deg,var(--lime),var(--teal));font-size:2.1rem;
+    box-shadow:0 0 40px rgba(168,226,42,.5);
+  }
+  .success h2{font-family:var(--display);font-size:1.9rem;margin-bottom:8px}
+  .success p{color:rgba(255,255,255,.82);font-size:.95rem;max-width:330px;margin:0 auto}
+  .success button{
+    margin-top:20px;background:var(--glass);border:1px solid var(--line);color:#fff;
+    padding:11px 20px;border-radius:11px;font-family:var(--body);font-weight:600;cursor:pointer;font-size:.9rem;
+  }
+  .success button:hover{background:var(--glass-strong)}
+
+  /* footer */
+  footer{padding:34px 0 50px;text-align:center;color:rgba(255,255,255,.55);font-size:.82rem;animation:rise .8s .3s both}
+  footer .line{height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent);margin-bottom:22px}
+  footer b{color:rgba(255,255,255,.85)}
+
+  @keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+  <div class="field" aria-hidden="true"></div>
+
+  <header class="hero">
+    <div class="wrap">
+      <span class="eyebrow"><span class="dot"></span>AI Literacy Class · One Session · Open to All</span>
+      <p class="hello">Hello Everyone 👋</p>
+      <h1>Reserve Your <em>Seat</em></h1>
+      <p class="lede">You've heard about AI everywhere — but what is it <i>really</i>? This one-session class gives you a grounded, honest look at artificial intelligence: how it works, where it's useful, and how to think about it clearly. <b>Spots are limited.</b></p>
+
+      <div class="facts">
+        <div class="fact"><div class="k">When</div><div class="v tba">To be announced</div></div>
+        <div class="fact"><div class="k">Where</div><div class="v tba">To be announced</div></div>
+        <div class="fact"><div class="k">Cost</div><div class="v tba">To be announced</div></div>
+        <div class="fact"><div class="k">Format</div><div class="v">Hands-on</div></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="main">
+
+      <!-- LEFT: what you'll cover -->
+      <section class="summary">
+        <h2>What we'll cover</h2>
+        <p class="sub">Five grounded sections — from the basics to a live, try-it-yourself session.</p>
+
+        <div class="topic">
+          <div class="ic">🧠</div>
+          <div><h3>AI basics, demystified</h3><p>What AI actually is (and isn't), how it learns from data, and why it sometimes gets things wrong.</p></div>
+        </div>
+        <div class="topic">
+          <div class="ic">💡</div>
+          <div><h3>Real-world use cases</h3><p>Writing, summarizing & brainstorming; AI in healthcare, education & business; tools you can start using today.</p></div>
+        </div>
+        <div class="topic">
+          <div class="ic">❓</div>
+          <div><h3>Curiosity & anxiety</h3><p>Is AI going to take my job? Separating hype from reality — plus an open Q&amp;A where no question is too basic.</p></div>
+        </div>
+        <div class="topic">
+          <div class="ic">⚖️</div>
+          <div><h3>Ethics & limits</h3><p>Bias, fairness, privacy, accountability when AI gets it wrong, and what guardrails exist today.</p></div>
+        </div>
+        <div class="topic">
+          <div class="ic">🛠️</div>
+          <div><h3>Hands-on practice</h3><p>Live demos with real AI tools, prompt one yourself, and leave with tools you can use the same day.</p></div>
+        </div>
+      </section>
+
+      <!-- RIGHT: registration form -->
+      <section class="card" id="card">
+        <form id="regForm" novalidate>
+          <!-- honeypot: hidden from humans, bots tend to fill it -->
+          <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true"
+                 style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+          <span class="badge">⚡ Limited spots</span>
+          <h2>Register now</h2>
+          <p class="cardsub">Fill in your details and we'll email you the date, location and joining link as soon as they're confirmed.</p>
+
+          <div class="grp row">
+            <div>
+              <label for="first">First name <span class="req">*</span></label>
+              <input id="first" name="first" placeholder="Jane" required>
+            </div>
+            <div>
+              <label for="last">Last name <span class="req">*</span></label>
+              <input id="last" name="last" placeholder="Doe" required>
+            </div>
+          </div>
+
+          <div class="grp">
+            <label for="email">Email <span class="req">*</span></label>
+            <input id="email" name="email" type="email" placeholder="you@example.com" required>
+          </div>
+
+          <div class="grp row">
+            <div>
+              <label for="phone">Phone <span style="color:rgba(255,255,255,.45);font-weight:400">(optional)</span></label>
+              <input id="phone" name="phone" type="tel" placeholder="+1 555 000 0000">
+            </div>
+            <div>
+              <label for="level">AI experience <span class="req">*</span></label>
+              <select id="level" name="level" required>
+                <option value="" disabled selected>Choose one</option>
+                <option>Complete beginner</option>
+                <option>Tried it a few times</option>
+                <option>Use it occasionally</option>
+                <option>Fairly comfortable</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grp">
+            <label for="hear">How did you hear about this class?</label>
+            <select id="hear" name="hear">
+              <option value="" disabled selected>Choose one</option>
+              <option>Flyer / poster</option>
+              <option>Friend or colleague</option>
+              <option>Social media</option>
+              <option>Email</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+          <div class="prereq">
+            <div class="ptitle">✓ Please confirm you can come prepared with:</div>
+            <label class="check"><input type="checkbox" name="p1" required><span>A <b>paid Claude account</b></span></label>
+            <label class="check"><input type="checkbox" name="p2" required><span>A <b>laptop with internet access</b></span></label>
+            <label class="check"><input type="checkbox" name="p3" required><span><b>Basic computer skills</b></span></label>
+          </div>
+
+          <div class="grp">
+            <label for="notes">Anything we should know? <span style="color:rgba(255,255,255,.45);font-weight:400">(accessibility, questions…)</span></label>
+            <textarea id="notes" name="notes" placeholder="Optional — let us know how we can help you get the most out of the session."></textarea>
+          </div>
+
+          <label class="opt"><input type="checkbox" name="updates" checked><span>Email me updates about this and future AI literacy sessions.</span></label>
+
+          <button type="submit" class="submit">Reserve my spot →</button>
+          <p class="formerror" id="formError" role="alert" hidden></p>
+          <p class="finehint">Your details are kept private, used only to contact you about this class, and never shared or sold. No spam.</p>
+        </form>
+
+        <!-- success view -->
+        <div class="success" id="success">
+          <div class="mark">✓</div>
+          <h2>You're on the list!</h2>
+          <p id="successMsg">Thanks for registering. We'll email you the date, location, and joining details the moment they're confirmed. Keep an eye on your inbox!</p>
+          <button type="button" onclick="resetForm()">Register someone else</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <footer>
+    <div class="wrap">
+      <div class="line"></div>
+      <p><b>AI Literacy Class</b> · One session · Open to all · Spots are limited</p>
+      <p style="margin-top:6px">Hosted on <b>pandyaHomeLab</b> · pandyahomelab.com</p>
+    </div>
+  </footer>
+
+<script>
+  /* ============================================================
+     FORM HANDLING — posts registrations to the Google Apps Script
+     Web App, which appends a row to the "AI Literacy Class —
+     Registrations" Google Sheet.
+
+     The endpoint is sent JSON as text/plain so the browser treats
+     it as a "simple" request (no CORS preflight, which Apps Script
+     does not answer). The script reads it via e.postData.contents.
+     ============================================================ */
+  const ENDPOINT = "https://script.google.com/macros/s/AKfycbywkXc42YiEv7BO0-Zlo_rff_b_bbT4fy3hFGcevnMrGkosliXsKXhycjEuOfa-R61_cw/exec";
+
+  const form = document.getElementById('regForm');
+  const success = document.getElementById('success');
+  const errorBox = document.getElementById('formError');
+  const submitBtn = form.querySelector('button.submit');
+
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+    errorBox.hidden = true;
+
+    // native validation (covers required fields + prerequisite checkboxes)
+    if(!form.checkValidity()){ form.reportValidity(); return; }
+
+    const data = Object.fromEntries(new FormData(form).entries());
+
+    const original = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Reserving…';
+
+    try {
+      const res = await fetch(ENDPOINT, {
+        method: 'POST',
+        headers: {'Content-Type': 'text/plain;charset=utf-8'},
+        body: JSON.stringify(data),
+        redirect: 'follow'
+      });
+
+      // Try to read the JSON result; if CORS hides it but the request
+      // itself succeeded, fall back to treating a 2xx as success.
+      let ok = res.ok, errMsg = '';
+      try {
+        const j = await res.json();
+        ok = !!j.ok;
+        if (!ok) errMsg = j.error || '';
+      } catch (_) { /* opaque/redirected body — rely on res.ok */ }
+
+      if (!ok) throw new Error(errMsg || 'Something went wrong.');
+
+      document.getElementById('successMsg').textContent =
+        "Thanks, " + (data.first || "there") + "! You're registered. We'll email " +
+        (data.email || "you") + " the date, location, and joining details as soon as they're confirmed.";
+
+      form.style.display = 'none';
+      success.classList.add('show');
+      document.getElementById('card').scrollIntoView({behavior:'smooth', block:'center'});
+    } catch (err) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = original;
+      errorBox.textContent =
+        "Sorry — we couldn't submit your registration just now. Please check your connection and try again, or email us if it keeps happening.";
+      errorBox.hidden = false;
+    }
+  });
+
+  function resetForm(){
+    form.reset();
+    success.classList.remove('show');
+    form.style.display = 'block';
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Reserve my spot →';
+    errorBox.hidden = true;
+  }
+</script>
+</body>
+</html>
