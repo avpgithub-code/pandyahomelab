@@ -109,6 +109,10 @@
     <div class="filters">
       <select id="fState" onchange="renderTable()"><option value="">All states</option><option>New Jersey</option><option>California</option></select>
       <select id="fStatus" onchange="renderTable()"><option value="">All statuses</option><option>Registered</option><option>Stand By</option><option>Cancelled</option></select>
+      <button class="btn btn-sm" onclick="downloadCSV()">⬇ Download CSV</button>
+      <a class="btn btn-sm" target="_blank" rel="noopener"
+         href="https://docs.google.com/spreadsheets/d/1NFz4Y-qoA-kUnmJuiS4i7xlP6B8EgXmVbp_P7WbRtjo/edit"
+         style="text-decoration:none;display:inline-flex;align-items:center">↗ Open in Google Sheets</a>
     </div>
     <div class="tablewrap">
       <table>
@@ -178,6 +182,24 @@
     });
     document.getElementById('rows').innerHTML = html || '<tr><td colspan="9" class="muted" style="padding:18px">No registrations match.</td></tr>';
   }
+
+  function downloadCSV(){
+    var fs = document.getElementById('fState').value, fst = document.getElementById('fStatus').value;
+    var rows = DATA.registrations.filter(function(x){ return (!fs || x.state===fs) && (!fst || x.status===fst); });
+    var cols  = ['timestamp','state','status','position','first','last','email','phone','level','hear','notes'];
+    var heads = ['Timestamp','State','Status','Standby Position','First','Last','Email','Phone','AI Level','How Heard','Notes'];
+    var lines = [heads.map(csvCell).join(',')];
+    rows.forEach(function(x){ lines.push(cols.map(function(c){ return csvCell(x[c]); }).join(',')); });
+    var csv = '﻿' + lines.join('\r\n');               // BOM so Excel reads UTF-8 correctly
+    var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'ai-literacy-registrations' + (fs?('-'+fs.replace(/\s/g,'')):'') + (fst?('-'+fst.replace(/\s/g,'')):'') + '.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+    toast('Downloaded ' + rows.length + ' row(s).');
+  }
+  function csvCell(v){ v = (v==null?'':String(v)); return /[",\r\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; }
 
   function promote(state){
     if (!confirm('Promote the next stand-by person for ' + state + ' to Registered and email them?')) return;

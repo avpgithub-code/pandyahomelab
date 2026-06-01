@@ -18,7 +18,54 @@ var CONFIG_SHEET = 'Config';
 var FROM_NAME    = 'pandyaHomeLab · AI Literacy Class';
 var STATES       = ['New Jersey', 'California'];
 
+// Admins live in the Sheet's "Admins" tab (column A = email). Edit that tab to
+// add/remove admins — no code change or redeploy needed.
+// Run setupAdmins() ONCE from the editor to create the tab and seed your account.
+var ADMINS_SHEET = 'Admins';
+
+function readAdmins_() {
+  var sh = ss_().getSheetByName(ADMINS_SHEET);
+  if (!sh) return [];
+  var vals = sh.getDataRange().getValues();
+  var out = [];
+  for (var r = 1; r < vals.length; r++) {           // skip header row
+    var e = String(vals[r][0] || '').trim().toLowerCase();
+    if (e) out.push(e);
+  }
+  return out;
+}
+
+function isAdmin_() {
+  var e = (Session.getActiveUser().getEmail() || '').toLowerCase();
+  if (!e) return false;
+  return readAdmins_().indexOf(e) >= 0;
+}
+
+// Run ONCE from the editor to create the "Admins" tab and add yourself to it.
+function setupAdmins() {
+  var ss = ss_();
+  var sh = ss.getSheetByName(ADMINS_SHEET) || ss.insertSheet(ADMINS_SHEET);
+  if (sh.getLastRow() === 0) {
+    sh.getRange(1, 1).setValue('Admin Email').setFontWeight('bold');
+    sh.setFrozenRows(1);
+  }
+  var me = (Session.getActiveUser().getEmail() || Session.getEffectiveUser().getEmail() || '').toLowerCase();
+  if (me && readAdmins_().indexOf(me) < 0) sh.appendRow([me]);
+  return 'Admins tab ready. Current admins: ' + readAdmins_().join(', ');
+}
+
+function denied_() { return { message: 'Access denied — your Google account is not on the admin list.', data: null }; }
+
 function doGet() {
+  if (!isAdmin_()) {
+    var who = Session.getActiveUser().getEmail() || '(not signed in)';
+    return HtmlService.createHtmlOutput(
+      '<div style="font-family:system-ui,-apple-system,sans-serif;color:#fff;background:#160726;min-height:100vh;display:grid;place-items:center;text-align:center;padding:40px">' +
+        '<div><h2 style="color:#ff9bb3;margin:0 0 8px">Access denied</h2>' +
+        '<p style="color:#ccc;margin:0 0 6px">Signed in as <b>' + esc_(who) + '</b>.</p>' +
+        '<p style="color:#888;font-size:.9rem;margin:0">This account isn\'t on the AI Literacy admin list. Ask the owner to add it.</p></div></div>'
+    ).setTitle('AI Literacy — Admin');
+  }
   return HtmlService.createHtmlOutputFromFile('Index')
     .setTitle('AI Literacy — Admin')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1');
@@ -28,6 +75,7 @@ function ss_() { return SpreadsheetApp.openById(SHEET_ID); }
 
 /* ---------------------------------- read --------------------------------- */
 function getData() {
+  if (!isAdmin_()) throw new Error('Access denied.');
   var ss = ss_();
   var reg = ss.getSheetByName(SHEET_NAME);
   var vals = reg.getDataRange().getValues();
@@ -76,6 +124,7 @@ function getData() {
 
 // Mark a registration as Cancelled (frees a seat for promotion).
 function markCancelled(rowNumber) {
+  if (!isAdmin_()) return denied_();
   var lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
     var reg = ss_().getSheetByName(SHEET_NAME);
@@ -88,6 +137,7 @@ function markCancelled(rowNumber) {
 
 // Promote the earliest stand-by for a state → Registered, email them, renumber the rest.
 function promoteNext(state) {
+  if (!isAdmin_()) return denied_();
   var lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
     var reg = ss_().getSheetByName(SHEET_NAME);
@@ -121,6 +171,7 @@ function promoteNext(state) {
 
 // Open or close registration for a state (writes Config!RegOpen).
 function setRegOpen(state, open) {
+  if (!isAdmin_()) return denied_();
   var lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
     var cfg = ss_().getSheetByName(CONFIG_SHEET);
@@ -139,6 +190,7 @@ function setRegOpen(state, open) {
 
 // Email all Registered students in a scope ('all' | state name).
 function sendMassEmail(scope, subject, bodyHtml) {
+  if (!isAdmin_()) return denied_();
   if (!subject || !bodyHtml) return { message: 'Subject and message are both required.', data: getData() };
   var data = getData();
   var sent = 0;

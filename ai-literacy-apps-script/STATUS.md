@@ -54,9 +54,13 @@ Visitor → pandyahomelab.com/ai-literacy/ (Cloudflare Tunnel → pandya-nginx �
 
 **Source of truth / backups:** Apps Script source is version-controlled in the `pandyahomelab` git repo under `ai-literacy-apps-script/` (public backend, admin backend, admin UI) — these live OUTSIDE the nginx web root so they aren't publicly served. The live web pages are at `website/ai-literacy/index.html` (registration) and `website/ai-literacy/admin/index.html` (admin launcher).
 
+### Admin access model
+- **Multiple admins** supported via an **`Admins` tab** in the Sheet (column A = email). Add/remove admins by editing that tab — no code change, no redeploy. `setupAdmins()` (run once) creates the tab + seeds the owner.
+- Admin Web App deployed **Execute as: User accessing** + **Who has access: Anyone with a Google Account**; `isAdmin_()` checks the signed-in email against the `Admins` tab. Non-listed accounts get an "Access denied" page. Each admin also needs **Editor** access to the Sheet (the app runs as them).
+
 ### Admin URLs
 - Registration backend Web App (`/exec`): `…AKfycbywkXc4…` (public, "Anyone")
-- Admin dashboard Web App (`/exec`): `…AKfycbyYz8Nk…` (Only myself)
+- Admin dashboard Web App (`/exec`): `…AKfycbykAKmi…` (allowlist via Admins tab; execute-as-user)  ← current
 - Admin entry (clean): https://pandyahomelab.com/ai-literacy/admin/
 
 Three modifications, with decisions locked:
