@@ -184,6 +184,8 @@
   .check{display:flex;align-items:flex-start;gap:11px;padding:7px 0;cursor:pointer;font-size:.9rem}
   .check input{width:auto;flex:none;margin-top:2px;accent-color:var(--lime);width:18px;height:18px}
   .check span{color:rgba(255,255,255,.9)}
+  .prereqhelp{display:inline-block;margin:-2px 0 8px 29px;font-size:.78rem;color:var(--lime);text-decoration:none}
+  .prereqhelp:hover{text-decoration:underline}
 
   .opt{display:flex;align-items:flex-start;gap:11px;font-size:.82rem;color:rgba(255,255,255,.72);margin:2px 0 18px;cursor:pointer}
   .opt input{width:auto;flex:none;margin-top:2px;accent-color:var(--lime);width:17px;height:17px}
@@ -351,7 +353,6 @@
               <option value="" disabled selected>Choose one</option>
               <option>Flyer / poster</option>
               <option>Friend or colleague</option>
-              <option>Social media</option>
               <option>Email</option>
               <option>Other</option>
             </select>
@@ -360,6 +361,7 @@
           <div class="prereq">
             <div class="ptitle">✓ Please confirm you can come prepared with:</div>
             <label class="check"><input type="checkbox" name="p1" required><span>A <b>paid Claude account</b></span></label>
+            <a class="prereqhelp" href="/ai-literacy/claude-setup/" target="_blank" rel="noopener">New to this? How to get one →</a>
             <label class="check"><input type="checkbox" name="p3" required><span><b>Basic computer skills</b></span></label>
           </div>
 
