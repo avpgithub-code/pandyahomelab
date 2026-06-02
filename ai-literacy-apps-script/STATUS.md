@@ -16,12 +16,15 @@ The public registration site is **live and fully working end-to-end**. Visitors 
 | Registration page (design + form) | ✅ | Vibrant page matching the flyer |
 | Data collection | ✅ | Form POSTs to Google Apps Script → appends a row to the Sheet |
 | Spam protection | ✅ | Hidden `_gotcha` honeypot; `safe_()` blocks spreadsheet-formula / CSV-injection |
-| Team view / count / export | ✅ | Native Google Sheet (share, filter, count cell, Download CSV/XLSX) |
-| Confirmation email to registrant | ✅ | Verified end-to-end |
-| Notification email to organiser | ✅ | Sent to `architpandya@yahoo.com` |
-| Content fixes | ✅ | "Five grounded sections" + privacy line |
-| Published publicly | ✅ | Static file in nginx web root, behind Cloudflare Tunnel |
-| Version control | ✅ | Committed + pushed to GitHub (`main`, commit 4d07e8c) |
+| Confirmation + notification emails | ✅ | State-aware; verified end-to-end (notify → `architpandya@yahoo.com`) |
+| **Per-state (NJ/CA)** | ✅ | Required state selector; one state per registration |
+| **Capacity + stand-by** | ✅ | Per-state capacity in `Config`; over capacity → Stand By (+position); dedup by email+state |
+| **Admin dashboard** | ✅ | Counts, promote-next, cancel, mass email, open/close toggle, **CSV export + Open-in-Sheets** |
+| **Multi-admin** | ✅ | `Admins` tab allowlist + Google sign-in (execute-as-user) |
+| Prerequisites | ✅ | Paid Claude account + basic computer skills (laptop prereq removed) |
+| Published publicly | ✅ | Static files in nginx web root, behind Cloudflare Tunnel |
+| Version control | ✅ | All in GitHub `pandyahomelab` (`main`); latest commit `d976cb5` |
+| **SMS (Phase D)** | ⬜ | Pending a Twilio account |
 
 ---
 
@@ -50,7 +53,7 @@ Visitor → pandyahomelab.com/ai-literacy/ (Cloudflare Tunnel → pandya-nginx �
 
 ## Improvements requested (agreed design — 2026-06-01)
 
-**Progress:** Phase A (Sheet schema) ✅, Phase B (capacity + stand-by + dedup + state selector) ✅, **Phase C (admin dashboard)** ✅ — a separate standalone Apps Script web app (files: `admin-Code.gs` + `admin-Index.html`, HTML file named `Index`), deployed Execute-as-Me / access Only-myself (Google-login secured), reads the Sheet by ID; per-state cards, mass email to Registered, manual Promote-next + Cancel, and a per-state **Open/Close registration toggle** (writes `Config!RegOpen`). Clean admin entry URL: **pandyahomelab.com/ai-literacy/admin/** (static launcher that redirects to the Apps Script app). Remaining: **Phase D** (Twilio SMS + SMS-consent checkbox).
+**Progress:** Phase A (Sheet schema) ✅, Phase B (capacity + stand-by + dedup + state selector) ✅, **Phase C (admin dashboard)** ✅ — a separate standalone Apps Script web app (files: `admin-Code.gs` + `admin-Index.html`, HTML file named `Index`), reads the Sheet by ID; per-state cards, mass email to Registered, manual Promote-next + Cancel, per-state **Open/Close registration toggle** (writes `Config!RegOpen`), and **CSV export + Open-in-Sheets** on the grid. **Multi-admin** via the `Admins` tab, deployed **Execute-as-User-accessing / Anyone-with-a-Google-Account** with an allowlist check (see Admin access model below). Clean admin entry URL: **pandyahomelab.com/ai-literacy/admin/** (static launcher that redirects to the Apps Script app). Remaining: **Phase D** (Twilio SMS + SMS-consent checkbox).
 
 **Source of truth / backups:** Apps Script source is version-controlled in the `pandyahomelab` git repo under `ai-literacy-apps-script/` (public backend, admin backend, admin UI) — these live OUTSIDE the nginx web root so they aren't publicly served. The live web pages are at `website/ai-literacy/index.html` (registration) and `website/ai-literacy/admin/index.html` (admin launcher).
 
