@@ -31,13 +31,14 @@
   .lede{font-size:1.05rem;color:rgba(255,255,255,.85);max-width:600px;margin-bottom:28px}
   .lede b{color:#fff}
 
-  .video{position:relative;width:100%;aspect-ratio:16/9;border-radius:18px;overflow:hidden;
-    border:1px solid var(--line);background:rgba(255,255,255,.05);margin-bottom:14px}
-  .video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+  .video{position:relative;width:85%;aspect-ratio:16/9;border-radius:18px;overflow:hidden;
+    border:1px solid var(--line);background:rgba(255,255,255,.05);margin:0 auto 14px}
+  @media (max-width:520px){.video{width:100%}}
+  .video iframe,.video video{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
   .video .placeholder{position:absolute;inset:0;display:grid;place-items:center;text-align:center;
     color:rgba(255,255,255,.7);font-size:1rem;padding:20px}
   .video .placeholder .play{font-size:2.4rem;display:block;margin-bottom:8px;opacity:.8}
-  .caption{font-size:.85rem;color:rgba(255,255,255,.6);margin-bottom:30px}
+  .caption{font-size:.85rem;color:rgba(255,255,255,.6);margin-bottom:30px;text-align:center}
   .vidsoon{display:flex;gap:12px;align-items:center;background:var(--glass);border:1px dashed var(--line);
     border-radius:14px;padding:14px 16px;margin-bottom:28px;font-size:.92rem;color:rgba(255,255,255,.82)}
   .vidsoon .ic{font-size:1.5rem;line-height:1}
@@ -74,12 +75,13 @@
               title="How to get a paid Claude account" allowfullscreen></iframe></div>
          (Works the same with a Loom share-embed URL or a self-hosted <video> tag.)
     ──────────────────────────────────────────────────────────────── -->
-    <!-- VIDEO (interim placeholder). When the walkthrough is ready, replace the
-         .vidsoon banner below with the embed, e.g.:
-         <div class="video"><iframe src="https://www.youtube.com/embed/VIDEO_ID"
-              title="How to get a paid Claude account" allowfullscreen></iframe></div> -->
-    <div class="vidsoon"><span class="ic">📹</span>
-      <span>A short <b>video walkthrough is on the way.</b> In the meantime, the quick steps below take about 5 minutes.</span></div>
+    <div class="video">
+      <video controls preload="metadata" playsinline>
+        <source src="walkthrough.mp4" type="video/mp4">
+        Your browser can't play this video — <a href="walkthrough.mp4">download it here</a>.
+      </video>
+    </div>
+    <p class="caption">A quick screen recording of signing up for and upgrading to a paid Claude account.</p>
 
     <ol class="steps">
       <li>Go to <a class="inline" href="https://claude.ai" target="_blank" rel="noopener">claude.ai</a> and create an account (or sign in).</li>
