@@ -241,3 +241,59 @@ function readConfig_() {
 function isOpen_(v) { return v === true || String(v).toLowerCase() === 'yes' || String(v).toLowerCase() === 'true'; }
 function getActiveEmail_() { try { return Session.getActiveUser().getEmail() || Session.getEffectiveUser().getEmail(); } catch (e) { return ''; } }
 function esc_(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+/* ------------------------- stakeholder PDF report ------------------------ */
+// Generates a branded one-page summary PDF (aggregate counts only, no PII).
+// emailTo empty  -> returns the PDF as base64 for the browser to download.
+// emailTo given  -> emails the PDF (comma-separated recipients) and returns a message.
+function makeReport(emailTo) {
+  if (!isAdmin_()) return denied_();
+  var d = getData();
+  var pdf = Utilities.newBlob(buildReportHtml_(d), 'text/html', 'report.html').getAs('application/pdf');
+  pdf.setName('AI-Literacy-Summary-' + String(d.generatedAt).replace(/[^0-9]/g, '').slice(0, 8) + '.pdf');
+
+  var result = { data: d };
+  if (emailTo) {
+    MailApp.sendEmail({
+      to: emailTo, name: FROM_NAME,
+      subject: 'AI Literacy Class — Registration Summary (' + d.generatedAt + ')',
+      htmlBody: 'Attached is the latest AI Literacy Class registration summary (aggregate counts).<br><br>— ' + FROM_NAME,
+      attachments: [pdf]
+    });
+    result.message = 'Report emailed to ' + emailTo + '.';
+  } else {
+    result.pdfBase64 = Utilities.base64Encode(pdf.getBytes());
+    result.filename = pdf.getName();
+    result.message = 'Report generated.';
+  }
+  return result;
+}
+
+function buildReportHtml_(d) {
+  var rows = '', tCap = 0, tReg = 0, tSb = 0, tLeft = 0;
+  d.summary.forEach(function (s) {
+    tCap += s.capacity; tReg += s.registered; tSb += s.standby; tLeft += s.seatsLeft;
+    rows += '<tr><td>' + esc_(s.state) + '</td><td class="n">' + s.capacity + '</td><td class="n">' +
+      s.registered + '</td><td class="n">' + s.standby + '</td><td class="n">' + s.seatsLeft +
+      '</td><td class="n">' + s.pctFull + '%</td><td>' + (s.regOpen ? 'Open' : 'Closed') + '</td></tr>';
+  });
+  var totalPct = tCap ? Math.round(tReg / tCap * 100) : 0;
+  return '<html><head><meta charset="utf-8"><style>' +
+    'body{font-family:Arial,Helvetica,sans-serif;color:#160726;margin:30px}' +
+    'h1{font-size:20px;margin:0 0 2px}.sub{color:#666;font-size:12px;margin-bottom:18px}' +
+    'table{border-collapse:collapse;width:100%;font-size:12px}' +
+    'th,td{border:1px solid #ddd;padding:8px 10px;text-align:left}' +
+    'th{background:#7b2ff7;color:#fff}.n{text-align:right}' +
+    'tr.total td{font-weight:bold;background:#f3eefb}' +
+    '.foot{margin-top:18px;color:#999;font-size:10px}</style></head><body>' +
+    '<h1>AI Literacy Class — Registration Summary</h1>' +
+    '<div class="sub">Generated ' + esc_(d.generatedAt) + '</div>' +
+    '<table><tr><th>Location</th><th class="n">Capacity</th><th class="n">Registered</th>' +
+    '<th class="n">Stand By</th><th class="n">Seats Left</th><th class="n">% Full</th><th>Status</th></tr>' +
+    rows +
+    '<tr class="total"><td>TOTAL</td><td class="n">' + tCap + '</td><td class="n">' + tReg +
+    '</td><td class="n">' + tSb + '</td><td class="n">' + tLeft + '</td><td class="n">' + totalPct + '%</td><td></td></tr>' +
+    '</table>' +
+    '<div class="foot">pandyaHomeLab · AI Literacy Class · Confidential summary (aggregate counts only; no personal data).</div>' +
+    '</body></html>';
+}

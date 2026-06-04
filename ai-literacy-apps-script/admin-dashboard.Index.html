@@ -106,6 +106,13 @@
         <span class="muted" style="font-size:.76rem;margin-left:8px">SMS coming in the next phase.</span></div>
     </div>
 
+    <div class="panel">
+      <h3>📄 Stakeholder PDF report</h3>
+      <p class="muted" style="font-size:.8rem;margin:-4px 0 10px">A one-page summary — per-location counts &amp; totals only (no student data).</p>
+      <button class="btn" onclick="downloadReport()">⬇ Download PDF</button>
+      <button class="btn" onclick="emailReport()">✉️ Email PDF…</button>
+    </div>
+
     <div class="filters">
       <select id="fState" onchange="renderTable()"><option value="">All states</option><option>New Jersey</option><option>California</option></select>
       <select id="fStatus" onchange="renderTable()"><option value="">All statuses</option><option>Registered</option><option>Stand By</option><option>Cancelled</option></select>
@@ -200,6 +207,28 @@
     toast('Downloaded ' + rows.length + ' row(s).');
   }
   function csvCell(v){ v = (v==null?'':String(v)); return /[",\r\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; }
+
+  function downloadReport(){
+    busy(true);
+    google.script.run.withSuccessHandler(onReport).withFailureHandler(afterErr).makeReport('');
+  }
+  function onReport(res){
+    busy(false);
+    if (res && res.pdfBase64){
+      var a = document.createElement('a');
+      a.href = 'data:application/pdf;base64,' + res.pdfBase64;
+      a.download = res.filename || 'AI-Literacy-Summary.pdf';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
+    if (res){ if (res.data){ DATA = res.data; renderCards(); renderTable(); } toast(res.message || 'Report ready.'); }
+  }
+  function emailReport(){
+    var to = prompt('Email the PDF summary to (comma-separated addresses):');
+    if (!to) return;
+    busy(true);
+    google.script.run.withSuccessHandler(function(res){ busy(false); toast(res && res.message ? res.message : 'Sent.'); })
+      .withFailureHandler(afterErr).makeReport(to.trim());
+  }
 
   function promote(state){
     if (!confirm('Promote the next stand-by person for ' + state + ' to Registered and email them?')) return;

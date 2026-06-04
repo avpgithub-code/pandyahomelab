@@ -19,7 +19,7 @@ The public registration site is **live and fully working end-to-end**. Visitors 
 | Confirmation + notification emails | ✅ | State-aware; verified end-to-end (notify → `architpandya@yahoo.com`) |
 | **Per-state (NJ/CA)** | ✅ | Required state selector; one state per registration |
 | **Capacity + stand-by** | ✅ | Per-state capacity in `Config`; over capacity → Stand By (+position); dedup by email+state |
-| **Admin dashboard** | ✅ | Counts, promote-next, cancel, mass email, open/close toggle, **CSV export + Open-in-Sheets** |
+| **Admin dashboard** | ✅ | Counts, promote-next, cancel, mass email, open/close toggle, **CSV export + Open-in-Sheets**, **one-click stakeholder PDF report** (download/email, aggregate counts only) |
 | **Multi-admin** | ✅ | `Admins` tab allowlist + Google sign-in (execute-as-user) |
 | Prerequisites | ✅ | Paid Claude account + basic computer skills (laptop prereq removed) |
 | Published publicly | ✅ | Static files in nginx web root, behind Cloudflare Tunnel |
