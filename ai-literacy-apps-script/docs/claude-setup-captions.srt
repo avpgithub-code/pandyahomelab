@@ -1,0 +1,55 @@
+1
+00:00:00,000 --> 00:00:03,200
+To join the AI Literacy Class hands-on,
+
+2
+00:00:03,200 --> 00:00:06,500
+you'll need a paid Claude account.
+
+3
+00:00:06,500 --> 00:00:09,800
+Here's how — it takes about a minute.
+
+4
+00:00:10,200 --> 00:00:14,000
+First, go to claude.ai
+
+5
+00:00:14,000 --> 00:00:18,500
+and sign in — or create a free account.
+
+6
+00:00:19,000 --> 00:00:24,000
+Then open the account menu
+
+7
+00:00:24,000 --> 00:00:28,500
+(bottom-left, where your name is).
+
+8
+00:00:29,000 --> 00:00:33,500
+Click "Upgrade,"
+
+9
+00:00:33,500 --> 00:00:38,000
+and choose the Pro plan.
+
+10
+00:00:39,000 --> 00:00:44,000
+Enter your payment details and confirm.
+
+11
+00:00:44,000 --> 00:00:49,500
+You'll see "Pro" on your account once it's active.
+
+12
+00:00:50,500 --> 00:00:55,500
+That's it! Bring this account —
+
+13
+00:00:55,500 --> 00:01:00,000
+logged in on your laptop — to class.
+
+14
+00:01:00,000 --> 00:01:03,000
+See you there!
