@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Find your level · AI Literacy Class</title>
+<meta name="description" content="A quick 5-question placement quiz to find your AI literacy level before the class — so the session meets you where you are." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --magenta:#ff2d78;
+    --pink:#e3306f;
+    --purple:#7b2ff7;
+    --blue:#2f6bf6;
+    --orange:#ff9e1b;
+    --teal:#0bc2ad;
+    --lime:#a8e22a;
+    --ink:#160726;
+    --ink-soft:#2a1342;
+    --paper:#fff6fb;
+    --glass:rgba(255,255,255,0.10);
+    --glass-strong:rgba(255,255,255,0.16);
+    --line:rgba(255,255,255,0.22);
+    --line-strong:rgba(255,255,255,0.34);
+    --display:"Fraunces",Georgia,serif;
+    --body:"Hanken Grotesk",system-ui,sans-serif;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--body);
+    color:#fff;
+    background:var(--ink);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    min-height:100vh;
+    padding:32px 20px;
+  }
+
+  /* Animated multi-band gradient field, echoing the registration page */
+  .field{
+    position:fixed;inset:0;z-index:-2;
+    background:
+      radial-gradient(120% 90% at 12% 6%, var(--magenta) 0%, transparent 42%),
+      radial-gradient(110% 80% at 88% 14%, var(--purple) 0%, transparent 45%),
+      radial-gradient(120% 90% at 78% 48%, var(--blue) 0%, transparent 46%),
+      radial-gradient(120% 90% at 18% 52%, var(--teal) 0%, transparent 44%),
+      radial-gradient(120% 100% at 86% 86%, var(--orange) 0%, transparent 40%),
+      radial-gradient(120% 100% at 10% 94%, var(--lime) 0%, transparent 38%),
+      linear-gradient(160deg,#2a0f47 0%, #160726 60%, #0d0418 100%);
+    background-size:200% 200%,200% 200%,200% 200%,200% 200%,200% 200%,200% 200%,100% 100%;
+    animation:drift 26s ease-in-out infinite alternate;
+    filter:saturate(1.05);
+  }
+  @keyframes drift{
+    0%{background-position:0% 0%,100% 0%,100% 50%,0% 50%,100% 100%,0% 100%,0 0}
+    100%{background-position:30% 20%,70% 30%,60% 70%,40% 30%,60% 70%,40% 80%,0 0}
+  }
+  .field::after{
+    content:"";position:absolute;inset:0;
+    background-image:radial-gradient(rgba(255,255,255,.10) 1px, transparent 1.4px);
+    background-size:26px 26px;
+    mask-image:linear-gradient(180deg,rgba(0,0,0,.6),transparent 70%);
+    opacity:.5;
+  }
+
+  .container{
+    max-width:680px;
+    margin:0 auto;
+    min-height:calc(100vh - 64px);
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* small uppercase labels (replaces the old mono treatment) */
+  .brand,.step-counter,.welcome-eyebrow,.q-number,.meta-label,
+  .result-eyebrow,.result-level,.result-section-label,.you-tag,footer{
+    font-family:var(--body);
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    font-weight:700;
+  }
+
+  /* Header */
+  .top-bar{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:40px;padding-bottom:16px;
+    border-bottom:1px solid var(--line);
+  }
+  .brand{font-size:11px;color:rgba(255,255,255,.7)}
+  .brand-mark{
+    display:inline-block;width:7px;height:7px;background:var(--lime);
+    border-radius:50%;margin-right:9px;vertical-align:middle;
+    box-shadow:0 0 12px var(--lime);
+  }
+  .step-counter{font-size:11px;color:rgba(255,255,255,.6)}
+
+  /* Progress bar */
+  .progress-track{
+    height:3px;background:rgba(255,255,255,.14);
+    margin-bottom:52px;border-radius:2px;overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;width:0%;border-radius:2px;
+    background:linear-gradient(90deg,var(--magenta),var(--orange) 55%,var(--lime));
+    transition:width .5s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* Screens */
+  .screen{display:none;animation:rise .5s ease;flex:1}
+  .screen.active{display:block}
+  @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+  /* Welcome screen */
+  .welcome-eyebrow{font-size:12px;color:var(--lime);margin-bottom:22px}
+  h1{
+    font-family:var(--display);font-weight:900;
+    font-size:clamp(44px,7vw,64px);line-height:.96;letter-spacing:-.02em;
+    margin-bottom:22px;
+  }
+  h1 .italic{font-style:italic;font-weight:400;color:var(--lime)}
+  .lede{
+    font-size:clamp(1.05rem,2.1vw,1.25rem);line-height:1.45;
+    color:rgba(255,255,255,.85);margin-bottom:38px;max-width:560px;
+  }
+
+  .meta-row{
+    display:flex;gap:14px;flex-wrap:wrap;margin-bottom:44px;
+  }
+  .meta-item{
+    flex:1;min-width:150px;
+    background:var(--glass);border:1px solid var(--line);border-radius:16px;
+    padding:14px 16px;backdrop-filter:blur(10px);
+  }
+  .meta-label{font-size:10px;color:rgba(255,255,255,.6);margin-bottom:4px}
+  .meta-value{font-family:var(--display);font-size:1.2rem;font-weight:600;color:#fff;letter-spacing:-.01em}
+
+  /* Buttons */
+  .btn{
+    display:inline-flex;align-items:center;gap:12px;
+    font-family:var(--body);font-size:1rem;font-weight:700;letter-spacing:.01em;
+    color:var(--ink);cursor:pointer;border:none;border-radius:100px;
+    padding:15px 28px;
+    background:linear-gradient(95deg,var(--magenta),var(--orange) 55%,var(--lime));
+    background-size:160% 100%;background-position:0% 0%;
+    transition:.35s;box-shadow:0 14px 34px -10px rgba(255,45,120,.6);
+  }
+  .btn:hover{background-position:100% 0%;transform:translateY(-2px)}
+  .btn:active{transform:translateY(0)}
+  .btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+  .btn:disabled:hover{background-position:0% 0%;transform:none}
+
+  .btn-ghost{
+    background:var(--glass);color:#fff;border:1px solid var(--line);
+    box-shadow:none;
+  }
+  .btn-ghost:hover{background:var(--glass-strong);transform:translateY(-1px)}
+
+  .btn .arrow{transition:transform .2s ease}
+  .btn:hover .arrow{transform:translateX(3px)}
+
+  /* Question screens */
+  .q-number{font-size:11px;color:var(--lime);margin-bottom:16px}
+  .q-text{
+    font-family:var(--display);font-weight:600;
+    font-size:clamp(28px,4vw,36px);line-height:1.2;letter-spacing:-.01em;
+    margin-bottom:12px;
+  }
+  .q-hint{font-size:.9rem;color:rgba(255,255,255,.6);font-style:italic;margin-bottom:34px}
+
+  .options{display:flex;flex-direction:column;gap:12px;margin-bottom:46px}
+  .option{
+    display:flex;align-items:flex-start;gap:16px;
+    padding:18px 20px;
+    background:var(--glass);border:1px solid var(--line);border-radius:14px;
+    cursor:pointer;transition:.2s;position:relative;backdrop-filter:blur(10px);
+  }
+  .option:hover{border-color:var(--line-strong);background:var(--glass-strong)}
+  .option.selected{
+    border-color:var(--lime);background:rgba(168,226,42,.16);
+    box-shadow:0 0 0 3px rgba(168,226,42,.16);
+  }
+  .option-letter{
+    flex-shrink:0;width:28px;height:28px;border-radius:50%;
+    border:1.5px solid var(--line-strong);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--body);font-size:12px;font-weight:700;
+    color:rgba(255,255,255,.8);transition:.2s;
+  }
+  .option.selected .option-letter{border-color:var(--lime);background:var(--lime);color:var(--ink)}
+  .option-text{flex:1;font-size:.98rem;line-height:1.5;color:#fff;padding-top:3px}
+
+  /* Nav */
+  .nav-row{display:flex;justify-content:space-between;align-items:center;gap:16px}
+
+  /* Result screen */
+  .result-eyebrow{font-size:12px;color:var(--lime);margin-bottom:18px}
+  .result-title{
+    font-family:var(--display);font-weight:900;
+    font-size:clamp(48px,8vw,72px);line-height:1.0;letter-spacing:-.02em;margin-bottom:8px;
+  }
+  .result-title .italic{font-style:italic;font-weight:400;color:var(--lime)}
+  .result-level{font-size:13px;color:rgba(255,255,255,.6);margin-bottom:26px}
+  .result-description{
+    font-size:1.12rem;line-height:1.55;color:rgba(255,255,255,.85);
+    margin-bottom:38px;padding-bottom:30px;border-bottom:1px solid var(--line);
+  }
+  .result-section-label{font-size:10px;color:rgba(255,255,255,.6);margin-bottom:16px}
+
+  .focus-list{list-style:none;margin-bottom:38px}
+  .focus-list li{
+    padding:14px 0;font-size:.98rem;line-height:1.5;color:rgba(255,255,255,.9);
+    border-bottom:1px solid var(--line);display:flex;gap:16px;align-items:flex-start;
+  }
+  .focus-list li:last-child{border-bottom:none}
+  .focus-list li::before{content:"\2192";color:var(--lime);font-weight:700;flex-shrink:0}
+
+  .levels-overview{margin-top:46px;padding-top:30px;border-top:1px solid var(--line)}
+  .level-card{
+    padding:20px 0;border-bottom:1px solid var(--line);
+    display:flex;gap:20px;align-items:flex-start;
+  }
+  .level-card:last-child{border-bottom:none}
+  .level-number{
+    font-family:var(--display);font-style:italic;font-size:32px;
+    color:rgba(255,255,255,.45);line-height:1;flex-shrink:0;width:40px;
+  }
+  .level-card.current .level-number{color:var(--lime)}
+  .level-name{font-family:var(--display);font-size:1.4rem;margin-bottom:4px;color:#fff}
+  .level-card.current .level-name{color:var(--lime)}
+  .level-blurb{font-size:.9rem;line-height:1.5;color:rgba(255,255,255,.7)}
+
+  .you-tag{
+    display:inline-block;font-size:10px;color:var(--ink);background:var(--lime);
+    padding:3px 8px;border-radius:5px;margin-left:8px;vertical-align:middle;
+  }
+
+  .result-actions{display:flex;gap:12px;margin-top:38px;flex-wrap:wrap}
+
+  /* Footer */
+  footer{
+    margin-top:60px;padding-top:22px;border-top:1px solid var(--line);
+    font-size:11px;letter-spacing:.08em;color:rgba(255,255,255,.5);
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;
+  }
+  footer a{color:rgba(255,255,255,.7);text-decoration:none;border-bottom:1px solid var(--line-strong)}
+  footer a:hover{color:var(--lime);border-color:var(--lime)}
+
+  /* Mobile */
+  @media (max-width:540px){
+    body{padding:20px 16px}
+    .meta-row{flex-direction:column;gap:12px}
+    .nav-row{flex-direction:column-reverse}
+    .nav-row .btn{width:100%;justify-content:center}
+    .result-actions .btn{width:100%;justify-content:center}
+  }
+</style>
+</head>
+<body>
+  <div class="field" aria-hidden="true"></div>
+
+<div class="container">
+
+  <div class="top-bar">
+    <div class="brand"><span class="brand-mark"></span>AI Literacy · Placement</div>
+    <div class="step-counter" id="stepCounter">Start</div>
+  </div>
+
+  <div class="progress-track">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+
+  <!-- WELCOME -->
+  <div class="screen active" id="screen-welcome">
+    <div class="welcome-eyebrow">Find your level — 2 minutes</div>
+    <h1>Find your <span class="italic">starting point.</span></h1>
+    <p class="lede">Five short questions to figure out where you are on the AI literacy curve — so the class meets you where you are. There's no wrong answer, and everyone's welcome.</p>
+
+    <div class="meta-row">
+      <div class="meta-item">
+        <div class="meta-label">Questions</div>
+        <div class="meta-value">5</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Time</div>
+        <div class="meta-value">~2 minutes</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Levels</div>
+        <div class="meta-value">Beginner → Daily User → Builder</div>
+      </div>
+    </div>
+
+    <button class="btn" onclick="startQuiz()">
+      Begin <span class="arrow">→</span>
+    </button>
+  </div>
+
+  <!-- QUESTIONS (dynamically populated) -->
+  <div class="screen" id="screen-question"></div>
+
+  <!-- RESULT -->
+  <div class="screen" id="screen-result"></div>
+
+  <footer>
+    <div>AI Literacy Class · Placement</div>
+    <div>Built for self-assessment · No data collected</div>
+  </footer>
+
+</div>
+
+<script>
+  // Each option maps to a level: 1 = Beginner, 2 = Daily User, 3 = Builder
+  const QUESTIONS = [
+    {
+      number: "01",
+      text: "How often do you use AI tools like ChatGPT, Claude, or Gemini?",
+      options: [
+        { label: "Never, or I've tried once or twice", level: 1 },
+        { label: "A few times a week for quick questions", level: 1 },
+        { label: "Every day, multiple times, for real work", level: 2 },
+        { label: "Daily — and I also use AI inside my code editor (Cursor, Claude Code, Copilot)", level: 3 }
+      ]
+    },
+    {
+      number: "02",
+      text: "Which of these have you actually done with an AI tool?",
+      hint: "Pick the most advanced one that's true for you.",
+      isTiebreaker: true,
+      options: [
+        { label: "Asked it a question and read the answer", level: 1 },
+        { label: "Had a back-and-forth conversation to refine a draft or get a better answer", level: 1 },
+        { label: "Uploaded a file (PDF, image, spreadsheet) and asked the AI to analyze it, or used Projects / Custom GPTs", level: 2 },
+        { label: "Called an AI API from code, or built something with RAG, agents, or vector databases", level: 3 }
+      ]
+    },
+    {
+      number: "03",
+      text: "What does \"prompt engineering\" mean to you?",
+      options: [
+        { label: "I've heard the term but I'm not sure what it means", level: 1 },
+        { label: "Writing clearer instructions so the AI gives better answers", level: 1 },
+        { label: "Giving the AI a role, context, examples, and step-by-step instructions to get reliable results", level: 2 },
+        { label: "Designing system prompts, managing context windows, and using techniques like chain-of-thought or few-shot prompting", level: 3 }
+      ]
+    },
+    {
+      number: "04",
+      text: "When the AI gives you a wrong or weak answer, what do you usually do?",
+      options: [
+        { label: "Assume the AI can't do it and give up", level: 1 },
+        { label: "Try rephrasing the question once or twice", level: 1 },
+        { label: "Add more context, examples, or break the task into smaller steps", level: 2 },
+        { label: "Check the model I'm using, adjust the system prompt, or switch to a different tool for the job", level: 3 }
+      ]
+    },
+    {
+      number: "05",
+      text: "Which of these terms do you understand well enough to explain to a friend?",
+      hint: "Pick the most advanced one.",
+      options: [
+        { label: "None of these yet", level: 1 },
+        { label: "ChatGPT, Claude, Gemini — what they are and how they differ", level: 1 },
+        { label: "Tokens, context window, hallucination, system prompt", level: 2 },
+        { label: "RAG, embeddings, agents, function calling, MCP", level: 3 }
+      ]
+    }
+  ];
+
+  const LEVELS = {
+    1: {
+      name: "Beginner",
+      tagline: "You're at the beginning of something powerful.",
+      description: "You've heard about AI or use it occasionally — but you sense there's a lot more it can do. This class will give you the foundation: what these tools really are, how to prompt them well, and where they fit in your daily work.",
+      focus: [
+        "Understanding what ChatGPT, Claude, and Gemini actually are (and what they aren't)",
+        "Your first 10 high-leverage prompts — for writing, research, and thinking",
+        "Knowing when to trust the AI and when to double-check",
+        "Building a daily habit you'll still be using in three months"
+      ]
+    },
+    2: {
+      name: "Daily User",
+      tagline: "You use AI every day. Time to use it well.",
+      description: "You're past the awkward stage — AI is already part of your workflow. But you suspect you're using maybe 20% of what's possible. This class will show you the advanced moves: better prompting, Projects, file workflows, and the difference between models.",
+      focus: [
+        "Prompting techniques that consistently outperform what most users do",
+        "Using Projects, Custom GPTs, and file uploads to build personal AI workflows",
+        "Choosing the right model for the right task — and why it matters",
+        "Avoiding the most common traps: hallucinations, context loss, over-trusting"
+      ]
+    },
+    3: {
+      name: "Builder",
+      tagline: "You're already shipping. Let's go deeper.",
+      description: "You write code with AI, use APIs, or build applications. You don't need an intro — you need depth. This class will focus on the engineering side: agents, RAG, system prompt design, and architecting AI features that actually work in production.",
+      focus: [
+        "System prompts, tool use, and structured outputs that hold up at scale",
+        "When to use RAG vs. fine-tuning vs. long-context — and the real tradeoffs",
+        "Building reliable agents: planning loops, evals, and failure modes",
+        "Production patterns: cost, latency, observability, and guardrails"
+      ]
+    }
+  };
+
+  const state = {
+    currentQ: 0,
+    answers: new Array(QUESTIONS.length).fill(null)
+  };
+
+  function startQuiz() {
+    state.currentQ = 0;
+    showQuestion(0);
+  }
+
+  function showQuestion(idx) {
+    state.currentQ = idx;
+    const q = QUESTIONS[idx];
+
+    document.getElementById('screen-welcome').classList.remove('active');
+    document.getElementById('screen-result').classList.remove('active');
+    const qScreen = document.getElementById('screen-question');
+    qScreen.classList.add('active');
+
+    // restart animation
+    qScreen.style.animation = 'none';
+    qScreen.offsetHeight;
+    qScreen.style.animation = '';
+
+    document.getElementById('stepCounter').textContent = `Question ${idx + 1} of ${QUESTIONS.length}`;
+    document.getElementById('progressFill').style.width = `${((idx) / QUESTIONS.length) * 100}%`;
+
+    const hintHTML = q.hint ? `<div class="q-hint">${q.hint}</div>` : '';
+    const letters = ['A', 'B', 'C', 'D'];
+
+    let optionsHTML = '';
+    q.options.forEach((opt, i) => {
+      const selected = state.answers[idx] === i ? 'selected' : '';
+      optionsHTML += `
+        <div class="option ${selected}" onclick="selectOption(${i})" data-index="${i}">
+          <div class="option-letter">${letters[i]}</div>
+          <div class="option-text">${opt.label}</div>
+        </div>
+      `;
+    });
+
+    const prevBtn = idx > 0
+      ? `<button class="btn btn-ghost" onclick="prevQuestion()">← Back</button>`
+      : `<div></div>`;
+
+    const isLast = idx === QUESTIONS.length - 1;
+    const nextLabel = isLast ? 'See my result' : 'Next';
+    const nextDisabled = state.answers[idx] === null ? 'disabled' : '';
+
+    qScreen.innerHTML = `
+      <div class="q-number">Question ${q.number}</div>
+      <div class="q-text">${q.text}</div>
+      ${hintHTML}
+      <div class="options">${optionsHTML}</div>
+      <div class="nav-row">
+        ${prevBtn}
+        <button class="btn" id="nextBtn" onclick="nextQuestion()" ${nextDisabled}>
+          ${nextLabel} <span class="arrow">→</span>
+        </button>
+      </div>
+    `;
+  }
+
+  function selectOption(i) {
+    state.answers[state.currentQ] = i;
+    document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+    document.querySelector(`.option[data-index="${i}"]`).classList.add('selected');
+    document.getElementById('nextBtn').removeAttribute('disabled');
+  }
+
+  function nextQuestion() {
+    if (state.answers[state.currentQ] === null) return;
+    if (state.currentQ < QUESTIONS.length - 1) {
+      showQuestion(state.currentQ + 1);
+    } else {
+      showResult();
+    }
+  }
+
+  function prevQuestion() {
+    if (state.currentQ > 0) {
+      showQuestion(state.currentQ - 1);
+    }
+  }
+
+  function computeLevel() {
+    const counts = { 1: 0, 2: 0, 3: 0 };
+    state.answers.forEach((ansIdx, qIdx) => {
+      const lvl = QUESTIONS[qIdx].options[ansIdx].level;
+      counts[lvl]++;
+    });
+
+    const max = Math.max(counts[1], counts[2], counts[3]);
+    const topLevels = Object.keys(counts).filter(k => counts[k] === max).map(Number);
+
+    if (topLevels.length === 1) return topLevels[0];
+
+    // Tiebreaker: use Q2 (index 1) answer's level if it's among the tied top levels
+    const tiebreakerQ = QUESTIONS.findIndex(q => q.isTiebreaker);
+    const tiebreakerLevel = QUESTIONS[tiebreakerQ].options[state.answers[tiebreakerQ]].level;
+    if (topLevels.includes(tiebreakerLevel)) return tiebreakerLevel;
+
+    // Fallback: highest level among tied
+    return Math.max(...topLevels);
+  }
+
+  function showResult() {
+    document.getElementById('screen-question').classList.remove('active');
+    const rScreen = document.getElementById('screen-result');
+    rScreen.classList.add('active');
+
+    document.getElementById('stepCounter').textContent = 'Result';
+    document.getElementById('progressFill').style.width = '100%';
+
+    const level = computeLevel();
+    const data = LEVELS[level];
+
+    const focusHTML = data.focus.map(f => `<li>${f}</li>`).join('');
+
+    let levelsOverviewHTML = '';
+    [1, 2, 3].forEach(l => {
+      const lvl = LEVELS[l];
+      const current = l === level ? 'current' : '';
+      const youTag = l === level ? '<span class="you-tag">You</span>' : '';
+      const blurbs = {
+        1: "Just getting started or using AI occasionally.",
+        2: "Daily user — comfortable, but going deeper.",
+        3: "Coding and building with AI."
+      };
+      levelsOverviewHTML += `
+        <div class="level-card ${current}">
+          <div class="level-number">${String(l).padStart(2, '0')}</div>
+          <div>
+            <div class="level-name">${lvl.name}${youTag}</div>
+            <div class="level-blurb">${blurbs[l]}</div>
+          </div>
+        </div>
+      `;
+    });
+
+    rScreen.innerHTML = `
+      <div class="result-eyebrow">Your Level</div>
+      <div class="result-title">${data.name.split(' ').map((w, i, arr) =>
+        i === arr.length - 1 ? `<span class="italic">${w}.</span>` : w
+      ).join(' ')}</div>
+      <div class="result-level">Level ${String(level).padStart(2, '0')} of 03 · ${data.tagline}</div>
+      <div class="result-description">${data.description}</div>
+
+      <div class="result-section-label">What the class will cover for you</div>
+      <ul class="focus-list">${focusHTML}</ul>
+
+      <div class="levels-overview">
+        <div class="result-section-label">The three levels</div>
+        ${levelsOverviewHTML}
+      </div>
+
+      <div class="result-actions">
+        <button class="btn" onclick="shareResult('${data.name}')">Share my result</button>
+        <button class="btn btn-ghost" onclick="restart()">Retake quiz</button>
+      </div>
+    `;
+  }
+
+  function restart() {
+    state.currentQ = 0;
+    state.answers = new Array(QUESTIONS.length).fill(null);
+    document.getElementById('screen-question').classList.remove('active');
+    document.getElementById('screen-result').classList.remove('active');
+    document.getElementById('screen-welcome').classList.add('active');
+    document.getElementById('stepCounter').textContent = 'Start';
+    document.getElementById('progressFill').style.width = '0%';
+  }
+
+  function shareResult(levelName) {
+    const text = `I just took the AI Literacy placement quiz — my level is "${levelName}". Take it yourself:`;
+    if (navigator.share) {
+      navigator.share({ title: 'AI Literacy Placement', text: text }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = event.target;
+        const orig = btn.textContent;
+        btn.textContent = 'Copied to clipboard ✓';
+        setTimeout(() => { btn.textContent = orig; }, 2000);
+      });
+    }
+  }
+</script>
+
+</body>
+</html>
