@@ -7,8 +7,11 @@ predictions if the tracker is briefly unreachable.
 """
 import logging
 import os
+import tempfile
 import threading
 from typing import Dict, List, Optional
+
+import torch
 
 from db_logic.loaders.loaders import LocalDataLoader
 from db_logic.transforms.preprocessor import DataPreprocessor
@@ -149,10 +152,24 @@ class PredictionService:
         return self._ready
 
     def _log_to_mlflow(self) -> None:
-        """Capture run_id BEFORE logging the model — log_model can throw."""
+        """Log run params, metrics, and model artifact to MLflow.
+
+        Capture run_id BEFORE the artifact write — logging can throw at any
+        step; graceful degradation keeps the demo serving predictions even
+        if dl-mlflow is briefly unreachable.
+
+        Uses the classic per-run `mlflow.log_artifact` upload path instead
+        of `mlflow.pytorch.log_model`. Reason: MLflow 3.11's LoggedModel +
+        `--serve-artifacts` combo silently marks LoggedModel uploads as
+        `LOGGED_MODEL_UPLOAD_FAILED` on dl-mlflow (root cause not root-
+        caused; classic path proven-good by direct probe). Trade-off:
+        model file lands under the run's Artifacts tab as
+        `model/mnist_cnn_state.pt`, not under Logged Models. Reload with
+        `torch.load(state_path)` + `MnistCNN().load_state_dict(...)`.
+        Lesson from [[mlflow_operational_lessons]] (Phase 1c).
+        """
         try:
             import mlflow
-            import mlflow.pytorch
             mlflow.set_tracking_uri(_MLFLOW_URI)
             mlflow.set_experiment(_EXPERIMENT)
             with mlflow.start_run() as run:
@@ -170,7 +187,10 @@ class PredictionService:
                 self._run_id = run.info.run_id
                 self._experiment_id = str(run.info.experiment_id)
                 try:
-                    mlflow.pytorch.log_model(self._classifier._model, "model")
+                    with tempfile.TemporaryDirectory() as tmp:
+                        state_path = os.path.join(tmp, "mnist_cnn_state.pt")
+                        torch.save(self._classifier._model.state_dict(), state_path)
+                        mlflow.log_artifact(state_path, artifact_path="model")
                 except Exception as artifact_err:
                     logger.warning(f"MLflow artifact logging skipped: {artifact_err}")
         except Exception as e:

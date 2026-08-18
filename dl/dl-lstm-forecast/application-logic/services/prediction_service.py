@@ -12,11 +12,13 @@ dl-mlflow is briefly unreachable.
 """
 import logging
 import os
+import tempfile
 import threading
 from typing import Dict, List, Optional
 
 import numpy as np
 import pandas as pd
+import torch
 
 from application_logic.model.forecaster import (
     ARCHITECTURE,
@@ -285,13 +287,25 @@ class PredictionService:
         return self._ready
 
     def _log_to_mlflow(self, df: Optional[pd.DataFrame] = None) -> None:
-        """Capture run_id BEFORE log_model — model artifact logging can throw.
+        """Log run params, metrics, and model artifact to MLflow.
 
+        Capture run_id BEFORE the artifact write — logging can throw at any
+        step; graceful degradation keeps the demo serving forecasts even if
+        dl-mlflow is briefly unreachable.
+
+        Uses the classic per-run `mlflow.log_artifact` upload path instead
+        of `mlflow.pytorch.log_model`. Reason: MLflow 3.11's LoggedModel +
+        `--serve-artifacts` combo silently marks LoggedModel uploads as
+        `LOGGED_MODEL_UPLOAD_FAILED` on dl-mlflow (identical config works on
+        ml-mlflow — root cause not root-caused; classic path is proven-good
+        on both trackers by direct probe). Trade-off: model file lands under
+        the run's Artifacts tab as `model/lstm_forecaster_state.pt`, not
+        under Logged Models. Reload with
+        `torch.load(state_path)` + `LSTMForecaster().load_state_dict(...)`.
         Lesson from [[mlflow_operational_lessons]] (Phase 1c).
         """
         try:
             import mlflow
-            import mlflow.pytorch
             mlflow.set_tracking_uri(_MLFLOW_URI)
             mlflow.set_experiment(_EXPERIMENT)
             with mlflow.start_run() as run:
@@ -322,7 +336,10 @@ class PredictionService:
                 self._run_id = run.info.run_id
                 self._experiment_id = str(run.info.experiment_id)
                 try:
-                    mlflow.pytorch.log_model(self._forecaster._model, "model")
+                    with tempfile.TemporaryDirectory() as tmp:
+                        state_path = os.path.join(tmp, "lstm_forecaster_state.pt")
+                        torch.save(self._forecaster._model.state_dict(), state_path)
+                        mlflow.log_artifact(state_path, artifact_path="model")
                 except Exception as artifact_err:
                     logger.warning(f"MLflow artifact logging skipped: {artifact_err}")
         except Exception as e:
