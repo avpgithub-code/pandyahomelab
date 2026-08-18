@@ -175,6 +175,30 @@
   }
   input:invalid:not(:placeholder-shown){border-color:rgba(255,80,120,.7)}
 
+  /* gmail username + fixed @gmail.com suffix (combined control) */
+  .gmail-input{
+    display:flex;align-items:stretch;overflow:hidden;
+    background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.2);border-radius:12px;transition:.2s;
+  }
+  .gmail-input:focus-within{
+    border-color:var(--lime);background:rgba(255,255,255,.12);
+    box-shadow:0 0 0 4px rgba(168,226,42,.18);
+  }
+  .gmail-input input{
+    flex:1;min-width:0;border:none;border-radius:0;background:transparent;box-shadow:none;
+  }
+  .gmail-input input:focus{box-shadow:none;background:transparent}
+  .gmail-input:has(input:invalid:not(:placeholder-shown)){border-color:rgba(255,80,120,.7)}
+  .gmail-suffix{
+    display:flex;align-items:center;padding:0 14px;white-space:nowrap;
+    font-size:.95rem;color:rgba(255,255,255,.7);
+    background:rgba(255,255,255,.06);border-left:1px solid rgba(255,255,255,.16);
+    user-select:none;
+  }
+  .fieldhint{text-align:left;font-size:.76rem;color:rgba(255,255,255,.55);margin-top:6px}
+  .field-err{text-align:left;font-size:.78rem;color:#ffd2dd;margin-top:6px}
+
   /* prerequisites checklist */
   .prereq{
     background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.14);
@@ -238,6 +262,44 @@
   }
   .success button:hover{background:var(--glass-strong)}
 
+  /* placement-quiz CTA (left column) + inline link */
+  .quizcta{
+    display:flex;align-items:center;gap:13px;margin-top:22px;
+    background:var(--glass);border:1px solid var(--line);border-radius:16px;
+    padding:15px 17px;backdrop-filter:blur(10px);color:#fff;text-decoration:none;
+    cursor:pointer;transition:.2s;
+  }
+  .quizcta:hover{background:var(--glass-strong);transform:translateY(-2px)}
+  .quizcta-ic{
+    flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;
+    font-size:1.2rem;border:1px solid var(--line);
+    background:linear-gradient(135deg,var(--lime),var(--teal));
+  }
+  .quizcta .t{font-size:.9rem;color:rgba(255,255,255,.88);line-height:1.4}
+  .quizcta .t b{color:#fff;font-weight:700}
+  .levellink{display:inline-block;margin-top:7px;font-size:.74rem;color:var(--lime);text-decoration:none}
+  .levellink:hover{text-decoration:underline}
+
+  /* placement-quiz modal */
+  .quizmodal{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px}
+  .quizmodal[hidden]{display:none}
+  .quizmodal-backdrop{position:absolute;inset:0;background:rgba(8,3,16,.72);backdrop-filter:blur(6px);animation:qfade .25s both}
+  .quizmodal-panel{
+    position:relative;width:min(760px,100%);height:min(88vh,920px);
+    background:var(--ink);border:1px solid var(--line);border-radius:22px;overflow:hidden;
+    box-shadow:0 40px 120px -30px rgba(0,0,0,.8);animation:qrise .3s both;
+  }
+  .quizmodal-panel iframe{width:100%;height:100%;border:0;display:block;background:var(--ink)}
+  .quizmodal-close{
+    position:absolute;top:12px;right:12px;z-index:2;width:38px;height:38px;border-radius:50%;
+    cursor:pointer;border:1px solid var(--line);background:rgba(22,7,38,.72);color:#fff;
+    font-size:1rem;line-height:1;display:grid;place-items:center;backdrop-filter:blur(8px);transition:.2s;
+  }
+  .quizmodal-close:hover{background:var(--glass-strong);transform:scale(1.05)}
+  @keyframes qfade{from{opacity:0}to{opacity:1}}
+  @keyframes qrise{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:none}}
+  @media (max-width:540px){.quizmodal{padding:0}.quizmodal-panel{width:100%;height:100%;border-radius:0;border:none}}
+
   /* footer */
   footer{padding:34px 0 50px;text-align:center;color:rgba(255,255,255,.55);font-size:.82rem;animation:rise .8s .3s both}
   footer .line{height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent);margin-bottom:22px}
@@ -254,7 +316,7 @@
       <span class="eyebrow"><span class="dot"></span>AI Literacy Class · One Session · Open to All</span>
       <p class="hello">Hello Everyone 👋</p>
       <h1>Reserve Your <em>Seat</em></h1>
-      <p class="lede">You've heard about AI everywhere — but what is it <i>really</i>? This one-session class gives you a grounded, honest look at artificial intelligence: how it works, where it's useful, and how to think about it clearly. <b>Spots are limited.</b></p>
+      <p class="lede">You've heard about AI everywhere — but what is it <i>really</i>?<br>This one-session class gives you a grounded, honest look at artificial intelligence: how it works, where it's useful, and how to think about it clearly. <b>Spots are limited.</b></p>
 
       <div class="facts">
         <div class="fact"><div class="k">When</div><div class="v tba" id="factWhen">To be announced</div></div>
@@ -293,6 +355,11 @@
           <div class="ic">🛠️</div>
           <div><h3>Hands-on practice</h3><p>Live demos with real AI tools, prompt one yourself, and leave with tools you can use the same day.</p></div>
         </div>
+
+        <a class="quizcta" href="quiz/index.html" target="_blank" rel="noopener" onclick="openQuiz();return false;">
+          <span class="quizcta-ic">🧭</span>
+          <span class="t"><b>Not sure where you'd start?</b><br>Take the 2-minute placement quiz to find your level →</span>
+        </a>
       </section>
 
       <!-- RIGHT: registration form -->
@@ -326,14 +393,23 @@
           </div>
 
           <div class="grp">
-            <label for="email">Email <span class="req">*</span></label>
-            <input id="email" name="email" type="email" placeholder="you@example.com" required>
+            <label for="email">Gmail username <span class="req">*</span></label>
+            <div class="gmail-input">
+              <input id="email" name="emailUser" type="text" inputmode="email"
+                     autocomplete="off" autocapitalize="off" spellcheck="false"
+                     placeholder="yourname" required minlength="6" maxlength="30"
+                     pattern="[A-Za-z0-9]+(\.[A-Za-z0-9]+)*"
+                     aria-describedby="emailHint">
+              <span class="gmail-suffix" aria-hidden="true">@gmail.com</span>
+            </div>
+            <p class="field-err" id="emailErr" role="alert" hidden></p>
+            <p class="fieldhint" id="emailHint">A Gmail email address required for this course. Training and use case documents are accessible from Google Drive</p>
           </div>
 
           <div class="grp row">
             <div>
-              <label for="phone">Phone <span style="color:rgba(255,255,255,.45);font-weight:400">(optional)</span></label>
-              <input id="phone" name="phone" type="tel" placeholder="+1 555 000 0000">
+              <label for="phone">Phone <span class="req">*</span></label>
+              <input id="phone" name="phone" type="tel" placeholder="+1 555 000 0000" required>
             </div>
             <div>
               <label for="level">AI experience <span class="req">*</span></label>
@@ -344,6 +420,7 @@
                 <option>Use it occasionally</option>
                 <option>Fairly comfortable</option>
               </select>
+              <a class="levellink" href="quiz/index.html" target="_blank" rel="noopener" onclick="openQuiz();return false;">Not sure? Find your level →</a>
             </div>
           </div>
 
@@ -389,11 +466,20 @@
     </div>
   </div>
 
+  <!-- placement quiz modal (iframe — quiz is a self-contained static page) -->
+  <div class="quizmodal" id="quizModal" hidden>
+    <div class="quizmodal-backdrop" onclick="closeQuiz()"></div>
+    <div class="quizmodal-panel" role="dialog" aria-modal="true" aria-label="AI literacy placement quiz">
+      <button type="button" class="quizmodal-close" onclick="closeQuiz()" aria-label="Close placement quiz">✕</button>
+      <iframe id="quizFrame" title="AI literacy placement quiz" src="about:blank" loading="lazy"></iframe>
+    </div>
+  </div>
+
   <footer>
     <div class="wrap">
       <div class="line"></div>
       <p><b>AI Literacy Class</b> · One session · Open to all · Spots are limited</p>
-      <p style="margin-top:6px">Hosted on <b>pandyaHomeLab</b> · pandyahomelab.com</p>
+      <p style="margin-top:6px">Hosted on <b>Subhag.org</b></p>
     </div>
   </footer>
 
@@ -414,6 +500,62 @@
   const errorBox = document.getElementById('formError');
   const submitBtn = form.querySelector('button.submit');
   const stateInfo = document.getElementById('stateInfo');
+  const emailUser = document.getElementById('email');
+
+  /* Gmail-only: the visitor types just the username; "@gmail.com" is fixed text.
+     Reject anything with an "@" — with a message keyed to what they typed —
+     and reject characters that aren't valid in a Gmail username. We surface this
+     through the SAME native-validation path the other fields use (an inline
+     bubble via reportValidity), not the server-error box. */
+  function validateGmail(){
+    const v = emailUser.value.trim();
+    emailUser.setCustomValidity('');            // empty → let "required" handle it
+    if (!v) return;
+    if (v.indexOf('@') !== -1){
+      emailUser.setCustomValidity(/@gmail\.com$/i.test(v)
+        ? 'Enter just your Gmail username — leave out the “@gmail.com”.'
+        : 'Only Gmail addresses are accepted — enter your Gmail username (the part before @gmail.com).');
+      return;
+    }
+    // Gmail username rules: letters, numbers and periods only; can't start or end
+    // with a period or contain two in a row; 6–30 characters.
+    if (/[^A-Za-z0-9.]/.test(v)){
+      emailUser.setCustomValidity('Use only letters, numbers and periods — no spaces or symbols like + _ -.');
+    } else if (v.charAt(0) === '.' || v.charAt(v.length - 1) === '.'){
+      emailUser.setCustomValidity('A Gmail username can’t start or end with a period.');
+    } else if (v.indexOf('..') !== -1){
+      emailUser.setCustomValidity('A Gmail username can’t have two periods in a row.');
+    } else if (v.length < 6 || v.length > 30){
+      emailUser.setCustomValidity('A Gmail username must be 6–30 characters long.');
+    }
+  }
+  // Show the appropriate message inline as soon as focus leaves the box,
+  // then keep it in sync (or clear it) while they correct the value.
+  const emailErr = document.getElementById('emailErr');
+  function renderGmailError(){
+    validateGmail();
+    if (!emailUser.checkValidity()){
+      emailErr.textContent = emailUser.validationMessage;
+      emailErr.hidden = false;
+    } else {
+      emailErr.textContent = '';
+      emailErr.hidden = true;
+    }
+  }
+  emailUser.addEventListener('blur', function(){
+    renderGmailError();
+    // Keep focus in the box until a valid Gmail username is entered — but only
+    // once they've typed something; an empty box falls through to submit-time validation.
+    if (emailUser.value.trim() && !emailUser.checkValidity()) setTimeout(function(){
+      emailUser.focus();
+      emailUser.select();        // highlight the entire value, start to end
+      emailUser.scrollLeft = 0;  // and scroll to the extreme left so it shows from the start
+    }, 0);
+  });
+  emailUser.addEventListener('input', function(){
+    validateGmail();
+    if (!emailErr.hidden) renderGmailError();   // only live-update once an error is showing
+  });
 
   // Per-state config (capacity / dates / seats), fetched from the backend.
   // Progressive enhancement: if the fetch is blocked or fails, the form still
@@ -460,10 +602,15 @@
     e.preventDefault();
     errorBox.hidden = true;
 
-    // native validation (covers required fields, the state radios + checkboxes)
+    // native validation (covers required fields, the state radios + checkboxes,
+    // and the Gmail-username rule via setCustomValidity)
+    validateGmail();
     if(!form.checkValidity()){ form.reportValidity(); return; }
 
     const data = Object.fromEntries(new FormData(form).entries());
+    // Reconstruct the full address so the backend/Sheet/emails are unchanged.
+    data.email = (data.emailUser || '').trim().toLowerCase() + '@gmail.com';
+    delete data.emailUser;
 
     const original = submitBtn.textContent;
     submitBtn.disabled = true;
@@ -542,6 +689,23 @@
     errorBox.hidden = true;
     stateInfo.hidden = true;
   }
+
+  /* ---- placement quiz modal ---- */
+  const quizModal = document.getElementById('quizModal');
+  const quizFrame = document.getElementById('quizFrame');
+  function openQuiz(){
+    // load the iframe lazily on first open
+    if (!quizFrame.src || quizFrame.src.indexOf('about:blank') !== -1) quizFrame.src = 'quiz/index.html';
+    quizModal.hidden = false;
+    document.body.style.overflow = 'hidden';   // scroll-lock behind the modal
+  }
+  function closeQuiz(){
+    quizModal.hidden = true;
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && !quizModal.hidden) closeQuiz();
+  });
 </script>
 </body>
 </html>
