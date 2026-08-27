@@ -252,3 +252,21 @@ git push origin v.dl-lstm-forecast-1.0.0
 - Exact CitiBike year-range (decide in 2b.2 when looking at file sizes — aim for 2021–2024 or similar 3-year window).
 - Exact early-stopping patience / final epoch count — tune in 2b.3 based on val-loss curves.
 - Whether "compare to actuals" overlay defaults to on or off in the UI — decide in 2b.4 based on visual clarity.
+
+---
+
+## Phase 2b.10 — post-tag polish (added 2026-08-27)
+
+Landed after `v.dl-lstm-forecast-1.0.0` as a small polish commit on `main` (`2c5c4bd`); tag stays at the merge commit `2d3e1fe`. Same shape as the 4 polish commits 2a shipped after `v.dl-mnist-cnn-1.0.0`.
+
+**Problem:** MLflow 3.11.1 + `--serve-artifacts` + `mlflow-artifacts:/` on `dl-mlflow` silently marks every `mlflow.pytorch.log_model` LoggedModel upload as `LOGGED_MODEL_UPLOAD_FAILED`. Identical config works on `ml-mlflow`. Client-side call returns successfully with a deprecation warning; server marks the entry Failed asynchronously and exposes no `status_message`. Both `dl-mnist-cnn` and `dl-lstm-forecast` were affected; nobody caught it until the LSTM demo's LoggedModel tab was checked.
+
+**Fix:** replace `mlflow.pytorch.log_model` in both `application-logic/services/prediction_service.py` files with `tempfile.TemporaryDirectory` + `torch.save(state_dict)` + `mlflow.log_artifact` — the classic per-run artifact upload path, proven-good on both trackers by direct `mlflow.log_text` probe.
+
+**Trade-off:** model file lands under the run's **Artifacts** tab (`model/{name}_state.pt`), not under **Logged Models**. Reload requires `torch.load(state_path)` + `{ModelClass}().load_state_dict(...)` instead of `mlflow.pytorch.load_model(uri)`. For a portfolio demo this is acceptable — model file is downloadable, run metadata is complete, no "Failed" badge in the public UI.
+
+**Cleanup:** 8 pre-fix `LOGGED_MODEL_UPLOAD_FAILED` entries (5 in exp 1, 3 in exp 2) DELETE'd via `/api/2.0/mlflow/logged-models/{model_id}`. Both LoggedModel tables now `(empty)`.
+
+**Verification runs:** LSTM `test_mape=0.2101` + `lstm_forecaster_state.pt` at `/mlartifacts/2/.../artifacts/model/`; MNIST `Test accuracy: 0.9891` + `mnist_cnn_state.pt` at `/mlartifacts/1/.../artifacts/model/`.
+
+**Lesson for Phase 2c and beyond:** do NOT use `mlflow.pytorch.log_model` against this platform's `--serve-artifacts` trackers. Use the classic `torch.save` + `mlflow.log_artifact` pattern from 2b.10. See [[mlflow_operational_lessons]] for the full write-up. Post-deploy verification MUST include `sudo docker exec {tracker} find /mlartifacts/{exp} -name '*.pt'` — params + metrics visible in the UI is not proof the model artifact persisted.
