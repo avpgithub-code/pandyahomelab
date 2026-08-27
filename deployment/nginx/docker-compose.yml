@@ -31,6 +31,17 @@ networks:
 services:
   pandya-nginx:
     image: pandya-nginx:latest
+    # `build:` is required even though the image is named above. Without it,
+    # `docker compose build pandya-nginx` prints "Building 0.0s (0/0)" and exits
+    # SUCCESSFULLY having done nothing — compose has no build context to work
+    # from — so a `--force-recreate` afterwards silently relaunches the stale
+    # image. nginx.conf is COPYed into the image (not bind-mounted), so every
+    # nginx.conf edit needs a real rebuild:
+    #   sudo docker compose build --no-cache pandya-nginx
+    #   sudo docker compose up -d --force-recreate pandya-nginx
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: pandya-nginx
     ports:
       - "8080:80"
