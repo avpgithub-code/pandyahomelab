@@ -1,0 +1,43 @@
+# Cloudflare Tunnel — pandyaHomeLab (containerised)
+#
+# This is the CONTAINER copy of the tunnel config. It differs from the host copy
+# at ~/.cloudflared/config.yml in exactly two ways:
+#
+#   1. `credentials-file` points at the in-container mount path, not the host home dir.
+#   2. `service` targets `pandya-nginx:443` (Docker DNS on pandya-proxy-network)
+#      instead of `localhost:8443`. Inside a container `localhost` is the container
+#      itself, so the host-style localhost:8443 would never reach Nginx.
+#
+# Why containerised: run as a bare `nohup` process, cloudflared is the only part of
+# the platform with no restart supervision. It was SIGTERM'd during the 2026-07-11
+# NAS reboot and stayed dead for 15 days (Error 1033) while every Docker service
+# self-healed via `restart: unless-stopped`. Making it a container closes that gap.
+
+tunnel: 958f0f40-18f5-49a4-8fe4-eba636894cc8
+credentials-file: /etc/cloudflared/958f0f40-18f5-49a4-8fe4-eba636894cc8.json
+
+# Bound inside the container only — deliberately NOT published to the host, so this
+# can run alongside the legacy bare process (which already holds host port 20241)
+# during cutover. /ready on this port reports tunnel connection state.
+metrics: 0.0.0.0:20241
+
+# Nginx terminates TLS with a self-signed cert, so noTLSVerify is required.
+# Do NOT change these to http:// — plain HTTP hits Nginx's :80 redirect and
+# produces an HTTP→HTTPS→Cloudflare redirect loop (see runbook §4.6).
+ingress:
+  - hostname: pandyahomelab.com
+    service: https://pandya-nginx:443
+    originRequest:
+      noTLSVerify: true
+
+  - hostname: www.pandyahomelab.com
+    service: https://pandya-nginx:443
+    originRequest:
+      noTLSVerify: true
+
+  - hostname: mlflow-dl.pandyahomelab.com
+    service: https://pandya-nginx:443
+    originRequest:
+      noTLSVerify: true
+
+  - service: http_status:404

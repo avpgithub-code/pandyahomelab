@@ -206,25 +206,64 @@ sudo docker-compose ps                             # shows warnings without .env
 
 ### 4.6 Cloudflare Tunnel
 
+There is exactly **one** tunnel config: `deployment/cloudflared/config.yml`, mounted
+read-only into the `cloudflared` service in `deployment/nginx/docker-compose.yml`. The old
+host copy at `~/.cloudflared/config.yml` was **deleted on 2026-08-27** — keeping a second
+copy meant a new subdomain could be added to one file and silently missed in the other.
+Only the credentials (`958f0f40-….json`) and `cert.pem` remain in `~/.cloudflared/`.
+
 ```yaml
-# ✅ CORRECT config (~/.cloudflared/config.yml)
+# ✅ CORRECT (deployment/cloudflared/config.yml)
 ingress:
   - hostname: pandyahomelab.com
-    service: https://localhost:8443
+    service: https://pandya-nginx:443
     originRequest:
-      noTLSVerify: true   # required for self-signed cert
+      noTLSVerify: true   # required for Nginx's self-signed cert
+
+# ❌ WRONG: inside a container `localhost` is the container itself, not the NAS host
+    service: https://localhost:8443
 
 # ❌ WRONG: causes redirect loop (HTTP → HTTPS → Cloudflare → loop)
-    service: http://localhost:8080
+    service: http://pandya-nginx:80
 ```
+
+**The container must run as root** — `user: "0:0"` in the compose service. The cloudflared
+image is distroless and defaults to uid 65532 (`nonroot`), but the mounted config and
+credentials live on `/volume1` under Synology ACLs that grant access only to
+`avpadmin` / `admin` / `administrators`. `ls -la` shows mode `777` with a trailing `+`;
+that mode is synthetic and the ACL is what the kernel enforces — check it with
+`synoacltool -get <path>`. Without `user: "0:0"` the container crash-loops on
+`open /etc/cloudflared/config.yml: permission denied`. This applies to **any** container
+mounting `/volume1` files as a non-root user.
 
 ```bash
-# ✅ CORRECT: start tunnel (survives session disconnect)
+# ✅ CORRECT: the tunnel is a supervised container — start/stop it with the stack
+cd /volume1/pandya-homelab/deployment/nginx/
+sudo docker-compose up -d
+sudo docker logs pandya-cloudflared | grep "Registered tunnel connection"
+
+# ❌ WRONG: no supervision. This is what caused the 2026-07-11 → 07-26 outage —
+# SIGTERM'd during a reboot, never restarted, Error 1033 for 15 days.
 nohup cloudflared tunnel run pandya-homelab >> ~/cloudflared.log 2>&1 &
 
-# ❌ WRONG: killed when terminal closes
+# ❌ WRONG: also killed when the terminal closes
 cloudflared tunnel run pandya-homelab &
 ```
+
+**Diagnosing Error 1033.** Every internal signal will look healthy — NAS up, all ports
+open, Nginx returning 200 on every route — because nothing downstream of the tunnel is
+broken. Check the tunnel first, not the site:
+
+```bash
+sudo docker ps --filter name=pandya-cloudflared      # should be Up, not Restarting
+sudo docker logs --tail 20 pandya-cloudflared
+curl -s http://172.24.0.3:20241/ready                # expect readyConnections: 4
+```
+
+The container's metrics port is bound inside `pandya-proxy-network` and deliberately not
+published to the host, so `/ready` is reachable from the NAS host but not from the LAN.
+A refused connection there (curl exit 7) means the container is not serving — host→container
+routing is fine, as `curl -k https://172.24.0.2:443` (pandya-nginx) proves.
 
 ---
 
@@ -330,13 +369,22 @@ sleep 20
 # Step 2: ML projects
 sudo docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 
-# Step 3: Nginx
+# Step 3: Nginx + Cloudflare tunnel (the tunnel is now a service in this stack)
 cd /volume1/pandya-homelab/deployment/nginx/
 sudo docker-compose up -d
-
-# Step 4: Cloudflare tunnel
-nohup cloudflared tunnel run pandya-homelab >> ~/cloudflared.log 2>&1 &
 ```
+
+There is **no manual step 4 any more.** The tunnel runs as the `cloudflared` service in
+`deployment/nginx/docker-compose.yml` with `restart: unless-stopped`, so it comes back
+by itself after a reboot.
+
+> ⚠️ **Do not start the tunnel with `nohup cloudflared tunnel run pandya-homelab &`.**
+> That was the old step 4, and it is exactly what caused the 15-day outage: a bare
+> background process has no supervision, so when it was SIGTERM'd during the
+> 2026-07-11 reboot it never came back — while every container self-healed. The
+> public site returned Error 1033 for 15 days with the NAS, Nginx, and all demos
+> perfectly healthy. Running it manually now also risks two instances fighting over
+> the tunnel. See §4.6.
 
 ---
 

@@ -56,3 +56,46 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+  # Cloudflare Tunnel — the platform's only public ingress.
+  #
+  # Lives here rather than in its own stack because it has exactly one dependency
+  # (pandya-nginx) and must sit on pandya-proxy-network, which is defined above.
+  #
+  # `restart: unless-stopped` is the entire point of this service: as a bare
+  # `nohup` process the tunnel had no supervision, and a SIGTERM during the
+  # 2026-07-11 reboot took the public site down for 15 days while every container
+  # here came back on its own.
+  #
+  # No healthcheck: the cloudflared image is distroless (no shell, no wget), so a
+  # HEALTHCHECK CMD cannot run. Liveness is covered by Cloudflare's own Tunnel
+  # Health notification plus the in-container /ready metrics endpoint.
+  cloudflared:
+    image: cloudflare/cloudflared:2026.3.0   # pinned to the version proven on this host
+    container_name: pandya-cloudflared
+    command: tunnel --config /etc/cloudflared/config.yml run
+    # Runs as root deliberately. The cloudflared image is distroless and defaults to
+    # the `nonroot` user (uid 65532), but both mounted files live on /volume1 under
+    # Synology ACLs that grant access ONLY to avpadmin / admin / administrators.
+    # Their POSIX mode displays as 777 with a trailing `+` — that mode is synthetic
+    # and the ACL is what the kernel enforces, so uid 65532 gets EACCES and the
+    # container crash-loops on `open /etc/cloudflared/config.yml: permission denied`.
+    # Root bypasses the ACL via CAP_DAC_OVERRIDE. Both mounts are read-only single
+    # files and the service publishes no ports, so the blast radius stays small.
+    user: "0:0"
+    volumes:
+      # Tunnel credentials stay in the operator's home dir (not in the repo, not in
+      # the web root) and are mounted read-only as a single file.
+      - /var/services/homes/avpadmin/.cloudflared/958f0f40-18f5-49a4-8fe4-eba636894cc8.json:/etc/cloudflared/958f0f40-18f5-49a4-8fe4-eba636894cc8.json:ro
+      - /volume1/pandya-homelab/deployment/cloudflared/config.yml:/etc/cloudflared/config.yml:ro
+    networks:
+      pandya-proxy-network:
+        ipv4_address: 172.24.0.3
+    depends_on:
+      - pandya-nginx
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
