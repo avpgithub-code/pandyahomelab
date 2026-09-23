@@ -42,7 +42,7 @@ services:
         max-file: "3"
 
   ml-minio:
-    image: minio/minio:latest
+    image: minio/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e   # RELEASE.2025-09-07T16-13-09Z — digest pin; Docker Hub no longer serves MinIO anonymously
     container_name: ml-minio
     environment:
       MINIO_ROOT_USER: ${ML_MINIO_ROOT_USER:-minioadmin}
@@ -92,7 +92,7 @@ services:
         max-file: "3"
 
   ml-mlflow:
-    image: ghcr.io/mlflow/mlflow:latest
+    image: ghcr.io/mlflow/mlflow@sha256:c4cfc7eb77caf73c84b084d93456bc904500884a93b5348934ae42b351cc1263   # MLflow 3.11.1 — digest pin; the v3.11.1 tag was re-pushed and no longer matches
     container_name: ml-mlflow
     environment:
       GIT_PYTHON_REFRESH: quiet
