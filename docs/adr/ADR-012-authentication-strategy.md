@@ -1,6 +1,6 @@
 # ADR-012: Authentication strategy
 
-**Status:** Accepted
+**Status:** Accepted — Part 1 superseded for MLflow by ADR-021 (public read-only). Grafana and MinIO consoles remain LAN-only.
 **Date:** May 2026
 **Stage:** 2 (Synology Implementation)
 

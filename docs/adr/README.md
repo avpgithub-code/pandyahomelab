@@ -62,7 +62,13 @@ ADRs are immutable. Once accepted, they are not edited. If a decision changes, w
 | 009 | Runtime filesystem layout and permissions on Synology NAS   | Accepted |
 | 010 | Synology secrets management                                 | Accepted |
 | 011 | Per-service conventions                                     | Accepted |
-| 012 | Authentication strategy                                     | Accepted |
+| 012 | Authentication strategy                                     | Accepted (Part 1 superseded for MLflow by 021) |
+
+### Stage 2 — Operations (September 2026)
+
+| #   | Title                                                       | Status   |
+|-----|-------------------------------------------------------------|----------|
+| 021 | MLflow is publicly browsable, read-only                     | Accepted |
 
 ## Decisions deferred to future stages
 
