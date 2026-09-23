@@ -189,7 +189,7 @@ curl -s http://172.24.0.2/health          # 200 OK  (301 = stale image)
 | 1 | Tunnel runs as `pandya-cloudflared` with `restart: unless-stopped` | ✅ Done |
 | 2 | `user: "0:0"` to survive Synology ACLs on `/volume1` mounts | ✅ Done |
 | 3 | Duplicate host config `~/.cloudflared/config.yml` deleted — one config, no drift | ✅ Done |
-| 4 | DSM Task Scheduler boot task abandoned | ✅ Done — but found still *enabled* on 23 Sep 2026; disabled then (not yet deleted) |
+| 4 | DSM Task Scheduler boot task abandoned | ✅ Done — found still *enabled* on 23 Sep 2026; disabled, then deleted the same day |
 | 5 | `/health` served from a `location` block; healthcheck passes | ✅ Done |
 | 6 | `build:` wired into the `pandya-nginx` compose service | ✅ Done |
 | 7 | Runbook §4.6 rewritten: single config, ACL requirement, 1033 diagnosis steps | ✅ Done |
@@ -255,7 +255,7 @@ Action item 10. Swept every place a long-running process could live outside a su
 | Stopped containers | 4 unnamed, `restart: no`, exited May 5–8 (failed `pip install` ×3, one cert-gen `docker run`) | One-off experiments, not services. Safe to `docker rm` |
 | Host processes | Only Synology packages (Photos, Drive, AI Console, Plex, DSM Postgres) plus the operator's SSH / VS Code shells | ✅ DSM-managed |
 | `/etc/crontab` / DSM Task Scheduler | `nginx log rotation` (root, daily), S.M.A.R.T. test, and DSM's built-in Auto Update and Security Advisor | ✅ Scheduled, no daemons |
-| DSM boot tasks | `cloudflared-tunnel`, disabled 23 Sep (item 4) | ✅ Inert |
+| DSM boot tasks | `cloudflared-tunnel`: disabled, then deleted 23 Sep (item 4) | ✅ Gone |
 | Custom systemd / rc.d units | None | ✅ |
 
 The only platform processes are containers under a restart policy.
