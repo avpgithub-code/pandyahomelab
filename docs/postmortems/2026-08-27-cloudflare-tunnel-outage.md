@@ -189,12 +189,12 @@ curl -s http://172.24.0.2/health          # 200 OK  (301 = stale image)
 | 1 | Tunnel runs as `pandya-cloudflared` with `restart: unless-stopped` | ✅ Done |
 | 2 | `user: "0:0"` to survive Synology ACLs on `/volume1` mounts | ✅ Done |
 | 3 | Duplicate host config `~/.cloudflared/config.yml` deleted — one config, no drift | ✅ Done |
-| 4 | DSM Task Scheduler boot task abandoned | ✅ Done |
+| 4 | DSM Task Scheduler boot task abandoned | ✅ Done — but found still *enabled* on 23 Sep 2026; disabled then (not yet deleted) |
 | 5 | `/health` served from a `location` block; healthcheck passes | ✅ Done |
 | 6 | `build:` wired into the `pandya-nginx` compose service | ✅ Done |
 | 7 | Runbook §4.6 rewritten: single config, ACL requirement, 1033 diagnosis steps | ✅ Done |
 | 8 | Runbook §6 manual "step 4: start the tunnel" removed | ✅ Done |
-| 9 | **Cloudflare Zero Trust → Tunnel Health notification** | ⬜ **Open** |
+| 9 | **Cloudflare Zero Trust → Tunnel Health notification** | ✅ Done 23 Sep 2026 — tunnel `pandya-homelab` + future tunnels, trigger healthy/degraded/down, email; test alert received |
 | 10 | Audit the platform for any other unsupervised process | ⬜ Open |
 
 Commits on `fix/cloudflared-supervised-container`:
@@ -221,6 +221,8 @@ Items 1–8 prevent *this* failure from recurring. **None of them prevents the n
 The tunnel can still fail in ways a restart policy cannot fix — expired credentials, a Cloudflare-side change, a config edit that does not parse, a network partition. The detection mechanism for both incidents was the owner happening to load the homepage. That mechanism has a demonstrated 15–21 day latency.
 
 Cloudflare Zero Trust offers a **Tunnel Health** notification (free) that emails on disconnect. It is roughly five minutes of setup and is the highest-value item remaining.
+
+**Update 23 Sep 2026:** enabled. It covers `pandya-homelab` and any future tunnel, fires on any change between healthy, degraded and down, and emails the owner. A dashboard **Test** send was received. Detection latency drops from weeks to minutes.
 
 ---
 
