@@ -10,8 +10,8 @@ version: '3.8'
 # Add new domain networks here as phases are completed:
 #   Phase 1 (ML):      connects to ml_ml-network       ✅ active
 #   Phase 2 (DL):      connects to dl_dl-network       ✅ active (Phase 2a)
-#   Phase 3 (NLP):     connects to nlp_nlp-network     (add when Phase 3 starts)
-#   Phase 4 (Agentic): connects to agentic_ag-network  (add when Phase 4 starts)
+#   Phase 3 (NLP):     connects to nlp_nlp-network     (add when Phase 3 starts) → 172.22.0.20
+#   Phase 4 (Agentic): connects to agentic_agentic-network (add when Phase 4 starts)
 
 networks:
   pandya-proxy-network:
