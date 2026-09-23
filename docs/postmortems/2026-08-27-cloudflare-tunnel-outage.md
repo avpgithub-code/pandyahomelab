@@ -195,7 +195,7 @@ curl -s http://172.24.0.2/health          # 200 OK  (301 = stale image)
 | 7 | Runbook §4.6 rewritten: single config, ACL requirement, 1033 diagnosis steps | ✅ Done |
 | 8 | Runbook §6 manual "step 4: start the tunnel" removed | ✅ Done |
 | 9 | **Cloudflare Zero Trust → Tunnel Health notification** | ✅ Done 23 Sep 2026 — tunnel `pandya-homelab` + future tunnels, trigger healthy/degraded/down, email; test alert received |
-| 10 | Audit the platform for any other unsupervised process | ⬜ Open |
+| 10 | Audit the platform for any other unsupervised process | ✅ Done 23 Sep 2026 — none found (see §11) |
 
 Commits on `fix/cloudflared-supervised-container`:
 
@@ -242,3 +242,22 @@ Cloudflare Zero Trust offers a **Tunnel Health** notification (free) that emails
 - [ADR-006 — Custom Nginx replaces DSM reverse proxy](../adr/ADR-006-nginx-replaces-dsm-proxy.md)
 - [ADR-019 — Internet access and domain routing](../adr/ADR-019-internet-access-domain-routing.md)
 - [Development Runbook §4.6 — Cloudflare Tunnel](../DEVELOPMENT_RUNBOOK.md)
+
+---
+
+## 11. Unsupervised-process audit (23 Sep 2026)
+
+Action item 10. Swept every place a long-running process could live outside a supervisor:
+
+| Where | Found | Verdict |
+|---|---|---|
+| Docker containers | All 17 platform containers `restart: unless-stopped` | ✅ Supervised |
+| Stopped containers | 4 unnamed, `restart: no`, exited May 5–8 (failed `pip install` ×3, one cert-gen `docker run`) | One-off experiments, not services. Safe to `docker rm` |
+| Host processes | Only Synology packages (Photos, Drive, AI Console, Plex, DSM Postgres) plus the operator's SSH / VS Code shells | ✅ DSM-managed |
+| `/etc/crontab` / DSM Task Scheduler | `nginx log rotation` (root, daily), S.M.A.R.T. test, and DSM's built-in Auto Update and Security Advisor | ✅ Scheduled, no daemons |
+| DSM boot tasks | `cloudflared-tunnel`, disabled 23 Sep (item 4) | ✅ Inert |
+| Custom systemd / rc.d units | None | ✅ |
+
+The only platform processes are containers under a restart policy.
+
+Worth knowing: **DSM Auto Update** runs weekly (Saturday 04:15) and can reboot the NAS. Every container comes back on its own and the Tunnel Health alert reports the blip. A major DSM upgrade can also reset `/etc`, which would drop `/etc/sudoers.d/avpadmin-docker`. Re-create it if `sudo -n docker` starts asking for a password.
