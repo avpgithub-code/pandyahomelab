@@ -135,6 +135,11 @@ services:
   # analytics.visitor_events in ml-postgres. Cross-cutting infra, not a demo.
   analytics-ingester:
     image: analytics-ingester:latest
+    # Without `build:`, `docker compose build analytics-ingester` succeeds having
+    # built nothing (code is COPYed into the image, not bind-mounted).
+    build:
+      context: ../../ml/analytics-ingester
+      dockerfile: docker/Dockerfile
     container_name: analytics-ingester
     environment:
       DATABASE_URL: postgresql://postgres:${ML_POSTGRES_PASSWORD}@ml-postgres:5432/mldb
@@ -152,6 +157,15 @@ services:
       ml-postgres:
         condition: service_healthy
     restart: unless-stopped
+    # The loop touches /tmp/heartbeat after every fully successful pass (idle
+    # poll or inserted batch). Stale > 60 s means it is stuck retrying, e.g.
+    # PostgreSQL unreachable, while the process itself is still "Up".
+    healthcheck:
+      test: ["CMD", "python", "-c", "import os,sys,time; sys.exit(time.time() - os.path.getmtime('/tmp/heartbeat') > 60)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
     logging:
       driver: "json-file"
       options:

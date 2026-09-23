@@ -22,8 +22,22 @@ logging.basicConfig(
 logger = logging.getLogger("ingester")
 
 
+def _beat(path: str) -> None:
+    """Touch the heartbeat file the Docker HEALTHCHECK reads.
+
+    Called only after a loop pass that fully succeeded, so a process that is
+    alive but stuck retrying (e.g. PostgreSQL down) goes stale and turns unhealthy.
+    """
+    try:
+        with open(path, "a"):
+            os.utime(path, None)
+    except OSError as err:
+        logger.warning(f"heartbeat write failed: {err!r}")
+
+
 def main() -> int:
     poll_interval = float(os.environ.get("POLL_INTERVAL_SECONDS", "2"))
+    heartbeat_path = os.environ.get("HEARTBEAT_PATH", "/tmp/heartbeat")
     log_path = os.environ.get("LOG_PATH", "/logs/access.json.log")
     checkpoint_path = os.environ.get("CHECKPOINT_PATH", "/checkpoint/state.json")
     database_url = os.environ.get("DATABASE_URL")
@@ -55,6 +69,7 @@ def main() -> int:
         try:
             new_lines = tailer.read_new()
             if not new_lines:
+                _beat(heartbeat_path)
                 time.sleep(poll_interval)
                 continue
 
@@ -76,6 +91,7 @@ def main() -> int:
                     f"inserted batch={len(rows)} total_inserted={inserted_total} "
                     f"total_skipped={skipped_total}"
                 )
+            _beat(heartbeat_path)
 
         except KeyboardInterrupt:
             logger.info("shutdown requested")
