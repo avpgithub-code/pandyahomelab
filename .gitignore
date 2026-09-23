@@ -171,6 +171,10 @@ models/*.h5
 # =========================================================================
 *.log
 logs/
+
+# Local image backups (docker save archives) — large binaries; README stays tracked.
+backups/**/*.tar
+backups/**/*.tar.gz
 log/
 
 # =========================================================================
