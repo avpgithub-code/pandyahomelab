@@ -11,7 +11,7 @@ services:
       PYTHONPATH: /app
       MLFLOW_TRACKING_URI: http://ml-mlflow:5000
     ports:
-      - "8001:8000"
+      - "127.0.0.1:8001:8000"   # NAS-only; public traffic comes via nginx
     networks:
       ml-network:
         ipv4_address: 172.20.0.10
@@ -43,7 +43,7 @@ services:
       PYTHONPATH: /app
       MLFLOW_TRACKING_URI: http://ml-mlflow:5000
     ports:
-      - "8002:8000"
+      - "127.0.0.1:8002:8000"   # NAS-only; public traffic comes via nginx
     networks:
       ml-network:
         ipv4_address: 172.20.0.11
@@ -76,7 +76,7 @@ services:
       MLFLOW_TRACKING_URI: http://ml-mlflow:5000
       DATABASE_URL: postgresql://postgres:${ML_POSTGRES_PASSWORD}@ml-postgres:5432/mldb
     ports:
-      - "8003:8000"
+      - "127.0.0.1:8003:8000"   # NAS-only; public traffic comes via nginx
     networks:
       ml-network:
         ipv4_address: 172.20.0.12

@@ -23,7 +23,7 @@ services:
       POSTGRES_USER: ${ML_POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${ML_POSTGRES_PASSWORD}
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"   # NAS-only; nginx uses ml-network
     volumes:
       - ml_postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -48,7 +48,7 @@ services:
       MINIO_ROOT_USER: ${ML_MINIO_ROOT_USER:-minioadmin}
       MINIO_ROOT_PASSWORD: ${ML_MINIO_ROOT_PASSWORD}
     ports:
-      - "9000:9000"
+      - "127.0.0.1:9000:9000"   # NAS-only; nginx uses ml-network
       - "9001:9001"
     volumes:
       - ml_minio_data:/minio_data
@@ -72,7 +72,7 @@ services:
     image: redis:7-alpine
     container_name: ml-redis
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"   # NAS-only; nginx uses ml-network
     volumes:
       - ml_redis_data:/data
     command: redis-server --appendonly yes

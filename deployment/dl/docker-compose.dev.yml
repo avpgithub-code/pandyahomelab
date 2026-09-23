@@ -20,7 +20,7 @@ services:
       # --serve-artifacts on a local volume).
       MLFLOW_TRACKING_URI: http://dl-mlflow:5000
     ports:
-      - "8010:8000"
+      - "127.0.0.1:8010:8000"   # NAS-only; public traffic comes via nginx
     volumes:
       # Persist the MNIST archive (~11MB) across container recreates so
       # torchvision doesn't re-download on every restart.
@@ -59,7 +59,7 @@ services:
       # Same dl-mlflow as dl-mnist-cnn — runs land as a separate experiment.
       MLFLOW_TRACKING_URI: http://dl-mlflow:5000
     ports:
-      - "8011:8000"
+      - "127.0.0.1:8011:8000"   # NAS-only; public traffic comes via nginx
     # No volume — bike_share_daily.csv is baked into the image (~67 KB) so the
     # container has fixed, reproducible training data with no runtime fetch.
     networks:
