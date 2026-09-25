@@ -69,3 +69,13 @@ def test_every_token_resolves(model_info):
 def test_learn_links_mlflow_nlp():
     learn = next(s for s in ABOUT["sections"] if s["id"] == "learn")
     assert any("mlflow-nlp.pandyahomelab.com" in link["url"] for link in learn["links"])
+
+
+def test_no_template_todos_left():
+    leftovers = [s for s in _strings(ABOUT) if "TODO" in s]
+    assert not leftovers, leftovers[:3]
+
+
+def test_demo_specific_sections_present():
+    ids = [s["id"] for s in ABOUT["sections"]]
+    assert {"features", "threshold"} <= set(ids)

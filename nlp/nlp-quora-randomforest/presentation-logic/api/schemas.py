@@ -49,6 +49,8 @@ class ModelInfoResponse(BaseModel):
     metrics: Dict
     metrics_display: Optional[Dict] = None
     confusion_matrix: Optional[Dict] = None
+    threshold_sweep: Optional[Dict] = None
+    importance: Optional[Dict] = None
     split: Optional[Dict] = None
     training: Optional[Dict] = None
     run_id: Optional[str] = None
