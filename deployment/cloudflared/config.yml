@@ -40,4 +40,9 @@ ingress:
     originRequest:
       noTLSVerify: true
 
+  - hostname: mlflow-nlp.pandyahomelab.com
+    service: https://pandya-nginx:443
+    originRequest:
+      noTLSVerify: true
+
   - service: http_status:404

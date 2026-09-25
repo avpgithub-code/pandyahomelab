@@ -309,3 +309,46 @@ Grafana:    ~200MB RAM
 
 All CIDR ranges verified, no conflicts detected, network isolation matrix validated.
 Next step: ADR-019 (Nginx routing configuration), then Phase 1a execution.
+
+---
+
+## Amendment 1 — 2026-09-23: host ports, Nginx legs, platform range
+
+**Why:** Phases 1 and 2 settled conventions that this ADR never recorded. Before Phase 3
+(NLP) started, they existed only in compose files and the Phase 2 master plan. Phase 3 needs
+a written allocation to refer to, not one inferred from code.
+
+**Unchanged:** every CIDR above, the `.1`–`.5` infrastructure slots, `.10`–`.19` project
+slots, the isolation matrix, and the AWS layer.
+
+**Added (all already true in the live system for ML and DL):**
+
+1. **Nginx leg at `.20`.** `pandya-nginx` joins each live domain network at `<domain>.0.20`
+   (ML 172.20.0.20, DL 172.21.0.20; NLP will be 172.22.0.20, Agentic 172.23.0.20). A leg is
+   added only after that domain's network and upstream containers exist.
+2. **Platform-services range `.30`–`.39`.** This is for cross-cutting services that aren't
+   demos. Today it holds only ML's `analytics-ingester` (.30) and `admin-portal` (.31).
+3. **cloudflared at 172.24.0.3** on the proxy network.
+4. **NAS host-port scheme.** Each domain gets a block of ten project ports (ML 8001–8009, DL
+   8010–8019, NLP 8020–8029, Agentic 8030–8039). Postgres, MinIO and Redis step by domain
+   index (5433+i, 9000+2i / 9001+2i, 6379+i). Nginx publishes 8080/8443. Public traffic
+   never uses these ports.
+5. **Binding rule for new domains:** every host port binds to `127.0.0.1`, and MLflow gets
+   no host port (public only via `mlflow-<domain>.pandyahomelab.com`).
+
+**Corrections to the text above:** "Only Nginx ports 80/443 are exposed to host" now reads
+8080/8443, reached by Cloudflare Tunnel. Container names in examples are superseded by the
+live names in the CIDR summary.
+
+**Open item:** `ml-mlflow:5000`, `ml-minio:9001` and `dl-minio:9003` remain bound to
+`0.0.0.0`. Whether to tighten them is deferred to a separate decision. This amendment only
+documents it.
+
+**NLP infra scope (Phase 3 gate G1, decided 2026-09-23):** the NLP domain deploys
+**nlp-mlflow only**. This relaxes "each domain receives dedicated PostgreSQL, MinIO, Redis" to
+"each domain *may* receive them when a demo needs them". Reason: in DL they are declared
+dependencies that no code uses (dl-mlflow runs on SQLite + a local artifact volume). They cost
+~150 MB on a NAS already using swap. NLP's `.2`–`.4` IPs and host ports stay reserved.
+Isolation is unaffected: nlp-mlflow is still domain-local.
+
+**Source of truth:** [NETWORK_CIDR_SUMMARY.md](../NETWORK_CIDR_SUMMARY.md) §3–§8 and §16.

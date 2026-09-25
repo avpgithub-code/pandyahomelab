@@ -497,23 +497,39 @@
     <div class="domain-header nlp">
       <span class="domain-icon">💬</span>
       <span class="domain-title">Natural Language Processing</span>
-      <span class="domain-count">0 live · 2 planned</span>
+      <span class="domain-count">0 live · 4 planned</span>
     </div>
     <div class="projects-grid">
       <div class="proj-card nlp">
-        <div class="proj-icon">💭</div>
-        <h3>Sentiment Analysis</h3>
+        <div class="proj-icon">🔁</div>
+        <h3>Duplicate Question Pairs</h3>
         <span class="proj-status status-planned">Planned</span>
-        <p>Transformer-based sentiment classifier — positive, negative, neutral detection.</p>
-        <span class="proj-route">/nlp/sentiment</span>
+        <p>Are two Quora questions asking the same thing? Bag-of-words + 22 engineered features (token, length, fuzzy) → Random Forest, with a probability slider and a “why” panel.</p>
+        <span class="proj-route">/nlp/quora-randomforest/</span>
+        <span class="proj-link proj-link-disabled">Planned</span>
+      </div>
+      <div class="proj-card nlp">
+        <div class="proj-icon">🧹</div>
+        <h3>Text Preprocessing &amp; Representation Lab</h3>
+        <span class="proj-status status-planned">Planned</span>
+        <p>Paste any text and watch every step — cleaning, tokenization, stemming vs. lemmatization — then compare one-hot, Bag of Words, n-grams and TF-IDF vectors side by side.</p>
+        <span class="proj-route">Phase 3b</span>
+        <span class="proj-link proj-link-disabled">Planned</span>
+      </div>
+      <div class="proj-card nlp">
+        <div class="proj-icon">🧭</div>
+        <h3>Word2Vec Explorer</h3>
+        <span class="proj-status status-planned">Planned</span>
+        <p>Word embeddings trained on a custom corpus: nearest words, king − man + woman analogies, and a 3D PCA map of the vocabulary.</p>
+        <span class="proj-route">Phase 3c</span>
         <span class="proj-link proj-link-disabled">Planned</span>
       </div>
       <div class="proj-card nlp">
         <div class="proj-icon">🏷️</div>
-        <h3>Named Entity Recognition</h3>
+        <h3>POS Tagger: HMM + Viterbi</h3>
         <span class="proj-status status-planned">Planned</span>
-        <p>Extract people, places, and organizations from text via HuggingFace transformers.</p>
-        <span class="proj-route">/nlp/ner</span>
+        <p>A hand-built Hidden Markov Model tags each word, with the Viterbi path drawn step by step — side by side with spaCy's neural tagger.</p>
+        <span class="proj-route">Phase 3d</span>
         <span class="proj-link proj-link-disabled">Planned</span>
       </div>
     </div>

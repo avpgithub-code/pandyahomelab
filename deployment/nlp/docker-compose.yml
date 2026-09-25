@@ -1,0 +1,65 @@
+version: '3.8'
+
+# NLP Domain Infrastructure
+# nlp-network (172.22.0.0/24, isolated per V3 domain autonomy). Addresses and ports
+# come from docs/NETWORK_CIDR_SUMMARY.md §5/§8 — do not invent new ones here.
+#
+# Phase 3 gate G1 (ADR-016 Amendment 1): nlp-mlflow ONLY. DL declares postgres/minio/
+# redis but no DL code uses them, so NLP does not start them. Their slots stay reserved:
+#   nlp-postgres 172.22.0.2 → 127.0.0.1:5435
+#   nlp-minio    172.22.0.3 → 127.0.0.1:9004 / 127.0.0.1:9005
+#   nlp-redis    172.22.0.4 → 127.0.0.1:6381
+# Add them here only when a demo actually needs one.
+
+networks:
+  nlp-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.22.0.0/24
+          gateway: 172.22.0.1
+
+services:
+  nlp-mlflow:
+    # Same digest as dl-mlflow — see mlflow_operational_lessons (recheck the ADR-021
+    # read-only allowlist before any MLflow bump).
+    image: ghcr.io/mlflow/mlflow@sha256:c4cfc7eb77caf73c84b084d93456bc904500884a93b5348934ae42b351cc1263   # MLflow 3.11.1 — digest pin; the v3.11.1 tag was re-pushed and no longer matches
+    container_name: nlp-mlflow
+    environment:
+      GIT_PYTHON_REFRESH: quiet
+    # SQLite runs + local artifact volume, exactly like dl-mlflow. No host port:
+    # public (read-only) access is via mlflow-nlp.pandyahomelab.com through Nginx.
+    command: >
+      mlflow server
+      --backend-store-uri sqlite:///mlflow/mlruns.db
+      --default-artifact-root mlflow-artifacts:/
+      --serve-artifacts
+      --host 0.0.0.0
+      --port 5000
+      --allowed-hosts "*"
+      --cors-allowed-origins "https://mlflow-nlp.pandyahomelab.com"
+    volumes:
+      - nlp_mlflow_data:/mlflow
+      - nlp_mlartifacts_data:/mlartifacts
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 35s
+    networks:
+      nlp-network:
+        ipv4_address: 172.22.0.5
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Project services live in docker-compose.dev.yml.
+
+volumes:
+  nlp_mlflow_data:
+  nlp_mlartifacts_data:

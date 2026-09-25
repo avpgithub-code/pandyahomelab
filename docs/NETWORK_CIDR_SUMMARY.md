@@ -1,19 +1,28 @@
 # pandyaHomeLab Network CIDR Summary
 
 **Generated:** May 5, 2026  
-**Status:** LOCKED - Ready for Implementation  
+**Last amended:** September 23, 2026 — [ADR-016 Amendment 1](adr/ADR-016-domain-level-network-topology.md#amendment-1--2026-09-23-host-ports-nginx-legs-platform-range)  
+**Status:** LOCKED — changes go through an ADR-016 amendment  
+
+> **Amendment 1 (2026-09-23)** reconciled this document with the running system: added the
+> NAS host-port scheme (§8), the Nginx per-domain leg at `.20`, the platform-services range
+> `.30–.39`, cloudflared, and the real container names. Network CIDRs and the `.1–.19`
+> in-network scheme are **unchanged**.
 
 ---
 
 ## 1. NAS Level Networks (Synology Docker)
 
-| Network Name | CIDR Block | Gateway | Scope | Purpose | Driver |
+| Network Name | Docker name (compose project prefix) | CIDR Block | Gateway | Purpose | Status |
 |---|---|---|---|---|---|
-| pandya-proxy-network | 172.24.0.0/24 | 172.24.0.1 | local | Nginx reverse proxy entry point | bridge |
-| ml-network | 172.20.0.0/24 | 172.20.0.1 | local | ML domain services | bridge |
-| dl-network | 172.21.0.0/24 | 172.21.0.1 | local | DL domain services | bridge |
-| nlp-network | 172.22.0.0/24 | 172.22.0.1 | local | NLP domain services | bridge |
-| agentic-network | 172.23.0.0/24 | 172.23.0.1 | local | Agentic AI domain services | bridge |
+| pandya-proxy-network | `nginx_pandya-proxy-network` | 172.24.0.0/24 | 172.24.0.1 | Nginx reverse proxy entry point | Live |
+| ml-network | `ml_ml-network` | 172.20.0.0/24 | 172.20.0.1 | ML domain services | Live (Phase 1) |
+| dl-network | `dl_dl-network` | 172.21.0.0/24 | 172.21.0.1 | DL domain services | Live (Phase 2) |
+| nlp-network | `nlp_nlp-network` | 172.22.0.0/24 | 172.22.0.1 | NLP domain services | Active (Phase 3.0, 2026-09-24) |
+| agentic-network | `agentic_agentic-network` | 172.23.0.0/24 | 172.23.0.1 | Agentic AI domain services | Reserved (Phase 4) |
+
+All bridge driver, local scope. The Docker name is what `external:` references in
+`deployment/nginx/docker-compose.yml`; it comes from the stack living in `deployment/<domain>/`.
 
 ---
 
@@ -30,82 +39,130 @@
 
 ---
 
-## 3. NAS ML Domain - Service IP Assignments
+## 3. NAS ML Domain — Service IP Assignments (live)
 
-| Service Name | Container Name | IP Address | Port | Network | Role |
+| Service | Container Name | IP Address | Container Port | Host Port (§8) | Role |
 |---|---|---|---|---|---|
-| PostgreSQL | ml-postgres | 172.20.0.2 | 5432 | ml-network | Database |
-| MinIO | ml-minio | 172.20.0.3 | 9000/9001 | ml-network | Artifact Storage |
-| Redis | ml-redis | 172.20.0.4 | 6379 | ml-network | Cache |
-| MLflow | ml-mlflow | 172.20.0.5 | 5000 | ml-network | Experiment Tracking |
-| Iris-KNN | ml-iris-knn | 172.20.0.10 | 8000 | ml-network | Project Service |
-| Housing | ml-housing | 172.20.0.11 | 8000 | ml-network | Project Service |
+| PostgreSQL | ml-postgres | 172.20.0.2 | 5432 | 127.0.0.1:5433 | Database |
+| MinIO | ml-minio | 172.20.0.3 | 9000 / 9001 | 127.0.0.1:9000 / 0.0.0.0:9001 ⚠ | Artifact Storage |
+| Redis | ml-redis | 172.20.0.4 | 6379 | 127.0.0.1:6379 | Cache |
+| MLflow | ml-mlflow | 172.20.0.5 | 5000 | 0.0.0.0:5000 ⚠ | Experiment Tracking |
+| Iris-KNN | ml-iris-knn | 172.20.0.10 | 8000 | 127.0.0.1:8001 | Project Service |
+| Housing | ml-housing-linear | 172.20.0.11 | 8000 | 127.0.0.1:8002 | Project Service |
+| Titanic AutoML | ml-titanic-automl | 172.20.0.12 | 8000 | 127.0.0.1:8003 | Project Service |
+| Nginx (ML leg) | pandya-nginx | 172.20.0.20 | — | — | Reverse-proxy attachment |
+| Analytics ingester | analytics-ingester | 172.20.0.30 | — | none | Platform service |
+| Admin portal | admin-portal | 172.20.0.31 | — | none | Platform service |
+
+⚠ = bound to all interfaces, not NAS-only. See §8 "Open item".
 
 ---
 
-## 4. NAS DL Domain - Service IP Assignments
+## 4. NAS DL Domain — Service IP Assignments (live)
 
-| Service Name | Container Name | IP Address | Port | Network | Role |
+| Service | Container Name | IP Address | Container Port | Host Port (§8) | Role |
 |---|---|---|---|---|---|
-| PostgreSQL | dl-postgres | 172.21.0.2 | 5432 | dl-network | Database |
-| MinIO | dl-minio | 172.21.0.3 | 9000/9001 | dl-network | Artifact Storage |
-| Redis | dl-redis | 172.21.0.4 | 6379 | dl-network | Cache |
-| MLflow | dl-mlflow | 172.21.0.5 | 5000 | dl-network | Experiment Tracking |
-| LSTM Forecast | dl-lstm | 172.21.0.10 | 8000 | dl-network | Project Service |
-| CNN Vision | dl-cnn | 172.21.0.11 | 8000 | dl-network | Project Service |
+| PostgreSQL | dl-postgres | 172.21.0.2 | 5432 | 127.0.0.1:5434 | Database |
+| MinIO | dl-minio | 172.21.0.3 | 9000 / 9001 | 127.0.0.1:9002 / 0.0.0.0:9003 ⚠ | Artifact Storage |
+| Redis | dl-redis | 172.21.0.4 | 6379 | 127.0.0.1:6380 | Cache |
+| MLflow | dl-mlflow | 172.21.0.5 | 5000 | none (public via `mlflow-dl.` subdomain) | Experiment Tracking |
+| MNIST CNN | dl-mnist-cnn | 172.21.0.10 | 8000 | 127.0.0.1:8010 | Project Service |
+| LSTM Forecast | dl-lstm-forecast | 172.21.0.11 | 8000 | 127.0.0.1:8011 | Project Service |
+| YOLO Object Detection | dl-yolo-object-detection | 172.21.0.12 | 8000 | 127.0.0.1:8012 | Reserved (Phase 2c) |
+| Nginx (DL leg) | pandya-nginx | 172.21.0.20 | — | — | Reverse-proxy attachment |
 
 ---
 
-## 5. NAS NLP Domain - Service IP Assignments
+## 5. NAS NLP Domain — Service IP Assignments (Phase 3; nlp-mlflow + Nginx leg live 2026-09-24)
 
-| Service Name | Container Name | IP Address | Port | Network | Role |
+| Service | Container Name | IP Address | Container Port | Host Port (§8) | Role |
 |---|---|---|---|---|---|
-| PostgreSQL | nlp-postgres | 172.22.0.2 | 5432 | nlp-network | Database |
-| MinIO | nlp-minio | 172.22.0.3 | 9000/9001 | nlp-network | Artifact Storage |
-| Redis | nlp-redis | 172.22.0.4 | 6379 | nlp-network | Cache |
-| MLflow | nlp-mlflow | 172.22.0.5 | 5000 | nlp-network | Experiment Tracking |
-| Sentiment Analyzer | nlp-sentiment | 172.22.0.10 | 8000 | nlp-network | Project Service |
-| NER Tagger | nlp-ner | 172.22.0.11 | 8000 | nlp-network | Project Service |
+| PostgreSQL | nlp-postgres | 172.22.0.2 | 5432 | 127.0.0.1:5435 | Database — reserved, not deployed (G1) |
+| MinIO | nlp-minio | 172.22.0.3 | 9000 / 9001 | 127.0.0.1:9004 / 127.0.0.1:9005 | Artifact Storage — reserved, not deployed (G1) |
+| Redis | nlp-redis | 172.22.0.4 | 6379 | 127.0.0.1:6381 | Cache — reserved, not deployed (G1) |
+| MLflow | nlp-mlflow | 172.22.0.5 | 5000 | none (public via `mlflow-nlp.` subdomain) | Experiment Tracking — ✅ live |
+| Quora duplicate questions | nlp-quora-randomforest | 172.22.0.10 | 8000 | 127.0.0.1:8020 | Project Service (Phase 3a) |
+| Project slot | nlp-<dataset-algorithm> | 172.22.0.11 | 8000 | 127.0.0.1:8021 | Reserved (Phase 3b) |
+| Project slot | nlp-<dataset-algorithm> | 172.22.0.12 | 8000 | 127.0.0.1:8022 | Reserved (Phase 3c) |
+| Project slot | nlp-<dataset-algorithm> | 172.22.0.13 | 8000 | 127.0.0.1:8023 | Reserved (Phase 3d) |
+| Nginx (NLP leg) | pandya-nginx | 172.22.0.20 | — | — | Reverse-proxy attachment |
+
+Phase 3 deploys **nlp-mlflow only** (Phase 3 gate G1, ADR-016 Amendment 1). The postgres/minio/redis
+slots stay reserved and are brought up only when a demo actually uses one.
+Container names follow [ADR-004](adr/ADR-004-demo-naming-convention.md) (`dataset-algorithm`).
+Slot names for 3b–3d are set at each sub-phase decision gate. See
+[PHASE_3_MASTER_PLAN.md](PHASE_3_MASTER_PLAN.md).
 
 ---
 
-## 6. NAS Agentic Domain - Service IP Assignments
+## 6. NAS Agentic Domain — Service IP Assignments (reserved, Phase 4)
 
-| Service Name | Container Name | IP Address | Port | Network | Role |
+| Service | Container Name | IP Address | Container Port | Host Port (§8) | Role |
 |---|---|---|---|---|---|
-| PostgreSQL | agentic-postgres | 172.23.0.2 | 5432 | agentic-network | Database |
-| MinIO | agentic-minio | 172.23.0.3 | 9000/9001 | agentic-network | Artifact Storage |
-| Redis | agentic-redis | 172.23.0.4 | 6379 | agentic-network | Cache |
-| MLflow | agentic-mlflow | 172.23.0.5 | 5000 | agentic-network | Experiment Tracking |
-| Task Planner | agentic-planner | 172.23.0.10 | 8000 | agentic-network | Project Service |
-| O1 Reasoner | agentic-o1 | 172.23.0.11 | 8000 | agentic-network | Project Service |
+| PostgreSQL | agentic-postgres | 172.23.0.2 | 5432 | 127.0.0.1:5436 | Database |
+| MinIO | agentic-minio | 172.23.0.3 | 9000 / 9001 | 127.0.0.1:9006 / 127.0.0.1:9007 | Artifact Storage |
+| Redis | agentic-redis | 172.23.0.4 | 6379 | 127.0.0.1:6382 | Cache |
+| MLflow | agentic-mlflow | 172.23.0.5 | 5000 | none (public via `mlflow-agentic.` subdomain) | Experiment Tracking |
+| Project slots | agentic-<dataset-algorithm> | 172.23.0.10–.19 | 8000 | 127.0.0.1:8030–8039 | Reserved (e.g. `agentic-pandyalab-docs-rag`) |
+| Nginx (Agentic leg) | pandya-nginx | 172.23.0.20 | — | — | Reverse-proxy attachment |
 
 ---
 
-## 7. NAS Proxy Network - Nginx Entry Point
+## 7. NAS Proxy Network — Entry Point
 
-| Service Name | Container Name | IP Address | Port (Container) | Port (Host) | Network | Role |
-|---|---|---|---|---|---|---|
-| Nginx Reverse Proxy | pandya-nginx | 172.24.0.2 | 80/443 | 80/443 | pandya-proxy-network | Entry Point |
+| Service | Container Name | IP Address | Container Port | Host Port | Role |
+|---|---|---|---|---|---|
+| Nginx Reverse Proxy | pandya-nginx | 172.24.0.2 | 80 / 443 | 8080 / 8443 | Entry point (public traffic arrives via cloudflared) |
+| Cloudflare Tunnel | pandya-cloudflared | 172.24.0.3 | — | none | Outbound tunnel → `https://pandya-nginx:443` |
+
+Nginx is multi-homed. It has one interface on the proxy network plus one leg per live domain
+network, always at **`.20`** of that domain's /24. A domain leg is added to
+`deployment/nginx/docker-compose.yml` **only after** that domain's network and upstream
+containers exist, because Nginx resolves upstreams eagerly at startup.
 
 ---
 
-## 8. AWS ECS Task Assignments (Phase 6)
+## 8. NAS Host Port Allocation
+
+Every published host port is bound to `127.0.0.1` (NAS-only) unless noted otherwise. Public traffic
+never uses these ports. It goes cloudflared → Nginx → the domain network IP. Host ports are for
+on-NAS debugging (`curl localhost:80xx/health`) only.
+
+| Port family | ML | DL | NLP | Agentic | Rule |
+|---|---|---|---|---|---|
+| Project services (container 8000) | 8001–8009 | 8010–8019 | **8020–8029** | 8030–8039 | One block of ten per domain; slot `.1N` → `80` + domain index + `N` (DL `.10`→8010, NLP `.10`→8020). ML is off by one (`.10`→8001), legacy |
+| PostgreSQL (5432) | 5433 | 5434 | **5435** | 5436 | 5433 + domain index |
+| MinIO API / console (9000 / 9001) | 9000 / 9001 | 9002 / 9003 | **9004 / 9005** | 9006 / 9007 | +2 per domain |
+| Redis (6379) | 6379 | 6380 | **6381** | 6382 | 6379 + domain index |
+| MLflow (5000) | 5000 (legacy) | none | **none** | none | New domains publish MLflow only via `mlflow-<domain>.pandyahomelab.com` |
+| Nginx (80 / 443) | — | — | — | — | 8080 / 8443, shared entry point (§7) |
+| Platform services (.30–.39) | none | — | — | — | Not published to the host |
+
+Domain index: ML = 0, DL = 1, NLP = 2, Agentic = 3. ML's 8001–8003 predates the rule and keeps
+its numbers.
+
+**Open item (not changed by Amendment 1):** `ml-mlflow:5000`, `ml-minio:9001` and
+`dl-minio:9003` are still bound to `0.0.0.0` (reachable on the NAS LAN). Everything else was
+moved to `127.0.0.1` in the 2026-09-23 hardening pass. New domains (NLP, Agentic) bind **all**
+host ports to `127.0.0.1`, including the MinIO console. Whether to tighten ML/DL is a separate
+decision.
+
+---
+
+## 9. AWS ECS Task Assignments (Phase 6)
 
 | Task Name | Subnet | IP Range | Count | CPU | Memory | Role |
 |---|---|---|---|---|---|---|
 | ml-iris-knn | ml-subnet (10.0.1.0/24) | 10.0.1.x | 2-4 | 256 units | 512 MB | ML Service |
-| ml-housing | ml-subnet (10.0.1.0/24) | 10.0.1.x | 1-2 | 256 units | 512 MB | ML Service |
-| dl-lstm | dl-subnet (10.0.2.0/24) | 10.0.2.x | 1-2 | 512 units | 1024 MB | DL Service |
-| dl-cnn | dl-subnet (10.0.2.0/24) | 10.0.2.x | 1-2 | 512 units | 1024 MB | DL Service |
-| nlp-sentiment | nlp-subnet (10.0.3.0/24) | 10.0.3.x | 1-2 | 256 units | 512 MB | NLP Service |
-| nlp-ner | nlp-subnet (10.0.3.0/24) | 10.0.3.x | 1-2 | 256 units | 512 MB | NLP Service |
-| agentic-planner | agentic-subnet (10.0.4.0/24) | 10.0.4.x | 1-2 | 512 units | 1024 MB | Agentic Service |
-| agentic-o1 | agentic-subnet (10.0.4.0/24) | 10.0.4.x | 1-2 | 512 units | 1024 MB | Agentic Service |
+| ml-housing-linear | ml-subnet (10.0.1.0/24) | 10.0.1.x | 1-2 | 256 units | 512 MB | ML Service |
+| dl-mnist-cnn | dl-subnet (10.0.2.0/24) | 10.0.2.x | 1-2 | 512 units | 1024 MB | DL Service |
+| dl-lstm-forecast | dl-subnet (10.0.2.0/24) | 10.0.2.x | 1-2 | 512 units | 1024 MB | DL Service |
+| nlp-quora-randomforest | nlp-subnet (10.0.3.0/24) | 10.0.3.x | 1-2 | 256 units | 512 MB | NLP Service |
+| agentic-* | agentic-subnet (10.0.4.0/24) | 10.0.4.x | 1-2 | 512 units | 1024 MB | Agentic Service |
 
 ---
 
-## 9. AWS Managed Services (Phase 6)
+## 10. AWS Managed Services (Phase 6)
 
 | Service | Type | Subnet/Scope | CIDR/Region | Purpose |
 |---|---|---|---|---|
@@ -124,18 +181,18 @@
 
 ---
 
-## 10. CIDR Range Summary & Conflict Analysis
+## 11. CIDR Range Summary & Conflict Analysis
 
 | Range | Usage | Status | Conflicts | Notes |
 |---|---|---|---|---|
 | 172.17.0.0/16 | Docker default bridge | In Use | None | Already in use, DO NOT use |
 | 172.18.0.0/16 | Available | Available | None | Can use if needed in future |
 | 172.19.0.0/16 | Available | Available | None | Can use if needed in future |
-| 172.20.0.0/24 | ml-network (NAS) | Allocated | None | ✅ Safe, verified |
-| 172.21.0.0/24 | dl-network (NAS) | Allocated | None | ✅ Safe, verified |
-| 172.22.0.0/24 | nlp-network (NAS) | Allocated | None | ✅ Safe, verified |
-| 172.23.0.0/24 | agentic-network (NAS) | Allocated | None | ✅ Safe, verified |
-| 172.24.0.0/24 | pandya-proxy-network (NAS) | Allocated | None | ✅ Safe, verified |
+| 172.20.0.0/24 | ml-network (NAS) | Live | None | ✅ Verified live 2026-09-23 |
+| 172.21.0.0/24 | dl-network (NAS) | Live | None | ✅ Verified live 2026-09-23 |
+| 172.22.0.0/24 | nlp-network (NAS) | Allocated | None | ✅ Not in use by any Docker network (2026-09-23) |
+| 172.23.0.0/24 | agentic-network (NAS) | Allocated | None | ✅ Not in use by any Docker network (2026-09-23) |
+| 172.24.0.0/24 | pandya-proxy-network (NAS) | Live | None | ✅ Verified live 2026-09-23 |
 | 192.168.x.x | Synology NAS Management | In Use | None | NAS LAN, no Docker conflict |
 | 10.0.0.0/16 | AWS VPC | Allocated | None | ✅ AWS standard, no NAS conflict |
 | 10.0.1.0/24 | ml-subnet (AWS) | Allocated | None | ✅ Safe for AWS |
@@ -146,7 +203,7 @@
 
 ---
 
-## 11. Network Isolation Matrix (NAS)
+## 12. Network Isolation Matrix (NAS)
 
 | From → To | ml-network | dl-network | nlp-network | agentic-network | pandya-proxy-network | External |
 |---|---|---|---|---|---|---|
@@ -154,126 +211,112 @@
 | dl-network | ❌ Via Nginx | ✅ Direct | ❌ Via Nginx | ❌ Via Nginx | ✅ Reverse Proxy | ✅ Via Nginx |
 | nlp-network | ❌ Via Nginx | ❌ Via Nginx | ✅ Direct | ❌ Via Nginx | ✅ Reverse Proxy | ✅ Via Nginx |
 | agentic-network | ❌ Via Nginx | ❌ Via Nginx | ❌ Via Nginx | ✅ Direct | ✅ Reverse Proxy | ✅ Via Nginx |
-| pandya-proxy-network | ✅ Upstream | ✅ Upstream | ✅ Upstream | ✅ Upstream | ✅ Direct | ✅ Port 80/443 |
-| External | ❌ No direct | ❌ No direct | ❌ No direct | ❌ No direct | ✅ Port 80/443 | N/A |
+| pandya-proxy-network | ✅ Upstream | ✅ Upstream | ✅ Upstream | ✅ Upstream | ✅ Direct | ✅ Via cloudflared |
+| External | ❌ No direct | ❌ No direct | ❌ No direct | ❌ No direct | ✅ Via Cloudflare Tunnel | N/A |
 
 ---
 
-## 12. Docker Compose IPAM Configuration Template
+## 13. Docker Compose IPAM Configuration Template
 
 ```yaml
-# deployment/ml/docker-compose.yml
+# deployment/nlp/docker-compose.yml  (base: network + domain infra)
 networks:
-  ml-network:
+  nlp-network:
     driver: bridge
     ipam:
       driver: default
       config:
-        - subnet: 172.20.0.0/24
-          gateway: 172.20.0.1
+        - subnet: 172.22.0.0/24
+          gateway: 172.22.0.1
 
 services:
-  ml-postgres:
+  nlp-postgres:
+    ports: ["127.0.0.1:5435:5432"]
     networks:
-      ml-network:
-        ipv4_address: 172.20.0.2
+      nlp-network:
+        ipv4_address: 172.22.0.2
 
-  ml-minio:
+  nlp-minio:
+    ports: ["127.0.0.1:9004:9000", "127.0.0.1:9005:9001"]
     networks:
-      ml-network:
-        ipv4_address: 172.20.0.3
+      nlp-network:
+        ipv4_address: 172.22.0.3
 
-  ml-redis:
+  nlp-redis:
+    ports: ["127.0.0.1:6381:6379"]
     networks:
-      ml-network:
-        ipv4_address: 172.20.0.4
+      nlp-network:
+        ipv4_address: 172.22.0.4
 
-  ml-mlflow:
+  nlp-mlflow:            # no host port — public via mlflow-nlp.pandyahomelab.com
     networks:
-      ml-network:
-        ipv4_address: 172.20.0.5
+      nlp-network:
+        ipv4_address: 172.22.0.5
 
-  ml-iris-knn:
+# deployment/nlp/docker-compose.dev.yml  (overlay: project services)
+  nlp-quora-randomforest:
+    ports: ["127.0.0.1:8020:8000"]
     networks:
-      ml-network:
-        ipv4_address: 172.20.0.10
+      nlp-network:
+        ipv4_address: 172.22.0.10
 
-  ml-housing:
-    networks:
-      ml-network:
-        ipv4_address: 172.20.0.11
+# deployment/nginx/docker-compose.yml  (add ONLY after the above is up)
+#   networks:  nlp_nlp-network: { external: true }
+#   pandya-nginx.networks.nlp_nlp-network.ipv4_address: 172.22.0.20
 ```
 
 ---
 
-## 13. Migration Path: NAS → AWS
+## 14. Migration Path: NAS → AWS
 
 | Phase | Environment | CIDR Range | Services | Status |
 |---|---|---|---|---|
-| Phase 1-5 | NAS (Synology Docker) | 172.20-24/24 | All 4 domains (8 projects) | Development |
+| Phase 1-5 | NAS (Synology Docker) | 172.20-24/24 | All 4 domains | Development |
 | Phase 6 Early | NAS (stays online) | 172.20-24/24 | Fallback/dev copy | Parallel |
-| Phase 6 Middle | AWS (new deployment) | 10.0.x/24 | All 4 domains (8 projects) | Staging |
-| Phase 6 Late | AWS (production) | 10.0.x/24 | All 4 domains (8 projects) | Production |
+| Phase 6 Middle | AWS (new deployment) | 10.0.x/24 | All 4 domains | Staging |
+| Phase 6 Late | AWS (production) | 10.0.x/24 | All 4 domains | Production |
 | Phase 6 Final | NAS (dev only) | 172.20-24/24 | Reduced workload | Dev/Fallback |
 
 ---
 
-## 14. DNS & Routing Summary
+## 15. DNS & Routing Summary
 
-| Environment | Domain | Entry Point | Protocol | Target | IP/Port |
-|---|---|---|---|---|---|
-| NAS | pandyahomelab.com | Nginx | HTTP/HTTPS | pandya-nginx | 172.24.0.2:80/443 |
-| NAS | /ml/* | Nginx Upstream | HTTP (internal) | ml-iris-knn | 172.20.0.10:8000 |
-| NAS | /dl/* | Nginx Upstream | HTTP (internal) | dl-lstm | 172.21.0.10:8000 |
-| NAS | /nlp/* | Nginx Upstream | HTTP (internal) | nlp-sentiment | 172.22.0.10:8000 |
-| NAS | /agentic/* | Nginx Upstream | HTTP (internal) | agentic-planner | 172.23.0.10:8000 |
-| AWS | pandyahomelab.com | ALB | HTTPS | ALB DNS | ALB IP |
-| AWS | /ml/* | ALB Target Group | HTTP (internal) | ml-iris-knn ECS | 10.0.1.x:8000 |
-| AWS | /dl/* | ALB Target Group | HTTP (internal) | dl-lstm ECS | 10.0.2.x:8000 |
-| AWS | /nlp/* | ALB Target Group | HTTP (internal) | nlp-sentiment ECS | 10.0.3.x:8000 |
-| AWS | /agentic/* | ALB Target Group | HTTP (internal) | agentic-planner ECS | 10.0.4.x:8000 |
+| Environment | Hostname / Path | Entry Point | Target | IP/Port |
+|---|---|---|---|---|
+| NAS | pandyahomelab.com | Cloudflare Tunnel → Nginx | pandya-nginx | 172.24.0.2:443 (host 8443) |
+| NAS | /ml/* | Nginx upstream | ml-* project services | 172.20.0.10–.19:8000 |
+| NAS | /dl/* | Nginx upstream | dl-* project services | 172.21.0.10–.19:8000 |
+| NAS | /nlp/<name>/ (flat, G2) | Nginx upstream | nlp-* project services | 172.22.0.10–.19:8000 |
+| NAS | /agentic/* | Nginx upstream | agentic-* project services | 172.23.0.10–.19:8000 |
+| NAS | mlflow-dl.pandyahomelab.com | Tunnel ingress → Nginx `server` block | dl-mlflow | 172.21.0.5:5000 |
+| NAS | mlflow-nlp.pandyahomelab.com | Tunnel ingress → Nginx `server` block | nlp-mlflow | 172.22.0.5:5000 ✅ live (read-only) |
+| AWS | pandyahomelab.com | ALB | ALB DNS | ALB IP |
+| AWS | /ml/* · /dl/* · /nlp/* · /agentic/* | ALB target groups | ECS services | 10.0.{1-4}.x:8000 |
 
 ---
 
-## 15. Quick Reference: IP Address Allocation Scheme
+## 16. Quick Reference: IP Address Allocation Scheme
 
 ```
-NAS DOCKER NETWORKS:
-172.20.0.x    - ML Domain
-  .1 = Gateway
-  .2 = PostgreSQL
-  .3 = MinIO
-  .4 = Redis
-  .5 = MLflow
-  .10-19 = Project Services (ml-iris-knn, ml-housing, etc.)
+NAS DOCKER NETWORKS — identical layout in every domain /24:
+  .1        = Gateway
+  .2        = PostgreSQL
+  .3        = MinIO
+  .4        = Redis
+  .5        = MLflow
+  .10-.19   = Project services
+  .20       = Nginx leg (pandya-nginx second/third/... interface)
+  .30-.39   = Platform services (only ML today: .30 analytics-ingester, .31 admin-portal)
 
-172.21.0.x    - DL Domain
-  .1 = Gateway
-  .2 = PostgreSQL
-  .3 = MinIO
-  .4 = Redis
-  .5 = MLflow
-  .10-19 = Project Services
+172.20.0.x  ML       (domain index 0) host ports 8001-8009, 5433, 9000/9001, 6379
+172.21.0.x  DL       (domain index 1) host ports 8010-8019, 5434, 9002/9003, 6380
+172.22.0.x  NLP      (domain index 2) host ports 8020-8029, 5435, 9004/9005, 6381
+172.23.0.x  Agentic  (domain index 3) host ports 8030-8039, 5436, 9006/9007, 6382
 
-172.22.0.x    - NLP Domain
+172.24.0.x  Proxy
   .1 = Gateway
-  .2 = PostgreSQL
-  .3 = MinIO
-  .4 = Redis
-  .5 = MLflow
-  .10-19 = Project Services
-
-172.23.0.x    - Agentic Domain
-  .1 = Gateway
-  .2 = PostgreSQL
-  .3 = MinIO
-  .4 = Redis
-  .5 = MLflow
-  .10-19 = Project Services
-
-172.24.0.x    - Proxy Network
-  .1 = Gateway
-  .2 = Nginx
+  .2 = Nginx (host 8080/8443)
+  .3 = cloudflared
 
 AWS VPC SUBNETS:
 10.0.1.x      - ml-subnet (private)
@@ -285,19 +328,19 @@ AWS VPC SUBNETS:
 
 ---
 
-## 16. Verification Checklist
+## 17. Verification Checklist
 
 - [x] NAS Docker networks verified (172.17.0.0/16 is only Docker default in use)
 - [x] No conflicts with Synology management network (192.168.x.x)
 - [x] AWS VPC CIDR (10.0.0.0/16) doesn't conflict with NAS (172.x.x.x)
 - [x] Site-to-site VPN possible between NAS and AWS (different ranges)
 - [x] Each domain has isolated network (no cross-network direct access)
-- [x] Nginx is sole entry point from internet
+- [x] Nginx is sole entry point from internet (via Cloudflare Tunnel)
 - [x] All infrastructure services (postgres, minio, redis, mlflow) isolated per domain
 - [x] Project services can only reach other services via Nginx routing
+- [x] 2026-09-23: §3/§4/§7 match `docker inspect` of every running container; NLP/Agentic IPs and §8 host ports are unused
+- [x] 2026-09-24: nlp_nlp-network = 172.22.0.0/24 (gw .1); nlp-mlflow = 172.22.0.5, no host port; pandya-nginx = 172.22.0.20
 
 ---
 
-**Status: READY FOR IMPLEMENTATION** ✅
-
-All network ranges allocated, verified, and documented. Safe to proceed with Phase 1a.
+**Status: LOCKED** ✅ — amend via ADR-016.
