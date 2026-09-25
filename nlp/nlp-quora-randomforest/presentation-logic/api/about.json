@@ -1,0 +1,528 @@
+{
+  "title": "About nlp-quora-randomforest",
+  "tagline": "Two questions in, the probability they ask the same thing out: 22 engineered features plus bag-of-words, voted on by a Random Forest.",
+  "sections": [
+    {
+      "id": "problem",
+      "title": "The Problem",
+      "icon": "🎯",
+      "body": [
+        "Quora gets many questions that ask the same thing in different words. \"How do I lose weight fast?\" and \"What is the quickest way to lose weight?\" should share one page of answers, not split them across two. The task: given two questions, estimate the probability that they are **duplicates**.",
+        "Text makes this hard in two opposite ways. **Paraphrases** mean the same thing with few shared words. **Near-misses** share almost every word but ask different things (\"a job at Google\" vs \"an internship at Google\"). A model that only counts shared words gets both wrong."
+      ]
+    },
+    {
+      "id": "approach",
+      "title": "Approach — Why a Random Forest on Engineered Features?",
+      "icon": "🧭",
+      "body": [
+        "This is the recipe from lecture 8 of the End-to-End NLP course: turn each pair into numbers a human can read (how many words they share, how similar the strings look), add a bag-of-words for each question, and let a Random Forest learn how to combine them.",
+        "Every input to the model has a name, so the \"Why\" panel on the demo can show exactly what the model saw. Sentence embeddings or a fine-tuned transformer score higher on this dataset, but they need far more compute than a CPU-only NAS container has, and they are much harder to explain. They are planned for a later v2 demo."
+      ],
+      "bullets": [
+        {
+          "label": "Why a Random Forest",
+          "text": "The features live on very different scales: character counts, ratios from 0 to 1, fuzzy scores from 0 to 100, word counts. Trees need no scaling, and they pick up interactions such as \"many shared words **and** the same first word\" without anyone writing them down."
+        },
+        {
+          "label": "Why 100 trees, min_samples_leaf = 2",
+          "text": "Fully grown trees (leaf size 1) scored 0.6 points higher, but the forest was 4× larger (388 MB in memory vs 88 MB) and training peaked at 1.5 GB of RAM instead of 0.6 GB. Leaf size 5 was smaller still but lost 1.4 points. Leaf size 2 is the middle; saved and compressed it is {{training.model_size}}."
+        },
+        {
+          "label": "Why a shared 3000-word vocabulary",
+          "text": "One CountVectorizer is fit on both questions together, then applied to each separately. Column *i* then means the same word on both sides, so the forest can compare them."
+        },
+        {
+          "label": "Why 100k training rows",
+          "text": "The lecture trained on 3k. 100k rows (stratified from 364k) lifts accuracy by about 2 points and keeps warm-up near 5 minutes on the NAS. The full set would take several times longer for a small gain."
+        }
+      ]
+    },
+    {
+      "id": "text-pipeline",
+      "title": "From Raw Text to Numbers",
+      "icon": "🔤",
+      "body": [
+        "Both questions run through the same fixed pipeline before training and before every prediction. The demo page shows each question after every step.",
+        "The cleaned pair then becomes one sparse row of **6,022 numbers**: the 22 engineered features, then 3,000 word counts for question 1 and 3,000 for question 2."
+      ],
+      "bullets": [
+        {
+          "label": "lowercase",
+          "text": "\"Python\" and \"python\" count as the same word."
+        },
+        {
+          "label": "replace_symbols",
+          "text": "`%`, `$`, `₹`, `€` and `@` become words (\"percent\", \"dollar\"…), so \"50%\" and \"50 percent\" match."
+        },
+        {
+          "label": "strip_math_tags",
+          "text": "Quora wraps formulas in `[math]` tags; the tags carry no meaning."
+        },
+        {
+          "label": "shorten_numbers",
+          "text": "5000 → 5k, 2000000 → 2m, so different spellings of the same number match."
+        },
+        {
+          "label": "expand_contractions",
+          "text": "\"can't\" → \"can not\", \"what's\" → \"what is\". Otherwise \"can't\" and \"cannot\" would never share a token."
+        },
+        {
+          "label": "strip_html · strip_punctuation · collapse_whitespace",
+          "text": "Remove stray tags and punctuation, then tidy spaces."
+        }
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph LR\n  Q[\"Question 1 + Question 2\"] --> C[\"Clean<br/>8 steps\"] --> F[\"22 engineered<br/>features\"]\n  C --> B[\"Bag-of-words<br/>3000 × 2\"]\n  F --> V[\"Sparse row<br/>6,022 columns\"]\n  B --> V --> M[\"Random Forest\"]\n\n  classDef io fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef step fill:#13161e,stroke:#4f8ef7,color:#e2e8f0\n  class Q,M io\n  class C,F,B,V step"
+      }
+    },
+    {
+      "id": "features",
+      "title": "The 22 Engineered Features",
+      "icon": "🧩",
+      "body": [
+        "Each feature answers a simple question about the pair. They come in four groups. Stopwords are NLTK's English list (\"the\", \"how\", \"is\"…); the small 0.0001 in each denominator keeps empty questions from dividing by zero.",
+        "How much the trained forest relied on each group (share of its total impurity decrease, summing to 100% with the two bag-of-words blocks):"
+      ],
+      "bullets": [
+        {
+          "label": "Basic (7)",
+          "text": "Character length and word count of each question, number of shared words, total words, and `word_share` = shared / total."
+        },
+        {
+          "label": "Token (8)",
+          "text": "Shared **content words**, shared **stopwords**, and shared tokens overall, each divided by the shorter (`_min`) and longer (`_max`) question. Plus: is the first word the same? Is the last word the same?"
+        },
+        {
+          "label": "Length (3)",
+          "text": "Difference in word count, mean word count, and the longest common substring as a share of the shorter question."
+        },
+        {
+          "label": "Fuzzy (4)",
+          "text": "Four `rapidfuzz` string-similarity scores from 0 to 100: plain ratio, partial ratio (best matching substring), token-sort ratio (word order ignored) and token-set ratio (duplicate words ignored)."
+        }
+      ],
+      "facts": [
+        {
+          "label": "Basic",
+          "value": "{{importance.groups_pct.basic}}"
+        },
+        {
+          "label": "Token",
+          "value": "{{importance.groups_pct.token}}"
+        },
+        {
+          "label": "Length",
+          "value": "{{importance.groups_pct.length}}"
+        },
+        {
+          "label": "Fuzzy",
+          "value": "{{importance.groups_pct.fuzzy}}"
+        },
+        {
+          "label": "BoW question 1",
+          "value": "{{importance.groups_pct.bow_q1}}"
+        },
+        {
+          "label": "BoW question 2",
+          "value": "{{importance.groups_pct.bow_q2}}"
+        },
+        {
+          "label": "Top 5 features",
+          "value": "{{importance.top_features}}"
+        }
+      ]
+    },
+    {
+      "id": "threshold",
+      "title": "Probability and the Threshold",
+      "icon": "🎚️",
+      "body": [
+        "The model returns a **probability** that the pair is a duplicate, not a bare yes/no. The label depends on where you draw the line. The slider on the demo moves that line in your browser; the probability itself does not change.",
+        "Which way to move it depends on which mistake costs more. Calling two different questions duplicates (a **false duplicate**) would merge them and hide one asker's question under someone else's answers. Missing a real duplicate only leaves two pages open. So a site like Quora would rather raise the threshold: fewer merges, each more likely correct.",
+        "Measured on the {{split.test_samples}} test pairs:"
+      ],
+      "bullets": [
+        {
+          "label": "Threshold 0.3",
+          "text": "precision {{threshold_sweep.t30.precision}}, recall {{threshold_sweep.t30.recall}}, flags {{threshold_sweep.t30.flagged_pct}}% of pairs"
+        },
+        {
+          "label": "Threshold 0.4",
+          "text": "precision {{threshold_sweep.t40.precision}}, recall {{threshold_sweep.t40.recall}}, flags {{threshold_sweep.t40.flagged_pct}}% of pairs"
+        },
+        {
+          "label": "Threshold 0.5 (default)",
+          "text": "precision {{threshold_sweep.t50.precision}}, recall {{threshold_sweep.t50.recall}}, flags {{threshold_sweep.t50.flagged_pct}}% of pairs"
+        },
+        {
+          "label": "Threshold 0.6",
+          "text": "precision {{threshold_sweep.t60.precision}}, recall {{threshold_sweep.t60.recall}}, flags {{threshold_sweep.t60.flagged_pct}}% of pairs"
+        },
+        {
+          "label": "Threshold 0.7",
+          "text": "precision {{threshold_sweep.t70.precision}}, recall {{threshold_sweep.t70.recall}}, flags {{threshold_sweep.t70.flagged_pct}}% of pairs"
+        }
+      ]
+    },
+    {
+      "id": "architecture",
+      "title": "Model Architecture",
+      "icon": "🧠",
+      "body": [
+        "Two cleaned questions become one sparse row: 22 engineered features, then a 3,000-word count vector for each question from one shared vocabulary ({{training.vocabulary_size}} words). The row stays sparse the whole way: dense, 100k rows × 6,022 columns would need about 2.4 GB.",
+        "A Random Forest of 100 trees (min_samples_leaf = 2, 2 CPU cores) votes; the share of trees voting \"duplicate\" is the probability. Saved model: {{training.model_size}}."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph TB\n  Q1[\"Question 1\"] --> P1[\"Preprocess\"]\n  Q2[\"Question 2\"] --> P2[\"Preprocess\"]\n  P1 --> F[\"22 features<br/>basic · token · length · fuzzy\"]\n  P2 --> F\n  P1 --> B1[\"BoW q1<br/>3000\"]\n  P2 --> B2[\"BoW q2<br/>3000\"]\n  F --> X[\"hstack → sparse 1 × 6022\"]\n  B1 --> X\n  B2 --> X\n  X --> RF[\"RandomForest<br/>100 trees · leaf ≥ 2\"] --> Out[\"P(duplicate)\"]\n\n  classDef io fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef layer fill:#13161e,stroke:#4f8ef7,color:#e2e8f0\n  class Q1,Q2,Out io\n  class P1,P2,F,B1,B2,X,RF layer"
+      }
+    },
+    {
+      "id": "service-architecture",
+      "title": "Service Architecture",
+      "icon": "🏗️",
+      "body": [
+        "Same per-project 4-layer pattern (ADR-013) used by every project on pandyaHomeLab. The browser sends two questions; the server returns P(duplicate), the label at 0.5, all 22 feature values, and each question after every preprocessing step."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph TB\n  Client[\"Browser\"] -->|HTTPS<br/>POST /predict| Nginx[\"Nginx Proxy\"]\n  Nginx -->|\"/nlp/quora-randomforest/*\"| App[\"nlp-quora-randomforest container\"]\n  subgraph App\n    direction TB\n    Pres[\"presentation-logic<br/>FastAPI · Pydantic v2 · vanilla JS UI\"] --> AppLogic[\"application-logic<br/>PredictionService\"]\n    AppLogic --> Model[\"DuplicateClassifier<br/>BoW + RandomForest\"]\n    AppLogic --> DB[\"db-logic<br/>QuoraPairLoader · TextPreprocessor<br/>+ PairFeatureBuilder\"]\n    Shared[\"shared/<br/>config · logger\"] -.- Pres\n    Shared -.- AppLogic\n    Shared -.- DB\n  end\n  AppLogic -.->|run logging| MLflow[\"nlp-mlflow<br/>experiment tracking\"]\n\n  classDef container fill:#13161e,stroke:#4f8ef7,color:#e2e8f0\n  classDef external fill:#1a1e2a,stroke:#64748b,color:#cbd5e1\n  class Pres,AppLogic,Model,DB,Shared container\n  class Nginx,Client,MLflow external"
+      }
+    },
+    {
+      "id": "network",
+      "title": "Network & Deployment",
+      "icon": "🌐",
+      "body": [
+        "The NLP domain has its own bridge network (ADR-016). Only nlp-mlflow runs alongside the demos: postgres, MinIO and Redis have reserved addresses but are not deployed until a demo needs one (Phase 3 gate G1). The tracker is public, read-only, at `mlflow-nlp.pandyahomelab.com`.",
+        "No cross-network reach-back into ml-network or dl-network — each domain's tracking and demos are independent."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph LR\n  User([\"🌍 Visitor\"]) --> CF[\"Cloudflare Tunnel<br/>pandyahomelab.com<br/>+ mlflow-nlp.pandyahomelab.com\"]\n  CF --> NX[\"Nginx<br/>:8443\"]\n  subgraph PROXY[\"pandya-proxy-network · 172.24.0.0/24\"]\n    NX\n  end\n  subgraph NLP[\"nlp-network · 172.22.0.0/24\"]\n    THIS[\"nlp-quora-randomforest<br/>172.22.0.10:8000\"]\n    MF[\"nlp-mlflow<br/>172.22.0.5\"]\n    RES[\"postgres · minio · redis<br/>.2–.4 reserved, not running\"]\n  end\n  NX --> THIS\n  NX --> MF\n  THIS -.->|MLflow runs| MF\n\n  classDef live fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef infra fill:#1a1e2a,stroke:#64748b,color:#cbd5e1\n  classDef reserved fill:#0d0f14,stroke:#334155,color:#64748b,stroke-dasharray:4 3\n  class THIS live\n  class MF infra\n  class RES reserved"
+      },
+      "facts": [
+        {
+          "label": "Container",
+          "value": "nlp-quora-randomforest"
+        },
+        {
+          "label": "Container IP",
+          "value": "172.22.0.10"
+        },
+        {
+          "label": "Network",
+          "value": "nlp-network"
+        },
+        {
+          "label": "CIDR",
+          "value": "172.22.0.0/24"
+        },
+        {
+          "label": "Host port",
+          "value": "127.0.0.1:8020 → 8000"
+        },
+        {
+          "label": "Public URL",
+          "value": "/nlp/quora-randomforest/"
+        },
+        {
+          "label": "MLflow tracker",
+          "value": "mlflow-nlp.pandyahomelab.com"
+        }
+      ]
+    },
+    {
+      "id": "stack",
+      "title": "Tech Stack",
+      "icon": "🧰",
+      "items": [
+        {
+          "name": "scikit-learn 1.3",
+          "purpose": "CountVectorizer (bag-of-words), RandomForestClassifier, metrics"
+        },
+        {
+          "name": "rapidfuzz 3.6",
+          "purpose": "The four fuzzy string-similarity features (the maintained successor to fuzzywuzzy, which the lecture uses)"
+        },
+        {
+          "name": "NLTK 3.8",
+          "purpose": "English stopword list for the token features, downloaded at image build time"
+        },
+        {
+          "name": "pandas + pyarrow",
+          "purpose": "Reads the GLUE QQP parquet files"
+        },
+        {
+          "name": "SciPy sparse",
+          "purpose": "Keeps the 6,022-column feature matrix sparse"
+        },
+        {
+          "name": "FastAPI 0.104",
+          "purpose": "Async HTTP API framework"
+        },
+        {
+          "name": "Pydantic v2",
+          "purpose": "Request/response schema validation"
+        },
+        {
+          "name": "uvicorn",
+          "purpose": "ASGI server, runs inside the container"
+        },
+        {
+          "name": "Docker",
+          "purpose": "Multi-stage build on python:3.11-slim"
+        },
+        {
+          "name": "Nginx 1.25",
+          "purpose": "Reverse proxy, TLS termination, route fan-out, host-based routing for the mlflow-nlp subdomain"
+        },
+        {
+          "name": "MLflow 3.11",
+          "purpose": "Per-domain tracker on nlp-mlflow:5000 — separate from ml-mlflow and dl-mlflow (V3 domain autonomy)"
+        },
+        {
+          "name": "Synology DSM",
+          "purpose": "Host OS — Docker engine, persistent volumes"
+        }
+      ]
+    },
+    {
+      "id": "dataset",
+      "title": "Dataset",
+      "icon": "📂",
+      "body": [
+        "**Quora Question Pairs**, released by Quora in 2017, taken from the GLUE benchmark's QQP task (`nyu-mll/glue` on Hugging Face, pinned to one revision so every retrain sees identical data). Each row is two questions and a human label: duplicate or not.",
+        "GLUE's own test split has no labels, so this demo trains on GLUE train (363,846 pairs, 36.9% duplicates) and tests on GLUE validation (40,430 pairs). Training uses a stratified 100k sample to fit the NAS memory and warm-up budget; testing uses every validation pair.",
+        "The labels are known to be noisy: Quora's reviewers did not always agree, so a perfect score is not possible. Quora released the data for non-commercial use only, so it is mounted into the container at runtime and never baked into the image."
+      ],
+      "facts": [
+        {
+          "label": "Train samples",
+          "value": "{{split.train_samples}}"
+        },
+        {
+          "label": "Test samples",
+          "value": "{{split.test_samples}}"
+        },
+        {
+          "label": "Duplicates",
+          "value": "≈ 37% (both splits)"
+        },
+        {
+          "label": "Source",
+          "value": "GLUE QQP (nyu-mll/glue)"
+        },
+        {
+          "label": "Licence",
+          "value": "Quora release, non-commercial"
+        }
+      ]
+    },
+    {
+      "id": "limitations",
+      "title": "What This Model Can't Do",
+      "icon": "⚠️",
+      "body": [
+        "The model never reads for meaning. It measures overlap: shared words, similar strings, matching first and last words. That is enough for about 4 in 5 pairs, and it fails in predictable ways. Two of the three example buttons on the demo show it."
+      ],
+      "bullets": [
+        {
+          "label": "Paraphrases with different words",
+          "text": "\"How do I learn Python quickly?\" vs \"What is the fastest way to learn Python?\" mean the same, but share few words besides \"learn Python\". The model scores it below 0.5: **Not duplicate**."
+        },
+        {
+          "label": "Near-misses with the same words",
+          "text": "\"How do I get a job at Google?\" vs \"How do I get an internship at Google?\" share every word but one. The model scores it above 0.5: **Duplicate**. A job and an internship are different questions."
+        },
+        {
+          "label": "Word order",
+          "text": "Bag-of-words and most features ignore order, so \"Is a dog bigger than a cat?\" and \"Is a cat bigger than a dog?\" look almost identical."
+        },
+        {
+          "label": "Negation",
+          "text": "\"not\" is one extra word. \"Is it good to eat eggs every day?\" vs \"Is it not good to eat eggs every day?\" look like near-duplicates."
+        },
+        {
+          "label": "Unseen words",
+          "text": "Words outside the 3,000-word vocabulary add nothing to the bag-of-words part; only the fuzzy and overlap features still see them. New product names and slang are mostly invisible."
+        },
+        {
+          "label": "Domain shift",
+          "text": "It learned from 2017 Quora questions. Other text, such as support tickets, search queries or other languages, will score unpredictably."
+        }
+      ]
+    },
+    {
+      "id": "walkthrough",
+      "title": "Read the Code Walkthrough",
+      "icon": "📖",
+      "body": [
+        "For a guided tour of how this service is built — file by file, layer by layer — start with the **ML Project Walkthrough** (uses iris-knn as the worked example but the 4-layer architecture is identical)."
+      ],
+      "bullets": [
+        {
+          "label": "Project anatomy",
+          "text": "Annotated file tree — what every file is and why it's there."
+        },
+        {
+          "label": "Request flow",
+          "text": "A `/predict` request traced hop-by-hop from the browser through all four layers."
+        },
+        {
+          "label": "Training flow",
+          "text": "Eager warm-up at container startup — load data → preprocess → fit → evaluate → log to nlp-mlflow."
+        },
+        {
+          "label": "Per-layer patterns",
+          "text": "Thread-safe train lock, `__file__`-relative paths, the hyphen-vs-underscore symlink trick."
+        },
+        {
+          "label": "MLflow integration",
+          "text": "How runs are logged to the per-domain tracker; graceful degradation when the tracker is briefly unreachable."
+        }
+      ],
+      "links": [
+        {
+          "label": "ML walkthrough on GitHub",
+          "url": "https://github.com/avpgithub-code/pandyahomelab/blob/main/docs/ML_PROJECT_WALKTHROUGH.md",
+          "external": true
+        }
+      ]
+    },
+    {
+      "id": "metrics",
+      "title": "Performance",
+      "icon": "📊",
+      "problem_type": "Binary text-pair classification · GLUE validation held out · threshold 0.5",
+      "body": [
+        "Trained on a stratified 100k sample of GLUE train, scored on all {{split.test_samples}} GLUE validation pairs, which the model never saw. About 37% of test pairs are duplicates, so always predicting \"Not duplicate\" would already score about 63% accuracy. The lecture's version reached about 78% on 3k rows."
+      ],
+      "facts": [
+        {
+          "label": "Train samples",
+          "value": "{{split.train_samples}}"
+        },
+        {
+          "label": "Test samples",
+          "value": "{{split.test_samples}}"
+        },
+        {
+          "label": "Training time",
+          "value": "{{training.seconds}}"
+        },
+        {
+          "label": "Model size",
+          "value": "{{training.model_size}}"
+        },
+        {
+          "label": "Vocabulary",
+          "value": "{{training.vocabulary_size}}"
+        },
+        {
+          "label": "Tracked in",
+          "value": "mlflow-nlp ↗"
+        }
+      ],
+      "confusion_matrix": {
+        "labels": "{{confusion_matrix.labels}}",
+        "matrix": "{{confusion_matrix.matrix}}",
+        "annotation": "The top-right cell is the costly error: pairs that are not duplicates but were called \"Duplicate\", which would merge two different questions. Raising the threshold shrinks it, at the price of more missed duplicates in the bottom-left."
+      },
+      "metrics_detail": [
+        {
+          "name": "Accuracy",
+          "value": "{{metrics_display.accuracy}}",
+          "what": "Share of test pairs labelled correctly at threshold 0.5.",
+          "formula": "correct / total",
+          "why_chosen": "The number the lecture reports, so this demo can be compared with it directly.",
+          "watch_out": "With 63% of pairs non-duplicates, a model that never says \"Duplicate\" scores 63%. Read it next to precision and recall."
+        },
+        {
+          "name": "Precision (duplicate)",
+          "value": "{{metrics_display.precision}}",
+          "what": "Of the pairs called \"Duplicate\", the share that really are.",
+          "formula": "TP / (TP + FP)",
+          "why_chosen": "Tracks the costly error directly: every false duplicate lowers it.",
+          "watch_out": "Easy to raise by raising the threshold, at the cost of recall. See the threshold table above."
+        },
+        {
+          "name": "Recall (duplicate)",
+          "value": "{{metrics_display.recall}}",
+          "what": "Of the real duplicates, the share the model found.",
+          "formula": "TP / (TP + FN)",
+          "why_chosen": "Shows how many duplicates slip through and stay split across two pages.",
+          "watch_out": "Easy to raise by lowering the threshold, at the cost of precision."
+        },
+        {
+          "name": "F1 (duplicate)",
+          "value": "{{metrics_display.f1}}",
+          "what": "Harmonic mean of precision and recall for the Duplicate class.",
+          "formula": "2 · P · R / (P + R)",
+          "why_chosen": "One number that falls if either precision or recall falls.",
+          "watch_out": "Weights both errors equally, while here a false duplicate costs more."
+        },
+        {
+          "name": "ROC-AUC",
+          "value": "{{metrics_display.roc_auc}}",
+          "what": "Chance that a random duplicate pair gets a higher probability than a random non-duplicate pair.",
+          "formula": "area under the true-positive vs false-positive rate curve",
+          "why_chosen": "Judges the probabilities at every threshold at once, which is what the slider exposes.",
+          "watch_out": "Says nothing about whether 0.7 really means a 70% chance; that is calibration."
+        },
+        {
+          "name": "Log loss",
+          "value": "{{metrics_display.log_loss}}",
+          "what": "How confident the model was when it was wrong (lower is better).",
+          "formula": "−mean(y · log p + (1 − y) · log(1 − p))",
+          "why_chosen": "The metric the original Kaggle competition used, and it rewards honest probabilities.",
+          "watch_out": "Random-forest probabilities are vote shares and are not calibrated, so this is higher than a model tuned for probabilities would get."
+        }
+      ]
+    },
+    {
+      "id": "learn",
+      "title": "Learn More",
+      "icon": "🔗",
+      "links": [
+        {
+          "label": "View live MLflow runs",
+          "url": "https://mlflow-nlp.pandyahomelab.com/",
+          "external": true
+        },
+        {
+          "label": "Source on GitHub",
+          "url": "https://github.com/avpgithub-code/pandyahomelab",
+          "external": true
+        },
+        {
+          "label": "CampusX — End-to-End NLP course (lectures 2 and 8)",
+          "url": "https://www.youtube.com/@campusx-official",
+          "external": true
+        },
+        {
+          "label": "Dataset: GLUE QQP on Hugging Face",
+          "url": "https://huggingface.co/datasets/nyu-mll/glue",
+          "external": true
+        },
+        {
+          "label": "Quora: First Quora Dataset Release — Question Pairs",
+          "url": "https://quoradata.quora.com/First-Quora-Dataset-Release-Question-Pairs",
+          "external": true
+        },
+        {
+          "label": "Kaggle: Quora Question Pairs competition",
+          "url": "https://www.kaggle.com/c/quora-question-pairs",
+          "external": true
+        },
+        {
+          "label": "rapidfuzz documentation",
+          "url": "https://rapidfuzz.github.io/RapidFuzz/",
+          "external": true
+        }
+      ]
+    }
+  ]
+}

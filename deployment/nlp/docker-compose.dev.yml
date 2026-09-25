@@ -12,4 +12,44 @@ version: '3.8'
 # Each service: MLFLOW_TRACKING_URI=http://nlp-mlflow:5000, depends_on nlp-mlflow
 # (service_healthy) only — no postgres/minio/redis (G1).
 
-services: {}
+services:
+  nlp-quora-randomforest:
+    image: nlp-quora-randomforest:latest
+    # `build:` so `docker compose build` actually builds (a service with only
+    # `image:` makes it a silent no-op; see deployment_image_rebuild_rules).
+    build:
+      context: ../../nlp/nlp-quora-randomforest
+      dockerfile: docker/Dockerfile
+    container_name: nlp-quora-randomforest
+    environment:
+      PYTHONPATH: /app
+      MLFLOW_TRACKING_URI: http://nlp-mlflow:5000
+      QQP_DATA_DIR: /app/data/qqp
+      QQP_MAX_TRAIN_ROWS: "100000"
+    ports:
+      - "127.0.0.1:8020:8000"   # NAS-only; public traffic comes via nginx
+    volumes:
+      # GLUE QQP is non-commercial, so it is mounted, never baked into the image.
+      # The container runs as uid 1000; data/qqp carries a read-only `everyone`
+      # Synology ACE for that (see the project README), not `user: "0:0"`.
+      - /volume1/pandya-homelab/nlp/nlp-quora-randomforest/data/qqp:/app/data/qqp:ro
+    networks:
+      nlp-network:
+        ipv4_address: 172.22.0.10
+    depends_on:
+      nlp-mlflow:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      # /health answers as soon as uvicorn binds; the ~5 min warm-up (features +
+      # Random Forest on 100k pairs) runs in the background.
+      start_period: 60s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

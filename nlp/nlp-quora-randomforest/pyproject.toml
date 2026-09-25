@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nlp-quora-randomforest"
+version = "0.1.0"
+description = "Duplicate question pair detector on Quora Question Pairs — bag-of-words + 22 engineered features into a Random Forest"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{name = "Archit Pandya", email = "archit@pandyahomelab.com"}]
+# Runtime dependencies live in requirements.txt (what the Dockerfile installs).
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["presentation_logic*", "application_logic*", "db_logic*", "shared*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
