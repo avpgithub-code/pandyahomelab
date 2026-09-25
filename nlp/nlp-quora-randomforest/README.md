@@ -34,3 +34,17 @@ make data        # ~37 MB into data/qqp/, checksum-verified
 make test-unit
 make docker-build
 ```
+
+## Data mount and the Synology ACL
+
+The container runs as `appuser` (uid 1000) and mounts `data/qqp` read-only. On
+`/volume1` the `777+` mode bits are synthetic: the Synology ACL decides, and by
+default it only grants administrators. So after `make data` on a fresh checkout,
+give `everyone` read access to this one folder (files inherit it; the data is public):
+
+```sh
+synoacltool -add data/qqp "everyone:*:allow:r-x---a-R-c--:fd--"
+```
+
+We don't run the container as root instead (the `cloudflared` fix) because this one serves web traffic.
+
