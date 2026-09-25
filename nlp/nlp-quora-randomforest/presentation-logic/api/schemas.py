@@ -12,7 +12,8 @@ class HealthResponse(BaseModel):
 
 
 class PredictRequest(BaseModel):
-    text: str = Field(..., min_length=1, max_length=2000, description="Input text")
+    question1: str = Field(..., min_length=1, max_length=1000, description="First question")
+    question2: str = Field(..., min_length=1, max_length=1000, description="Second question")
 
 
 class PipelineStep(BaseModel):
@@ -21,10 +22,15 @@ class PipelineStep(BaseModel):
 
 
 class PredictResponse(BaseModel):
-    label: str = Field(..., description="Predicted label")
-    confidence: float = Field(..., description="Probability of the predicted label (0-1)")
-    probabilities: Dict[str, float] = Field(..., description="Probability per label")
-    pipeline: List[PipelineStep] = Field(..., description="Text after each preprocessing step")
+    probability: float = Field(..., description="P(duplicate), 0-1")
+    threshold: float = Field(..., description="Threshold behind `label`; the UI slider moves it")
+    label: str = Field(..., description="'Duplicate' or 'Not duplicate' at `threshold`")
+    features: Dict[str, Dict[str, float]] = Field(
+        ..., description="The 22 engineered feature values, grouped basic/token/length/fuzzy"
+    )
+    pipeline: Dict[str, List[PipelineStep]] = Field(
+        ..., description="Each question after every preprocessing step"
+    )
     request_id: Optional[str] = None
 
 
@@ -39,6 +45,7 @@ class ModelInfoResponse(BaseModel):
     target: str
     parameters: Dict
     preprocessing: Dict
+    features: Dict
     metrics: Dict
     metrics_display: Optional[Dict] = None
     confusion_matrix: Optional[Dict] = None

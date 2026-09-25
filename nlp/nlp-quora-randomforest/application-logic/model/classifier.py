@@ -1,62 +1,83 @@
-"""Model wrapper — PLACEHOLDER: TF-IDF + logistic regression.
+"""Model: the L8 recipe, bag-of-words (3000 × 2 questions) + 22 features -> Random Forest.
 
-Swap in the demo's real model (Random Forest over engineered features, HMM,
-Word2Vec, ...) but keep the interface the service relies on: fit, predict_proba,
-evaluate, save, plus the ARCHITECTURE / hyper-parameter constants that
-PredictionService logs to MLflow and returns from /model-info.
+The CountVectorizer is fit on q1 + q2 together (one shared vocabulary), then each
+question is transformed separately, so column i means the same word on both
+sides. The feature matrix stays sparse end to end: 6022 columns × 100k rows
+dense would be ~2.4 GB of float32; sparse it is a few tens of MB.
 """
 from typing import Dict, List
 
 import joblib
 import numpy as np
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, confusion_matrix, precision_recall_fscore_support
-from sklearn.pipeline import Pipeline
+import scipy.sparse as sp
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics import (
+    accuracy_score,
+    confusion_matrix,
+    f1_score,
+    log_loss,
+    precision_score,
+    recall_score,
+    roc_auc_score,
+)
 
-ARCHITECTURE = "TfidfVectorizer(1-2 grams) -> LogisticRegression"
-NGRAM_RANGE = (1, 2)
-MAX_FEATURES = 5000
-C = 1.0
+ARCHITECTURE = "BoW(3000) × 2 questions + 22 engineered features -> RandomForestClassifier"
+BOW_MAX_FEATURES = 3000
+N_ESTIMATORS = 100
+MIN_SAMPLES_LEAF = 2  # 100k rows: 80.2% acc, 88 MB model, 202 s fit (leaf=1: 80.8%, 388 MB, 533 s)
+N_JOBS = 2
 RANDOM_STATE = 42
+LABELS = ["Not duplicate", "Duplicate"]
 
 
-class TextClassifier:
-    """Vectorizer + classifier as one sklearn Pipeline."""
+class DuplicateClassifier:
+    """Shared-vocabulary BoW + handcrafted features into a Random Forest."""
 
     def __init__(self):
-        self._model = Pipeline([
-            ("vectorizer", TfidfVectorizer(ngram_range=NGRAM_RANGE, max_features=MAX_FEATURES)),
-            ("classifier", LogisticRegression(C=C, max_iter=1000, random_state=RANDOM_STATE)),
-        ])
-        self.labels: List[str] = []
-
-    def fit(self, texts: List[str], labels: List[str]) -> None:
-        self._model.fit(texts, labels)
-        self.labels = [str(c) for c in self._model.classes_]
-
-    def predict_proba(self, texts: List[str]) -> np.ndarray:
-        return self._model.predict_proba(texts)
-
-    def evaluate(self, texts: List[str], labels: List[str]) -> Dict:
-        preds = self._model.predict(texts)
-        precision, recall, f1, _ = precision_recall_fscore_support(
-            labels, preds, average="macro", zero_division=0
+        self._bow = CountVectorizer(max_features=BOW_MAX_FEATURES)
+        self._rf = RandomForestClassifier(
+            n_estimators=N_ESTIMATORS,
+            min_samples_leaf=MIN_SAMPLES_LEAF,
+            n_jobs=N_JOBS,
+            random_state=RANDOM_STATE,
         )
-        cm = confusion_matrix(labels, preds, labels=self.labels)
+        self.labels = LABELS
+
+    def fit(self, q1s: List[str], q2s: List[str], handcrafted: np.ndarray, y: List[int]) -> None:
+        self._bow.fit(q1s + q2s)
+        self._rf.fit(self._matrix(q1s, q2s, handcrafted), y)
+
+    def predict_proba(self, q1s: List[str], q2s: List[str], handcrafted: np.ndarray) -> np.ndarray:
+        """P(duplicate) per pair. The threshold is the caller's choice (the UI slider)."""
+        return self._rf.predict_proba(self._matrix(q1s, q2s, handcrafted))[:, 1]
+
+    def evaluate(
+        self, q1s: List[str], q2s: List[str], handcrafted: np.ndarray, y: List[int],
+        threshold: float = 0.5,
+    ) -> Dict:
+        proba = self.predict_proba(q1s, q2s, handcrafted)
+        preds = (proba >= threshold).astype(int)
         return {
             "metrics": {
-                "accuracy": round(float(accuracy_score(labels, preds)), 4),
-                "precision_macro": round(float(precision), 4),
-                "recall_macro": round(float(recall), 4),
-                "f1_macro": round(float(f1), 4),
+                "accuracy": round(float(accuracy_score(y, preds)), 4),
+                "precision": round(float(precision_score(y, preds, zero_division=0)), 4),
+                "recall": round(float(recall_score(y, preds, zero_division=0)), 4),
+                "f1": round(float(f1_score(y, preds, zero_division=0)), 4),
+                "roc_auc": round(float(roc_auc_score(y, proba)), 4),
+                "log_loss": round(float(log_loss(y, proba, labels=[0, 1])), 4),
             },
-            "confusion_matrix": cm.tolist(),
+            "confusion_matrix": confusion_matrix(y, preds, labels=[0, 1]).tolist(),
         }
+
+    def _matrix(self, q1s: List[str], q2s: List[str], handcrafted: np.ndarray) -> sp.csr_matrix:
+        return sp.hstack(
+            [sp.csr_matrix(handcrafted), self._bow.transform(q1s), self._bow.transform(q2s)]
+        ).tocsr()
 
     @property
     def vocabulary_size(self) -> int:
-        return len(self._model.named_steps["vectorizer"].vocabulary_)
+        return len(self._bow.vocabulary_)
 
     def save(self, path: str) -> None:
-        joblib.dump(self._model, path)
+        joblib.dump({"bow": self._bow, "rf": self._rf}, path, compress=3)

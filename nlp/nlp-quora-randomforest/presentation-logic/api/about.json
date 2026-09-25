@@ -188,7 +188,7 @@
         },
         {
           "name": "F1 (macro)",
-          "value": "{{metrics_display.f1_macro}}",
+          "value": "{{metrics_display.f1}}",
           "what": "Harmonic mean of precision and recall, averaged equally over classes.",
           "formula": "2 · P · R / (P + R)",
           "why_chosen": "TODO",

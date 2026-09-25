@@ -20,6 +20,10 @@ class Config:
         # GLUE QQP parquet files (make data). Mounted read-only in the container;
         # the dataset's licence keeps it out of the image.
         self.QQP_DATA_DIR = os.getenv("QQP_DATA_DIR", "/app/data/qqp")
+        # Rows sampled from GLUE train / validation. Train is capped for the NAS
+        # memory guardrail; 0 means "use every row".
+        self.QQP_MAX_TRAIN_ROWS = int(os.getenv("QQP_MAX_TRAIN_ROWS", "100000")) or None
+        self.QQP_MAX_TEST_ROWS = int(os.getenv("QQP_MAX_TEST_ROWS", "0")) or None
 
         # MLflow — internal URI for logging, public base for links in the UI
         self.MLFLOW_TRACKING_URI = os.getenv(

@@ -21,8 +21,10 @@ ENV PYTHONPATH=/app
 # Silence mlflow's gitpython warning — there's no git repo inside the container.
 ENV GIT_PYTHON_REFRESH=quiet
 
-# TODO: download model assets at build time so warm-up never hits the network,
-# e.g. `RUN python -m spacy download en_core_web_sm` or an NLTK corpus.
+# NLTK stopwords at build time so warm-up never hits the network. NLTK_DATA puts
+# them outside $HOME (appuser can't see /root).
+ENV NLTK_DATA=/usr/local/share/nltk_data
+RUN python -m nltk.downloader -d /usr/local/share/nltk_data stopwords
 
 COPY . .
 

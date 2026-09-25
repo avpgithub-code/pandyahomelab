@@ -15,16 +15,15 @@ import threading
 import time
 from typing import Dict, Optional
 
-import pandas as pd
-
 from application_logic.model.classifier import (
     ARCHITECTURE,
-    C,
-    MAX_FEATURES,
-    NGRAM_RANGE,
-    TextClassifier,
+    BOW_MAX_FEATURES,
+    MIN_SAMPLES_LEAF,
+    N_ESTIMATORS,
+    DuplicateClassifier,
 )
-from db_logic.loaders.loaders import TextLoader
+from db_logic.loaders.quora import GLUE_REPO, GLUE_REVISION, PairSplit, QuoraPairLoader
+from db_logic.transforms.features import FEATURE_GROUPS, PairFeatureBuilder
 from db_logic.transforms.preprocessor import TextPreprocessor
 from shared.config import get_config
 
@@ -35,9 +34,9 @@ _MLFLOW_URI = _config.MLFLOW_TRACKING_URI
 _MLFLOW_PUBLIC_BASE = _config.MLFLOW_PUBLIC_BASE_URL
 # Experiment per demo, named after the container (Phase 3 plan).
 _EXPERIMENT = "nlp-quora-randomforest"
-_DATASET = "Built-in sample corpus (template placeholder)"
+_DATASET = f"Quora Question Pairs (GLUE QQP, {GLUE_REPO}@{GLUE_REVISION[:7]})"
 
-DEFAULT_TEST_SIZE = 0.25
+DEFAULT_THRESHOLD = 0.5
 
 
 class PredictionService:
@@ -45,13 +44,17 @@ class PredictionService:
 
     def __init__(
         self,
-        loader: Optional[TextLoader] = None,
-        test_size: float = DEFAULT_TEST_SIZE,
+        loader: Optional[QuoraPairLoader] = None,
+        max_train_rows: Optional[int] = _config.QQP_MAX_TRAIN_ROWS,
+        max_test_rows: Optional[int] = _config.QQP_MAX_TEST_ROWS,
+        features: Optional[PairFeatureBuilder] = None,
     ):
-        self._loader = loader or TextLoader()
+        self._loader = loader or QuoraPairLoader(_config.QQP_DATA_DIR)
+        self._max_train_rows = max_train_rows
+        self._max_test_rows = max_test_rows
         self._preprocessor = TextPreprocessor()
-        self._model = TextClassifier()
-        self._test_size = test_size
+        self._features = features or PairFeatureBuilder()
+        self._model = DuplicateClassifier()
         self._metrics: Dict = {}
         self._confusion_matrix: list = []
         self._train_size = 0
@@ -62,8 +65,8 @@ class PredictionService:
         self._ready = False
         self._train_lock = threading.Lock()
 
-    def train(self, df: Optional[pd.DataFrame] = None) -> Dict:
-        """Fit on the train split, evaluate on the test split, log to MLflow.
+    def train(self, split: Optional[PairSplit] = None) -> Dict:
+        """Fit on GLUE train, evaluate on GLUE validation, log to MLflow.
 
         Thread-safe — concurrent callers during the warm-up window block here
         and pick up the cached metrics once the first caller finishes.
@@ -73,12 +76,16 @@ class PredictionService:
                 return self._metrics
 
             start = time.perf_counter()
-            split = self._loader.train_test_split(test_size=self._test_size, df=df)
-            x_train = self._preprocessor.transform_many(split.train["text"].tolist())
-            x_test = self._preprocessor.transform_many(split.test["text"].tolist())
+            split = split or self._loader.train_test_split(
+                max_train_rows=self._max_train_rows, max_test_rows=self._max_test_rows
+            )
+            train_q1, train_q2, train_x = self._featurize(split.train)
+            test_q1, test_q2, test_x = self._featurize(split.test)
 
-            self._model.fit(x_train, split.train["label"].tolist())
-            result = self._model.evaluate(x_test, split.test["label"].tolist())
+            self._model.fit(train_q1, train_q2, train_x, split.train["is_duplicate"].tolist())
+            result = self._model.evaluate(
+                test_q1, test_q2, test_x, split.test["is_duplicate"].tolist(), DEFAULT_THRESHOLD
+            )
             self._metrics = result["metrics"]
             self._confusion_matrix = result["confusion_matrix"]
 
@@ -90,20 +97,36 @@ class PredictionService:
             self._log_to_mlflow()
             return self._metrics
 
-    def predict(self, text: str) -> Dict:
+    def predict(self, question1: str, question2: str) -> Dict:
+        """P(duplicate) plus everything the UI needs to explain it.
+
+        The label uses the default 0.5 threshold; the UI's slider re-labels
+        client-side from `probability`, so moving it never costs a request.
+        """
         if not self._ready:
             self.train()
-        clean = self._preprocessor.transform(text)
-        probs = self._model.predict_proba([clean])[0]
-        best = int(probs.argmax())
+        q1 = self._preprocessor.transform(question1)
+        q2 = self._preprocessor.transform(question2)
+        values = self._features.build(q1, q2)
+        proba = float(self._model.predict_proba([q1], [q2], self._features.build_matrix([q1], [q2]))[0])
         return {
-            "label": self._model.labels[best],
-            "confidence": round(float(probs[best]), 4),
-            "probabilities": {
-                label: round(float(p), 4) for label, p in zip(self._model.labels, probs)
+            "probability": round(proba, 4),
+            "threshold": DEFAULT_THRESHOLD,
+            "label": self._model.labels[int(proba >= DEFAULT_THRESHOLD)],
+            "features": {
+                group: {name: round(float(values[name]), 4) for name in names}
+                for group, names in FEATURE_GROUPS.items()
             },
-            "pipeline": self._preprocessor.trace(text),
+            "pipeline": {
+                "question1": self._preprocessor.trace(question1),
+                "question2": self._preprocessor.trace(question2),
+            },
         }
+
+    def _featurize(self, df):
+        q1 = self._preprocessor.transform_many(df["question1"].tolist())
+        q2 = self._preprocessor.transform_many(df["question2"].tolist())
+        return q1, q2, self._features.build_matrix(q1, q2)
 
     def get_model_info(self) -> Dict:
         """Model metadata for the About drawer and Model Card.
@@ -113,17 +136,19 @@ class PredictionService:
         returns the static fields with empty metrics.
         """
         info = {
-            "model_type": "TextClassifier",
+            "model_type": "RandomForestClassifier",
             "architecture": ARCHITECTURE,
             "dataset": _DATASET,
-            "target": "text label (classification)",
+            "target": "is_duplicate (binary)",
             "parameters": {
-                "ngram_range": list(NGRAM_RANGE),
-                "max_features": MAX_FEATURES,
-                "C": C,
-                "test_size": self._test_size,
+                "bow_max_features": BOW_MAX_FEATURES,
+                "n_estimators": N_ESTIMATORS,
+                "min_samples_leaf": MIN_SAMPLES_LEAF,
+                "max_train_rows": self._max_train_rows,
+                "threshold": DEFAULT_THRESHOLD,
             },
             "preprocessing": {"steps": self._preprocessor.step_names},
+            "features": FEATURE_GROUPS,
             "metrics": {},
             "metrics_display": {},
             "confusion_matrix": None,
@@ -140,9 +165,11 @@ class PredictionService:
             "metrics": m,
             "metrics_display": {
                 "accuracy": f"{m['accuracy'] * 100:.1f}%",
-                "precision_macro": f"{m['precision_macro']:.3f}",
-                "recall_macro": f"{m['recall_macro']:.3f}",
-                "f1_macro": f"{m['f1_macro']:.3f}",
+                "precision": f"{m['precision']:.3f}",
+                "recall": f"{m['recall']:.3f}",
+                "f1": f"{m['f1']:.3f}",
+                "roc_auc": f"{m['roc_auc']:.3f}",
+                "log_loss": f"{m['log_loss']:.3f}",
             },
             "confusion_matrix": {
                 "labels": self._model.labels,
@@ -185,10 +212,11 @@ class PredictionService:
             with mlflow.start_run() as run:
                 mlflow.log_params({
                     "architecture": ARCHITECTURE,
-                    "ngram_range": str(NGRAM_RANGE),
-                    "max_features": MAX_FEATURES,
-                    "C": C,
-                    "test_size": self._test_size,
+                    "bow_max_features": BOW_MAX_FEATURES,
+                    "n_estimators": N_ESTIMATORS,
+                    "min_samples_leaf": MIN_SAMPLES_LEAF,
+                    "threshold": DEFAULT_THRESHOLD,
+                    "n_handcrafted_features": sum(len(g) for g in FEATURE_GROUPS.values()),
                     "n_train": self._train_size,
                     "n_test": self._test_count,
                     "preprocessing": ",".join(self._preprocessor.step_names),

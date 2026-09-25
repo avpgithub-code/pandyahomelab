@@ -54,7 +54,7 @@
     }
 
     textarea {
-      width: 100%; min-height: 110px; resize: vertical;
+      width: 100%; min-height: 70px; resize: vertical;
       background: var(--surface2); color: var(--text);
       border: 1px solid var(--border); border-radius: 8px;
       padding: .8rem 1rem; font: inherit; font-size: .95rem; line-height: 1.5;
@@ -98,6 +98,21 @@
     .prob-bar-fill { height: 100%; border-radius: 99px; background: var(--accent); transition: width .6s ease; }
     .prob-value { width: 42px; text-align: right; color: var(--muted); font-family: monospace; font-size: .8rem; }
 
+    .question-label { display: block; font-size: .75rem; color: var(--muted); margin: 1rem 0 .4rem; }
+    .threshold-row { display: flex; align-items: center; gap: .75rem; font-size: .85rem; margin-bottom: .5rem; }
+    .threshold-row input { flex: 1; accent-color: var(--accent); }
+    .threshold-note { font-size: .75rem; color: var(--muted); margin-bottom: 1.5rem; }
+    .label-badge.dup { background: rgba(34,197,94,.15); color: #86efac; }
+    .features { display: grid; grid-template-columns: repeat(2, 1fr); gap: .75rem; margin-bottom: 1.5rem; }
+    @media (max-width: 500px) { .features { grid-template-columns: 1fr; } }
+    .feature-group { background: var(--surface2); border-radius: 8px; padding: .6rem .75rem; }
+    .feature-group h3 { font-size: .7rem; color: var(--accent); text-transform: uppercase; letter-spacing: .08em; margin-bottom: .4rem; }
+    .feature-row { display: flex; justify-content: space-between; gap: .5rem; font-size: .78rem; padding: .1rem 0; }
+    .feature-row .name { color: #cbd5e1; font-family: 'SF Mono', Consolas, monospace; }
+    .feature-row .val { color: var(--text); font-family: monospace; }
+    .pipeline-pair { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+    @media (max-width: 700px) { .pipeline-pair { grid-template-columns: 1fr; } }
+    .pipeline-pair h3 { font-size: .75rem; color: var(--muted); margin-bottom: .4rem; }
     .pipeline { display: flex; flex-direction: column; gap: .4rem; }
     .pipeline-step {
       display: grid; grid-template-columns: 150px 1fr; gap: .75rem;
@@ -365,8 +380,11 @@
 
 <!-- Input Card -->
 <div class="card">
-  <h2>Input text</h2>
-  <textarea id="input-text" maxlength="2000" placeholder="Type or paste some text…"></textarea>
+  <h2>Two questions</h2>
+  <label class="question-label" for="question1">Question 1</label>
+  <textarea id="question1" maxlength="1000" placeholder="How do I learn Python quickly?"></textarea>
+  <label class="question-label" for="question2">Question 2</label>
+  <textarea id="question2" maxlength="1000" placeholder="What is the fastest way to learn Python?"></textarea>
   <div>
     <p style="font-size:.75rem;color:var(--muted);margin-top:1rem">Try an example:</p>
     <div class="example-row" id="examples"></div>
@@ -379,9 +397,26 @@
 <div class="result-card" id="result-card">
   <h2>Prediction</h2>
   <div class="label-badge" id="label-badge"></div>
-  <div class="probabilities" id="probabilities"></div>
+  <div class="probabilities">
+    <div class="prob-row">
+      <span class="prob-label">P(duplicate)</span>
+      <div class="prob-bar-bg"><div class="prob-bar-fill" id="prob-fill"></div></div>
+      <span class="prob-value" id="prob-value"></span>
+    </div>
+  </div>
+  <div class="threshold-row">
+    <label for="threshold">Threshold</label>
+    <input type="range" id="threshold" min="0.05" max="0.95" step="0.05" value="0.5">
+    <span class="prob-value" id="threshold-value">0.50</span>
+  </div>
+  <p class="threshold-note">Raise the threshold to flag fewer pairs as duplicates. That means fewer false "duplicate" calls (the costly error) but more real duplicates missed.</p>
+  <h2>Why: the engineered features for this pair</h2>
+  <div class="features" id="features"></div>
   <h2>Preprocessing pipeline</h2>
-  <div class="pipeline" id="pipeline"></div>
+  <div class="pipeline-pair">
+    <div><h3>Question 1</h3><div class="pipeline" id="pipeline-q1"></div></div>
+    <div><h3>Question 2</h3><div class="pipeline" id="pipeline-q2"></div></div>
+  </div>
 </div>
 
 <!-- Model Card -->
@@ -391,7 +426,7 @@
     <div class="stat-box"><div class="stat-label">Model</div><div class="stat-value" id="mc-model">—</div></div>
     <div class="stat-box"><div class="stat-label">Train rows</div><div class="stat-value" id="mc-train">—</div></div>
     <div class="stat-box"><div class="stat-label">Accuracy</div><div class="stat-value" id="mc-accuracy">—</div></div>
-    <div class="stat-box"><div class="stat-label">F1 Macro</div><div class="stat-value" id="mc-f1">—</div></div>
+    <div class="stat-box"><div class="stat-label">F1 (duplicate)</div><div class="stat-value" id="mc-f1">—</div></div>
   </div>
   <a class="mlflow-link" id="mlflow-link" href="#" target="_blank" rel="noopener" style="display:none">
     ↗ View in MLflow
@@ -402,11 +437,14 @@
   // Works behind Nginx (/nlp/<name>/) and on the bare host port (/).
   const API_BASE = location.pathname.replace(/\/$/, '');
 
-  // TODO: replace with examples that show off this demo.
+  // Paraphrase, near-miss (same words, different ask), and unrelated.
   const EXAMPLES = [
-    'I loved this film, the acting was superb',
-    'Rude staff and awful service',
+    ['How do I learn Python quickly?', 'What is the fastest way to learn Python?'],
+    ['How do I get a job at Google?', 'How do I get an internship at Google?'],
+    ['What is the capital of Australia?', 'Why do cats purr?'],
   ];
+  const GROUP_TITLES = { basic: 'Basic', token: 'Token overlap', length: 'Length', fuzzy: 'Fuzzy match' };
+  let _lastResult = null;
 
   async function loadModelCard() {
     try {
@@ -416,7 +454,7 @@
       document.getElementById('mc-model').textContent = info.model_type;
       if (info.split) document.getElementById('mc-train').textContent = info.split.train_samples;
       if (info.metrics_display.accuracy) document.getElementById('mc-accuracy').textContent = info.metrics_display.accuracy;
-      if (info.metrics_display.f1_macro) document.getElementById('mc-f1').textContent = info.metrics_display.f1_macro;
+      if (info.metrics_display.f1) document.getElementById('mc-f1').textContent = info.metrics_display.f1;
       if (info.mlflow_url) {
         const link = document.getElementById('mlflow-link');
         link.href = info.mlflow_url;
@@ -629,26 +667,29 @@
 
   window.addEventListener('DOMContentLoaded', () => {
     const row = document.getElementById('examples');
-    EXAMPLES.forEach(text => {
+    EXAMPLES.forEach(([q1, q2]) => {
       const b = document.createElement('button');
       b.className = 'example-btn';
       b.type = 'button';
-      b.textContent = text.length > 40 ? text.slice(0, 40) + '…' : text;
+      b.textContent = `${q1} ↔ ${q2}`.slice(0, 48) + '…';
       b.addEventListener('click', () => {
-        document.getElementById('input-text').value = text;
+        document.getElementById('question1').value = q1;
+        document.getElementById('question2').value = q2;
         predict();
       });
       row.appendChild(b);
     });
     document.getElementById('predict-btn').addEventListener('click', predict);
+    document.getElementById('threshold').addEventListener('input', renderLabel);
     loadModelCard();
   });
 
   async function predict() {
     const btn = document.getElementById('predict-btn');
     const errEl = document.getElementById('error-msg');
-    const text = document.getElementById('input-text').value.trim();
-    if (!text) return;
+    const question1 = document.getElementById('question1').value.trim();
+    const question2 = document.getElementById('question2').value.trim();
+    if (!question1 || !question2) return;
     errEl.classList.remove('visible');
     btn.disabled = true;
     btn.textContent = 'Predicting…';
@@ -656,7 +697,7 @@
       const res = await fetch(`${API_BASE}/predict`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ question1, question2 }),
       });
       if (!res.ok) throw new Error('Request failed');
       showResult(await res.json());
@@ -669,16 +710,35 @@
     }
   }
 
-  function showResult(r) {
-    document.getElementById('label-badge').textContent = r.label;
-    document.getElementById('probabilities').innerHTML = Object.entries(r.probabilities).map(([label, p]) => `
-      <div class="prob-row">
-        <span class="prob-label">${escapeHtml(label)}</span>
-        <div class="prob-bar-bg"><div class="prob-bar-fill" style="width:${Math.round(p * 100)}%"></div></div>
-        <span class="prob-value">${Math.round(p * 100)}%</span>
-      </div>`).join('');
-    document.getElementById('pipeline').innerHTML = r.pipeline.map(s => `
+  // The threshold only moves the label; the probability comes from the model.
+  function renderLabel() {
+    const t = parseFloat(document.getElementById('threshold').value);
+    document.getElementById('threshold-value').textContent = t.toFixed(2);
+    if (!_lastResult) return;
+    const dup = _lastResult.probability >= t;
+    const badge = document.getElementById('label-badge');
+    badge.textContent = dup ? 'Duplicate' : 'Not duplicate';
+    badge.classList.toggle('dup', dup);
+  }
+
+  function renderPipeline(steps) {
+    return steps.map(s => `
       <div class="pipeline-step"><span class="name">${escapeHtml(s.step)}</span><span class="out">${escapeHtml(s.text) || '<em>(empty)</em>'}</span></div>`).join('');
+  }
+
+  function showResult(r) {
+    _lastResult = r;
+    const pct = Math.round(r.probability * 100);
+    document.getElementById('prob-fill').style.width = `${pct}%`;
+    document.getElementById('prob-value').textContent = `${pct}%`;
+    renderLabel();
+    document.getElementById('features').innerHTML = Object.entries(r.features).map(([group, values]) => `
+      <div class="feature-group"><h3>${escapeHtml(GROUP_TITLES[group] || group)}</h3>
+        ${Object.entries(values).map(([name, v]) => `
+          <div class="feature-row"><span class="name">${escapeHtml(name)}</span><span class="val">${Number.isInteger(v) ? v : v.toFixed(3)}</span></div>`).join('')}
+      </div>`).join('');
+    document.getElementById('pipeline-q1').innerHTML = renderPipeline(r.pipeline.question1);
+    document.getElementById('pipeline-q2').innerHTML = renderPipeline(r.pipeline.question2);
     const card = document.getElementById('result-card');
     card.classList.add('visible');
     card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

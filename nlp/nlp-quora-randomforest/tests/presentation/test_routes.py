@@ -31,23 +31,27 @@ class TestHealth:
             assert field in data
 
 
+PAIR = {"question1": "How do I learn chess?", "question2": "What is the best way to learn chess?"}
+
+
 class TestPredict:
     def test_returns_200(self):
-        assert client.post("/predict", json={"text": "Great service"}).status_code == 200
+        assert client.post("/predict", json=PAIR).status_code == 200
 
     def test_response_shape(self):
-        data = client.post("/predict", json={"text": "Great service"}).json()
-        for field in ("label", "confidence", "probabilities", "pipeline", "request_id"):
+        data = client.post("/predict", json=PAIR).json()
+        for field in ("probability", "threshold", "label", "features", "pipeline", "request_id"):
             assert field in data
+        assert set(data["pipeline"]) == {"question1", "question2"}
 
-    def test_empty_text_returns_422(self):
-        assert client.post("/predict", json={"text": ""}).status_code == 422
+    def test_empty_question_returns_422(self):
+        assert client.post("/predict", json={**PAIR, "question2": ""}).status_code == 422
 
-    def test_missing_text_returns_422(self):
-        assert client.post("/predict", json={}).status_code == 422
+    def test_missing_question_returns_422(self):
+        assert client.post("/predict", json={"question1": "Why?"}).status_code == 422
 
-    def test_too_long_text_returns_422(self):
-        assert client.post("/predict", json={"text": "a" * 2001}).status_code == 422
+    def test_too_long_question_returns_422(self):
+        assert client.post("/predict", json={**PAIR, "question1": "a" * 1001}).status_code == 422
 
 
 class TestModelInfo:
@@ -57,7 +61,7 @@ class TestModelInfo:
     def test_required_fields(self):
         data = client.get("/model-info").json()
         for field in ("model_type", "architecture", "metrics", "metrics_display",
-                      "confusion_matrix", "split", "preprocessing", "mlflow_url"):
+                      "confusion_matrix", "split", "preprocessing", "features", "mlflow_url"):
             assert field in data
 
 

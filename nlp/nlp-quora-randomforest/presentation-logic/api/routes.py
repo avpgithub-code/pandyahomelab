@@ -56,7 +56,7 @@ async def predict(request: PredictRequest, x_request_id: Optional[str] = Header(
     concurrent calls block on the train lock."""
     request_id = x_request_id or str(uuid.uuid4())
     try:
-        result = _service.predict(request.text)
+        result = _service.predict(request.question1, request.question2)
         return PredictResponse(**result, request_id=request_id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
