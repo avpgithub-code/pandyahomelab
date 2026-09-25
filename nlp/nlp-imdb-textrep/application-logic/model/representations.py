@@ -57,6 +57,7 @@ class RepresentationSuite:
         )
         self._tfidf = TfidfTransformer(sublinear_tf=True)
         self._models: Dict[str, LogisticRegression] = {}
+        self._names: Dict[str, np.ndarray] = {}
         self.stats: Dict[str, Dict] = {}
         self.labels = LABELS
 
@@ -72,8 +73,12 @@ class RepresentationSuite:
         }
 
     def _feature_names(self, rep: str) -> np.ndarray:
-        vec = self._unigram if rep in ("one_hot", "bow") else self._ngram
-        return vec.get_feature_names_out()
+        # Cached: get_feature_names_out() rebuilds a 100k-entry array on every call.
+        key = "unigram" if rep in ("one_hot", "bow") else "ngram"
+        if key not in self._names:
+            vec = self._unigram if key == "unigram" else self._ngram
+            self._names[key] = vec.get_feature_names_out()
+        return self._names[key]
 
     # ——— training ———
     def fit(self, texts: List[str], y: List[int]) -> None:
