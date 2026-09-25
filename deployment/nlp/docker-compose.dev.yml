@@ -1,0 +1,15 @@
+version: '3.8'
+
+# Dev overlay: NLP project containers attached to nlp-network.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+#
+# Slots (docs/NETWORK_CIDR_SUMMARY.md §5/§8). Every host port binds 127.0.0.1:
+#   - nlp-quora-randomforest   172.22.0.10 → 127.0.0.1:8020   (Phase 3a)
+#   - 3b slot                  172.22.0.11 → 127.0.0.1:8021   (Phase 3b)
+#   - 3c slot                  172.22.0.12 → 127.0.0.1:8022   (Phase 3c)
+#   - 3d slot                  172.22.0.13 → 127.0.0.1:8023   (Phase 3d)
+#
+# Each service: MLFLOW_TRACKING_URI=http://nlp-mlflow:5000, depends_on nlp-mlflow
+# (service_healthy) only — no postgres/minio/redis (G1).
+
+services: {}

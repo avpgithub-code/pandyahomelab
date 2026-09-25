@@ -11,7 +11,7 @@ not yet created. Phase 3.0 creates it.
 No PyTorch/transformers until the deferred v2 cards. Images should stay well under the
 ~2.5 GB DL images.
 
-**Status:** Approved 2026-09-23. Gates G1–G3 decided (see [decision gates](#decision-gates)); 3.0 is next.
+**Status:** Approved 2026-09-23. Gates G1–G3 decided (see [decision gates](#decision-gates)). 3.0 done 2026-09-24; 3a is next.
 
 ---
 
@@ -41,7 +41,7 @@ Don't add it in a compose file first.
 
 | Sub-phase | Project (ADR-004 name) | Slot (§5 / §8) | Course source | Status |
 |---|---|---|---|---|
-| **3.0** | Domain infrastructure: nlp-network, nlp-mlflow only (G1), Nginx leg, `mlflow-nlp` subdomain, replace `/nlp/` 503 | .5, .20 | — | Not started |
+| **3.0** | Domain infrastructure: nlp-network, nlp-mlflow only (G1), Nginx leg, `mlflow-nlp` subdomain, replace `/nlp/` 503 | .5, .20 | — | ✅ Done 2026-09-24 |
 | **3a** | `nlp-quora-randomforest`: duplicate question pair detector | .10 / 8020 | L2 assignment, L8 | Not started |
 | **3b** | Text preprocessing and representation playground (name at gate) | .11 / 8021 | L3, L4 | Not started |
 | **3c** | Word2Vec explorer on a custom corpus (name at gate) | .12 / 8022 | L5 | Not started |
@@ -71,11 +71,15 @@ does. 3b–3d are independent of each other and can ship in any order after 3a.
    listing JSON. Rebuild with `--no-cache` + `--force-recreate` (see
    `deployment_image_rebuild_rules`).
 5. `deployment/cloudflared/config.yml`: add the `mlflow-nlp.pandyahomelab.com` ingress rule.
-6. Create `nlp/_templates/nlp-project-template/` from `ml/_templates/ml-project-template`,
-   dropping the unused `DATABASE_URL` / `MINIO_*` / `REDIS_URL` config and `depends_on` entries (G1).
-   The ML template has no `ui.html`, `about.json` or `/about` route, so add them per the
-   [About drawer + MLflow contract](#about-drawer--mlflow-contract-inherited-from-mldl), along
-   with the graceful `_log_to_mlflow()` from `dl/dl-lstm-forecast`.
+6. Create `nlp/_templates/nlp-project-template/`, with no `DATABASE_URL` / `MINIO_*` /
+   `REDIS_URL` config or `depends_on` entries (G1). **As built (2026-09-24):** it is based on the
+   live `dl/dl-lstm-forecast` layout, not `ml/_templates/ml-project-template`. The ML template
+   has no `ui.html`, `about.json`, `/about` or `/model-info`, and its healthcheck calls `curl`,
+   which `python:slim` doesn't have. The template runs end-to-end on a placeholder classifier. It
+   follows the [About drawer + MLflow contract](#about-drawer--mlflow-contract-inherited-from-mldl),
+   pins the MLflow client to the server's 3.11.1, and ships the token-resolution test.
+   `nlp/_templates/new-nlp-project.sh <name> <slot> "<Title>"` scaffolds a demo, deriving its IP
+   and port from the slot.
 7. Verify: `docker network inspect nlp_nlp-network` shows 172.22.0.0/24; every NLP container
    IP and host port matches CIDR summary §5; `https://mlflow-nlp.pandyahomelab.com` loads read-only.
 

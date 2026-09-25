@@ -18,7 +18,7 @@
 | pandya-proxy-network | `nginx_pandya-proxy-network` | 172.24.0.0/24 | 172.24.0.1 | Nginx reverse proxy entry point | Live |
 | ml-network | `ml_ml-network` | 172.20.0.0/24 | 172.20.0.1 | ML domain services | Live (Phase 1) |
 | dl-network | `dl_dl-network` | 172.21.0.0/24 | 172.21.0.1 | DL domain services | Live (Phase 2) |
-| nlp-network | `nlp_nlp-network` | 172.22.0.0/24 | 172.22.0.1 | NLP domain services | Reserved (Phase 3) |
+| nlp-network | `nlp_nlp-network` | 172.22.0.0/24 | 172.22.0.1 | NLP domain services | Active (Phase 3.0, 2026-09-24) |
 | agentic-network | `agentic_agentic-network` | 172.23.0.0/24 | 172.23.0.1 | Agentic AI domain services | Reserved (Phase 4) |
 
 All bridge driver, local scope. The Docker name is what `external:` references in
@@ -73,14 +73,14 @@ All bridge driver, local scope. The Docker name is what `external:` references i
 
 ---
 
-## 5. NAS NLP Domain — Service IP Assignments (reserved, Phase 3)
+## 5. NAS NLP Domain — Service IP Assignments (Phase 3; nlp-mlflow + Nginx leg live 2026-09-24)
 
 | Service | Container Name | IP Address | Container Port | Host Port (§8) | Role |
 |---|---|---|---|---|---|
 | PostgreSQL | nlp-postgres | 172.22.0.2 | 5432 | 127.0.0.1:5435 | Database — reserved, not deployed (G1) |
 | MinIO | nlp-minio | 172.22.0.3 | 9000 / 9001 | 127.0.0.1:9004 / 127.0.0.1:9005 | Artifact Storage — reserved, not deployed (G1) |
 | Redis | nlp-redis | 172.22.0.4 | 6379 | 127.0.0.1:6381 | Cache — reserved, not deployed (G1) |
-| MLflow | nlp-mlflow | 172.22.0.5 | 5000 | none (public via `mlflow-nlp.` subdomain) | Experiment Tracking |
+| MLflow | nlp-mlflow | 172.22.0.5 | 5000 | none (public via `mlflow-nlp.` subdomain) | Experiment Tracking — ✅ live |
 | Quora duplicate questions | nlp-quora-randomforest | 172.22.0.10 | 8000 | 127.0.0.1:8020 | Project Service (Phase 3a) |
 | Project slot | nlp-<dataset-algorithm> | 172.22.0.11 | 8000 | 127.0.0.1:8021 | Reserved (Phase 3b) |
 | Project slot | nlp-<dataset-algorithm> | 172.22.0.12 | 8000 | 127.0.0.1:8022 | Reserved (Phase 3c) |
@@ -289,7 +289,7 @@ services:
 | NAS | /nlp/<name>/ (flat, G2) | Nginx upstream | nlp-* project services | 172.22.0.10–.19:8000 |
 | NAS | /agentic/* | Nginx upstream | agentic-* project services | 172.23.0.10–.19:8000 |
 | NAS | mlflow-dl.pandyahomelab.com | Tunnel ingress → Nginx `server` block | dl-mlflow | 172.21.0.5:5000 |
-| NAS | mlflow-nlp.pandyahomelab.com | Tunnel ingress → Nginx `server` block | nlp-mlflow | 172.22.0.5:5000 (Phase 3) |
+| NAS | mlflow-nlp.pandyahomelab.com | Tunnel ingress → Nginx `server` block | nlp-mlflow | 172.22.0.5:5000 ✅ live (read-only) |
 | AWS | pandyahomelab.com | ALB | ALB DNS | ALB IP |
 | AWS | /ml/* · /dl/* · /nlp/* · /agentic/* | ALB target groups | ECS services | 10.0.{1-4}.x:8000 |
 
@@ -339,6 +339,7 @@ AWS VPC SUBNETS:
 - [x] All infrastructure services (postgres, minio, redis, mlflow) isolated per domain
 - [x] Project services can only reach other services via Nginx routing
 - [x] 2026-09-23: §3/§4/§7 match `docker inspect` of every running container; NLP/Agentic IPs and §8 host ports are unused
+- [x] 2026-09-24: nlp_nlp-network = 172.22.0.0/24 (gw .1); nlp-mlflow = 172.22.0.5, no host port; pandya-nginx = 172.22.0.20
 
 ---
 
