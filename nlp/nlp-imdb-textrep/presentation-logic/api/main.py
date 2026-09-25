@@ -49,7 +49,7 @@ async def lifespan(app: FastAPI):
 def create_app() -> FastAPI:
     app = FastAPI(
         title="nlp-imdb-textrep",
-        description="__DESCRIPTION__",
+        description="Text preprocessing + representation lab: one-hot, bag-of-words, n-grams and TF-IDF on IMDB reviews, each scored by the same logistic regression",
         version=VERSION,
         lifespan=lifespan,
     )

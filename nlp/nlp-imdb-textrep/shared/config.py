@@ -17,6 +17,13 @@ class Config:
         self.API_HOST = os.getenv("API_HOST", "0.0.0.0")
         self.LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
+        # IMDB parquet files (make data). Mounted read-only in the container;
+        # no stated licence, so the data stays out of the image.
+        self.IMDB_DATA_DIR = os.getenv("IMDB_DATA_DIR", "/app/data/imdb")
+        # 0 means "every row" (25k train, 25k test).
+        self.IMDB_MAX_TRAIN_ROWS = int(os.getenv("IMDB_MAX_TRAIN_ROWS", "0")) or None
+        self.IMDB_MAX_TEST_ROWS = int(os.getenv("IMDB_MAX_TEST_ROWS", "0")) or None
+
         # MLflow — internal URI for logging, public base for links in the UI
         self.MLFLOW_TRACKING_URI = os.getenv(
             "MLFLOW_TRACKING_URI", "http://nlp-mlflow:5000"

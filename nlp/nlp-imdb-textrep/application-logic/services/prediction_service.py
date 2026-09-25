@@ -1,11 +1,9 @@
-"""Prediction service: orchestrates loader -> preprocessor -> model -> MLflow.
+"""Prediction service: loader -> preprocessor -> four representations -> MLflow.
 
-The single object the API layer talks to. Same shape as dl/dl-lstm-forecast:
-thread-safe lazy training (eager warm-up at startup; concurrent /predict calls
-during the train window block on a lock instead of stampeding), a /model-info
-payload that fills the About drawer's {{tokens}}, and MLflow logging that
-degrades gracefully — the demo still serves predictions if nlp-mlflow is
-briefly unreachable.
+Same shape as nlp-quora-randomforest: thread-safe lazy training (eager warm-up at
+startup; concurrent calls during the train window block on a lock), a /model-info
+payload that fills the About drawer's {{tokens}}, and MLflow logging that degrades
+gracefully if nlp-mlflow is briefly unreachable.
 """
 import json
 import logging
@@ -15,17 +13,17 @@ import threading
 import time
 from typing import Dict, Optional
 
-import pandas as pd
-
-from application_logic.model.classifier import (
-    ARCHITECTURE,
+from application_logic.model.representations import (
     C,
-    MAX_FEATURES,
-    NGRAM_RANGE,
-    TextClassifier,
+    MIN_DF,
+    NGRAM_MAX_FEATURES,
+    REPRESENTATIONS,
+    SOLVER,
+    RepresentationSuite,
 )
-from db_logic.loaders.loaders import TextLoader
+from db_logic.loaders.imdb import IMDB_REPO, IMDB_REVISION, ImdbLoader, Split
 from db_logic.transforms.preprocessor import TextPreprocessor
+from db_logic.transforms.tokens import TokenAnalyzer
 from shared.config import get_config
 
 logger = logging.getLogger(__name__)
@@ -35,9 +33,8 @@ _MLFLOW_URI = _config.MLFLOW_TRACKING_URI
 _MLFLOW_PUBLIC_BASE = _config.MLFLOW_PUBLIC_BASE_URL
 # Experiment per demo, named after the container (Phase 3 plan).
 _EXPERIMENT = "nlp-imdb-textrep"
-_DATASET = "Built-in sample corpus (template placeholder)"
-
-DEFAULT_TEST_SIZE = 0.25
+_DATASET = f"IMDB Large Movie Review Dataset ({IMDB_REPO}@{IMDB_REVISION[:7]})"
+ARCHITECTURE = "4 representations (one-hot, BoW, n-grams, TF-IDF) -> LogisticRegression each"
 
 
 class PredictionService:
@@ -45,65 +42,88 @@ class PredictionService:
 
     def __init__(
         self,
-        loader: Optional[TextLoader] = None,
-        test_size: float = DEFAULT_TEST_SIZE,
+        loader: Optional[ImdbLoader] = None,
+        max_train_rows: Optional[int] = _config.IMDB_MAX_TRAIN_ROWS,
+        max_test_rows: Optional[int] = _config.IMDB_MAX_TEST_ROWS,
+        tokens: Optional[TokenAnalyzer] = None,
     ):
-        self._loader = loader or TextLoader()
+        self._loader = loader or ImdbLoader(_config.IMDB_DATA_DIR)
+        self._max_train_rows = max_train_rows
+        self._max_test_rows = max_test_rows
         self._preprocessor = TextPreprocessor()
-        self._model = TextClassifier()
-        self._test_size = test_size
-        self._metrics: Dict = {}
-        self._confusion_matrix: list = []
+        self._tokens = tokens or TokenAnalyzer()
+        self._suite = RepresentationSuite()
+        self._results: Dict = {}
         self._train_size = 0
         self._test_count = 0
         self._train_seconds = 0.0
+        self._model_size_mb = 0.0
         self._run_id: Optional[str] = None
         self._experiment_id: Optional[str] = None
         self._ready = False
         self._train_lock = threading.Lock()
 
-    def train(self, df: Optional[pd.DataFrame] = None) -> Dict:
-        """Fit on the train split, evaluate on the test split, log to MLflow.
+    def train(self, split: Optional[Split] = None) -> Dict:
+        """Fit every representation on IMDB train, evaluate on IMDB test, log to MLflow.
 
         Thread-safe — concurrent callers during the warm-up window block here
-        and pick up the cached metrics once the first caller finishes.
+        and pick up the cached results once the first caller finishes.
         """
         with self._train_lock:
             if self._ready:
-                return self._metrics
+                return self._results
 
             start = time.perf_counter()
-            split = self._loader.train_test_split(test_size=self._test_size, df=df)
-            x_train = self._preprocessor.transform_many(split.train["text"].tolist())
-            x_test = self._preprocessor.transform_many(split.test["text"].tolist())
-
-            self._model.fit(x_train, split.train["label"].tolist())
-            result = self._model.evaluate(x_test, split.test["label"].tolist())
-            self._metrics = result["metrics"]
-            self._confusion_matrix = result["confusion_matrix"]
+            self._tokens.load()
+            split = split or self._loader.train_test_split(
+                max_train_rows=self._max_train_rows, max_test_rows=self._max_test_rows
+            )
+            train_x = self._preprocessor.transform_many(split.train["text"].tolist())
+            test_x = self._preprocessor.transform_many(split.test["text"].tolist())
+            self._suite.fit(train_x, split.train["label"].tolist())
+            self._results = self._suite.evaluate(test_x, split.test["label"].tolist())
 
             self._train_size = len(split.train)
             self._test_count = len(split.test)
             self._train_seconds = time.perf_counter() - start
-            self._ready = True
 
-            self._log_to_mlflow()
-            return self._metrics
+            with tempfile.TemporaryDirectory() as tmp:
+                model_path = os.path.join(tmp, "representations.joblib")
+                self._suite.save(model_path)
+                self._model_size_mb = os.path.getsize(model_path) / 1e6
+                self._ready = True
+                self._log_to_mlflow(model_path)
+            return self._results
 
     def predict(self, text: str) -> Dict:
+        """Everything the playground shows for one piece of text."""
         if not self._ready:
             self.train()
         clean = self._preprocessor.transform(text)
-        probs = self._model.predict_proba([clean])[0]
-        best = int(probs.argmax())
         return {
-            "label": self._model.labels[best],
-            "confidence": round(float(probs[best]), 4),
-            "probabilities": {
-                label: round(float(p), 4) for label, p in zip(self._model.labels, probs)
-            },
             "pipeline": self._preprocessor.trace(text),
+            "tokens": self._tokens.analyze(text),
+            "representations": self._suite.explain(clean),
         }
+
+    def _comparison(self) -> Dict:
+        """One entry per representation: test metrics plus vector statistics.
+        Keys are the representation ids so About {{tokens}} can address them."""
+        rows = {}
+        for rep, name in REPRESENTATIONS.items():
+            m = self._results[rep]["metrics"]
+            st = self._suite.stats[rep]
+            rows[rep] = {
+                "name": name,
+                "accuracy": f"{m['accuracy'] * 100:.1f}%",
+                "f1": f"{m['f1']:.3f}",
+                "roc_auc": f"{m['roc_auc']:.3f}",
+                "vocabulary_size": f"{st['vocabulary_size']:,}",
+                "density_pct": f"{st['density_pct']:.3f}%",
+                "nonzeros_per_doc": st["nonzeros_per_doc"],
+                "fit_seconds": f"{st['fit_seconds']:.1f}s",
+            }
+        return rows
 
     def get_model_info(self) -> Dict:
         """Model metadata for the About drawer and Model Card.
@@ -113,19 +133,21 @@ class PredictionService:
         returns the static fields with empty metrics.
         """
         info = {
-            "model_type": "TextClassifier",
+            "model_type": "LogisticRegression × 4",
             "architecture": ARCHITECTURE,
             "dataset": _DATASET,
-            "target": "text label (classification)",
+            "target": "sentiment (Negative / Positive)",
             "parameters": {
-                "ngram_range": list(NGRAM_RANGE),
-                "max_features": MAX_FEATURES,
+                "min_df": MIN_DF,
+                "ngram_max_features": NGRAM_MAX_FEATURES,
                 "C": C,
-                "test_size": self._test_size,
+                "solver": SOLVER,
             },
             "preprocessing": {"steps": self._preprocessor.step_names},
+            "representations": REPRESENTATIONS,
             "metrics": {},
             "metrics_display": {},
+            "comparison": None,
             "confusion_matrix": None,
             "split": None,
             "training": None,
@@ -135,26 +157,28 @@ class PredictionService:
         }
         if not self._ready:
             return info
-        m = self._metrics
+        best = max(self._results, key=lambda r: self._results[r]["metrics"]["accuracy"])
+        worst = min(self._results, key=lambda r: self._results[r]["metrics"]["accuracy"])
+        tf = self._results["tfidf"]
         info.update({
-            "metrics": m,
+            # Headline metrics are the TF-IDF model's (the lecture's end point).
+            "metrics": {rep: r["metrics"] for rep, r in self._results.items()},
             "metrics_display": {
-                "accuracy": f"{m['accuracy'] * 100:.1f}%",
-                "precision_macro": f"{m['precision_macro']:.3f}",
-                "recall_macro": f"{m['recall_macro']:.3f}",
-                "f1_macro": f"{m['f1_macro']:.3f}",
+                "accuracy": f"{tf['metrics']['accuracy'] * 100:.1f}%",
+                "precision": f"{tf['metrics']['precision']:.3f}",
+                "recall": f"{tf['metrics']['recall']:.3f}",
+                "f1": f"{tf['metrics']['f1']:.3f}",
+                "roc_auc": f"{tf['metrics']['roc_auc']:.3f}",
+                "best": REPRESENTATIONS[best],
+                "spread": f"{(self._results[best]['metrics']['accuracy'] - self._results[worst]['metrics']['accuracy']) * 100:.1f} points",
+                "transform_ms_per_doc": f"{tf['transform_ms_per_doc']:.2f} ms",
             },
-            "confusion_matrix": {
-                "labels": self._model.labels,
-                "matrix": self._confusion_matrix,
-            },
-            "split": {
-                "train_samples": self._train_size,
-                "test_samples": self._test_count,
-            },
+            "comparison": self._comparison(),
+            "confusion_matrix": {"labels": self._suite.labels, "matrix": tf["confusion_matrix"]},
+            "split": {"train_samples": self._train_size, "test_samples": self._test_count},
             "training": {
                 "seconds": f"{self._train_seconds:.1f}s",
-                "vocabulary_size": self._model.vocabulary_size,
+                "model_size": f"{self._model_size_mb:.1f} MB",
             },
             "run_id": self._run_id,
             "experiment_id": self._experiment_id,
@@ -169,15 +193,10 @@ class PredictionService:
     def is_ready(self) -> bool:
         return self._ready
 
-    def _log_to_mlflow(self) -> None:
-        """Log params, metrics and the model file to nlp-mlflow.
-
-        Uses the classic per-run `mlflow.log_artifact` path, NOT the LoggedModel
-        API (`mlflow.sklearn.log_model`): MLflow 3.11's LoggedModel +
-        `--serve-artifacts` silently fails uploads on the per-domain trackers
-        (Phase 2b.10 lesson, see mlflow_operational_lessons). run_id is captured
-        before the artifact write so a failed upload still links the run.
-        """
+    def _log_to_mlflow(self, model_path: str) -> None:
+        """One parent run plus a nested child run per representation, so MLflow's
+        compare view lines the four up. Classic `mlflow.log_artifact` path, NOT the
+        LoggedModel API (Phase 2b.10 lesson, see mlflow_operational_lessons)."""
         try:
             import mlflow
             mlflow.set_tracking_uri(_MLFLOW_URI)
@@ -185,34 +204,35 @@ class PredictionService:
             with mlflow.start_run() as run:
                 mlflow.log_params({
                     "architecture": ARCHITECTURE,
-                    "ngram_range": str(NGRAM_RANGE),
-                    "max_features": MAX_FEATURES,
+                    "min_df": MIN_DF,
+                    "ngram_max_features": NGRAM_MAX_FEATURES,
                     "C": C,
-                    "test_size": self._test_size,
+                    "solver": SOLVER,
                     "n_train": self._train_size,
                     "n_test": self._test_count,
                     "preprocessing": ",".join(self._preprocessor.step_names),
                     "dataset": _DATASET,
                 })
                 mlflow.log_metrics({
-                    **self._metrics,
                     "train_seconds": round(self._train_seconds, 3),
-                    "vocabulary_size": self._model.vocabulary_size,
+                    "model_size_mb": round(self._model_size_mb, 2),
+                    **{f"{rep}_accuracy": r["metrics"]["accuracy"] for rep, r in self._results.items()},
                 })
                 self._run_id = run.info.run_id
                 self._experiment_id = str(run.info.experiment_id)
+                for rep, name in REPRESENTATIONS.items():
+                    with mlflow.start_run(run_name=rep, nested=True):
+                        mlflow.log_params({"representation": name})
+                        mlflow.log_metrics({
+                            **self._results[rep]["metrics"],
+                            **{k: v for k, v in self._suite.stats[rep].items()},
+                        })
                 try:
                     with tempfile.TemporaryDirectory() as tmp:
-                        model_path = os.path.join(tmp, "model.joblib")
-                        self._model.save(model_path)
                         mlflow.log_artifact(model_path, artifact_path="model")
-                        # Confusion matrix as a JSON artifact (the costly error
-                        # is visible in MLflow, not only in the drawer).
-                        cm_path = os.path.join(tmp, "confusion_matrix.json")
+                        cm_path = os.path.join(tmp, "comparison.json")
                         with open(cm_path, "w") as f:
-                            json.dump(
-                                {"labels": self._model.labels, "matrix": self._confusion_matrix}, f
-                            )
+                            json.dump({"results": self._results, "stats": self._suite.stats}, f)
                         mlflow.log_artifact(cm_path, artifact_path="evaluation")
                 except Exception as artifact_err:
                     logger.warning(f"MLflow artifact logging skipped: {artifact_err}")

@@ -107,6 +107,31 @@
     .pipeline-step .out { color: #cbd5e1; word-break: break-word; }
     @media (max-width: 500px) { .pipeline-step { grid-template-columns: 1fr; gap: .2rem; } }
 
+    .tokens-table, .cmp-table, .we-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+    .tokens-table th, .cmp-table th, .we-table th {
+      text-align: left; color: var(--muted); font-weight: 600; font-size: .7rem;
+      text-transform: uppercase; letter-spacing: .06em; padding: .35rem .5rem; border-bottom: 1px solid var(--border);
+    }
+    .tokens-table td, .cmp-table td, .we-table td { padding: .3rem .5rem; border-bottom: 1px solid var(--border); font-family: 'SF Mono', Consolas, monospace; }
+    .tokens-table tr.stop td { color: var(--muted); }
+    .diff { color: #facc15; }
+    .table-scroll { overflow-x: auto; margin-bottom: 1.5rem; }
+    .token-summary { font-size: .8rem; color: var(--muted); margin: .5rem 0 1.5rem; }
+    .reps { display: grid; grid-template-columns: repeat(2, 1fr); gap: .75rem; margin-bottom: 1.5rem; }
+    @media (max-width: 700px) { .reps { grid-template-columns: 1fr; } }
+    .rep-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: .75rem; font-size: .8rem; }
+    .rep-card h3 { font-size: .85rem; color: var(--text); margin-bottom: .4rem; }
+    .rep-meta { color: var(--muted); font-size: .72rem; margin: .35rem 0 .5rem; }
+    .rep-label { font-weight: 700; }
+    .rep-label.pos { color: #86efac; } .rep-label.neg { color: #f87171; }
+    .chips { display: flex; flex-wrap: wrap; gap: .3rem; margin: .25rem 0 .5rem; }
+    .chip { font-family: 'SF Mono', Consolas, monospace; font-size: .72rem; padding: .1rem .45rem; border-radius: 99px; background: rgba(79,142,247,.1); color: #cbd5e1; }
+    .chip.pos { background: rgba(34,197,94,.12); color: #86efac; }
+    .chip.neg { background: rgba(248,113,113,.12); color: #fca5a5; }
+    .sub-label { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+    .we-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    @media (max-width: 700px) { .we-grid { grid-template-columns: 1fr; } }
+    .we-grid h3 { font-size: .8rem; color: var(--accent); margin-bottom: .3rem; }
     .model-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: .75rem; margin-bottom: 1rem; }
     @media (max-width: 500px) { .model-stats { grid-template-columns: repeat(2, 1fr); } }
     .stat-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: .6rem .75rem; }
@@ -347,7 +372,7 @@
     </button>
   </div>
   <h1>Text Representation Lab</h1>
-  <p class="subtitle">__SUBTITLE__</p>
+  <p class="subtitle">Preprocessing · stemming vs lemmatization · one-hot, BoW, n-grams, TF-IDF · IMDB reviews</p>
 </header>
 
 <!-- About drawer -->
@@ -365,8 +390,8 @@
 
 <!-- Input Card -->
 <div class="card">
-  <h2>Input text</h2>
-  <textarea id="input-text" maxlength="2000" placeholder="Type or paste some text…"></textarea>
+  <h2>A review, or any text</h2>
+  <textarea id="input-text" maxlength="5000" placeholder="Paste a movie review, or type something like: OMG this movie was GR8!! Not bad at all 😍"></textarea>
   <div>
     <p style="font-size:.75rem;color:var(--muted);margin-top:1rem">Try an example:</p>
     <div class="example-row" id="examples"></div>
@@ -377,52 +402,85 @@
 
 <!-- Result Card -->
 <div class="result-card" id="result-card">
-  <h2>Prediction</h2>
-  <div class="label-badge" id="label-badge"></div>
-  <div class="probabilities" id="probabilities"></div>
-  <h2>Preprocessing pipeline</h2>
+  <h2>1 · Preprocessing pipeline</h2>
   <div class="pipeline" id="pipeline"></div>
+  <h2 style="margin-top:1.5rem">2 · Tokens: stemming vs lemmatization</h2>
+  <p class="token-summary" id="token-summary"></p>
+  <div class="table-scroll"><table class="tokens-table" id="tokens-table"></table></div>
+  <h2>3 · Four representations, one classifier</h2>
+  <div class="reps" id="reps"></div>
 </div>
 
 <!-- Model Card -->
 <div class="model-card">
-  <h2>Model Card</h2>
-  <div class="model-stats">
-    <div class="stat-box"><div class="stat-label">Model</div><div class="stat-value" id="mc-model">—</div></div>
-    <div class="stat-box"><div class="stat-label">Train rows</div><div class="stat-value" id="mc-train">—</div></div>
-    <div class="stat-box"><div class="stat-label">Accuracy</div><div class="stat-value" id="mc-accuracy">—</div></div>
-    <div class="stat-box"><div class="stat-label">F1 Macro</div><div class="stat-value" id="mc-f1">—</div></div>
-  </div>
+  <h2>Which representation wins? (IMDB test set)</h2>
+  <div class="table-scroll"><table class="cmp-table" id="cmp-table"><tr><td>Training on 25,000 reviews — the table fills in when warm-up finishes.</td></tr></table></div>
   <a class="mlflow-link" id="mlflow-link" href="#" target="_blank" rel="noopener" style="display:none">
-    ↗ View in MLflow
+    ↗ Compare the four runs in MLflow
   </a>
+</div>
+
+<!-- Worked example -->
+<div class="model-card">
+  <h2>Worked example: the lecture's four documents</h2>
+  <p class="token-summary" id="we-corpus"></p>
+  <div class="we-grid" id="we-grid"></div>
 </div>
 
 <script>
   // Works behind Nginx (/nlp/<name>/) and on the bare host port (/).
   const API_BASE = location.pathname.replace(/\/$/, '');
 
-  // TODO: replace with examples that show off this demo.
+  // Negation, mixed sentiment, and a messy chat-style review.
   const EXAMPLES = [
-    'I loved this film, the acting was superb',
-    'Rude staff and awful service',
+    'This movie was not good at all.',
+    'Not bad, actually quite good!',
+    'The acting was great but the plot was terrible.',
+    'OMG this movie was GR8!! <br /><br />Studies say the actors were running better than ever 😍 tbh',
   ];
+  const REP_ORDER = ['one_hot', 'bow', 'ngram', 'tfidf'];
 
   async function loadModelCard() {
     try {
       const res = await fetch(`${API_BASE}/model-info`);
       if (!res.ok) return;
       const info = await res.json();
-      document.getElementById('mc-model').textContent = info.model_type;
-      if (info.split) document.getElementById('mc-train').textContent = info.split.train_samples;
-      if (info.metrics_display.accuracy) document.getElementById('mc-accuracy').textContent = info.metrics_display.accuracy;
-      if (info.metrics_display.f1_macro) document.getElementById('mc-f1').textContent = info.metrics_display.f1_macro;
+      if (!info.comparison) return;
+      let html = '<tr><th>Representation</th><th>Accuracy</th><th>F1</th><th>Vocabulary</th><th>Density</th><th>Non-zeros / review</th><th>Fit</th></tr>';
+      REP_ORDER.forEach(k => {
+        const c = info.comparison[k];
+        html += `<tr><td>${escapeHtml(c.name)}</td><td>${c.accuracy}</td><td>${c.f1}</td><td>${c.vocabulary_size}</td><td>${c.density_pct}</td><td>${c.nonzeros_per_doc}</td><td>${c.fit_seconds}</td></tr>`;
+      });
+      document.getElementById('cmp-table').innerHTML = html;
       if (info.mlflow_url) {
         const link = document.getElementById('mlflow-link');
         link.href = info.mlflow_url;
         link.style.display = 'inline-flex';
       }
-    } catch (e) { /* model still warming up or MLflow down — card keeps dashes */ }
+    } catch (e) { /* model still warming up or MLflow down — table keeps its note */ }
+  }
+
+  function renderTable(t, rowLabels) {
+    let html = '<tr><th></th>' + t.columns.map(c => `<th>${escapeHtml(c)}</th>`).join('') + '</tr>';
+    t.rows.forEach((row, i) => {
+      html += `<tr><td>${escapeHtml(rowLabels[i])}</td>` + row.map(v => `<td>${v}</td>`).join('') + '</tr>';
+    });
+    return `<div class="table-scroll"><table class="we-table">${html}</table></div>`;
+  }
+
+  async function loadWorkedExample() {
+    try {
+      const res = await fetch(`${API_BASE}/worked-example`);
+      if (!res.ok) return;
+      const w = await res.json();
+      const docs = w.corpus.map((_, i) => `D${i + 1}`);
+      document.getElementById('we-corpus').textContent = w.corpus.map((d, i) => `D${i + 1}: "${d}"`).join(' · ');
+      document.getElementById('we-grid').innerHTML = `
+        <div><h3>One-hot: D1, one row per word</h3>${renderTable(w.one_hot_doc1, w.one_hot_doc1.tokens)}</div>
+        <div><h3>Bag-of-words: counts per document</h3>${renderTable(w.bow, docs)}</div>
+        <div><h3>N-grams (1-2): bigrams become columns</h3>${renderTable(w.ngram, docs)}</div>
+        <div><h3>TF-IDF: rare words weigh more</h3>${renderTable(w.tfidf, docs)}</div>`;
+    } catch (e) { /* static tables are optional */ }
   }
 
   // ——— About drawer ———
@@ -642,6 +700,7 @@
     });
     document.getElementById('predict-btn').addEventListener('click', predict);
     loadModelCard();
+    loadWorkedExample();
   });
 
   async function predict() {
@@ -669,16 +728,44 @@
     }
   }
 
+  function chips(items, cls, key) {
+    if (!items.length) return '<span class="chip">none</span>';
+    return items.map(it => `<span class="chip ${cls}">${escapeHtml(it.feature)} ${it[key] > 0 && cls === 'pos' ? '+' : ''}${it[key]}</span>`).join('');
+  }
+
   function showResult(r) {
-    document.getElementById('label-badge').textContent = r.label;
-    document.getElementById('probabilities').innerHTML = Object.entries(r.probabilities).map(([label, p]) => `
-      <div class="prob-row">
-        <span class="prob-label">${escapeHtml(label)}</span>
-        <div class="prob-bar-bg"><div class="prob-bar-fill" style="width:${Math.round(p * 100)}%"></div></div>
-        <span class="prob-value">${Math.round(p * 100)}%</span>
-      </div>`).join('');
     document.getElementById('pipeline').innerHTML = r.pipeline.map(s => `
       <div class="pipeline-step"><span class="name">${escapeHtml(s.step)}</span><span class="out">${escapeHtml(s.text) || '<em>(empty)</em>'}</span></div>`).join('');
+
+    const t = r.tokens;
+    document.getElementById('token-summary').textContent =
+      `${t.total} tokens · ${t.stopwords} stopwords (greyed) · ${t.stem_vocab} distinct stems vs ${t.lemma_vocab} distinct lemmas. Yellow = stem and lemma disagree.`;
+    document.getElementById('tokens-table').innerHTML =
+      '<tr><th>Token</th><th>Porter stem</th><th>spaCy lemma</th><th>POS</th></tr>' +
+      t.tokens.map(k => `<tr class="${k.is_stop ? 'stop' : ''}"><td>${escapeHtml(k.token)}</td>` +
+        `<td class="${k.stem !== k.lemma.toLowerCase() ? 'diff' : ''}">${escapeHtml(k.stem)}</td>` +
+        `<td>${escapeHtml(k.lemma)}</td><td>${escapeHtml(k.pos)}</td></tr>`).join('');
+
+    document.getElementById('reps').innerHTML = REP_ORDER.map(k => {
+      const v = r.representations[k];
+      const pct = Math.round(v.probability_positive * 100);
+      return `<div class="rep-card">
+        <h3>${escapeHtml(v.name)}</h3>
+        <div class="prob-row">
+          <span class="rep-label ${v.label === 'Positive' ? 'pos' : 'neg'}">${v.label}</span>
+          <div class="prob-bar-bg"><div class="prob-bar-fill" style="width:${pct}%"></div></div>
+          <span class="prob-value">${pct}%</span>
+        </div>
+        <div class="rep-meta">${v.nonzeros} non-zero of ${v.dimensions.toLocaleString()} dimensions</div>
+        <div class="sub-label">Largest vector entries</div>
+        <div class="chips">${v.top_values.map(it => `<span class="chip">${escapeHtml(it.feature)} = ${it.value}</span>`).join('') || '<span class="chip">none</span>'}</div>
+        <div class="sub-label">Pushed towards Positive</div>
+        <div class="chips">${chips(v.pushes_positive, 'pos', 'weight')}</div>
+        <div class="sub-label">Pushed towards Negative</div>
+        <div class="chips">${chips(v.pushes_negative, 'neg', 'weight')}</div>
+      </div>`;
+    }).join('');
+
     const card = document.getElementById('result-card');
     card.classList.add('visible');
     card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

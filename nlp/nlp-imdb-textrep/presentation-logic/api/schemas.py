@@ -12,7 +12,7 @@ class HealthResponse(BaseModel):
 
 
 class PredictRequest(BaseModel):
-    text: str = Field(..., min_length=1, max_length=2000, description="Input text")
+    text: str = Field(..., min_length=1, max_length=5000, description="Any text, e.g. a movie review")
 
 
 class PipelineStep(BaseModel):
@@ -21,10 +21,11 @@ class PipelineStep(BaseModel):
 
 
 class PredictResponse(BaseModel):
-    label: str = Field(..., description="Predicted label")
-    confidence: float = Field(..., description="Probability of the predicted label (0-1)")
-    probabilities: Dict[str, float] = Field(..., description="Probability per label")
     pipeline: List[PipelineStep] = Field(..., description="Text after each preprocessing step")
+    tokens: Dict = Field(..., description="spaCy tokens with Porter stem, lemma, POS, stopword flag")
+    representations: Dict[str, Dict] = Field(
+        ..., description="Per representation: P(positive), label, vector entries, top word weights"
+    )
     request_id: Optional[str] = None
 
 
@@ -39,6 +40,8 @@ class ModelInfoResponse(BaseModel):
     target: str
     parameters: Dict
     preprocessing: Dict
+    representations: Dict
+    comparison: Optional[Dict] = None
     metrics: Dict
     metrics_display: Optional[Dict] = None
     confusion_matrix: Optional[Dict] = None

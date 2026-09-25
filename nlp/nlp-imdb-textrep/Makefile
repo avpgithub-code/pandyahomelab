@@ -1,4 +1,4 @@
-.PHONY: help lint test docker-build docker-run docker-stop clean
+.PHONY: help data lint test docker-build docker-run docker-stop clean
 
 PROJECT_NAME := nlp-imdb-textrep
 DOCKER_IMAGE := $(PROJECT_NAME):latest
@@ -7,6 +7,7 @@ CONTAINER_PORT := 8000
 
 help:
 	@echo "nlp-imdb-textrep — Available targets:"
+	@echo "  make data          — Download IMDB train/test into data/imdb/"
 	@echo "  make lint          — Run black, flake8, mypy"
 	@echo "  make test-unit     — Run unit tests"
 	@echo "  make test-cov      — Run tests with coverage"
@@ -14,6 +15,9 @@ help:
 	@echo "  make docker-run    — Run container locally"
 	@echo "  make docker-stop   — Stop running container"
 	@echo "  make clean         — Remove __pycache__ and .pyc files"
+
+data:
+	python3 scripts/fetch_imdb.py --data-dir data/imdb
 
 lint:
 	@echo "Linting code..."

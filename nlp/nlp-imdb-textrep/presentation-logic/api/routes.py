@@ -1,4 +1,4 @@
-"""API routes for nlp-imdb-textrep: /, /about, /health, /predict, /model-info."""
+"""API routes for nlp-imdb-textrep: /, /about, /health, /predict, /model-info, /worked-example."""
 import json
 import logging
 import uuid
@@ -9,6 +9,7 @@ from typing import Optional
 from fastapi import APIRouter, Header, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 
+from application_logic.model.worked_example import worked_example
 from application_logic.services.prediction_service import PredictionService
 from presentation_logic.api.schemas import (
     HealthResponse,
@@ -63,6 +64,12 @@ async def predict(request: PredictRequest, x_request_id: Optional[str] = Header(
     except Exception as e:
         logger.error(f"[{request_id}] Predict failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/worked-example")
+async def worked_example_tables():
+    """The lecture's four-document toy corpus encoded every way. Static, never trains."""
+    return worked_example()
 
 
 @router.get("/model-info", response_model=ModelInfoResponse)

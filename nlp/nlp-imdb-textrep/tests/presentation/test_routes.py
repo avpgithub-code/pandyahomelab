@@ -33,11 +33,11 @@ class TestHealth:
 
 class TestPredict:
     def test_returns_200(self):
-        assert client.post("/predict", json={"text": "Great service"}).status_code == 200
+        assert client.post("/predict", json={"text": "Great film"}).status_code == 200
 
     def test_response_shape(self):
-        data = client.post("/predict", json={"text": "Great service"}).json()
-        for field in ("label", "confidence", "probabilities", "pipeline", "request_id"):
+        data = client.post("/predict", json={"text": "Great film"}).json()
+        for field in ("pipeline", "tokens", "representations", "request_id"):
             assert field in data
 
     def test_empty_text_returns_422(self):
@@ -47,7 +47,13 @@ class TestPredict:
         assert client.post("/predict", json={}).status_code == 422
 
     def test_too_long_text_returns_422(self):
-        assert client.post("/predict", json={"text": "a" * 2001}).status_code == 422
+        assert client.post("/predict", json={"text": "a" * 5001}).status_code == 422
+
+
+class TestWorkedExample:
+    def test_returns_tables(self):
+        data = client.get("/worked-example").json()
+        assert {"corpus", "one_hot_doc1", "bow", "ngram", "tfidf"} <= set(data)
 
 
 class TestModelInfo:
@@ -57,7 +63,7 @@ class TestModelInfo:
     def test_required_fields(self):
         data = client.get("/model-info").json()
         for field in ("model_type", "architecture", "metrics", "metrics_display",
-                      "confusion_matrix", "split", "preprocessing", "mlflow_url"):
+                      "confusion_matrix", "split", "preprocessing", "comparison", "mlflow_url"):
             assert field in data
 
 
