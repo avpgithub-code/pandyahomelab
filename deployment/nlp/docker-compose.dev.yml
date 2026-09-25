@@ -53,3 +53,41 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+  nlp-imdb-textrep:
+    image: nlp-imdb-textrep:latest
+    build:
+      context: ../../nlp/nlp-imdb-textrep
+      dockerfile: docker/Dockerfile
+    container_name: nlp-imdb-textrep
+    environment:
+      PYTHONPATH: /app
+      MLFLOW_TRACKING_URI: http://nlp-mlflow:5000
+      IMDB_DATA_DIR: /app/data/imdb
+    ports:
+      - "127.0.0.1:8021:8000"   # NAS-only; public traffic comes via nginx
+    volumes:
+      # IMDB has no stated licence, so it is mounted, never baked into the image.
+      # Non-root container; data/imdb carries a read-only `everyone` Synology ACE.
+      - /volume1/pandya-homelab/nlp/nlp-imdb-textrep/data/imdb:/app/data/imdb:ro
+    networks:
+      nlp-network:
+        ipv4_address: 172.22.0.11
+    depends_on:
+      nlp-mlflow:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      # /health answers as soon as uvicorn binds; the ~5 min warm-up (spaCy load +
+      # 2 vectorizers + 4 logistic regressions on 25k reviews) runs in the background.
+      start_period: 60s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+

@@ -1,0 +1,479 @@
+{
+  "title": "About imdb-textrep",
+  "tagline": "Any text in; every cleaning step, stems vs lemmas, and four vector representations out, each scored by the same classifier on 25,000 IMDB reviews.",
+  "sections": [
+    {
+      "id": "problem",
+      "title": "The Problem",
+      "icon": "🎯",
+      "body": [
+        "A model can only do arithmetic. Before it can say whether a movie review is positive or negative, the review has to become a list of numbers, and **how** you turn words into numbers decides what the model can notice.",
+        "This lab shows the whole path for any text you type: the cleaning steps, the tokens (with stemming and lemmatization side by side), and four ways to turn the result into a vector. Then it runs the same classifier on each of the four, so you can see which representation actually helps."
+      ]
+    },
+    {
+      "id": "approach",
+      "title": "Approach — Why Compare Representations?",
+      "icon": "🧭",
+      "body": [
+        "Lecture 4 of the End-to-End NLP course walks from one-hot encoding to bag-of-words, n-grams and TF-IDF. Seeing the vectors is half the lesson; the other half is what they do to a model. So each representation feeds an **identical** logistic regression, trained on the same {{split.train_samples}} IMDB reviews and scored on the same {{split.test_samples}} unseen ones. The only thing that changes between rows is the representation.",
+        "On this data the spread from worst to best is {{metrics_display.spread}}, and the winner is **{{metrics_display.best}}**."
+      ],
+      "bullets": [
+        {
+          "label": "Why logistic regression",
+          "text": "It gives every vocabulary column one weight, so the \"pushed towards Positive/Negative\" chips on the demo are the model's actual reasoning, not an approximation. It also trains in seconds on sparse vectors."
+        },
+        {
+          "label": "Why shared vocabularies",
+          "text": "One-hot and bag-of-words use the same unigram vocabulary; n-grams and TF-IDF use the same unigram + bigram vocabulary. Within each pair only the weighting differs."
+        },
+        {
+          "label": "Why min_df = 2 and 100k n-grams",
+          "text": "Words seen in only one review are mostly typos and names, so they are dropped. Unigrams + bigrams would give millions of columns; the 100,000 most frequent keep training fast on the NAS."
+        },
+        {
+          "label": "Why no stopword removal",
+          "text": "The standard stopword lists include \"not\", \"no\" and \"never\". Removing them turns \"not good\" into \"good\". The token table greys stopwords out so you can see what would be lost."
+        }
+      ]
+    },
+    {
+      "id": "text-pipeline",
+      "title": "From Raw Text to Numbers",
+      "icon": "🔤",
+      "body": [
+        "Every review goes through the same fixed cleaning steps from lecture 3 before it is vectorized. The demo shows your text after each step.",
+        "Tokens are then shown twice: cut down by NLTK's **Porter stemmer**, which strips suffixes by rule (\"studies\" → \"studi\"), and by spaCy's **lemmatizer**, which looks words up using their part of speech (\"studies\" → \"study\", \"better\" → \"well\"). The representations train on the cleaned text only, which keeps warm-up short."
+      ],
+      "bullets": [
+        {
+          "label": "lowercase",
+          "text": "\"Great\" and \"great\" become one word."
+        },
+        {
+          "label": "strip_html",
+          "text": "IMDB reviews contain `<br />` line breaks."
+        },
+        {
+          "label": "strip_urls · strip_emojis",
+          "text": "Links and emoji carry little that a word-count model can use."
+        },
+        {
+          "label": "expand_chat_words",
+          "text": "\"gr8\" → \"great\", \"tbh\" → \"to be honest\", so they share columns with the spelled-out words."
+        },
+        {
+          "label": "strip_punctuation · collapse_whitespace",
+          "text": "Punctuation goes; spaces are tidied."
+        }
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph LR\n  R[\"Review\"] --> C[\"Clean<br/>7 steps\"] --> T[\"Tokens\"]\n  T --> O[\"One-hot\"]\n  T --> B[\"Bag-of-words\"]\n  T --> N[\"N-grams\"]\n  N --> F[\"TF-IDF\"]\n  O --> LR[\"Logistic regression × 4\"]\n  B --> LR\n  N --> LR\n  F --> LR\n\n  classDef io fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef step fill:#13161e,stroke:#4f8ef7,color:#e2e8f0\n  class R,LR io\n  class C,T,O,B,N,F step"
+      }
+    },
+    {
+      "id": "representations",
+      "title": "Four Representations",
+      "icon": "🧮",
+      "body": [
+        "The worked example card on the demo encodes the lecture's four tiny documents every way: D1 \"people watch campusx\", D2 \"campusx watch campusx\", D3 \"people write comment\", D4 \"campusx write comment\". Each representation keeps something the previous one threw away."
+      ],
+      "bullets": [
+        {
+          "label": "One-hot",
+          "text": "Each word is a vector with a single 1 in its vocabulary column. Summed over a review and clipped at 1, it says only **which** words appear. IMDB accuracy: {{comparison.one_hot.accuracy}}."
+        },
+        {
+          "label": "Bag-of-words",
+          "text": "Counts how **often** each word appears: D2 gets campusx = 2. Word order is gone. IMDB accuracy: {{comparison.bow.accuracy}}. Counts can hurt: a word repeated ten times gets ten times the say."
+        },
+        {
+          "label": "N-grams",
+          "text": "Adds pairs of neighbouring words as extra columns, so \"not good\" and \"good\" become different features and a little word order comes back. IMDB accuracy: {{comparison.ngram.accuracy}}."
+        },
+        {
+          "label": "TF-IDF",
+          "text": "The same n-gram columns, reweighted: a word counts for more when it is frequent in this review (TF) and rare across all reviews (IDF). \"the\" is everywhere, so it fades; \"masterpiece\" stands out. IMDB accuracy: {{comparison.tfidf.accuracy}}."
+        }
+      ]
+    },
+    {
+      "id": "sparsity",
+      "title": "Sparse Vectors and Why Embeddings Come Next",
+      "icon": "🕳️",
+      "body": [
+        "All four vectors are almost entirely zeros. A review uses a couple of hundred distinct words out of a vocabulary of tens of thousands, so most columns are empty for any given review.",
+        "Sparse vectors have two blind spots. They grow with the vocabulary, and they know nothing about meaning: \"great\" and \"excellent\" are as unrelated as \"great\" and \"boring\". Dense word embeddings fix both, with a few hundred numbers per word learned from context. That is the next demo in this series (Word2Vec, Phase 3c)."
+      ],
+      "facts": [
+        {
+          "label": "One-hot / BoW vocabulary",
+          "value": "{{comparison.bow.vocabulary_size}}"
+        },
+        {
+          "label": "One-hot / BoW density",
+          "value": "{{comparison.bow.density_pct}}"
+        },
+        {
+          "label": "Non-zeros per review (1-grams)",
+          "value": "{{comparison.bow.nonzeros_per_doc}}"
+        },
+        {
+          "label": "N-gram / TF-IDF vocabulary",
+          "value": "{{comparison.tfidf.vocabulary_size}}"
+        },
+        {
+          "label": "N-gram / TF-IDF density",
+          "value": "{{comparison.tfidf.density_pct}}"
+        },
+        {
+          "label": "Non-zeros per review (1-2 grams)",
+          "value": "{{comparison.tfidf.nonzeros_per_doc}}"
+        }
+      ]
+    },
+    {
+      "id": "architecture",
+      "title": "Model Architecture",
+      "icon": "🧠",
+      "body": [
+        "Two vectorizers are fit on the cleaned training reviews: a unigram CountVectorizer and a unigram + bigram CountVectorizer (min_df = 2, top 100,000). Four matrices come out of them, and each gets its own logistic regression (C = 1, liblinear solver). Everything is saved together: {{training.model_size}}.",
+        "For your text the demo shows, per model, the probability of Positive, the vector's largest entries, and the words whose weight × value pushed hardest each way."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph TB\n  In[\"Cleaned review\"] --> U[\"CountVectorizer<br/>1-grams\"]\n  In --> N[\"CountVectorizer<br/>1-2 grams · top 100k\"]\n  U --> OH[\"clip to 0/1<br/>one-hot\"] --> L1[\"LogReg\"]\n  U --> L2[\"LogReg\"]\n  N --> L3[\"LogReg\"]\n  N --> TF[\"TfidfTransformer\"] --> L4[\"LogReg\"]\n  L1 --> Out[\"P(positive) × 4\"]\n  L2 --> Out\n  L3 --> Out\n  L4 --> Out\n\n  classDef io fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef layer fill:#13161e,stroke:#4f8ef7,color:#e2e8f0\n  class In,Out io\n  class U,N,OH,TF,L1,L2,L3,L4 layer"
+      }
+    },
+    {
+      "id": "service-architecture",
+      "title": "Service Architecture",
+      "icon": "🏗️",
+      "body": [
+        "Same per-project 4-layer pattern (ADR-013) used by every project on pandyaHomeLab. The browser sends text; the server returns the text after each cleaning step, the token table, and all four representations with their predictions. A static `/worked-example` endpoint serves the lecture's toy tables."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph TB\n  Client[\"Browser\"] -->|HTTPS<br/>POST /predict| Nginx[\"Nginx Proxy\"]\n  Nginx -->|\"/nlp/imdb-textrep/*\"| App[\"nlp-imdb-textrep container\"]\n  subgraph App\n    direction TB\n    Pres[\"presentation-logic<br/>FastAPI · Pydantic v2 · vanilla JS UI\"] --> AppLogic[\"application-logic<br/>PredictionService\"]\n    AppLogic --> Model[\"RepresentationSuite<br/>2 vectorizers · 4 LogReg\"]\n    AppLogic --> DB[\"db-logic<br/>ImdbLoader · TextPreprocessor<br/>+ TokenAnalyzer (spaCy + NLTK)\"]\n    Shared[\"shared/<br/>config · logger\"] -.- Pres\n    Shared -.- AppLogic\n    Shared -.- DB\n  end\n  AppLogic -.->|run logging| MLflow[\"nlp-mlflow<br/>experiment tracking\"]\n\n  classDef container fill:#13161e,stroke:#4f8ef7,color:#e2e8f0\n  classDef external fill:#1a1e2a,stroke:#64748b,color:#cbd5e1\n  class Pres,AppLogic,Model,DB,Shared container\n  class Nginx,Client,MLflow external"
+      }
+    },
+    {
+      "id": "network",
+      "title": "Network & Deployment",
+      "icon": "🌐",
+      "body": [
+        "The NLP domain has its own bridge network (ADR-016). Only nlp-mlflow runs alongside the demos: postgres, MinIO and Redis have reserved addresses but are not deployed until a demo needs one (Phase 3 gate G1). The tracker is public, read-only, at `mlflow-nlp.pandyahomelab.com`.",
+        "No cross-network reach-back into ml-network or dl-network — each domain's tracking and demos are independent."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph LR\n  User([\"🌍 Visitor\"]) --> CF[\"Cloudflare Tunnel<br/>pandyahomelab.com<br/>+ mlflow-nlp.pandyahomelab.com\"]\n  CF --> NX[\"Nginx<br/>:8443\"]\n  subgraph PROXY[\"pandya-proxy-network · 172.24.0.0/24\"]\n    NX\n  end\n  subgraph NLP[\"nlp-network · 172.22.0.0/24\"]\n    THIS[\"nlp-imdb-textrep<br/>172.22.0.11:8000\"]\n    MF[\"nlp-mlflow<br/>172.22.0.5\"]\n    RES[\"postgres · minio · redis<br/>.2–.4 reserved, not running\"]\n  end\n  NX --> THIS\n  NX --> MF\n  THIS -.->|MLflow runs| MF\n\n  classDef live fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef infra fill:#1a1e2a,stroke:#64748b,color:#cbd5e1\n  classDef reserved fill:#0d0f14,stroke:#334155,color:#64748b,stroke-dasharray:4 3\n  class THIS live\n  class MF infra\n  class RES reserved"
+      },
+      "facts": [
+        {
+          "label": "Container",
+          "value": "nlp-imdb-textrep"
+        },
+        {
+          "label": "Container IP",
+          "value": "172.22.0.11"
+        },
+        {
+          "label": "Network",
+          "value": "nlp-network"
+        },
+        {
+          "label": "CIDR",
+          "value": "172.22.0.0/24"
+        },
+        {
+          "label": "Host port",
+          "value": "127.0.0.1:8021 → 8000"
+        },
+        {
+          "label": "Public URL",
+          "value": "/nlp/imdb-textrep/"
+        },
+        {
+          "label": "MLflow tracker",
+          "value": "mlflow-nlp.pandyahomelab.com"
+        }
+      ]
+    },
+    {
+      "id": "stack",
+      "title": "Tech Stack",
+      "icon": "🧰",
+      "items": [
+        {
+          "name": "scikit-learn 1.3",
+          "purpose": "CountVectorizer, TfidfTransformer, LogisticRegression, metrics"
+        },
+        {
+          "name": "spaCy 3.7 (en_core_web_sm)",
+          "purpose": "Tokenizer, part-of-speech tags and lemmatizer for the token table; model baked into the image"
+        },
+        {
+          "name": "NLTK 3.8",
+          "purpose": "PorterStemmer for the stemming column"
+        },
+        {
+          "name": "pandas + pyarrow",
+          "purpose": "Reads the IMDB parquet files"
+        },
+        {
+          "name": "FastAPI 0.104",
+          "purpose": "Async HTTP API framework"
+        },
+        {
+          "name": "Pydantic v2",
+          "purpose": "Request/response schema validation"
+        },
+        {
+          "name": "uvicorn",
+          "purpose": "ASGI server, runs inside the container"
+        },
+        {
+          "name": "Docker",
+          "purpose": "Multi-stage build on python:3.11-slim"
+        },
+        {
+          "name": "Nginx 1.25",
+          "purpose": "Reverse proxy, TLS termination, route fan-out, host-based routing for the mlflow-nlp subdomain"
+        },
+        {
+          "name": "MLflow 3.11",
+          "purpose": "Per-domain tracker on nlp-mlflow:5000 — separate from ml-mlflow and dl-mlflow (V3 domain autonomy)"
+        },
+        {
+          "name": "Synology DSM",
+          "purpose": "Host OS — Docker engine, persistent volumes"
+        }
+      ]
+    },
+    {
+      "id": "dataset",
+      "title": "Dataset",
+      "icon": "📂",
+      "body": [
+        "The **Large Movie Review Dataset** (Maas et al., ACL 2011): 50,000 IMDB reviews labelled positive or negative, split into 25,000 for training and 25,000 for testing, each exactly half positive. Reviews are highly polar: only ratings of 1–4 or 7–10 stars were kept. Taken from `stanfordnlp/imdb` on Hugging Face, pinned to one revision.",
+        "The dataset card states no licence, so, like the Quora data in 3a, it is mounted into the container at runtime and never baked into the image. Every training and test review is used."
+      ],
+      "facts": [
+        {
+          "label": "Train samples",
+          "value": "{{split.train_samples}}"
+        },
+        {
+          "label": "Test samples",
+          "value": "{{split.test_samples}}"
+        },
+        {
+          "label": "Balance",
+          "value": "50% positive (both splits)"
+        },
+        {
+          "label": "Source",
+          "value": "stanfordnlp/imdb"
+        },
+        {
+          "label": "Citation",
+          "value": "Maas et al., ACL 2011"
+        }
+      ]
+    },
+    {
+      "id": "limitations",
+      "title": "What These Models Can't Do",
+      "icon": "⚠️",
+      "body": [
+        "All four models add up word weights. None of them reads a sentence. Try the example buttons to watch them fail."
+      ],
+      "bullets": [
+        {
+          "label": "Negation",
+          "text": "In \"not good\", one-hot and bag-of-words see \"not\" and \"good\" separately, and \"good\" usually wins. N-grams and TF-IDF have a \"not good\" column, which is why they handle it better, but only for pairs of adjacent words: \"not at all good\" slips through."
+        },
+        {
+          "label": "Mixed reviews",
+          "text": "\"The acting was great but the plot was terrible\" is a tug of war between \"great\" and \"terrible\". The model has no idea that \"but\" usually means the second half matters more."
+        },
+        {
+          "label": "Sarcasm",
+          "text": "\"Oh great, another two hours I'll never get back\" is full of positive words."
+        },
+        {
+          "label": "Unseen words",
+          "text": "Words outside the training vocabulary get no column at all. New slang, names and misspellings are invisible."
+        },
+        {
+          "label": "Domain shift",
+          "text": "Trained on polar movie reviews. Product reviews, tweets or neutral text will score unpredictably, and there is no \"neutral\" answer."
+        }
+      ]
+    },
+    {
+      "id": "walkthrough",
+      "title": "Read the Code Walkthrough",
+      "icon": "📖",
+      "body": [
+        "For a guided tour of how this service is built — file by file, layer by layer — start with the **ML Project Walkthrough** (uses iris-knn as the worked example but the 4-layer architecture is identical)."
+      ],
+      "bullets": [
+        {
+          "label": "Project anatomy",
+          "text": "Annotated file tree — what every file is and why it's there."
+        },
+        {
+          "label": "Request flow",
+          "text": "A `/predict` request traced hop-by-hop from the browser through all four layers."
+        },
+        {
+          "label": "Training flow",
+          "text": "Eager warm-up at container startup — load data → preprocess → fit → evaluate → log to nlp-mlflow."
+        },
+        {
+          "label": "Per-layer patterns",
+          "text": "Thread-safe train lock, `__file__`-relative paths, the hyphen-vs-underscore symlink trick."
+        },
+        {
+          "label": "MLflow integration",
+          "text": "How runs are logged to the per-domain tracker; graceful degradation when the tracker is briefly unreachable."
+        }
+      ],
+      "links": [
+        {
+          "label": "ML walkthrough on GitHub",
+          "url": "https://github.com/avpgithub-code/pandyahomelab/blob/main/docs/ML_PROJECT_WALKTHROUGH.md",
+          "external": true
+        }
+      ]
+    },
+    {
+      "id": "metrics",
+      "title": "Performance",
+      "icon": "📊",
+      "problem_type": "Binary sentiment classification · balanced · IMDB test split held out · 4 representations compared",
+      "body": [
+        "Every model trains on the {{split.train_samples}} IMDB training reviews and is scored on the {{split.test_samples}} test reviews it never saw. Classes are exactly balanced, so a coin flip scores 50%. The figures below are for the **TF-IDF** model; the demo's comparison table and the MLflow run show all four."
+      ],
+      "facts": [
+        {
+          "label": "Train samples",
+          "value": "{{split.train_samples}}"
+        },
+        {
+          "label": "Test samples",
+          "value": "{{split.test_samples}}"
+        },
+        {
+          "label": "Training time (all 4)",
+          "value": "{{training.seconds}}"
+        },
+        {
+          "label": "Model size (all 4)",
+          "value": "{{training.model_size}}"
+        },
+        {
+          "label": "Transform latency",
+          "value": "{{metrics_display.transform_ms_per_doc}} per review"
+        },
+        {
+          "label": "Tracked in",
+          "value": "mlflow-nlp ↗"
+        }
+      ],
+      "confusion_matrix": {
+        "labels": "{{confusion_matrix.labels}}",
+        "matrix": "{{confusion_matrix.matrix}}",
+        "annotation": "TF-IDF model. Errors are roughly symmetric: with balanced classes and no costlier mistake, neither off-diagonal cell is the one to minimise first."
+      },
+      "metrics_detail": [
+        {
+          "name": "Accuracy",
+          "value": "{{metrics_display.accuracy}}",
+          "what": "Share of test reviews labelled correctly.",
+          "formula": "correct / total",
+          "why_chosen": "With exactly balanced classes, accuracy is a fair single number and easy to compare across the four representations.",
+          "watch_out": "Hides which way the errors go; read the confusion matrix too."
+        },
+        {
+          "name": "Precision (positive)",
+          "value": "{{metrics_display.precision}}",
+          "what": "Of the reviews called Positive, the share that really are.",
+          "formula": "TP / (TP + FP)",
+          "why_chosen": "Shows whether the model is too eager to call a review positive.",
+          "watch_out": "Moves against recall as the 0.5 threshold moves."
+        },
+        {
+          "name": "Recall (positive)",
+          "value": "{{metrics_display.recall}}",
+          "what": "Of the positive reviews, the share the model found.",
+          "formula": "TP / (TP + FN)",
+          "why_chosen": "Together with precision it shows whether errors lean one way.",
+          "watch_out": "Easy to push to 1.0 by calling everything positive."
+        },
+        {
+          "name": "F1 (positive)",
+          "value": "{{metrics_display.f1}}",
+          "what": "Harmonic mean of precision and recall.",
+          "formula": "2 · P · R / (P + R)",
+          "why_chosen": "The second column of the comparison table: one number that falls if either precision or recall falls.",
+          "watch_out": "On balanced data it tracks accuracy closely; a gap between them means the errors are lopsided."
+        },
+        {
+          "name": "ROC-AUC",
+          "value": "{{metrics_display.roc_auc}}",
+          "what": "Chance that a random positive review gets a higher probability than a random negative one.",
+          "formula": "area under the true-positive vs false-positive rate curve",
+          "why_chosen": "Judges the probabilities, not just the 0.5 cut, which matters for the probability bars on the demo.",
+          "watch_out": "Says nothing about calibration: a 0.8 is not necessarily an 80% chance."
+        }
+      ]
+    },
+    {
+      "id": "learn",
+      "title": "Learn More",
+      "icon": "🔗",
+      "links": [
+        {
+          "label": "View live MLflow runs (one child run per representation)",
+          "url": "https://mlflow-nlp.pandyahomelab.com/",
+          "external": true
+        },
+        {
+          "label": "Source on GitHub",
+          "url": "https://github.com/avpgithub-code/pandyahomelab",
+          "external": true
+        },
+        {
+          "label": "CampusX — End-to-End NLP course (lectures 3 and 4)",
+          "url": "https://www.youtube.com/@campusx-official",
+          "external": true
+        },
+        {
+          "label": "Dataset: stanfordnlp/imdb on Hugging Face",
+          "url": "https://huggingface.co/datasets/stanfordnlp/imdb",
+          "external": true
+        },
+        {
+          "label": "Maas et al. (2011), Learning Word Vectors for Sentiment Analysis",
+          "url": "https://aclanthology.org/P11-1015/",
+          "external": true
+        },
+        {
+          "label": "scikit-learn: text feature extraction",
+          "url": "https://scikit-learn.org/stable/modules/feature_extraction.html#text-feature-extraction",
+          "external": true
+        },
+        {
+          "label": "spaCy: linguistic features (lemmatization, POS)",
+          "url": "https://spacy.io/usage/linguistic-features",
+          "external": true
+        }
+      ]
+    }
+  ]
+}

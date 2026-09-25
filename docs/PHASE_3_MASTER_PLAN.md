@@ -43,7 +43,7 @@ Don't add it in a compose file first.
 |---|---|---|---|---|
 | **3.0** | Domain infrastructure: nlp-network, nlp-mlflow only (G1), Nginx leg, `mlflow-nlp` subdomain, replace `/nlp/` 503 | .5, .20 | — | ✅ Done 2026-09-24 |
 | **3a** | `nlp-quora-randomforest`: duplicate question pair detector | .10 / 8020 | L2 assignment, L8 | ✅ Shipped 2026-09-25 (`v.nlp-quora-randomforest-1.0.0`, 80.1% acc on GLUE QQP) |
-| **3b** | Text preprocessing and representation playground (name at gate) | .11 / 8021 | L3, L4 | Not started |
+| **3b** | `nlp-imdb-textrep`: text preprocessing + representation lab with an IMDB classifier comparison | .11 / 8021 | L3, L4 | ✅ Shipped 2026-09-25 (`v.nlp-imdb-textrep-1.0.0`, TF-IDF 89.9% on IMDB) |
 | **3c** | Word2Vec explorer on a custom corpus (name at gate) | .12 / 8022 | L5 | Not started |
 | **3d** | POS tagger: hand-built HMM + Viterbi trellis vs spaCy (name at gate) | .13 / 8023 | L7 | Not started |
 | v2 | Transformer sentiment / NER (compare against the classical demos) | .14+ | after the course covers transformers | Deferred |
@@ -195,7 +195,7 @@ section `id` using these fields: `body`, `bullets`, `diagram` (Mermaid), `facts`
 | Demo | Demo-specific sections (go in slot 4) | `problem_type` | `metrics_detail` | Confusion matrix |
 |---|---|---|---|---|
 | **3a** quora-randomforest | `features`: the 22 handcrafted features grouped 7 basic / 8 token / 3 length / 4 fuzzy, plus BoW 3000 × 2, with a bullet per group. `threshold`: what the probability means, the slider, and the precision/recall trade-off (a false "duplicate" is the costly error). | Binary text-pair classification | Accuracy, Precision (duplicate), Recall (duplicate), F1, ROC-AUC, log loss | ✅ Not duplicate / Duplicate, at threshold 0.5 |
-| **3b** preprocessing lab | `representations`: OHE → BoW → n-grams → TF-IDF, with a worked example on one sentence. `sparsity`: vocabulary size vs matrix density, and why this leads to dense embeddings (3c). | Text representation (+ classifier comparison, **decide at gate**) | If a comparison classifier is approved: accuracy/F1 per representation. Otherwise vocab size, sparsity %, transform latency. | Only with a classifier |
+| **3b** preprocessing lab | `representations`: OHE → BoW → n-grams → TF-IDF, with a worked example on one sentence. `sparsity`: vocabulary size vs matrix density, and why this leads to dense embeddings (3c). | Text representation + classifier comparison (**gate 2026-09-25: yes, on IMDB**) | If a comparison classifier is approved: accuracy/F1 per representation. Otherwise vocab size, sparsity %, transform latency. | Only with a classifier |
 | **3c** word2vec explorer | `word2vec`: CBOW vs Skip-gram, window, negative sampling. `embedding-space`: cosine similarity, analogies (king − man + woman), 2-D projection. | Unsupervised representation learning | Analogy accuracy, similarity correlation (if a licensed benchmark fits), vocab size, OOV rate, final training loss | ❌ |
 | **3d** HMM POS tagger | `hmm`: tags = hidden states, words = observations, transition/emission probabilities counted from the corpus. `viterbi`: dynamic-programming trellis with backpointers (Mermaid). `unknown-words`: smoothing for unseen words. `spacy-comparison`: same sentences, both taggers, where they disagree. | Sequence labelling (token-level) | Token accuracy, accuracy on unknown words, spaCy agreement rate | ✅ Universal 12-tag set (keeps the grid readable) |
 
