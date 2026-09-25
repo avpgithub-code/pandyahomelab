@@ -42,7 +42,7 @@ Don't add it in a compose file first.
 | Sub-phase | Project (ADR-004 name) | Slot (§5 / §8) | Course source | Status |
 |---|---|---|---|---|
 | **3.0** | Domain infrastructure: nlp-network, nlp-mlflow only (G1), Nginx leg, `mlflow-nlp` subdomain, replace `/nlp/` 503 | .5, .20 | — | ✅ Done 2026-09-24 |
-| **3a** | `nlp-quora-randomforest`: duplicate question pair detector | .10 / 8020 | L2 assignment, L8 | Not started |
+| **3a** | `nlp-quora-randomforest`: duplicate question pair detector | .10 / 8020 | L2 assignment, L8 | ✅ Shipped 2026-09-25 (`v.nlp-quora-randomforest-1.0.0`, 80.1% acc on GLUE QQP) |
 | **3b** | Text preprocessing and representation playground (name at gate) | .11 / 8021 | L3, L4 | Not started |
 | **3c** | Word2Vec explorer on a custom corpus (name at gate) | .12 / 8022 | L5 | Not started |
 | **3d** | POS tagger: hand-built HMM + Viterbi trellis vs spaCy (name at gate) | .13 / 8023 | L7 | Not started |
