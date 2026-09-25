@@ -21,7 +21,7 @@ from presentation_logic.api.schemas import (
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-VERSION = "0.1.0"
+VERSION = "1.0.0"
 
 _service = PredictionService()
 _UI_PATH = Path(__file__).parent / "ui.html"
