@@ -18,7 +18,10 @@ about 78% accuracy on 3k rows. See `docs/PHASE_3_MASTER_PLAN.md` → "3a specifi
 Scaffolded from `nlp/_templates/nlp-project-template`. It still runs the template's
 placeholder classifier and sample corpus. Still to build:
 
-- [ ] Quora Question Pairs loader (dataset stays out of git; licence check before baking)
+- [x] Quora Question Pairs loader: GLUE QQP (`nyu-mll/glue`, pinned revision) via `make data`.
+  GLUE train → train, GLUE validation → test (GLUE test has no labels). Non-commercial
+  licence, so `data/` is mounted at runtime and never baked into the image
+- [ ] Switch the prediction service from the template's `TextLoader` to `QuoraPairLoader`
 - [ ] 22 engineered features + BoW → Random Forest; train on more than 3k rows within the memory guardrail
 - [ ] Probability + threshold slider; "why" panel with the top feature values for the pair
 - [ ] About sections `features` and `threshold`; confusion matrix Not duplicate / Duplicate
@@ -27,6 +30,7 @@ placeholder classifier and sample corpus. Still to build:
 ## Develop
 
 ```sh
+make data        # ~37 MB into data/qqp/, checksum-verified
 make test-unit
 make docker-build
 ```

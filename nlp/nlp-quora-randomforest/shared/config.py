@@ -17,6 +17,10 @@ class Config:
         self.API_HOST = os.getenv("API_HOST", "0.0.0.0")
         self.LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
+        # GLUE QQP parquet files (make data). Mounted read-only in the container;
+        # the dataset's licence keeps it out of the image.
+        self.QQP_DATA_DIR = os.getenv("QQP_DATA_DIR", "/app/data/qqp")
+
         # MLflow — internal URI for logging, public base for links in the UI
         self.MLFLOW_TRACKING_URI = os.getenv(
             "MLFLOW_TRACKING_URI", "http://nlp-mlflow:5000"
