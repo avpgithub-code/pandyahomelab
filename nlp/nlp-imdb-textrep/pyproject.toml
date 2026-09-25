@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nlp-imdb-textrep"
+version = "0.1.0"
+description = "__DESCRIPTION__"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{name = "Archit Pandya", email = "archit@pandyahomelab.com"}]
+# Runtime dependencies live in requirements.txt (what the Dockerfile installs).
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["presentation_logic*", "application_logic*", "db_logic*", "shared*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

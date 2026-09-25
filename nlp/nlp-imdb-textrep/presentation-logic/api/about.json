@@ -1,0 +1,212 @@
+{
+  "title": "About nlp-imdb-textrep",
+  "tagline": "TODO: one sentence — what goes in, what comes out, and the technique in between.",
+  "sections": [
+    {
+      "id": "problem",
+      "title": "The Problem",
+      "icon": "🎯",
+      "body": [
+        "TODO: the real-world question this demo answers.",
+        "TODO: why text makes it hard — ambiguity, paraphrase, sparsity, word order."
+      ]
+    },
+    {
+      "id": "approach",
+      "title": "Approach — Why TODO?",
+      "icon": "🧭",
+      "body": [
+        "TODO: why this classical technique, and what the alternatives would miss."
+      ],
+      "bullets": [
+        {"label": "Why TODO", "text": "TODO: one bullet per key hyper-parameter or design choice."}
+      ]
+    },
+    {
+      "id": "text-pipeline",
+      "title": "From Raw Text to Numbers",
+      "icon": "🔤",
+      "body": [
+        "Every model here sees numbers, not words. Before training and before every prediction, the input text runs through the same fixed pipeline, then becomes a vector.",
+        "TODO: describe the representation this demo produces (BoW, TF-IDF, engineered features, embeddings, ...)."
+      ],
+      "bullets": [
+        {"label": "lowercase", "text": "TODO: why each step is here — or remove it."},
+        {"label": "strip_html / strip_urls", "text": "TODO"},
+        {"label": "strip_punctuation", "text": "TODO"},
+        {"label": "collapse_whitespace", "text": "TODO"}
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph LR\n  Raw[\"Raw text\"] --> Clean[\"Clean<br/>lowercase · strip · collapse\"] --> Vec[\"Vectorize<br/>TODO\"] --> Model[\"Model\"]\n\n  classDef io fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef step fill:#13161e,stroke:#4f8ef7,color:#e2e8f0\n  class Raw,Model io\n  class Clean,Vec step"
+      }
+    },
+    {
+      "id": "concept",
+      "title": "TODO: Demo-specific concept",
+      "icon": "💡",
+      "body": [
+        "TODO: the idea the lecture teaches. Rename this id/title, or add several sections here (see docs/PHASE_3_MASTER_PLAN.md, per-demo table)."
+      ]
+    },
+    {
+      "id": "architecture",
+      "title": "Model Architecture",
+      "icon": "🧠",
+      "body": [
+        "TODO: the feature/model graph with shapes and parameter counts. Vocabulary size after training: {{training.vocabulary_size}}."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph TB\n  In[\"Clean text\"] --> V[\"TODO vectorizer\"] --> M[\"TODO model\"] --> Out[\"Label + probability\"]\n\n  classDef io fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef layer fill:#13161e,stroke:#4f8ef7,color:#e2e8f0\n  class In,Out io\n  class V,M layer"
+      }
+    },
+    {
+      "id": "service-architecture",
+      "title": "Service Architecture",
+      "icon": "🏗️",
+      "body": [
+        "Same per-project 4-layer pattern (ADR-013) used by every project on pandyaHomeLab. The browser sends text; the server returns a label, per-label probabilities, and the text after each preprocessing step."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph TB\n  Client[\"Browser\"] -->|HTTPS<br/>POST /predict| Nginx[\"Nginx Proxy\"]\n  Nginx -->|\"/nlp/imdb-textrep/*\"| App[\"nlp-imdb-textrep container\"]\n  subgraph App\n    direction TB\n    Pres[\"presentation-logic<br/>FastAPI · Pydantic v2 · vanilla JS UI\"] --> AppLogic[\"application-logic<br/>PredictionService\"]\n    AppLogic --> Model[\"TODO model\"]\n    AppLogic --> DB[\"db-logic<br/>TextLoader<br/>+ TextPreprocessor\"]\n    Shared[\"shared/<br/>config · logger\"] -.- Pres\n    Shared -.- AppLogic\n    Shared -.- DB\n  end\n  AppLogic -.->|run logging| MLflow[\"nlp-mlflow<br/>experiment tracking\"]\n\n  classDef container fill:#13161e,stroke:#4f8ef7,color:#e2e8f0\n  classDef external fill:#1a1e2a,stroke:#64748b,color:#cbd5e1\n  class Pres,AppLogic,Model,DB,Shared container\n  class Nginx,Client,MLflow external"
+      }
+    },
+    {
+      "id": "network",
+      "title": "Network & Deployment",
+      "icon": "🌐",
+      "body": [
+        "The NLP domain has its own bridge network (ADR-016). Only nlp-mlflow runs alongside the demos: postgres, MinIO and Redis have reserved addresses but are not deployed until a demo needs one (Phase 3 gate G1). The tracker is public, read-only, at `mlflow-nlp.pandyahomelab.com`.",
+        "No cross-network reach-back into ml-network or dl-network — each domain's tracking and demos are independent."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph LR\n  User([\"🌍 Visitor\"]) --> CF[\"Cloudflare Tunnel<br/>pandyahomelab.com<br/>+ mlflow-nlp.pandyahomelab.com\"]\n  CF --> NX[\"Nginx<br/>:8443\"]\n  subgraph PROXY[\"pandya-proxy-network · 172.24.0.0/24\"]\n    NX\n  end\n  subgraph NLP[\"nlp-network · 172.22.0.0/24\"]\n    THIS[\"nlp-imdb-textrep<br/>172.22.0.11:8000\"]\n    MF[\"nlp-mlflow<br/>172.22.0.5\"]\n    RES[\"postgres · minio · redis<br/>.2–.4 reserved, not running\"]\n  end\n  NX --> THIS\n  NX --> MF\n  THIS -.->|MLflow runs| MF\n\n  classDef live fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef infra fill:#1a1e2a,stroke:#64748b,color:#cbd5e1\n  classDef reserved fill:#0d0f14,stroke:#334155,color:#64748b,stroke-dasharray:4 3\n  class THIS live\n  class MF infra\n  class RES reserved"
+      },
+      "facts": [
+        {"label": "Container", "value": "nlp-imdb-textrep"},
+        {"label": "Container IP", "value": "172.22.0.11"},
+        {"label": "Network", "value": "nlp-network"},
+        {"label": "CIDR", "value": "172.22.0.0/24"},
+        {"label": "Host port", "value": "127.0.0.1:8021 → 8000"},
+        {"label": "Public URL", "value": "/nlp/imdb-textrep/"},
+        {"label": "MLflow tracker", "value": "mlflow-nlp.pandyahomelab.com"}
+      ]
+    },
+    {
+      "id": "stack",
+      "title": "Tech Stack",
+      "icon": "🧰",
+      "items": [
+        {"name": "scikit-learn 1.3", "purpose": "TODO: what it does in this demo"},
+        {"name": "TODO NLP library", "purpose": "NLTK / spaCy / gensim / rapidfuzz — list only what is imported"},
+        {"name": "FastAPI 0.104", "purpose": "Async HTTP API framework"},
+        {"name": "Pydantic v2", "purpose": "Request/response schema validation"},
+        {"name": "uvicorn", "purpose": "ASGI server, runs inside the container"},
+        {"name": "Docker", "purpose": "Multi-stage build on python:3.11-slim"},
+        {"name": "Nginx 1.25", "purpose": "Reverse proxy, TLS termination, route fan-out, host-based routing for the mlflow-nlp subdomain"},
+        {"name": "MLflow 3.11", "purpose": "Per-domain tracker on nlp-mlflow:5000 — separate from ml-mlflow and dl-mlflow (V3 domain autonomy)"},
+        {"name": "Synology DSM", "purpose": "Host OS — Docker engine, persistent volumes"}
+      ]
+    },
+    {
+      "id": "dataset",
+      "title": "Dataset",
+      "icon": "📂",
+      "body": [
+        "TODO: source, licence, size, class balance, and how many rows fit the NAS memory budget."
+      ],
+      "facts": [
+        {"label": "Train samples", "value": "{{split.train_samples}}"},
+        {"label": "Test samples", "value": "{{split.test_samples}}"},
+        {"label": "Source", "value": "TODO"},
+        {"label": "Licence", "value": "TODO"}
+      ]
+    },
+    {
+      "id": "limitations",
+      "title": "What This Model Can't Do",
+      "icon": "⚠️",
+      "body": [
+        "TODO: honest failure modes — the same tone as the LSTM demo's MAPE note."
+      ],
+      "bullets": [
+        {"label": "Word order", "text": "TODO (e.g. bag-of-words treats \"not good\" and \"good, not\" the same)."},
+        {"label": "Unseen words", "text": "TODO: what happens to out-of-vocabulary input."},
+        {"label": "Sarcasm and negation", "text": "TODO"},
+        {"label": "Domain shift", "text": "TODO: text unlike the training data."}
+      ]
+    },
+    {
+      "id": "walkthrough",
+      "title": "Read the Code Walkthrough",
+      "icon": "📖",
+      "body": [
+        "For a guided tour of how this service is built — file by file, layer by layer — start with the **ML Project Walkthrough** (uses iris-knn as the worked example but the 4-layer architecture is identical)."
+      ],
+      "bullets": [
+        {"label": "Project anatomy", "text": "Annotated file tree — what every file is and why it's there."},
+        {"label": "Request flow", "text": "A `/predict` request traced hop-by-hop from the browser through all four layers."},
+        {"label": "Training flow", "text": "Eager warm-up at container startup — load data → preprocess → fit → evaluate → log to nlp-mlflow."},
+        {"label": "Per-layer patterns", "text": "Thread-safe train lock, `__file__`-relative paths, the hyphen-vs-underscore symlink trick."},
+        {"label": "MLflow integration", "text": "How runs are logged to the per-domain tracker; graceful degradation when the tracker is briefly unreachable."}
+      ],
+      "links": [
+        {"label": "ML walkthrough on GitHub", "url": "https://github.com/avpgithub-code/pandyahomelab/blob/main/docs/ML_PROJECT_WALKTHROUGH.md", "external": true}
+      ]
+    },
+    {
+      "id": "metrics",
+      "title": "Performance",
+      "icon": "📊",
+      "problem_type": "TODO: e.g. Binary text-pair classification · held-out test split",
+      "body": [
+        "TODO: how the data was split, and what a good score means for this task."
+      ],
+      "facts": [
+        {"label": "Train samples", "value": "{{split.train_samples}}"},
+        {"label": "Test samples", "value": "{{split.test_samples}}"},
+        {"label": "Training time", "value": "{{training.seconds}}"},
+        {"label": "Vocabulary", "value": "{{training.vocabulary_size}}"},
+        {"label": "Tracked in", "value": "mlflow-nlp ↗"}
+      ],
+      "confusion_matrix": {
+        "labels": "{{confusion_matrix.labels}}",
+        "matrix": "{{confusion_matrix.matrix}}",
+        "annotation": "TODO: which off-diagonal cell is the costly error, and why."
+      },
+      "metrics_detail": [
+        {
+          "name": "Accuracy",
+          "value": "{{metrics_display.accuracy}}",
+          "what": "Share of test examples labelled correctly.",
+          "formula": "correct / total",
+          "why_chosen": "TODO",
+          "watch_out": "Misleading on imbalanced classes — read it next to F1."
+        },
+        {
+          "name": "F1 (macro)",
+          "value": "{{metrics_display.f1_macro}}",
+          "what": "Harmonic mean of precision and recall, averaged equally over classes.",
+          "formula": "2 · P · R / (P + R)",
+          "why_chosen": "TODO",
+          "watch_out": "TODO"
+        }
+      ]
+    },
+    {
+      "id": "learn",
+      "title": "Learn More",
+      "icon": "🔗",
+      "links": [
+        {"label": "View live MLflow runs", "url": "https://mlflow-nlp.pandyahomelab.com/", "external": true},
+        {"label": "Source on GitHub", "url": "https://github.com/avpgithub-code/pandyahomelab", "external": true},
+        {"label": "TODO: course lecture this demo is built from", "url": "TODO", "external": true},
+        {"label": "TODO: dataset source", "url": "TODO", "external": true},
+        {"label": "TODO: key paper or library docs", "url": "TODO", "external": true}
+      ]
+    }
+  ]
+}
