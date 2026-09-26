@@ -27,8 +27,8 @@ The portfolio value ADR-012 had set aside ("here's my training history") turned 
    - Everything else returns 403.
 3. **Writes go through the platform only.**
    - Services and training jobs log over the Docker domain networks (`http://ml-mlflow:5000`, `http://dl-mlflow:5000`).
-   - The operator writes via LAN `192.168.1.152:5000` (ML). The DL tracker has no host port; operator writes to it go through an SSH tunnel or `docker exec`.
-4. **Anything that stores data stays off the public path.** Postgres, Redis and the MinIO S3 API are bound to `127.0.0.1` on the host. The MinIO consoles (`:9001`, `:9003`) remain LAN-only per ADR-012.
+   - The operator writes through an SSH tunnel or `docker exec`. Since 2026-09-26 (Phase 3 gate G4, ADR-012 Amendment 1) no tracker is reachable on the LAN: ml-mlflow's host port is `127.0.0.1:5000`, and dl-mlflow and nlp-mlflow have none.
+4. **Anything that stores data stays off the public path.** Postgres, Redis and the MinIO S3 API are bound to `127.0.0.1` on the host. The MinIO consoles (`:9001`, `:9003`) are NAS-only (`127.0.0.1`) since 2026-09-26, per ADR-012 Amendment 1.
 
 ## Alternatives considered
 

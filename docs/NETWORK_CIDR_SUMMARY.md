@@ -44,9 +44,9 @@ All bridge driver, local scope. The Docker name is what `external:` references i
 | Service | Container Name | IP Address | Container Port | Host Port (§8) | Role |
 |---|---|---|---|---|---|
 | PostgreSQL | ml-postgres | 172.20.0.2 | 5432 | 127.0.0.1:5433 | Database |
-| MinIO | ml-minio | 172.20.0.3 | 9000 / 9001 | 127.0.0.1:9000 / 0.0.0.0:9001 ⚠ | Artifact Storage |
+| MinIO | ml-minio | 172.20.0.3 | 9000 / 9001 | 127.0.0.1:9000 / 127.0.0.1:9001 | Artifact Storage |
 | Redis | ml-redis | 172.20.0.4 | 6379 | 127.0.0.1:6379 | Cache |
-| MLflow | ml-mlflow | 172.20.0.5 | 5000 | 0.0.0.0:5000 ⚠ | Experiment Tracking |
+| MLflow | ml-mlflow | 172.20.0.5 | 5000 | 127.0.0.1:5000 | Experiment Tracking |
 | Iris-KNN | ml-iris-knn | 172.20.0.10 | 8000 | 127.0.0.1:8001 | Project Service |
 | Housing | ml-housing-linear | 172.20.0.11 | 8000 | 127.0.0.1:8002 | Project Service |
 | Titanic AutoML | ml-titanic-automl | 172.20.0.12 | 8000 | 127.0.0.1:8003 | Project Service |
@@ -63,7 +63,7 @@ All bridge driver, local scope. The Docker name is what `external:` references i
 | Service | Container Name | IP Address | Container Port | Host Port (§8) | Role |
 |---|---|---|---|---|---|
 | PostgreSQL | dl-postgres | 172.21.0.2 | 5432 | 127.0.0.1:5434 | Database |
-| MinIO | dl-minio | 172.21.0.3 | 9000 / 9001 | 127.0.0.1:9002 / 0.0.0.0:9003 ⚠ | Artifact Storage |
+| MinIO | dl-minio | 172.21.0.3 | 9000 / 9001 | 127.0.0.1:9002 / 127.0.0.1:9003 | Artifact Storage |
 | Redis | dl-redis | 172.21.0.4 | 6379 | 127.0.0.1:6380 | Cache |
 | MLflow | dl-mlflow | 172.21.0.5 | 5000 | none (public via `mlflow-dl.` subdomain) | Experiment Tracking |
 | MNIST CNN | dl-mnist-cnn | 172.21.0.10 | 8000 | 127.0.0.1:8010 | Project Service |
@@ -141,9 +141,11 @@ on-NAS debugging (`curl localhost:80xx/health`) only.
 Domain index: ML = 0, DL = 1, NLP = 2, Agentic = 3. ML's 8001–8003 predates the rule and keeps
 its numbers.
 
-**Open item (not changed by Amendment 1):** `ml-mlflow:5000`, `ml-minio:9001` and
-`dl-minio:9003` are still bound to `0.0.0.0` (reachable on the NAS LAN). Everything else was
-moved to `127.0.0.1` in the 2026-09-23 hardening pass. New domains (NLP, Agentic) bind **all**
+**Resolved 2026-09-26 (Phase 3 gate G4):** `ml-mlflow:5000`, `ml-minio:9001` and
+`dl-minio:9003`, the last host ports on `0.0.0.0`, now bind `127.0.0.1` like everything
+else; the 2026-09-23 hardening pass had moved the rest. Of the containers, only pandya-nginx (`8080`/`8443`,
+behind the Cloudflare tunnel) listens beyond the NAS. Operator access to the UIs is by SSH
+tunnel (ADR-012 Amendment 1, DEVELOPMENT_RUNBOOK §4.11). New domains (NLP, Agentic) bind **all**
 host ports to `127.0.0.1`, including the MinIO console. Whether to tighten ML/DL is a separate
 decision.
 

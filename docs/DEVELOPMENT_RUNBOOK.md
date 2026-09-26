@@ -329,6 +329,25 @@ models under the project's `data/` folder, not `/tmp`.
 | `unzip` | `python3 -m zipfile -e archive.zip dest/` |
 | A browser | `node` (`/usr/local/bin/node`) can run a demo page's inline script: `node --check` for syntax, or stub `document.getElementById` and point `fetch` at `127.0.0.1:<port>` to render every card and drawer section from the live API, then grep the output for `undefined`, `NaN` and unresolved `{{tokens}}`. It does not check layout. |
 
+### 4.11 Reaching the Operator UIs (SSH Tunnel)
+
+Since 2026-09-26 (gate G4) no container but Nginx listens beyond the NAS: the MLflow API and the
+MinIO consoles are `127.0.0.1`-only, and dl-mlflow / nlp-mlflow have no host port at all
+(the NAS host reaches them at their container IPs). From another machine on the LAN or the
+VPN, tunnel over SSH (key auth, port 22) and open `http://localhost:<left port>`:
+
+| UI | Tunnel |
+|---|---|
+| ml-mlflow (read/write) | `ssh -N -L 5000:127.0.0.1:5000 avpadmin@192.168.1.152` |
+| dl-mlflow (read/write) | `ssh -N -L 5001:172.21.0.5:5000 avpadmin@192.168.1.152` |
+| nlp-mlflow (read/write) | `ssh -N -L 5002:172.22.0.5:5000 avpadmin@192.168.1.152` |
+| ml-minio console | `ssh -N -L 9001:127.0.0.1:9001 avpadmin@192.168.1.152` |
+| dl-minio console | `ssh -N -L 9003:127.0.0.1:9003 avpadmin@192.168.1.152` |
+
+Local MLflow clients then use `MLFLOW_TRACKING_URI=http://localhost:5000` (5001, 5002 for DL,
+NLP). Several `-L` flags can share one `ssh` command. Read-only browsing needs no tunnel:
+`pandyahomelab.com/mlflow/`, `mlflow-dl.` and `mlflow-nlp.pandyahomelab.com`.
+
 ---
 
 ## 5. New Project Checklist (Phase 1b+)
