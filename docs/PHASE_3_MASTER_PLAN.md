@@ -4,14 +4,15 @@
 `/nlp/`, each built from a lecture of the End-to-End NLP course, with experiments tracked in a
 domain-local MLflow at `mlflow-nlp.pandyahomelab.com`.
 
-**Network:** Third domain network on the NAS. `nlp-network` (172.22.0.0/24) is allocated but
-not yet created. Phase 3.0 creates it.
+**Network:** Third domain network on the NAS. `nlp-network` (172.22.0.0/24), created in Phase 3.0
+(2026-09-24).
 
 **Framework:** CPU-only. scikit-learn, spaCy (`en_core_web_sm`), gensim, rapidfuzz, NLTK.
 No PyTorch/transformers until the deferred v2 cards. Images should stay well under the
 ~2.5 GB DL images.
 
-**Status:** Approved 2026-09-23. Gates G1–G3 decided (see [decision gates](#decision-gates)). 3.0 done 2026-09-24; 3a is next.
+**Status:** Approved 2026-09-23. Gates G1–G3 decided (see [decision gates](#decision-gates)). 3.0 done 2026-09-24;
+3a, 3b and 3c shipped 2026-09-25 (see [shipped so far](#shipped-so-far)). **3d is next.**
 
 ---
 
@@ -97,9 +98,21 @@ far above ADR-016's ~200 MB estimate.
 | nlp-postgres + nlp-minio + nlp-redis | 0 (not deployed, G1) |
 | 3a Random Forest + BoW vectorizer | ~0.3 GB |
 | 3b playground (spaCy sm) | ~0.2 GB |
-| 3c Word2Vec (custom corpus, 100-d) | ~0.2–0.4 GB |
+| 3c Word2Vec (text8, 100-d; 4 models) | ~0.2–0.4 GB |
 | 3d HMM + spaCy sm | ~0.2 GB |
 | **Phase 3 total** | **~1.7–2.1 GB** |
+
+**Actuals, 2026-09-25 (after 3a–3c):**
+
+| Container | Idle RSS | Notes |
+|---|---|---|
+| nlp-quora-randomforest | ~0.56 GB | +~0.1 GB during the ~5 min warm-up |
+| nlp-imdb-textrep | ~0.80 GB | 1.2 GB peak during the ~5 min warm-up |
+| nlp-text8-word2vec | ~0.28–0.33 GB | no warm-up training (trained offline) |
+| nlp-mlflow | **0.51 GB** | was 1.70 GB: MLflow 3.x's job runner (6 idle worker processes, GenAI-only) is now disabled and web workers cut 4 → 2. Same change applied to ml-mlflow (1.38 → 0.51 GB) and dl-mlflow (0.76 → 0.50 GB). |
+
+NAS available memory after 3c and the MLflow trim: **~7.2 GB** (vs ~7.4 GB before Phase 3). Note that
+`/tmp` on the NAS is RAM-backed (tmpfs): large scratch files there count against this.
 
 **Guardrail:** after each sub-phase ships, `free -m` must still show **≥ 3 GB available**, and
 swap use must not grow by more than 1 GB. If it does, stop and re-plan before the next sub-phase.
@@ -132,7 +145,9 @@ Decided 2026-09-23.
   `MLFLOW_PUBLIC_BASE_URL` = `https://mlflow-nlp.pandyahomelab.com`.
 - **Feedback widget:** one-line `<script src="/feedback-widget.js">` in each `ui.html`.
 - **About drawer:** see the contract below. "Learn More" links the lecture it came from.
-- **Eager warm-up:** load models in the FastAPI lifespan (Phase 2a lesson). spaCy and gensim
+- **Eager warm-up:** load models in the FastAPI lifespan (Phase 2a lesson). **Exception, 3c:**
+  training takes ~35 min, so `scripts/train_embeddings.py` runs offline in a one-off container
+  and the service only loads the saved vectors. spaCy and gensim
   models load before `/health` goes green.
 - **Build/deploy:** images baked via `COPY . .`; any code/`ui.html` change = rebuild +
   `--force-recreate --no-deps`.
@@ -196,7 +211,7 @@ section `id` using these fields: `body`, `bullets`, `diagram` (Mermaid), `facts`
 |---|---|---|---|---|
 | **3a** quora-randomforest | `features`: the 22 handcrafted features grouped 7 basic / 8 token / 3 length / 4 fuzzy, plus BoW 3000 × 2, with a bullet per group. `threshold`: what the probability means, the slider, and the precision/recall trade-off (a false "duplicate" is the costly error). | Binary text-pair classification | Accuracy, Precision (duplicate), Recall (duplicate), F1, ROC-AUC, log loss | ✅ Not duplicate / Duplicate, at threshold 0.5 |
 | **3b** preprocessing lab | `representations`: OHE → BoW → n-grams → TF-IDF, with a worked example on one sentence. `sparsity`: vocabulary size vs matrix density, and why this leads to dense embeddings (3c). | Text representation + classifier comparison (**gate 2026-09-25: yes, on IMDB**) | If a comparison classifier is approved: accuracy/F1 per representation. Otherwise vocab size, sparsity %, transform latency. | Only with a classifier |
-| **3c** word2vec explorer | `word2vec`: CBOW vs Skip-gram, window, negative sampling. `embedding-space`: cosine similarity, analogies (king − man + woman), 2-D projection. | Unsupervised representation learning | Analogy accuracy, similarity correlation (if a licensed benchmark fits), vocab size, OOV rate, final training loss | ❌ |
+| **3c** word2vec explorer | `word2vec`: CBOW vs Skip-gram, window, negative sampling. `embedding-space`: cosine similarity, analogies (king − man + woman), 2-D projection. | Unsupervised representation learning | **As built:** Google analogy accuracy split meaning / grammar (top-30k vocab), WordSim-353 Spearman, vocab size, training time, model size — for CBOW, skip-gram, fastText and GloVe 6B (reference). Training loss not tracked. | ❌ |
 | **3d** HMM POS tagger | `hmm`: tags = hidden states, words = observations, transition/emission probabilities counted from the corpus. `viterbi`: dynamic-programming trellis with backpointers (Mermaid). `unknown-words`: smoothing for unseen words. `spacy-comparison`: same sentences, both taggers, where they disagree. | Sequence labelling (token-level) | Token accuracy, accuracy on unknown words, spaCy agreement rate | ✅ Universal 12-tag set (keeps the grid readable) |
 
 **Tokens must resolve.** Every `{{token}}` in `about.json` must exist in `get_model_info()`,
@@ -230,9 +245,29 @@ otherwise the drawer shows raw braces. Each NLP demo gets a TIER 1 test that wal
 ## Phase 3 exit criteria
 
 - [ ] 3.0 + 3a–3d shipped; NLP domain count on landing page = **4 live**
-- [ ] nlp-network stable; `/nlp/` no longer returns 503
-- [ ] No regressions on ML/DL demos
+- [x] nlp-network stable; `/nlp/` no longer returns 503 (listing JSON; only 3d's path still 503)
+- [x] No regressions on ML/DL demos (checked after every 3a–3c deploy and the MLflow trim)
 - [ ] CIDR summary §5 slot names for 3b–3d filled in (ADR-016 amendment if anything moved)
+
+---
+
+## Shipped so far
+
+| Sub-phase | Project | Tag | Headline result |
+|---|---|---|---|
+| 3a | `nlp-quora-randomforest` | `v.nlp-quora-randomforest-1.0.0` | 80.1% accuracy, ROC-AUC 0.886 on 40,430 GLUE QQP validation pairs (lecture ~78% on 3k) |
+| 3b | `nlp-imdb-textrep` | `v.nlp-imdb-textrep-1.0.0` | IMDB test: TF-IDF 89.9% · n-grams 89.3% · one-hot 87.0% · BoW counts 86.6% |
+| 3c | `nlp-text8-word2vec` | `v.nlp-text8-word2vec-1.0.0` | Skip-gram WordSim-353 0.685 (best trained); GloVe meaning analogies 65.5% vs skip-gram 29.7%; fastText grammar analogies 71.9% |
+
+Decisions made at each gate:
+- **3a data:** GLUE QQP (`nyu-mll/glue`, pinned) instead of the Kaggle CSV — no Kaggle token.
+  GLUE validation is the test set (GLUE test is unlabelled). Random Forest `min_samples_leaf=2`.
+- **3b:** classifier comparison **yes**, on IMDB (`stanfordnlp/imdb`, pinned).
+- **3c:** CBOW vs skip-gram vs fastText on text8, GloVe 6B 100d (top 50k) as reference; trained
+  offline because training takes ~35 min.
+- **Data licences:** QQP (non-commercial) and IMDB (no stated licence) are mounted at runtime and
+  never baked into images. Each demo's `data/` folder carries a read-only `everyone` Synology ACE so
+  the non-root container can read it (see each project README).
 
 ---
 
