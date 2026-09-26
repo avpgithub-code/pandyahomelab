@@ -49,7 +49,7 @@ services:
       MINIO_ROOT_PASSWORD: ${ML_MINIO_ROOT_PASSWORD}
     ports:
       - "127.0.0.1:9000:9000"   # NAS-only; nginx uses ml-network
-      - "9001:9001"
+      - "127.0.0.1:9001:9001"   # console, NAS-only (G4, 2026-09-26); SSH-tunnel from elsewhere
     volumes:
       - ml_minio_data:/minio_data
     command: minio server /minio_data --console-address ":9001"
@@ -111,7 +111,7 @@ services:
       --allowed-hosts "*"
       --cors-allowed-origins "https://pandyahomelab.com"
     ports:
-      - "5000:5000"
+      - "127.0.0.1:5000:5000"   # NAS-only (G4, 2026-09-26): LAN clients use an SSH tunnel; public read-only via nginx
     volumes:
       - ml_mlflow_data:/mlflow
       - ml_mlartifacts_data:/mlartifacts

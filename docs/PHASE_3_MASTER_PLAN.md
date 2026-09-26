@@ -134,7 +134,7 @@ Decided 2026-09-23.
 | **G1** | Domain infra scope | (a) Full ADR-016 set: postgres, minio, redis, mlflow. (b) nlp-mlflow only; bring up postgres/minio/redis when a demo actually uses one. The IPs stay reserved either way. | ✅ **(b) nlp-mlflow only.** DL's postgres/minio/redis are declared but unused by any DL code. Recorded as an ADR-016 note (Amendment 1, G1); IPs .2–.4 and host ports 5435/9004/9005/6381 stay reserved. |
 | **G2** | URL shape | (a) Flat, like live DL: `/nlp/<name>/`. (b) ADR-003 hierarchy: `/nlp/<task>/<name>/`. | ✅ **(a) flat** `/nlp/<name>/`, matching `/dl/mnist-cnn/` and `/dl/lstm-forecast/`. |
 | **G3** | Landing page cards | Replace the "Sentiment (transformer)" and "NER (HF)" cards with 3a–3d as Planned; move transformer cards to a "v2" note | ✅ **Done.** Both `website/index.html` and `site/index.html` show 3a–3d as Planned (0 live · 4 planned); 3a route `/nlp/quora-randomforest/`. |
-| **G4** | ML/DL ports still on `0.0.0.0` | (CIDR summary §8 open item) | Still open. NLP binds everything to `127.0.0.1` regardless. |
+| **G4** | ML/DL ports still on `0.0.0.0` | (CIDR summary §8 open item) | ✅ **Done 2026-09-26.** ml-mlflow:5000, ml-minio:9001 and dl-minio:9003 moved to `127.0.0.1`; operator access by SSH tunnel (ADR-012 Amendment 1). |
 
 ---
 

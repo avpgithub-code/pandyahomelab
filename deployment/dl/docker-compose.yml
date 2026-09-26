@@ -51,7 +51,7 @@ services:
       MINIO_ROOT_PASSWORD: ${DL_MINIO_ROOT_PASSWORD}
     ports:
       - "127.0.0.1:9002:9000"   # NAS-only; nginx uses dl-network
-      - "9003:9001"
+      - "127.0.0.1:9003:9001"   # console, NAS-only (G4, 2026-09-26); SSH-tunnel from elsewhere
     volumes:
       - dl_minio_data:/minio_data
     command: minio server /minio_data --console-address ":9001"

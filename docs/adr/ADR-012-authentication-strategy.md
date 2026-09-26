@@ -1,6 +1,6 @@
 # ADR-012: Authentication strategy
 
-**Status:** Accepted — Part 1 superseded for MLflow by ADR-021 (public read-only). Grafana and MinIO consoles remain LAN-only.
+**Status:** Accepted — Part 1 superseded for MLflow by ADR-021 (public read-only). Amendment 1 (2026-09-26): operator UIs are NAS-only (`127.0.0.1`), reached by SSH tunnel instead of LAN URLs.
 **Date:** May 2026
 **Stage:** 2 (Synology Implementation)
 
@@ -222,6 +222,25 @@ This ADR governs authentication-related setup steps in the Stage 2 → Implement
 9. Create a per-demo htpasswd file (e.g., `/volume1/pandya-homelab/.htpasswd-<demoname>`).
 10. Reference the per-demo file in the demo's Nginx location block.
 11. Document the credential in the demo's `README.md` (without the password — just noting that auth is required and where the credential is stored).
+
+## Amendment 1 — 2026-09-26: NAS-only operator UIs (Phase 3 gate G4)
+
+**Why:** "LAN-only" left ml-mlflow's API (`:5000`) and the MinIO consoles (`:9001`, `:9003`)
+reachable, without authentication, from every device on the home network and from every
+OpenVPN client. MLflow's REST API accepts create/delete from any of them; ADR-021's
+read-only gate covers only traffic through Nginx. Nothing depended on the LAN path: the
+demos log over the Docker domain networks, both MinIO stores were empty and unused, and
+dl-mlflow and nlp-mlflow already had no LAN port.
+
+**Decision:** every operator UI and admin API binds to `127.0.0.1` on the NAS. From another
+machine the operator uses an SSH tunnel (key auth, port 22), e.g.
+`ssh -L 5000:127.0.0.1:5000 avpadmin@192.168.1.152` → `http://localhost:5000`. The
+"Operator access is via direct LAN URLs" list above and step 1 of the implementation
+reference ("bind to the NAS IP") are superseded. Commands for each UI:
+[DEVELOPMENT_RUNBOOK.md](../DEVELOPMENT_RUNBOOK.md) §4.11.
+
+**Unchanged:** public read-only MLflow via Nginx (ADR-021), no subdomains for Grafana or the
+MinIO consoles, the Basic Auth plan for anything that needs public exposure.
 
 ## Related ADRs
 
