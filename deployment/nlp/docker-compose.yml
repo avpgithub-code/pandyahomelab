@@ -28,6 +28,12 @@ services:
     container_name: nlp-mlflow
     environment:
       GIT_PYTHON_REFRESH: quiet
+      # MLflow 3.x starts a background job runner + 6 huey workers (~1.1 GB idle) for
+      # GenAI features only (issue detection, LLM scorers, prompt optimisation). No
+      # NLP demo uses them and the public tracker is read-only, so it stays off.
+      MLFLOW_SERVER_ENABLE_JOB_EXECUTION: "false"
+    # --workers 2 (default 4): only a few demos log here, and the public UI is
+    # read-only and low-traffic. Saves ~0.35 GB.
     # SQLite runs + local artifact volume, exactly like dl-mlflow. No host port:
     # public (read-only) access is via mlflow-nlp.pandyahomelab.com through Nginx.
     command: >
@@ -37,6 +43,7 @@ services:
       --serve-artifacts
       --host 0.0.0.0
       --port 5000
+      --workers 2
       --allowed-hosts "*"
       --cors-allowed-origins "https://mlflow-nlp.pandyahomelab.com"
     volumes:
