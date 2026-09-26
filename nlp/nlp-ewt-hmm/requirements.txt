@@ -1,0 +1,13 @@
+# Web layer
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+
+# The HMM is hand-built on numpy. spaCy is the reference tagger and the demo's
+# tokenizer (en_core_web_sm is installed in the Dockerfile).
+numpy==1.26.3
+spacy==3.7.5
+
+# Tracking — pinned to the nlp-mlflow server version (3.11.1). The DL images left
+# this unpinned and resolved a newer client (3.15.x) than their server.
+mlflow==3.11.1

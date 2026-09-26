@@ -1,0 +1,510 @@
+{
+  "title": "About ewt-hmm",
+  "tagline": "Sentences in; every word's part of speech out, from a hidden Markov model counted from 200k hand-tagged words and decoded with Viterbi, next to spaCy's neural tagger.",
+  "sections": [
+    {
+      "id": "problem",
+      "title": "The Problem",
+      "icon": "🎯",
+      "body": [
+        "Part-of-speech tagging labels every word with its grammatical role: noun, verb, adjective, and so on. It sounds like a dictionary lookup, but many common words take several roles. \"Book\" is a noun in \"read the book\" and a verb in \"book a flight\"; \"can\" is a noun in \"the can\" and a verb in \"we can\".",
+        "A tagger has to use the context. This demo tags your sentences twice: with a hidden Markov model built by hand from counts, and with spaCy's neural tagger. It shows you the Viterbi trellis the HMM fills in to choose its tags."
+      ]
+    },
+    {
+      "id": "approach",
+      "title": "Approach — Why an HMM?",
+      "icon": "🧭",
+      "body": [
+        "Lecture 7 of the End-to-End NLP course builds a tagger from two ideas: some tags tend to follow others (a determiner is usually followed by an adjective or a noun), and each tag tends to produce certain words. A hidden Markov model is exactly those two tables, counted from {{split.train_tokens}} hand-tagged words. Training is only counting, and takes {{training.hmm_fit_seconds}}.",
+        "To see how far counting gets you, the same {{split.test_sentences}} unseen test sentences are also tagged by spaCy's small English model, a neural network trained on a different, larger corpus. The HMM scores **{{metrics_display.accuracy}}**, spaCy **{{metrics_display.spacy_accuracy}}**, a gap of {{metrics_display.gap}}."
+      ],
+      "bullets": [
+        {
+          "label": "Why a bigram HMM",
+          "text": "Each tag depends only on the one before it. That keeps the trellis small enough to show on the page (12 tags × your words), and it is the model the lecture derives Viterbi for."
+        },
+        {
+          "label": "Why the 12 universal tags",
+          "text": "The Universal Dependencies treebank uses 17 tags. Merging proper nouns into nouns, auxiliaries into verbs and so on gives the 12-tag universal set (Petrov et al., 2012). The confusion matrix stays readable, and both taggers are scored on the same labels."
+        },
+        {
+          "label": "Why no lowercasing",
+          "text": "Capital letters are evidence: an unknown capitalised word is usually a name. \"The\" and \"the\" are counted separately."
+        },
+        {
+          "label": "Why smoothing",
+          "text": "A tag pair never seen in training would get probability 0 and veto every path through it. Add-1 smoothing gives every transition a small count."
+        }
+      ]
+    },
+    {
+      "id": "text-pipeline",
+      "title": "From Raw Text to Tokens",
+      "icon": "🔤",
+      "body": [
+        "Tagging needs tokens, not cleaned text. Your input is split into sentences (spaCy's rule-based sentencizer) and tokens (spaCy's tokenizer), and **both** taggers tag exactly those tokens, so every difference you see comes from the taggers.",
+        "Nothing is removed. Stopwords such as \"the\", \"of\" and \"can\" are what a tagger needs most, and punctuation has its own tag."
+      ],
+      "bullets": [
+        {
+          "label": "Sentence split",
+          "text": "The HMM's start probabilities describe the first word of a sentence, so each sentence is decoded separately."
+        },
+        {
+          "label": "Tokenize",
+          "text": "spaCy splits \"can't\" into \"ca\" + \"n't\", the same way the EWT treebank does, so contractions look like the training data."
+        },
+        {
+          "label": "Limit",
+          "text": "Up to 80 tokens per request, so the trellis stays readable."
+        }
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph LR\n  R[\"Your text\"] --> S[\"Sentences<br/>sentencizer\"] --> T[\"Tokens<br/>spaCy tokenizer\"]\n  T --> H[\"HMM + Viterbi\"]\n  T --> SP[\"spaCy tagger\"]\n  H --> C[\"Compare tags\"]\n  SP --> C\n\n  classDef io fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef step fill:#13161e,stroke:#4f8ef7,color:#e2e8f0\n  class R,C io\n  class S,T,H,SP step"
+      }
+    },
+    {
+      "id": "hmm",
+      "title": "The Hidden Markov Model",
+      "icon": "🔗",
+      "body": [
+        "In an HMM the tags are **hidden states** and the words are **observations**. The model pretends a sentence was written by walking from tag to tag and letting each tag emit a word. Three tables, all counted from the training data:",
+        "Tagging runs the story backwards: given the words, find the tag sequence that most probably produced them, i.e. the one with the highest start × transition × emission product. The demo's \"HMM tables\" card shows the real transition matrix and the most likely words per tag."
+      ],
+      "bullets": [
+        {
+          "label": "Start P(tag)",
+          "text": "How often each tag begins a sentence (pronouns and determiners do; punctuation rarely does)."
+        },
+        {
+          "label": "Transition P(tag | previous tag)",
+          "text": "How often one tag follows another. DET → NOUN is common; DET → VERB is rare. This table is what lets context settle \"the can\" vs \"we can\"."
+        },
+        {
+          "label": "Emission P(word | tag)",
+          "text": "How often a tag produces a given word: of all the words tagged DET, the share that are \"the\". {{training.vocabulary_size}} words have their own emission column."
+        }
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph LR\n  S((start)) -->|P start| T1[\"PRON\"] -->|P trans| T2[\"VERB\"] -->|P trans| T3[\"DET\"] -->|P trans| T4[\"NOUN\"]\n  T1 -.->|P emit| W1([\"We\"])\n  T2 -.->|P emit| W2([\"book\"])\n  T3 -.->|P emit| W3([\"a\"])\n  T4 -.->|P emit| W4([\"flight\"])\n\n  classDef tag fill:#13161e,stroke:#4f8ef7,color:#e2e8f0\n  classDef word fill:#0d2818,stroke:#22c55e,color:#86efac\n  class T1,T2,T3,T4 tag\n  class W1,W2,W3,W4 word"
+      }
+    },
+    {
+      "id": "viterbi",
+      "title": "Viterbi: Filling the Trellis",
+      "icon": "🧮",
+      "body": [
+        "With 12 tags, a 20-word sentence has 12²⁰ possible tag sequences, far too many to try. Viterbi avoids that with dynamic programming: it only needs to remember, for each word and each tag, the best path that ends there.",
+        "The trellis on the demo is that table: one column per word, one row per tag. Brighter cells hold more of the column's probability, and the outlined cells are the path Viterbi picked. Hover a cell to see its log score and which tag it came from. Everything is in log space, so long sentences don't round to zero."
+      ],
+      "bullets": [
+        {
+          "label": "1. First column",
+          "text": "score(tag) = log P(tag starts) + log P(word | tag)."
+        },
+        {
+          "label": "2. Each next column",
+          "text": "For every tag, try every previous tag: previous score + log P(tag | previous). Keep the best, add log P(word | tag), and store a **backpointer** to the previous tag it came from."
+        },
+        {
+          "label": "3. Backtrack",
+          "text": "Take the best tag in the last column and follow the backpointers to the start. That chain is the answer."
+        },
+        {
+          "label": "Cost",
+          "text": "words × tags² steps: 20 × 144 = 2,880 instead of 12²⁰. That is why the HMM tags {{metrics_display.hmm_speed}} here, against spaCy's {{metrics_display.spacy_speed}}."
+        }
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph LR\n  subgraph W1[\"'the'\"]\n    A1[\"DET\"]\n    B1[\"NOUN\"]\n  end\n  subgraph W2[\"'can'\"]\n    A2[\"NOUN\"]\n    B2[\"VERB\"]\n  end\n  subgraph W3[\"'fell'\"]\n    A3[\"VERB\"]\n    B3[\"NOUN\"]\n  end\n  A1 ==>|best| A2\n  B1 -.-> B2\n  A2 ==>|best| A3\n  B2 -.-> B3\n  A1 -.-> B2\n  A2 -.-> B3\n\n  classDef best fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef other fill:#13161e,stroke:#4f8ef7,color:#e2e8f0\n  class A1,A2,A3 best\n  class B1,B2,B3 other"
+      }
+    },
+    {
+      "id": "unknown-words",
+      "title": "Unknown Words",
+      "icon": "❓",
+      "body": [
+        "{{split.unknown_rate}} of the test words ({{split.unknown_tokens}}) never appear in the training data, so they have no emission count. How the model handles them matters more than any other choice. Three strategies, trained and scored on the same data:",
+        "The suffix/shape classes are the default. Words seen only once in training stand in for unseen words: a capitalised one teaches the model what an unseen capitalised word looks like (mostly a noun), a word ending in \"-ed\" mostly a verb, digits a number. On the demo, unknown words are underlined and show the class they were read as."
+      ],
+      "bullets": [
+        {
+          "label": "Add-1 smoothing",
+          "text": "Every word gets +1 in every tag, and unseen words share one <UNK> column with no real counts, so only the transitions can tag them. Accuracy {{unknown_ladder.laplace.accuracy}}; on unknown words {{unknown_ladder.laplace.unknown_accuracy}}."
+        },
+        {
+          "label": "Rare words → <UNK>",
+          "text": "Words seen once in training are rewritten to <UNK>, so P(<UNK> | tag) is learned from real words. Accuracy {{unknown_ladder.unk.accuracy}}; on unknown words {{unknown_ladder.unk.unknown_accuracy}}."
+        },
+        {
+          "label": "Rare words → suffix/shape classes",
+          "text": "As above, but split by shape: <UNK-ing>, <UNK-CAP-s>, <UNK-NUM>… Accuracy {{unknown_ladder.signatures.accuracy}}; on unknown words {{unknown_ladder.signatures.unknown_accuracy}}."
+        }
+      ]
+    },
+    {
+      "id": "spacy-comparison",
+      "title": "HMM vs spaCy",
+      "icon": "⚖️",
+      "body": [
+        "spaCy's `{{spacy_comparison.model}}` tagger is a small convolutional neural network. It looks at a window of neighbouring words on **both** sides, and at sub-word features (prefix, suffix, shape) of every word, not just unknown ones. It was trained on OntoNotes 5 (news, conversation and web text), not on EWT, so it is tagging text from outside its training data; the HMM is not.",
+        "Even so, spaCy leads by {{metrics_display.gap}} overall and by {{metrics_display.unknown_gap}} on unknown words. The two agree on {{metrics_display.agreement}} of test words. On the {{spacy_comparison.disagreements}} words where they disagree, spaCy is right {{spacy_comparison.spacy_right_pct}} of the time, the HMM {{spacy_comparison.hmm_right_pct}}, and neither {{spacy_comparison.neither_right_pct}}. The demo's comparison card lists the most common disagreements."
+      ],
+      "bullets": [
+        {
+          "label": "Where spaCy wins",
+          "text": "Content words that can be a noun, a verb or an adjective (\"work\", \"need\", \"visit\", \"fast\"). spaCy reads the words on both sides and each word's spelling; the HMM only knows the previous tag. spaCy also gets prepositional \"to\" (\"went to the shop\") right, where the HMM, which mostly sees \"to\" before verbs, calls it a particle."
+        },
+        {
+          "label": "Where the HMM wins",
+          "text": "Treebank conventions it learned from EWT itself: \"this\", \"that\" and \"which\" standing alone are pronouns in EWT (spaCy says determiner), \"up\" and \"out\" after verbs, email addresses, and \"lol\". spaCy learned OntoNotes' slightly different conventions."
+        },
+        {
+          "label": "Speed and size",
+          "text": "The HMM's tables take {{training.model_size}} and tag {{metrics_display.hmm_speed}}; spaCy's model is ~15 MB and tags {{metrics_display.spacy_speed}} on the NAS."
+        }
+      ]
+    },
+    {
+      "id": "architecture",
+      "title": "Model Architecture",
+      "icon": "🧠",
+      "body": [
+        "The HMM is plain numpy: a 12-entry start vector, a 12 × 12 transition matrix and a 12 × {{training.emission_columns}} emission matrix (every known word plus the <UNK> classes), all stored as log probabilities. Viterbi is a loop over words with a 12 × 12 max at each step. Saved to disk the model is {{training.model_size}}.",
+        "Three HMMs are counted at startup, one per unknown-word strategy, so the drawer's comparison uses live numbers; the demo tags with the suffix/shape one. spaCy runs its tok2vec → tagger → attribute_ruler pipeline; its parser, NER and lemmatizer are switched off."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph TB\n  In[\"Tokens\"] --> O[\"Emission column<br/>word, or its UNK class\"]\n  O --> V[\"Viterbi<br/>start · 12×12 transitions · emissions\"]\n  V --> B[\"Backtrack\"] --> H[\"HMM tags\"]\n  In --> SP[\"spaCy sm<br/>tok2vec → tagger → attribute_ruler\"] --> M[\"UPOS → universal 12\"] --> S[\"spaCy tags\"]\n\n  classDef io fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef layer fill:#13161e,stroke:#4f8ef7,color:#e2e8f0\n  class In,H,S io\n  class O,V,B,SP,M layer"
+      }
+    },
+    {
+      "id": "service-architecture",
+      "title": "Service Architecture",
+      "icon": "🏗️",
+      "body": [
+        "Same per-project 4-layer pattern (ADR-013) used by every project on pandyaHomeLab. The browser sends text; the server returns, per sentence, both taggers' tags and the full Viterbi trellis with its backpointers."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph TB\n  Client[\"Browser\"] -->|HTTPS<br/>POST /predict| Nginx[\"Nginx Proxy\"]\n  Nginx -->|\"/nlp/ewt-hmm/*\"| App[\"nlp-ewt-hmm container\"]\n  subgraph App\n    direction TB\n    Pres[\"presentation-logic<br/>FastAPI · Pydantic v2 · vanilla JS UI\"] --> AppLogic[\"application-logic<br/>PredictionService\"]\n    AppLogic --> Model[\"HmmTagger (numpy)<br/>+ SpacyTagger\"]\n    AppLogic --> DB[\"db-logic<br/>EwtLoader · CoNLL-U reader<br/>+ UPOS → universal 12\"]\n    Shared[\"shared/<br/>config · logger\"] -.- Pres\n    Shared -.- AppLogic\n    Shared -.- DB\n  end\n  AppLogic -.->|run logging| MLflow[\"nlp-mlflow<br/>experiment tracking\"]\n\n  classDef container fill:#13161e,stroke:#4f8ef7,color:#e2e8f0\n  classDef external fill:#1a1e2a,stroke:#64748b,color:#cbd5e1\n  class Pres,AppLogic,Model,DB,Shared container\n  class Nginx,Client,MLflow external"
+      }
+    },
+    {
+      "id": "network",
+      "title": "Network & Deployment",
+      "icon": "🌐",
+      "body": [
+        "The NLP domain has its own bridge network (ADR-016). Only nlp-mlflow runs alongside the demos: postgres, MinIO and Redis have reserved addresses but are not deployed until a demo needs one (Phase 3 gate G1). The tracker is public, read-only, at `mlflow-nlp.pandyahomelab.com`.",
+        "No cross-network reach-back into ml-network or dl-network — each domain's tracking and demos are independent."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph LR\n  User([\"🌍 Visitor\"]) --> CF[\"Cloudflare Tunnel<br/>pandyahomelab.com<br/>+ mlflow-nlp.pandyahomelab.com\"]\n  CF --> NX[\"Nginx<br/>:8443\"]\n  subgraph PROXY[\"pandya-proxy-network · 172.24.0.0/24\"]\n    NX\n  end\n  subgraph NLP[\"nlp-network · 172.22.0.0/24\"]\n    THIS[\"nlp-ewt-hmm<br/>172.22.0.13:8000\"]\n    MF[\"nlp-mlflow<br/>172.22.0.5\"]\n    RES[\"postgres · minio · redis<br/>.2–.4 reserved, not running\"]\n  end\n  NX --> THIS\n  NX --> MF\n  THIS -.->|MLflow runs| MF\n\n  classDef live fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef infra fill:#1a1e2a,stroke:#64748b,color:#cbd5e1\n  classDef reserved fill:#0d0f14,stroke:#334155,color:#64748b,stroke-dasharray:4 3\n  class THIS live\n  class MF infra\n  class RES reserved"
+      },
+      "facts": [
+        {
+          "label": "Container",
+          "value": "nlp-ewt-hmm"
+        },
+        {
+          "label": "Container IP",
+          "value": "172.22.0.13"
+        },
+        {
+          "label": "Network",
+          "value": "nlp-network"
+        },
+        {
+          "label": "CIDR",
+          "value": "172.22.0.0/24"
+        },
+        {
+          "label": "Host port",
+          "value": "127.0.0.1:8023 → 8000"
+        },
+        {
+          "label": "Public URL",
+          "value": "/nlp/ewt-hmm/"
+        },
+        {
+          "label": "MLflow tracker",
+          "value": "mlflow-nlp.pandyahomelab.com"
+        }
+      ]
+    },
+    {
+      "id": "stack",
+      "title": "Tech Stack",
+      "icon": "🧰",
+      "items": [
+        {
+          "name": "numpy 1.26",
+          "purpose": "The whole HMM: count tables, log probabilities, the Viterbi trellis and backpointers"
+        },
+        {
+          "name": "spaCy 3.7 (en_core_web_sm)",
+          "purpose": "Tokenizer, sentencizer and the reference tagger; model baked into the image"
+        },
+        {
+          "name": "FastAPI 0.104",
+          "purpose": "Async HTTP API framework"
+        },
+        {
+          "name": "Pydantic v2",
+          "purpose": "Request/response schema validation"
+        },
+        {
+          "name": "uvicorn",
+          "purpose": "ASGI server, runs inside the container"
+        },
+        {
+          "name": "Docker",
+          "purpose": "Multi-stage build on python:3.11-slim"
+        },
+        {
+          "name": "Nginx 1.25",
+          "purpose": "Reverse proxy, TLS termination, route fan-out, host-based routing for the mlflow-nlp subdomain"
+        },
+        {
+          "name": "MLflow 3.11",
+          "purpose": "Per-domain tracker on nlp-mlflow:5000 — separate from ml-mlflow and dl-mlflow (V3 domain autonomy)"
+        },
+        {
+          "name": "Synology DSM",
+          "purpose": "Host OS — Docker engine, persistent volumes"
+        }
+      ]
+    },
+    {
+      "id": "dataset",
+      "title": "Dataset",
+      "icon": "📂",
+      "body": [
+        "The **Universal Dependencies English Web Treebank** (EWT), release 2.16: blogs, newsgroups, emails, product reviews and Yahoo! Answers posts, every word tagged by hand. It is messier than newspaper text (typos, lower-case names, email addresses), which is a fair test for both taggers. The official train/test split is used as-is.",
+        "Licensed **CC BY-SA 4.0**. Annotations © 2013–2021 The Board of Trustees of The Leland Stanford Junior University; the underlying texts come from the LDC English Web Treebank. The files are pinned to one commit, checked by sha256, and mounted into the container read-only."
+      ],
+      "facts": [
+        {
+          "label": "Train",
+          "value": "{{split.train_sentences}} sentences"
+        },
+        {
+          "label": "Train words",
+          "value": "{{split.train_tokens}}"
+        },
+        {
+          "label": "Test",
+          "value": "{{split.test_sentences}} sentences"
+        },
+        {
+          "label": "Test words",
+          "value": "{{split.test_tokens}}"
+        },
+        {
+          "label": "Unseen test words",
+          "value": "{{split.unknown_rate}}"
+        },
+        {
+          "label": "Licence",
+          "value": "CC BY-SA 4.0"
+        }
+      ]
+    },
+    {
+      "id": "limitations",
+      "title": "What This Model Can't Do",
+      "icon": "⚠️",
+      "body": [
+        "The HMM sees one tag of context, to the left. Try the example buttons to watch it slip."
+      ],
+      "bullets": [
+        {
+          "label": "Right-hand context",
+          "text": "In \"Time flies like an arrow\", \"flies\" is a verb only because of what comes after it. A left-to-right bigram model can't look ahead, so it follows the more common noun reading."
+        },
+        {
+          "label": "Merged tags hide rules",
+          "text": "The 12-tag set merges auxiliaries into VERB, so after \"can\" the HMM no longer knows a bare verb must follow: in \"They can fish\" it tags \"fish\" as a noun. The 17-tag set would keep AUX, at the cost of a bigger, sparser table."
+        },
+        {
+          "label": "Imperatives",
+          "text": "\"Book a table for two\" starts with a verb, which is rare in the training text: both taggers call \"Book\" a noun."
+        },
+        {
+          "label": "Unknown words",
+          "text": "Suffix classes are guesses: \"-er\" is a noun in \"teacher\" and an adjective in \"faster\". Unknown words are right {{metrics_display.unknown_accuracy}} of the time, against {{metrics_display.known_accuracy}} for known ones."
+        },
+        {
+          "label": "Whole sentences",
+          "text": "{{metrics_display.accuracy}} per word still means only {{metrics_display.sentence_accuracy}} of test sentences are tagged entirely correctly (spaCy: {{metrics_display.spacy_sentence_accuracy}})."
+        },
+        {
+          "label": "Rare tags",
+          "text": "X (symbols, interjections, foreign words, email addresses) is the weakest row in the confusion matrix: too few examples to learn from."
+        },
+        {
+          "label": "Domain shift",
+          "text": "Trained on English web text. Other languages, code or heavy slang give poor tags."
+        }
+      ]
+    },
+    {
+      "id": "walkthrough",
+      "title": "Read the Code Walkthrough",
+      "icon": "📖",
+      "body": [
+        "For a guided tour of how this service is built — file by file, layer by layer — start with the **ML Project Walkthrough** (uses iris-knn as the worked example but the 4-layer architecture is identical)."
+      ],
+      "bullets": [
+        {
+          "label": "Project anatomy",
+          "text": "Annotated file tree — what every file is and why it's there."
+        },
+        {
+          "label": "Request flow",
+          "text": "A `/predict` request traced hop-by-hop from the browser through all four layers."
+        },
+        {
+          "label": "Training flow",
+          "text": "Eager warm-up at container startup — load EWT → count three HMMs → tag the test set with each and with spaCy → log to nlp-mlflow."
+        },
+        {
+          "label": "Per-layer patterns",
+          "text": "Thread-safe train lock, `__file__`-relative paths, the hyphen-vs-underscore symlink trick."
+        },
+        {
+          "label": "MLflow integration",
+          "text": "How runs are logged to the per-domain tracker; graceful degradation when the tracker is briefly unreachable."
+        }
+      ],
+      "links": [
+        {
+          "label": "ML walkthrough on GitHub",
+          "url": "https://github.com/avpgithub-code/pandyahomelab/blob/main/docs/ML_PROJECT_WALKTHROUGH.md",
+          "external": true
+        }
+      ]
+    },
+    {
+      "id": "metrics",
+      "title": "Performance",
+      "icon": "📊",
+      "problem_type": "Sequence labelling · 12 tags per token · official EWT test split",
+      "body": [
+        "The HMM is counted on the {{split.train_sentences}} EWT training sentences and scored on the {{split.test_sentences}} test sentences ({{split.test_tokens}} words) it never saw. Nouns are the most common tag, so always answering NOUN would score about 25%; the HMM scores {{metrics_display.accuracy}}. The figures below are for the HMM with suffix/shape classes."
+      ],
+      "facts": [
+        {
+          "label": "Test words",
+          "value": "{{split.test_tokens}}"
+        },
+        {
+          "label": "spaCy accuracy",
+          "value": "{{metrics_display.spacy_accuracy}}"
+        },
+        {
+          "label": "Warm-up (3 HMMs + spaCy)",
+          "value": "{{training.seconds}}"
+        },
+        {
+          "label": "HMM size",
+          "value": "{{training.model_size}}"
+        },
+        {
+          "label": "HMM speed",
+          "value": "{{metrics_display.hmm_speed}}"
+        },
+        {
+          "label": "Tracked in",
+          "value": "mlflow-nlp ↗"
+        }
+      ],
+      "confusion_matrix": {
+        "labels": "{{confusion_matrix.labels}}",
+        "matrix": "{{confusion_matrix.matrix}}",
+        "annotation": "HMM on the EWT test set. The largest off-diagonal cells are the classic ambiguities: adjectives and verbs tagged as nouns and back (\"work\", \"need\", \"fast\"), and words like \"up\" and \"when\" split between ADV and ADP. X is the weakest row: email addresses and symbols have too few examples to learn."
+      },
+      "metrics_detail": [
+        {
+          "name": "Token accuracy",
+          "value": "{{metrics_display.accuracy}}",
+          "what": "Share of test words given the correct tag.",
+          "formula": "correct tags / words",
+          "why_chosen": "The standard POS-tagging score, and the one the lecture reports.",
+          "watch_out": "Punctuation and \"the\" are easy points: a large part of every sentence is nearly impossible to get wrong."
+        },
+        {
+          "name": "Unknown-word accuracy",
+          "value": "{{metrics_display.unknown_accuracy}}",
+          "what": "Accuracy on the {{split.unknown_rate}} of test words never seen in training.",
+          "formula": "correct unknown / unknown",
+          "why_chosen": "This is where the unknown-word strategy shows, and where spaCy pulls ahead ({{metrics_display.spacy_unknown_accuracy}}).",
+          "watch_out": "Depends on what counts as unknown: here, any word form not in the training data, case-sensitive."
+        },
+        {
+          "name": "Sentence accuracy",
+          "value": "{{metrics_display.sentence_accuracy}}",
+          "what": "Share of test sentences with every word tagged correctly.",
+          "formula": "perfect sentences / sentences",
+          "why_chosen": "One wrong tag can derail anything built on top (a parser, an information extractor), so the per-sentence view is the honest one.",
+          "watch_out": "Long sentences pull it down whatever the tagger: short EWT posts inflate it."
+        },
+        {
+          "name": "Agreement with spaCy",
+          "value": "{{metrics_display.agreement}}",
+          "what": "Share of test words where the HMM and spaCy give the same tag.",
+          "formula": "same tag / words",
+          "why_chosen": "Shows how often a counting model lands where a neural one does, and sizes the disagreements the comparison card lists.",
+          "watch_out": "Agreement is not accuracy: both can be wrong the same way."
+        }
+      ]
+    },
+    {
+      "id": "learn",
+      "title": "Learn More",
+      "icon": "🔗",
+      "links": [
+        {
+          "label": "View live MLflow runs (one child run per unknown-word strategy, plus spaCy)",
+          "url": "https://mlflow-nlp.pandyahomelab.com/",
+          "external": true
+        },
+        {
+          "label": "Source on GitHub",
+          "url": "https://github.com/avpgithub-code/pandyahomelab",
+          "external": true
+        },
+        {
+          "label": "CampusX — End-to-End NLP course (lecture 7: POS tagging)",
+          "url": "https://www.youtube.com/@campusx-official",
+          "external": true
+        },
+        {
+          "label": "Dataset: UD English EWT on GitHub",
+          "url": "https://github.com/UniversalDependencies/UD_English-EWT",
+          "external": true
+        },
+        {
+          "label": "Petrov, Das & McDonald (2012), A Universal Part-of-Speech Tagset",
+          "url": "https://arxiv.org/abs/1104.2086",
+          "external": true
+        },
+        {
+          "label": "Jurafsky & Martin, Speech and Language Processing: sequence labelling, HMMs and Viterbi",
+          "url": "https://web.stanford.edu/~jurafsky/slp3/",
+          "external": true
+        },
+        {
+          "label": "spaCy: part-of-speech tagging",
+          "url": "https://spacy.io/usage/linguistic-features#pos-tagging",
+          "external": true
+        }
+      ]
+    }
+  ]
+}
