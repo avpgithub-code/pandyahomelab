@@ -1,6 +1,6 @@
 ---
 title: Repository layout — V3 autonomous project architecture
-status: Proposed (replaces ADR-007)
+status: Accepted (signed off 2026-05-05; supersedes ADR-007)
 context: |
   Stage 2 locked a flat repository structure (platform/, site/, services/, compose/, docs/).
   This worked for initial scaffolding but doesn't reflect how projects should be organized:

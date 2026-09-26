@@ -57,12 +57,26 @@ ADRs are immutable. Once accepted, they are not edited. If a decision changes, w
 
 | #   | Title                                                       | Status   |
 |-----|-------------------------------------------------------------|----------|
-| 007 | Repository layout follows 3-tier multi-service shape        | Accepted |
+| 007 | Repository layout follows 3-tier multi-service shape        | Superseded by 007 (v3) |
 | 008 | Repository packaging is a single monorepo                   | Accepted |
 | 009 | Runtime filesystem layout and permissions on Synology NAS   | Accepted |
 | 010 | Synology secrets management                                 | Accepted |
 | 011 | Per-service conventions                                     | Accepted |
 | 012 | Authentication strategy                                     | Accepted (Part 1 superseded for MLflow by 021) |
+
+### V3 Architecture (May 2026, signed off 2026-05-05 before Phase 1a)
+
+| #        | Title                                                       | Status   |
+|----------|-------------------------------------------------------------|----------|
+| 007 (v3) | [Repository layout — V3 autonomous project architecture](ADR-007-repository-layout-v3.md) | Accepted (supersedes 007) |
+| 013      | [Per-project layered architecture](ADR-013-per-project-3-layer-architecture.md) | Accepted |
+| 014      | [Project autonomy and templates](ADR-014-project-autonomy-and-templates.md) | Accepted |
+| 015      | [Deployment service separation](ADR-015-deployment-service-separation.md) | Accepted |
+| 016      | [Domain-level network topology](ADR-016-domain-level-network-topology.md) | Accepted (Amendment 1, 2026-09-23) |
+| 017      | [Docker Compose file strategy and build context](ADR-017-docker-compose-file-strategy.md) | Accepted |
+| 018      | [Development workflow and Git strategy](ADR-018-development-workflow-git-strategy.md) | Accepted |
+| 019      | [Internet access and domain routing](ADR-019-internet-access-domain-routing.md) | Accepted |
+| 020      | [Project readiness checklist and phase gates](ADR-020-project-readiness-checklist.md) | Accepted |
 
 ### Stage 2 — Operations (September 2026)
 
@@ -91,4 +105,4 @@ These are placeholders, not commitments. Each will be decided in its own time, w
 ---
 
 _Author: Archit Pandya_
-_Last updated: May 2026 (Stage 2 lock — twelve ADRs accepted)_
+_Last updated: 2026-09-25 (21 ADRs: Stage 1, Stage 2, V3 architecture, operations)_

@@ -1,6 +1,6 @@
 ---
 title: Domain-Level Network Topology & Infrastructure
-status: Proposed (new)
+status: Accepted (signed off 2026-05-05)
 context: |
   V3 architecture establishes 4 independent domains (ML, DL, NLP, Agentic) each with isolated
   infrastructure. Network topology must support:

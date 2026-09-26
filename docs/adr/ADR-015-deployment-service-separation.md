@@ -1,6 +1,6 @@
 ---
 title: Deployment service separation — orchestration decoupled from projects
-status: Proposed (new)
+status: Accepted (signed off 2026-05-05)
 context: |
   ADR-007 (V3 revision) establishes that ml/ and dl/ folders contain autonomous projects.
   But where does Docker Compose live? Where does Nginx config go?

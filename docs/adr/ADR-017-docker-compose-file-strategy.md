@@ -1,6 +1,6 @@
 ---
 title: Docker Compose File Strategy & Build Context
-status: Proposed (new)
+status: Accepted (signed off 2026-05-05)
 context: |
   Phase 1a requires wiring ml-iris-knn project into the ml-network infrastructure. However,
   the docker-compose file structure is not yet specified:
