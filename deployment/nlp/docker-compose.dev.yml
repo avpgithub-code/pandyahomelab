@@ -91,3 +91,39 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  nlp-text8-word2vec:
+    image: nlp-text8-word2vec:latest
+    build:
+      context: ../../nlp/nlp-text8-word2vec
+      dockerfile: docker/Dockerfile
+    container_name: nlp-text8-word2vec
+    environment:
+      PYTHONPATH: /app
+      MLFLOW_TRACKING_URI: http://nlp-mlflow:5000
+      DATA_DIR: /app/data
+    ports:
+      - "127.0.0.1:8022:8000"   # NAS-only; public traffic comes via nginx
+    volumes:
+      # Trained offline (scripts/train_embeddings.py, ~35 min), loaded at startup.
+      # data/raw holds text8 + GloVe; data/models the saved vectors. Non-root
+      # container; data/ carries a read-only `everyone` Synology ACE.
+      - /volume1/pandya-homelab/nlp/nlp-text8-word2vec/data:/app/data:ro
+    networks:
+      nlp-network:
+        ipv4_address: 172.22.0.12
+    depends_on:
+      nlp-mlflow:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+

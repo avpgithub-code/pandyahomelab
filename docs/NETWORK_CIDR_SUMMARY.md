@@ -83,7 +83,7 @@ All bridge driver, local scope. The Docker name is what `external:` references i
 | MLflow | nlp-mlflow | 172.22.0.5 | 5000 | none (public via `mlflow-nlp.` subdomain) | Experiment Tracking — ✅ live |
 | Quora duplicate questions | nlp-quora-randomforest | 172.22.0.10 | 8000 | 127.0.0.1:8020 | Project Service (Phase 3a) |
 | Text representation lab | nlp-imdb-textrep | 172.22.0.11 | 8000 | 127.0.0.1:8021 | Project Service (Phase 3b) |
-| Project slot | nlp-<dataset-algorithm> | 172.22.0.12 | 8000 | 127.0.0.1:8022 | Reserved (Phase 3c) |
+| Word2Vec explorer | nlp-text8-word2vec | 172.22.0.12 | 8000 | 127.0.0.1:8022 | Project Service (Phase 3c) |
 | Project slot | nlp-<dataset-algorithm> | 172.22.0.13 | 8000 | 127.0.0.1:8023 | Reserved (Phase 3d) |
 | Nginx (NLP leg) | pandya-nginx | 172.22.0.20 | — | — | Reverse-proxy attachment |
 

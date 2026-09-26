@@ -1,0 +1,431 @@
+{
+  "title": "About text8-word2vec",
+  "tagline": "Three embeddings trained on the same 17M words of Wikipedia (CBOW, skip-gram, fastText) next to GloVe's 6 billion: neighbours, analogies, similarity and a map.",
+  "sections": [
+    {
+      "id": "problem",
+      "title": "The Problem",
+      "icon": "🎯",
+      "body": [
+        "Count-based vectors (the previous demo, 3b) treat every word as its own column. \"great\" and \"excellent\" are as unrelated as \"great\" and \"boring\", and the vectors grow with the vocabulary.",
+        "Word embeddings give every word a short, dense vector (here 100 numbers) learned from the words around it, so words used in similar contexts end up close together. This demo trains three kinds of embedding on the same Wikipedia text and puts them next to a much larger pretrained model, so you can probe what each one learned."
+      ]
+    },
+    {
+      "id": "approach",
+      "title": "Approach — Why Compare CBOW, Skip-gram and fastText?",
+      "icon": "🧭",
+      "body": [
+        "Lecture 5 of the End-to-End NLP course introduces Word2Vec and its two training methods. CBOW and skip-gram are not two different models: they are two ways of training the **same** Word2Vec network. fastText adds one idea on top of skip-gram. All three here are trained on the same {{split.corpus_tokens}} words of text8 with the same settings, so any difference comes from the method.",
+        "GloVe 6B is included as a fixed reference. It was trained by Stanford on 6 billion words (about 350 times more). Scale buys a lot on meaning analogies ({{comparison.glove.analogy_semantic}} vs skip-gram's {{comparison.skipgram.analogy_semantic}}), but not everything: on WordSim-353 skip-gram trained here scores {{comparison.skipgram.wordsim_spearman}} against GloVe's {{comparison.glove.wordsim_spearman}}."
+      ],
+      "bullets": [
+        {
+          "label": "Why 100 dimensions, window 5",
+          "text": "The common defaults. Every model, including GloVe, uses 100-d vectors so they are compared like for like."
+        },
+        {
+          "label": "Why min_count 5",
+          "text": "Words seen fewer than five times are dropped: there is too little context to learn a useful vector."
+        },
+        {
+          "label": "Why trained offline",
+          "text": "Training all three takes about 35 minutes on the NAS CPU, too long to repeat on every container restart. A script trains them once, logs the run to MLflow and saves the vectors; the service loads them in seconds."
+        },
+        {
+          "label": "Why a smaller fastText",
+          "text": "fastText hashes character pieces into a table. gensim's default table made an 830 MB model; 200,000 rows keeps it near 110 MB."
+        }
+      ]
+    },
+    {
+      "id": "text-pipeline",
+      "title": "From Raw Text to Numbers",
+      "icon": "🔤",
+      "body": [
+        "text8 comes pre-cleaned: Matt Mahoney reduced the first 100 MB of an English Wikipedia dump to lowercase letters a–z and single spaces, with numbers spelled out. So the only step here is splitting on spaces.",
+        "Then comes the part that differs from 3b: instead of counting words, each model **learns** a vector per word by trying to predict words from their neighbours. The vector is a by-product of that prediction task."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph LR\n  W[\"Wikipedia text<br/>17M words\"] --> T[\"Split on spaces\"] --> P[\"Slide a 5-word window\"]\n  P --> M[\"Predict word ↔ context<br/>(CBOW / skip-gram / fastText)\"] --> V[\"100 numbers per word\"]\n\n  classDef io fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef step fill:#13161e,stroke:#4f8ef7,color:#e2e8f0\n  class W,V io\n  class T,P,M step"
+      }
+    },
+    {
+      "id": "word2vec",
+      "title": "How Word2Vec Learns",
+      "icon": "🧠",
+      "body": [
+        "Slide a window over the text. In \"the **king** wore a crown\", the centre word is *king* and the context is *the, wore, a, crown*. A tiny network with one hidden layer of 100 units is trained on millions of these windows. The hidden-layer weights for each word become its vector.",
+        "Training compares the true word with a handful of random \"negative\" words and nudges vectors so the true pair scores higher (negative sampling, 5 negatives here). That is what makes training on millions of windows affordable."
+      ],
+      "bullets": [
+        {
+          "label": "CBOW",
+          "text": "Averages the context words and predicts the centre word. Fast, because each window is one prediction. Tends to smooth over rare words. Trained in {{comparison.cbow.train_time}}."
+        },
+        {
+          "label": "Skip-gram",
+          "text": "Uses the centre word to predict each context word separately. Each window becomes several predictions, so it is slower ({{comparison.skipgram.train_time}}), but rare words get more updates. Usually better on analogies and similarity."
+        },
+        {
+          "label": "fastText",
+          "text": "Skip-gram where each word is also the sum of its character pieces (3 to 6 letters: \"<ki\", \"kin\", \"ing>\"…). Words sharing pieces share information, and a word never seen in training still gets a vector from its pieces. Trained in {{comparison.fasttext.train_time}}."
+        },
+        {
+          "label": "GloVe (reference)",
+          "text": "A different recipe: it factorises a table of how often words appear together across the whole corpus, instead of sliding a window. Pretrained on 6 billion words; trimmed here to the 50,000 most frequent."
+        }
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph LR\n  subgraph CBOW\n    C1[\"the\"] --> H1[\"hidden 100\"]\n    C2[\"wore\"] --> H1\n    C3[\"crown\"] --> H1\n    H1 --> O1[\"king?\"]\n  end\n  subgraph SG[\"Skip-gram\"]\n    K[\"king\"] --> H2[\"hidden 100\"]\n    H2 --> O2[\"the?\"]\n    H2 --> O3[\"wore?\"]\n    H2 --> O4[\"crown?\"]\n  end\n\n  classDef io fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef step fill:#13161e,stroke:#4f8ef7,color:#e2e8f0\n  class C1,C2,C3,K io\n  class H1,H2,O1,O2,O3,O4 step"
+      }
+    },
+    {
+      "id": "embedding-space",
+      "title": "Reading the Embedding Space",
+      "icon": "🧭",
+      "body": [
+        "Closeness is measured with **cosine similarity**: 1 means the vectors point the same way, 0 means unrelated. Nearest neighbours are the words with the highest cosine similarity.",
+        "**Analogies** use vector arithmetic: king − man + woman lands near queen because the direction from *man* to *woman* is roughly the same as from *king* to *queen*. The Google analogy set splits these into meaning (capitals, currencies, family) and grammar (plurals, tenses, comparatives).",
+        "The **2-D map** squeezes 100 dimensions into 2 with PCA, fitted separately for each model and each word list. It keeps the biggest differences and loses the rest, so read clusters, not exact distances."
+      ],
+      "facts": [
+        {
+          "label": "Best trained model on WordSim-353",
+          "value": "{{metrics_display.best_wordsim}}"
+        },
+        {
+          "label": "Analogy questions asked",
+          "value": "{{metrics_display.analogy_questions}}"
+        },
+        {
+          "label": "Analogy vocabulary",
+          "value": "top {{metrics_display.analogy_vocab}} words"
+        }
+      ]
+    },
+    {
+      "id": "architecture",
+      "title": "Model Architecture",
+      "icon": "🏛️",
+      "body": [
+        "Each trained model is a 100-d vector per word for the {{comparison.cbow.vocabulary_size}} words seen at least five times in text8. fastText also keeps 200,000 × 100 vectors for hashed character pieces. GloVe keeps its 50,000 most frequent words. The service memory-maps the saved vectors, so only the pages a query touches are read into RAM."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph TB\n  T8[\"text8<br/>17M words\"] --> TR[\"scripts/train_embeddings.py<br/>offline · ~35 min\"]\n  TR --> CB[\"cbow.kv\"]\n  TR --> SG[\"skipgram.kv\"]\n  TR --> FT[\"fasttext.kv<br/>+ n-gram table\"]\n  GL[\"GloVe 6B 100d\"] --> TRIM[\"trim to 50k\"] --> GK[\"glove.kv\"]\n  TR --> MX[\"metrics.json\"]\n  TR -.-> ML[\"nlp-mlflow\"]\n  CB --> SVC[\"Service: load at startup<br/>neighbours · analogy · similarity · map\"]\n  SG --> SVC\n  FT --> SVC\n  GK --> SVC\n  MX --> SVC\n\n  classDef io fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef layer fill:#13161e,stroke:#4f8ef7,color:#e2e8f0\n  class T8,GL,SVC io\n  class TR,CB,SG,FT,TRIM,GK,MX layer"
+      }
+    },
+    {
+      "id": "service-architecture",
+      "title": "Service Architecture",
+      "icon": "🏗️",
+      "body": [
+        "Same per-project 4-layer pattern (ADR-013) used by every project on pandyaHomeLab. The browser sends a word, an analogy, a word pair or a word list; the server answers from all four models at once. Training is not part of the running service: it happens offline and only its saved vectors are mounted in."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph TB\n  Client[\"Browser\"] -->|HTTPS<br/>POST /neighbors · /analogy · /similarity · /map| Nginx[\"Nginx Proxy\"]\n  Nginx -->|\"/nlp/text8-word2vec/*\"| App[\"nlp-text8-word2vec container\"]\n  subgraph App\n    direction TB\n    Pres[\"presentation-logic<br/>FastAPI · Pydantic v2 · vanilla JS UI\"] --> AppLogic[\"application-logic<br/>PredictionService\"]\n    AppLogic --> Model[\"EmbeddingStore<br/>4 × KeyedVectors (mmap)\"]\n    AppLogic --> DB[\"db-logic<br/>sources · saved vectors<br/>+ metrics.json\"]\n    Shared[\"shared/<br/>config · logger\"] -.- Pres\n    Shared -.- AppLogic\n    Shared -.- DB\n  end\n  AppLogic -.->|run logging| MLflow[\"nlp-mlflow<br/>experiment tracking\"]\n\n  classDef container fill:#13161e,stroke:#4f8ef7,color:#e2e8f0\n  classDef external fill:#1a1e2a,stroke:#64748b,color:#cbd5e1\n  class Pres,AppLogic,Model,DB,Shared container\n  class Nginx,Client,MLflow external"
+      }
+    },
+    {
+      "id": "network",
+      "title": "Network & Deployment",
+      "icon": "🌐",
+      "body": [
+        "The NLP domain has its own bridge network (ADR-016). Only nlp-mlflow runs alongside the demos: postgres, MinIO and Redis have reserved addresses but are not deployed until a demo needs one (Phase 3 gate G1). The tracker is public, read-only, at `mlflow-nlp.pandyahomelab.com`.",
+        "No cross-network reach-back into ml-network or dl-network — each domain's tracking and demos are independent."
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "graph LR\n  User([\"🌍 Visitor\"]) --> CF[\"Cloudflare Tunnel<br/>pandyahomelab.com<br/>+ mlflow-nlp.pandyahomelab.com\"]\n  CF --> NX[\"Nginx<br/>:8443\"]\n  subgraph PROXY[\"pandya-proxy-network · 172.24.0.0/24\"]\n    NX\n  end\n  subgraph NLP[\"nlp-network · 172.22.0.0/24\"]\n    THIS[\"nlp-text8-word2vec<br/>172.22.0.12:8000\"]\n    MF[\"nlp-mlflow<br/>172.22.0.5\"]\n    RES[\"postgres · minio · redis<br/>.2–.4 reserved, not running\"]\n  end\n  NX --> THIS\n  NX --> MF\n  THIS -.->|MLflow runs| MF\n\n  classDef live fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef infra fill:#1a1e2a,stroke:#64748b,color:#cbd5e1\n  classDef reserved fill:#0d0f14,stroke:#334155,color:#64748b,stroke-dasharray:4 3\n  class THIS live\n  class MF infra\n  class RES reserved"
+      },
+      "facts": [
+        {
+          "label": "Container",
+          "value": "nlp-text8-word2vec"
+        },
+        {
+          "label": "Container IP",
+          "value": "172.22.0.12"
+        },
+        {
+          "label": "Network",
+          "value": "nlp-network"
+        },
+        {
+          "label": "CIDR",
+          "value": "172.22.0.0/24"
+        },
+        {
+          "label": "Host port",
+          "value": "127.0.0.1:8022 → 8000"
+        },
+        {
+          "label": "Public URL",
+          "value": "/nlp/text8-word2vec/"
+        },
+        {
+          "label": "MLflow tracker",
+          "value": "mlflow-nlp.pandyahomelab.com"
+        }
+      ]
+    },
+    {
+      "id": "stack",
+      "title": "Tech Stack",
+      "icon": "🧰",
+      "items": [
+        {
+          "name": "gensim 4.3",
+          "purpose": "Word2Vec (CBOW, skip-gram) and fastText training, KeyedVectors, and the bundled Google analogy + WordSim-353 benchmarks"
+        },
+        {
+          "name": "NumPy",
+          "purpose": "Cosine similarity and the per-model PCA for the 2-D map"
+        },
+        {
+          "name": "FastAPI 0.104",
+          "purpose": "Async HTTP API framework"
+        },
+        {
+          "name": "Pydantic v2",
+          "purpose": "Request/response schema validation"
+        },
+        {
+          "name": "uvicorn",
+          "purpose": "ASGI server, runs inside the container"
+        },
+        {
+          "name": "Docker",
+          "purpose": "Multi-stage build on python:3.11-slim"
+        },
+        {
+          "name": "Nginx 1.25",
+          "purpose": "Reverse proxy, TLS termination, route fan-out, host-based routing for the mlflow-nlp subdomain"
+        },
+        {
+          "name": "MLflow 3.11",
+          "purpose": "Per-domain tracker on nlp-mlflow:5000 — separate from ml-mlflow and dl-mlflow (V3 domain autonomy)"
+        },
+        {
+          "name": "Synology DSM",
+          "purpose": "Host OS — Docker engine, persistent volumes"
+        }
+      ]
+    },
+    {
+      "id": "dataset",
+      "title": "Dataset",
+      "icon": "📂",
+      "body": [
+        "**text8**: the first 10^8 bytes of an English Wikipedia dump from 2006, cleaned by Matt Mahoney to lowercase letters and spaces. It is the corpus the original Word2Vec tools use for their demos: small enough to train on a CPU, big enough for analogies to start working. Wikipedia text is CC BY-SA.",
+        "The reference is **GloVe 6B 100d** (Pennington, Socher and Manning, 2014), trained on Wikipedia 2014 + Gigaword 5, released under the Public Domain Dedication (PDDL). Both are downloaded at pinned versions and checked against SHA-256 checksums.",
+        "Evaluation uses the **Google analogy set** (Mikolov et al., 2013; 19,544 questions) and **WordSim-353** (353 word pairs scored by people), both shipped with gensim."
+      ],
+      "facts": [
+        {
+          "label": "Corpus words",
+          "value": "{{split.corpus_tokens}}"
+        },
+        {
+          "label": "Vocabulary (min_count 5)",
+          "value": "{{comparison.cbow.vocabulary_size}}"
+        },
+        {
+          "label": "Reference",
+          "value": "GloVe 6B 100d, top 50,000 words"
+        },
+        {
+          "label": "Corpus licence",
+          "value": "CC BY-SA (Wikipedia)"
+        },
+        {
+          "label": "Reference licence",
+          "value": "PDDL"
+        }
+      ]
+    },
+    {
+      "id": "limitations",
+      "title": "What These Models Can't Do",
+      "icon": "⚠️",
+      "body": [
+        "An embedding is a summary of which words appear near which. It is not a dictionary, and the summary has blind spots."
+      ],
+      "bullets": [
+        {
+          "label": "One vector per word",
+          "text": "\"bank\" (river) and \"bank\" (money) share one vector, blended by how often each sense appears. Contextual models (transformers) fix this; they are planned for a later v2 demo."
+        },
+        {
+          "label": "Opposites look similar",
+          "text": "\"hot\" and \"cold\" appear in the same kinds of sentences, so they end up close together. Similarity here means \"used alike\", not \"means the same\"."
+        },
+        {
+          "label": "Small corpus",
+          "text": "17 million words is tiny next to GloVe's 6 billion. Rare words get noisy vectors and most meaning analogies fail: the trained models answer about a quarter of them, GloVe about two thirds. Compare the columns."
+        },
+        {
+          "label": "Unseen words",
+          "text": "CBOW and skip-gram have no vector for a word they never saw (try \"moviee\"). fastText makes one from spelling, which works for typos and word forms but can produce confident nonsense for unrelated words that merely look alike."
+        },
+        {
+          "label": "Bias",
+          "text": "The vectors absorb the associations in their text, including social stereotypes present in 2006 Wikipedia and in news text."
+        },
+        {
+          "label": "Old text",
+          "text": "text8 is a 2006 snapshot. Anything newer is missing."
+        }
+      ]
+    },
+    {
+      "id": "walkthrough",
+      "title": "Read the Code Walkthrough",
+      "icon": "📖",
+      "body": [
+        "For a guided tour of how this service is built — file by file, layer by layer — start with the **ML Project Walkthrough** (uses iris-knn as the worked example but the 4-layer architecture is identical)."
+      ],
+      "bullets": [
+        {
+          "label": "Project anatomy",
+          "text": "Annotated file tree — what every file is and why it's there."
+        },
+        {
+          "label": "Request flow",
+          "text": "A `/predict` request traced hop-by-hop from the browser through all four layers."
+        },
+        {
+          "label": "Training flow",
+          "text": "Eager warm-up at container startup — load data → preprocess → fit → evaluate → log to nlp-mlflow."
+        },
+        {
+          "label": "Per-layer patterns",
+          "text": "Thread-safe train lock, `__file__`-relative paths, the hyphen-vs-underscore symlink trick."
+        },
+        {
+          "label": "MLflow integration",
+          "text": "How runs are logged to the per-domain tracker; graceful degradation when the tracker is briefly unreachable."
+        }
+      ],
+      "links": [
+        {
+          "label": "ML walkthrough on GitHub",
+          "url": "https://github.com/avpgithub-code/pandyahomelab/blob/main/docs/ML_PROJECT_WALKTHROUGH.md",
+          "external": true
+        }
+      ]
+    },
+    {
+      "id": "metrics",
+      "title": "Performance",
+      "icon": "📊",
+      "problem_type": "Unsupervised representation learning · intrinsic evaluation (analogies + similarity)",
+      "body": [
+        "Embeddings have no labels to score against, so they are judged on two standard tests. Every model is asked the same questions over its {{metrics_display.analogy_vocab}} most frequent words; a question with a word outside that vocabulary counts as not attempted."
+      ],
+      "facts": [
+        {
+          "label": "Corpus words",
+          "value": "{{split.corpus_tokens}}"
+        },
+        {
+          "label": "Trained",
+          "value": "{{training.trained_at}}"
+        },
+        {
+          "label": "CBOW training",
+          "value": "{{comparison.cbow.train_time}}"
+        },
+        {
+          "label": "Skip-gram training",
+          "value": "{{comparison.skipgram.train_time}}"
+        },
+        {
+          "label": "fastText training",
+          "value": "{{comparison.fasttext.train_time}}"
+        },
+        {
+          "label": "Tracked in",
+          "value": "mlflow-nlp ↗"
+        }
+      ],
+      "metrics_detail": [
+        {
+          "name": "Analogy accuracy · meaning",
+          "value": "CBOW {{comparison.cbow.analogy_semantic}} · skip-gram {{comparison.skipgram.analogy_semantic}} · fastText {{comparison.fasttext.analogy_semantic}} · GloVe {{comparison.glove.analogy_semantic}}",
+          "what": "Share of meaning analogies answered exactly: capitals (athens : greece :: paris : ?), currencies, US states, family (king : queen :: man : ?).",
+          "formula": "top-1 of most_similar(b + c − a) == d",
+          "why_chosen": "The test Mikolov et al. introduced with Word2Vec; it checks that relations became consistent directions.",
+          "watch_out": "All-or-nothing: the right answer at rank 2 scores zero."
+        },
+        {
+          "name": "Analogy accuracy · grammar",
+          "value": "CBOW {{comparison.cbow.analogy_syntactic}} · skip-gram {{comparison.skipgram.analogy_syntactic}} · fastText {{comparison.fasttext.analogy_syntactic}} · GloVe {{comparison.glove.analogy_syntactic}}",
+          "what": "Share of grammar analogies answered exactly: plurals, verb tenses, comparatives, adverbs (quick : quickly :: slow : ?).",
+          "formula": "top-1 of most_similar(b + c − a) == d",
+          "why_chosen": "Split out because fastText's spelling pieces make grammar easy for it; the combined score would hide that.",
+          "watch_out": "High grammar scores can come from spelling alone, without learning meaning."
+        },
+        {
+          "name": "WordSim-353",
+          "value": "CBOW {{comparison.cbow.wordsim_spearman}} · skip-gram {{comparison.skipgram.wordsim_spearman}} · fastText {{comparison.fasttext.wordsim_spearman}} · GloVe {{comparison.glove.wordsim_spearman}}",
+          "what": "Rank correlation between the model's cosine similarity and people's 0–10 similarity ratings for 353 word pairs.",
+          "formula": "Spearman ρ(cosine, human score)",
+          "why_chosen": "Checks graded similarity, not just exact answers.",
+          "watch_out": "The ratings mix \"similar\" with \"related\" (cup–coffee), and 353 pairs is a small sample. GloVe scoring below the text8 models here is a known quirk of this test, not a sign that GloVe is worse overall; its analogy scores say otherwise."
+        }
+      ]
+    },
+    {
+      "id": "learn",
+      "title": "Learn More",
+      "icon": "🔗",
+      "links": [
+        {
+          "label": "View live MLflow runs (one child run per model)",
+          "url": "https://mlflow-nlp.pandyahomelab.com/",
+          "external": true
+        },
+        {
+          "label": "Source on GitHub",
+          "url": "https://github.com/avpgithub-code/pandyahomelab",
+          "external": true
+        },
+        {
+          "label": "CampusX — End-to-End NLP course (lecture 5)",
+          "url": "https://www.youtube.com/@campusx-official",
+          "external": true
+        },
+        {
+          "label": "Mikolov et al. (2013), Efficient Estimation of Word Representations in Vector Space",
+          "url": "https://arxiv.org/abs/1301.3781",
+          "external": true
+        },
+        {
+          "label": "Bojanowski et al. (2017), Enriching Word Vectors with Subword Information (fastText)",
+          "url": "https://arxiv.org/abs/1607.04606",
+          "external": true
+        },
+        {
+          "label": "GloVe project page (Stanford)",
+          "url": "https://nlp.stanford.edu/projects/glove/",
+          "external": true
+        },
+        {
+          "label": "text8 and the Large Text Compression Benchmark",
+          "url": "https://mattmahoney.net/dc/textdata.html",
+          "external": true
+        },
+        {
+          "label": "gensim Word2Vec documentation",
+          "url": "https://radimrehurek.com/gensim/models/word2vec.html",
+          "external": true
+        }
+      ]
+    }
+  ]
+}

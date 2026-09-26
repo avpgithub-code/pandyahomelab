@@ -44,7 +44,7 @@ Don't add it in a compose file first.
 | **3.0** | Domain infrastructure: nlp-network, nlp-mlflow only (G1), Nginx leg, `mlflow-nlp` subdomain, replace `/nlp/` 503 | .5, .20 | — | ✅ Done 2026-09-24 |
 | **3a** | `nlp-quora-randomforest`: duplicate question pair detector | .10 / 8020 | L2 assignment, L8 | ✅ Shipped 2026-09-25 (`v.nlp-quora-randomforest-1.0.0`, 80.1% acc on GLUE QQP) |
 | **3b** | `nlp-imdb-textrep`: text preprocessing + representation lab with an IMDB classifier comparison | .11 / 8021 | L3, L4 | ✅ Shipped 2026-09-25 (`v.nlp-imdb-textrep-1.0.0`, TF-IDF 89.9% on IMDB) |
-| **3c** | Word2Vec explorer on a custom corpus (name at gate) | .12 / 8022 | L5 | Not started |
+| **3c** | `nlp-text8-word2vec`: CBOW vs skip-gram vs fastText on text8, GloVe as reference; trained offline, loaded at startup | .12 / 8022 | L5 | ✅ Shipped 2026-09-25 (`v.nlp-text8-word2vec-1.0.0`; skip-gram WordSim 0.685, GloVe meaning analogies 65.5%) |
 | **3d** | POS tagger: hand-built HMM + Viterbi trellis vs spaCy (name at gate) | .13 / 8023 | L7 | Not started |
 | v2 | Transformer sentiment / NER (compare against the classical demos) | .14+ | after the course covers transformers | Deferred |
 
