@@ -27,11 +27,11 @@
       "title": "Platform Architecture",
       "icon": "🏗️",
       "body": [
-        "Four AI domains sit on isolated Docker bridge networks, each fronted by a shared Nginx reverse proxy. Each domain has its own shared infrastructure (PostgreSQL, MinIO, Redis, MLflow) so domains never cross-contaminate. Every project inside a domain follows the same 4-layer internal structure."
+        "Four AI domains sit on isolated Docker bridge networks, each fronted by a shared Nginx reverse proxy. Each domain has its own MLflow tracker, so experiments never cross-contaminate; ML also runs PostgreSQL, MinIO and Redis, while DL and NLP add them only when a demo needs one. Every project inside a domain follows the same 4-layer internal structure."
       ],
       "diagram": {
         "type": "mermaid",
-        "code": "graph TB\n  User([🌍 Internet Visitor]) -->|HTTPS| CF[Cloudflare Tunnel<br/>pandyahomelab.com]\n  CF --> NX[Nginx Reverse Proxy<br/>TLS termination · path routing]\n  NX --> ML[🧪 ML Domain<br/>3 live demos]\n  NX --> DL[🧠 DL Domain<br/>Phase 2]\n  NX --> NLP[💬 NLP Domain<br/>Phase 3]\n  NX --> AG[🤖 Agentic Domain<br/>Phase 4]\n  NX --> MF[MLflow UI<br/>experiment tracking]\n  ML -.->|run logging| MF\n  ML -.->|persistence| PG[(PostgreSQL)]\n  ML -.->|artifacts| MN[(MinIO)]\n  ML -.->|cache| RD[(Redis)]\n\n  classDef live fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef planned fill:#1a1e2a,stroke:#64748b,color:#94a3b8\n  classDef infra fill:#13161e,stroke:#4f8ef7,color:#cbd5e1\n  class ML live\n  class DL,NLP,AG planned\n  class CF,NX,MF,PG,MN,RD infra"
+        "code": "graph TB\n  User([🌍 Internet Visitor]) -->|HTTPS| CF[Cloudflare Tunnel<br/>pandyahomelab.com]\n  CF --> NX[Nginx Reverse Proxy<br/>TLS termination · path routing]\n  NX --> ML[🧪 ML Domain<br/>3 live demos]\n  NX --> DL[🧠 DL Domain<br/>2 live demos]\n  NX --> NLP[💬 NLP Domain<br/>3 live demos]\n  NX --> AG[🤖 Agentic Domain<br/>Phase 4]\n  ML -.->|run logging| MFM[ml-mlflow<br/>/mlflow/]\n  DL -.->|run logging| MFD[dl-mlflow<br/>mlflow-dl.]\n  NLP -.->|run logging| MFN[nlp-mlflow<br/>mlflow-nlp.]\n  ML -.->|persistence| PG[(PostgreSQL)]\n  ML -.->|artifacts| MN[(MinIO)]\n  ML -.->|cache| RD[(Redis)]\n\n  classDef live fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef planned fill:#1a1e2a,stroke:#64748b,color:#94a3b8\n  classDef infra fill:#13161e,stroke:#4f8ef7,color:#cbd5e1\n  class ML,DL,NLP live\n  class AG planned\n  class CF,NX,MFM,MFD,MFN,PG,MN,RD infra"
       }
     },
     {
@@ -43,7 +43,7 @@
       ],
       "diagram": {
         "type": "mermaid",
-        "code": "graph LR\n  User([🌍 Internet]) --> CF[Cloudflare Tunnel]\n  CF --> NX[Nginx<br/>172.24.0.2]\n  subgraph PROXY[pandya-proxy-network · 172.24.0.0/24]\n    NX\n  end\n  subgraph ML[ml-network · 172.20.0.0/24]\n    IRIS[ml-iris-knn<br/>172.20.0.10]\n    HOUS[ml-housing-linear<br/>172.20.0.11]\n    TIT[ml-titanic-automl<br/>172.20.0.12]\n    MF[ml-mlflow<br/>172.20.0.5]\n    PG[ml-postgres<br/>172.20.0.2]\n  end\n  subgraph DL[dl-network · 172.21.0.0/24]\n    DLP[Phase 2 planned]\n  end\n  subgraph NLP[nlp-network · 172.22.0.0/24]\n    NLPP[Phase 3 planned]\n  end\n  subgraph AG[agentic-network · 172.23.0.0/24]\n    AGP[Phase 4 planned]\n  end\n  NX --> IRIS\n  NX --> HOUS\n  NX --> TIT\n  NX --> MF\n\n  classDef live fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef planned fill:#1a1e2a,stroke:#64748b,color:#94a3b8\n  classDef infra fill:#13161e,stroke:#4f8ef7,color:#cbd5e1\n  class IRIS,HOUS,TIT,MF,PG live\n  class DLP,NLPP,AGP planned\n  class CF,NX infra"
+        "code": "graph LR\n  User([🌍 Internet]) --> CF[Cloudflare Tunnel]\n  CF --> NX[Nginx<br/>172.24.0.2]\n  subgraph PROXY[pandya-proxy-network · 172.24.0.0/24]\n    NX\n  end\n  subgraph ML[ml-network · 172.20.0.0/24]\n    IRIS[ml-iris-knn<br/>.10]\n    HOUS[ml-housing-linear<br/>.11]\n    TIT[ml-titanic-automl<br/>.12]\n    MF[ml-mlflow<br/>.5]\n    PG[ml-postgres<br/>.2]\n  end\n  subgraph DL[dl-network · 172.21.0.0/24]\n    MNIST[dl-mnist-cnn<br/>.10]\n    LSTM[dl-lstm-forecast<br/>.11]\n    DMF[dl-mlflow<br/>.5]\n  end\n  subgraph NLP[nlp-network · 172.22.0.0/24]\n    QUORA[nlp-quora-randomforest<br/>.10]\n    IMDB[nlp-imdb-textrep<br/>.11]\n    W2V[nlp-text8-word2vec<br/>.12]\n    NMF[nlp-mlflow<br/>.5]\n  end\n  subgraph AG[agentic-network · 172.23.0.0/24]\n    AGP[Phase 4 planned]\n  end\n  NX --> ML\n  NX --> DL\n  NX --> NLP\n\n  classDef live fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef planned fill:#1a1e2a,stroke:#64748b,color:#94a3b8\n  classDef infra fill:#13161e,stroke:#4f8ef7,color:#cbd5e1\n  class IRIS,HOUS,TIT,MF,PG,MNIST,LSTM,DMF,QUORA,IMDB,W2V,NMF live\n  class AGP planned\n  class CF,NX infra"
       },
       "facts": [
         {"label": "Proxy network", "value": "172.24.0.0/24"},
@@ -76,13 +76,20 @@
       "title": "Live Demos",
       "icon": "🚀",
       "body": [
-        "All three ML demos are live. Click any to try it, or open the **About this project** drawer inside each demo for a deep dive on architecture, metrics, and code patterns."
+        "Eight demos are live across three domains. Click any to try it, or open the **About this project** drawer inside each demo for a deep dive on architecture, metrics, and code patterns. Every training run is logged to its domain's public, read-only MLflow tracker."
       ],
       "links": [
         {"label": "🌸 Iris KNN Classifier — multi-class classification, balanced data", "url": "/ml/iris-knn/", "external": false},
         {"label": "🏠 Housing Linear Regression — continuous prediction, 20,640 census blocks", "url": "/ml/housing-linear/", "external": false},
         {"label": "🚢 Titanic AutoML — binary classification on imbalanced data, PyCaret AutoML", "url": "/ml/titanic-automl/", "external": false},
-        {"label": "📈 MLflow — experiment tracking for every run", "url": "/mlflow/", "external": false}
+        {"label": "✍️ MNIST CNN — draw a digit, PyTorch CNN classifier", "url": "/dl/mnist-cnn/", "external": false},
+        {"label": "📉 LSTM Forecast — 14-day NYC CitiBike forecast with an MC-Dropout band", "url": "/dl/lstm-forecast/", "external": false},
+        {"label": "🔁 Duplicate Question Pairs — 22 engineered features + bag-of-words → Random Forest on Quora pairs", "url": "/nlp/quora-randomforest/", "external": false},
+        {"label": "🧹 Text Representation Lab — preprocessing, stems vs lemmas, one-hot / BoW / n-grams / TF-IDF on IMDB", "url": "/nlp/imdb-textrep/", "external": false},
+        {"label": "🧭 Word2Vec Explorer — CBOW vs skip-gram vs fastText on Wikipedia, GloVe as reference", "url": "/nlp/text8-word2vec/", "external": false},
+        {"label": "📈 MLflow (ML) — experiment tracking", "url": "/mlflow/", "external": false},
+        {"label": "📈 MLflow (DL) — experiment tracking", "url": "https://mlflow-dl.pandyahomelab.com/", "external": true},
+        {"label": "📈 MLflow (NLP) — experiment tracking", "url": "https://mlflow-nlp.pandyahomelab.com/", "external": true}
       ]
     },
     {
@@ -90,11 +97,11 @@
       "title": "Roadmap",
       "icon": "🗺️",
       "body": [
-        "Phase 1 (ML) is complete. The platform now grows along two dimensions: **more domains** (DL, NLP, Agentic) and **production maturity** (CI/CD, AWS deployment, observability)."
+        "Phase 1 (ML) and Phase 2 (DL) are live, and Phase 3 (NLP) has three of its four demos live. The platform grows along two dimensions: **more domains** and **production maturity** (CI/CD, AWS deployment, observability)."
       ],
       "bullets": [
-        {"label": "Phase 2 — Deep Learning", "text": "CNN on MNIST handwritten digits → image classification → object detection. PyTorch + interactive draw-a-digit UI."},
-        {"label": "Phase 3 — Natural Language Processing", "text": "Sentiment analysis, Named Entity Recognition, transformer-based models from HuggingFace."},
+        {"label": "Phase 2 — Deep Learning (2 live)", "text": "MNIST CNN with a draw-a-digit UI and an LSTM time-series forecast are live (PyTorch). Object detection (YOLO) is planned."},
+        {"label": "Phase 3 — Natural Language Processing (3 of 4 live)", "text": "Classical NLP from the CampusX course: duplicate question detection, a text representation lab and a Word2Vec explorer are live; an HMM part-of-speech tagger compared with spaCy is next. Transformer models (sentiment, NER) follow in a later v2."},
         {"label": "Phase 4 — Agentic AI", "text": "Claude API in production. Multi-step reasoning, tool use, structured outputs."},
         {"label": "Stage 3 — CI/CD", "text": "GitHub Actions pipelines, automated test gates, container image registry."},
         {"label": "Stage 4 — AWS deployment", "text": "Migrate from NAS to ECS with RDS PostgreSQL, S3 artifact storage, ElastiCache Redis."},

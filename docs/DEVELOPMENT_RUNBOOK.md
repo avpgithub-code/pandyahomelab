@@ -1,7 +1,7 @@
 # pandyaHomeLab — Development Runbook
 
-**Version:** 1.0 (Phase 1a lessons learned)  
-**Last Updated:** May 2026  
+**Version:** 1.1 (adds Phase 3 lessons)  
+**Last Updated:** 2026-09-25  
 **Purpose:** Reference for all future ML/DL/NLP/Agentic project development.  
 Captures every hard-won lesson from Phase 1a so Phase 1b+ is clean first time.
 
@@ -16,8 +16,14 @@ Captures every hard-won lesson from Phase 1a so Phase 1b+ is clean first time.
 | PostgreSQL | ml-postgres | 172.20.0.2 | 5433 | DSM has native postgres on 5432 — use 5433 |
 | MinIO | ml-minio | 172.20.0.3 | 9000/9001 | Object storage + console |
 | Redis | ml-redis | 172.20.0.4 | 6379 | Cache |
-| MLflow | ml-mlflow | 172.20.0.5 | 5000 | Currently restarting — non-critical for Phase 1b |
-| Nginx | pandya-nginx | 172.24.0.2 (proxy) / 172.20.0.20 (ml) | 8080/8443 | Reverse proxy entry point |
+| MLflow (ML) | ml-mlflow | 172.20.0.5 | 5000 | Public read-only at `/mlflow/` |
+| MLflow (DL) | dl-mlflow | 172.21.0.5 | — | Public read-only at `mlflow-dl.pandyahomelab.com` |
+| MLflow (NLP) | nlp-mlflow | 172.22.0.5 | — | Public read-only at `mlflow-nlp.pandyahomelab.com` |
+| Nginx | pandya-nginx | 172.24.0.2 (proxy) / .20 on ml, dl, nlp networks | 8080/8443 | Reverse proxy entry point |
+| Cloudflare Tunnel | pandya-cloudflared | 172.24.0.3 | — | The only public ingress |
+
+The full, current allocation (every container, IP and host port) is
+[NETWORK_CIDR_SUMMARY.md](NETWORK_CIDR_SUMMARY.md). This section is a quick reference only.
 
 ### 1.2 Port Allocation — NEVER USE THESE
 
@@ -32,16 +38,26 @@ Captures every hard-won lesson from Phase 1a so Phase 1b+ is clean first time.
 | 9000, 9001 | ml-minio | |
 | 8001 | ml-iris-knn | Phase 1a project |
 
-### 1.3 Available Ports for New Projects
+### 1.3 Project Slots
 
-| Project | Assigned Port | IP |
+Each domain has ten project slots, `.10`–`.19`, and ten host ports (ML 8001–8009, DL 8010–8019,
+NLP 8020–8029, Agentic 8030–8039; ADR-016 Amendment 1). All demo host ports bind to
+`127.0.0.1`. Slots in use as of 2026-09-25:
+
+| Project | Host port | IP |
 |---|---|---|
-| ml-iris-knn | 8001 | 172.20.0.10 |
-| ml-housing-linear | 8002 | 172.20.0.11 |
-| ml-random-forest | 8003 | 172.20.0.12 |
-| dl-lstm | 8010 | 172.21.0.10 |
-| nlp-sentiment | 8020 | 172.22.0.10 |
-| agentic-claude | 8030 | 172.23.0.10 |
+| ml-iris-knn | 127.0.0.1:8001 | 172.20.0.10 |
+| ml-housing-linear | 127.0.0.1:8002 | 172.20.0.11 |
+| ml-titanic-automl | 127.0.0.1:8003 | 172.20.0.12 |
+| dl-mnist-cnn | 127.0.0.1:8010 | 172.21.0.10 |
+| dl-lstm-forecast | 127.0.0.1:8011 | 172.21.0.11 |
+| nlp-quora-randomforest | 127.0.0.1:8020 | 172.22.0.10 |
+| nlp-imdb-textrep | 127.0.0.1:8021 | 172.22.0.11 |
+| nlp-text8-word2vec | 127.0.0.1:8022 | 172.22.0.12 |
+| *(3d, reserved)* | 127.0.0.1:8023 | 172.22.0.13 |
+
+Check a slot against the CIDR summary before using it; if an address isn't there, amend
+ADR-016 first.
 
 ---
 
@@ -177,6 +193,17 @@ from pydantic import validator
 @validator("data")
 ```
 
+**Installing spaCy on the NAS's Python 3.8 (for local tests).** Some of spaCy's compiled
+dependencies no longer ship Python 3.8 wheels, and pip's fallback source build fails because
+`/tmp` is mounted `noexec`. Force wheels and pin the last versions that have them:
+
+```bash
+python3 -m pip install --user --only-binary=:all: "spacy==3.7.5" "murmurhash==1.0.10" \
+    "cymem==2.0.8" "preshed==3.0.9" "blis==0.7.11" "thinc==8.2.4" "srsly==2.4.8"
+```
+
+Containers use Python 3.11 and are unaffected.
+
 ### 4.4 Python Import Path (Hyphenated Folders)
 
 ```bash
@@ -264,6 +291,35 @@ The container's metrics port is bound inside `pandya-proxy-network` and delibera
 published to the host, so `/ready` is reachable from the NAS host but not from the LAN.
 A refused connection there (curl exit 7) means the container is not serving — host→container
 routing is fine, as `curl -k https://172.24.0.2:443` (pandya-nginx) proves.
+
+### 4.7 Mounting Data into Non-Root Demo Containers
+
+Demo images run as `appuser` (uid 1000). Datasets that can't be baked into an image (licence)
+are mounted read-only from the project's `data/` folder. The Synology ACL on `/volume1` denies
+uid 1000 by default (same trap as cloudflared, §4.6). For a **web-facing** container reading
+**public, non-secret** data, grant read to `everyone` on that folder instead of running as root:
+
+```bash
+synoacltool -add data/qqp "everyone:*:allow:r-x---a-R-c--:fd--"   # name must be `*`
+synoacltool -get data/qqp/train.parquet | grep everyone          # files inherit it
+```
+
+Keep `user: "0:0"` only for port-less containers that mount secrets (cloudflared).
+
+### 4.8 MLflow Idle Memory
+
+MLflow 3.x starts a background job runner plus 6 worker processes (~1.1 GB idle) because
+`MLFLOW_SERVER_ENABLE_JOB_EXECUTION` defaults to true. They serve GenAI-only features
+(issue detection, LLM scorers, prompt optimisation) that this platform doesn't use. All three
+trackers now run with it off and `--workers 2`, ~0.5 GB each (was 1.70 / 1.38 / 0.76 GB).
+Keep both settings on any new tracker. Inspect a container's processes with
+`sudo docker top <container> -eo rss,args`.
+
+### 4.9 `/tmp` Is RAM on the NAS
+
+`/tmp` is a tmpfs, so every file there uses memory (it shows up as `shared` in `free -m`).
+1.1 GB of benchmark files once took available memory from 4.2 to 3.1 GB. Keep datasets and
+models under the project's `data/` folder, not `/tmp`.
 
 ---
 

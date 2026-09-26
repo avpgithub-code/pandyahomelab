@@ -351,4 +351,8 @@ dependencies that no code uses (dl-mlflow runs on SQLite + a local artifact volu
 ~150 MB on a NAS already using swap. NLP's `.2`–`.4` IPs and host ports stay reserved.
 Isolation is unaffected: nlp-mlflow is still domain-local.
 
+**Status 2026-09-25:** the NLP leg (172.22.0.20) is live, and NLP slots `.10`–`.12` are in use
+(nlp-quora-randomforest, nlp-imdb-textrep, nlp-text8-word2vec), all bound to `127.0.0.1`.
+Nothing moved from this amendment's allocation.
+
 **Source of truth:** [NETWORK_CIDR_SUMMARY.md](../NETWORK_CIDR_SUMMARY.md) §3–§8 and §16.
