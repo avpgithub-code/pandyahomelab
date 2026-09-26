@@ -348,6 +348,35 @@ Local MLflow clients then use `MLFLOW_TRACKING_URI=http://localhost:5000` (5001,
 NLP). Several `-L` flags can share one `ssh` command. Read-only browsing needs no tunnel:
 `pandyahomelab.com/mlflow/`, `mlflow-dl.` and `mlflow-nlp.pandyahomelab.com`.
 
+### 4.12 Content-Security-Policy (Report-Only)
+
+Since 2026-09-26 every page (main site and both MLflow subdomains) sends
+`Content-Security-Policy-Report-Only`, defined once as the `$csp_policy` map at the top of
+`deployment/nginx/nginx.conf`. Browsers block nothing; they POST each would-be violation to
+`/csp-report`, logged one JSON line per report to `logs/nginx/csp-report.log` (rotated
+weekly, kept out of analytics). In a browser, the DevTools console shows them as
+`[Report Only] Refused to …`.
+
+Summarise the reports (which directive, which blocked source, on which page):
+
+```bash
+python3 -c "
+import json, collections
+c = collections.Counter()
+for line in open('/volume1/pandya-homelab/logs/nginx/csp-report.log'):
+    r = json.loads(json.loads(line)['report'] or '{}').get('csp-report', {})
+    c[(r.get('violated-directive'), r.get('blocked-uri'), r.get('document-uri'))] += 1
+for k, n in c.most_common(30): print(n, *k)
+"
+```
+
+A new page that loads from a new host must add it to the policy, or it shows up here.
+**To enforce:** once a week or two of reports is clean (or only shows browser extensions,
+`blocked-uri` like `chrome-extension`), rename the header to `Content-Security-Policy` in the
+four `add_header … $csp_policy` lines and rebuild Nginx. Dropping `'unsafe-inline'` from
+`script-src` is a separate job: the demos' inline `<script>` blocks and `on*=` handlers
+have to move to files first.
+
 ---
 
 ## 5. New Project Checklist (Phase 1b+)
