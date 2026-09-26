@@ -17,7 +17,7 @@
       "icon": "🧭",
       "body": [
         "Lecture 5 of the End-to-End NLP course introduces Word2Vec and its two training methods. CBOW and skip-gram are not two different models: they are two ways of training the **same** Word2Vec network. fastText adds one idea on top of skip-gram. All three here are trained on the same {{split.corpus_tokens}} words of text8 with the same settings, so any difference comes from the method.",
-        "GloVe 6B is included as a fixed reference. It was trained by Stanford on 6 billion words (about 350 times more), so it shows what scale buys."
+        "GloVe 6B is included as a fixed reference. It was trained by Stanford on 6 billion words (about 350 times more). Scale buys a lot on meaning analogies ({{comparison.glove.analogy_semantic}} vs skip-gram's {{comparison.skipgram.analogy_semantic}}), but not everything: on WordSim-353 skip-gram trained here scores {{comparison.skipgram.wordsim_spearman}} against GloVe's {{comparison.glove.wordsim_spearman}}."
       ],
       "bullets": [
         {
@@ -266,7 +266,7 @@
         },
         {
           "label": "Small corpus",
-          "text": "17 million words is tiny next to GloVe's 6 billion. Rare words get noisy vectors, and many analogies fail. Compare the trained columns with the GloVe column."
+          "text": "17 million words is tiny next to GloVe's 6 billion. Rare words get noisy vectors and most meaning analogies fail: the trained models answer about a quarter of them, GloVe about two thirds. Compare the columns."
         },
         {
           "label": "Unseen words",
@@ -376,7 +376,7 @@
           "what": "Rank correlation between the model's cosine similarity and people's 0–10 similarity ratings for 353 word pairs.",
           "formula": "Spearman ρ(cosine, human score)",
           "why_chosen": "Checks graded similarity, not just exact answers.",
-          "watch_out": "The ratings mix \"similar\" with \"related\" (cup–coffee), and 353 pairs is a small sample."
+          "watch_out": "The ratings mix \"similar\" with \"related\" (cup–coffee), and 353 pairs is a small sample. GloVe scoring below the text8 models here is a known quirk of this test, not a sign that GloVe is worse overall; its analogy scores say otherwise."
         }
       ]
     },

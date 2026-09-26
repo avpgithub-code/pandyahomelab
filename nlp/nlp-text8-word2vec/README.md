@@ -1,54 +1,54 @@
-# NLP project template
+# nlp-text8-word2vec
 
-Starting point for every Phase 3 demo (3a–3d). It runs end-to-end as shipped: a
-placeholder TF-IDF + logistic-regression classifier on a 24-sentence built-in
-corpus, so the About drawer, Model Card, MLflow logging and tests all work before
-the real model exists.
+Phase 3c: a Word2Vec explorer. CBOW, skip-gram and fastText trained on the same 17M
+words of text8 (Wikipedia), next to GloVe 6B as a pretrained reference: nearest
+neighbours, analogies, similarity and a 2-D map, answered by all four at once.
 
-Built from the live `dl/dl-lstm-forecast` layout rather than the older
-`ml/_templates/ml-project-template`, which has no UI, About drawer or `/model-info`
-contract and whose healthcheck calls `curl` (not present in `python:slim`).
+Built from lecture L5 of the End-to-End NLP course. See `docs/PHASE_3_MASTER_PLAN.md`.
 
-## Create a demo
+| | |
+|---|---|
+| Container | `nlp-text8-word2vec` · 172.22.0.12:8000 · `127.0.0.1:8022` |
+| Route | `/nlp/text8-word2vec/` |
+| MLflow | experiment `nlp-text8-word2vec` on `mlflow-nlp.pandyahomelab.com` (parent run `train-text8` + one child run per model) |
 
-```sh
-nlp/_templates/new-nlp-project.sh nlp-quora-randomforest 0 "Quora Duplicate Questions"
-```
+## Status
 
-The slot number (0–9) sets the container IP (`172.22.0.1<slot>`) and host port
-(`127.0.0.1:802<slot>`) from `docs/NETWORK_CIDR_SUMMARY.md` §5/§8. Then fill in
-`__DESCRIPTION__`, `__SUBTITLE__` and every `TODO`.
+Shipped as 1.0.0 on 2026-09-25 (see CHANGELOG.md).
 
-## What each demo inherits
+| Model | Analogy · meaning | Analogy · grammar | WordSim-353 | Training |
+|---|---|---|---|---|
+| Word2Vec CBOW | 19.9% | 37.2% | 0.625 | 3.7 min |
+| Word2Vec skip-gram | 29.7% | 40.9% | 0.685 | 11.0 min |
+| fastText (skip-gram + subwords) | 23.5% | 71.9% | 0.622 | 21.3 min |
+| GloVe 6B 100d (reference, top 50k) | 65.5% | 65.5% | 0.555 | pretrained |
 
-| Piece | Where | Contract |
-|---|---|---|
-| About drawer | `presentation-logic/api/ui.html` | ml-iris-knn's drawer (the only copy that renders a confusion matrix). Fetches `/about` + `/model-info`, fills `{{tokens}}`, lazy-loads Mermaid. |
-| About content | `presentation-logic/api/about.json` | All standard sections in plan order: problem → approach → text-pipeline → *demo-specific* → architecture → service-architecture → network → stack → dataset → limitations → walkthrough → metrics → learn. |
-| Live numbers | `PredictionService.get_model_info()` | `metrics`, `metrics_display`, `confusion_matrix`, `split`, `training`, `preprocessing`, `run_id`, `experiment_id`, `mlflow_url`. Never trains. |
-| MLflow | `PredictionService._log_to_mlflow()` | Classic `mlflow.log_artifact` path (not LoggedModel), experiment = container name, fails soft. Client pinned to the server's 3.11.1. |
-| Warm-up | `presentation-logic/api/main.py` | Lifespan task trains in a thread; `/predict` during warm-up waits on the train lock. |
-| Pipeline trace | `db-logic/transforms/preprocessor.py` | Named steps; `/predict` returns the text after each one for the UI panel. |
+## Training is offline
 
-## Tests that guard the contract
-
-`tests/presentation/test_about_contract.py` fails if a standard section is
-missing or out of order, or if any `{{token}}` doesn't resolve against a trained
-`get_model_info()`. Keep it green as you replace the placeholders.
+Training takes ~35 min on the NAS, so the service only loads saved vectors at
+startup. Data and models live under `data/` (gitignored, dockerignored), mounted
+read-only.
 
 ```sh
-make test-unit
+python3 scripts/fetch_data.py --data-dir data     # text8 + GloVe, checksum-verified (make data)
+synoacltool -add data "everyone:*:allow:r-x---a-R-c--:fd--"   # once, so the non-root container can read
 ```
 
-## Deploying (per Phase 3 plan)
+Train inside the image on nlp-network, so the run lands in nlp-mlflow (root only to
+write data/models; files are handed back to avpadmin afterwards):
 
-1. Add the service to `deployment/nlp/docker-compose.dev.yml` (IP/port from the
-   script's output, `MLFLOW_TRACKING_URI: http://nlp-mlflow:5000`, depends_on
-   `nlp-mlflow` only).
-2. Build the image, `up -d --no-deps <service>`.
-3. **Only after the container is up**, add its upstream + `location /nlp/<slug>/`
-   to `deployment/nginx/nginx.conf` (Nginx resolves upstreams at startup), add the
-   slug to the `/nlp/` listing, rebuild Nginx with `--no-cache` + `--force-recreate`.
+```sh
+cd deployment/nlp
+sudo docker compose -f docker-compose.yml -f docker-compose.dev.yml run --rm --no-deps \
+  --user 0:0 -v /volume1/pandya-homelab/nlp/nlp-text8-word2vec/data:/train-data \
+  nlp-text8-word2vec sh -c "python scripts/train_embeddings.py --data-dir /train-data \
+  && chown -R 1026:100 /train-data/models"
+sudo docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --no-deps --force-recreate nlp-text8-word2vec
+```
 
-Baked data goes under `db-logic/data/` — `/data/` at the project root is both
-gitignored and dockerignored.
+## Develop
+
+```sh
+make test-unit     # tiny models trained in tests/conftest.py; no text8 needed
+make docker-build
+```
