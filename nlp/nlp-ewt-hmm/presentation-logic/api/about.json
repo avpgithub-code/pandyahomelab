@@ -7,7 +7,7 @@
       "title": "The Problem",
       "icon": "🎯",
       "body": [
-        "Part-of-speech tagging labels every word with its grammatical role: noun, verb, adjective, and so on. It sounds like a dictionary lookup, but many common words take several roles. \"Book\" is a noun in \"read the book\" and a verb in \"book a flight\"; \"can\" is a noun in \"the can\" and a verb in \"we can\".",
+        "Part-of-speech tagging labels every word with its grammatical role: noun, verb, adjective, and so on. It sounds like a dictionary lookup, but many common words take several roles. \"Book\" is a noun in \"read the book\" and a verb in \"book a flight\"; \"saw\" is a noun in \"the saw\" and a verb in \"I saw\".",
         "A tagger has to use the context. This demo tags your sentences twice: with a hidden Markov model built by hand from counts, and with spaCy's neural tagger. It shows you the Viterbi trellis the HMM fills in to choose its tags."
       ]
     },
@@ -80,7 +80,7 @@
         },
         {
           "label": "Transition P(tag | previous tag)",
-          "text": "How often one tag follows another. DET → NOUN is common; DET → VERB is rare. This table is what lets context settle \"the can\" vs \"we can\"."
+          "text": "How often one tag follows another. DET → NOUN is common; DET → VERB is rare. This table is what turns \"book\" into a verb after \"will\" and \"saw\" into a noun after \"the\", although their emissions alone lean the other way."
         },
         {
           "label": "Emission P(word | tag)",
@@ -120,7 +120,7 @@
       ],
       "diagram": {
         "type": "mermaid",
-        "code": "graph LR\n  subgraph W1[\"'the'\"]\n    A1[\"DET\"]\n    B1[\"NOUN\"]\n  end\n  subgraph W2[\"'can'\"]\n    A2[\"NOUN\"]\n    B2[\"VERB\"]\n  end\n  subgraph W3[\"'fell'\"]\n    A3[\"VERB\"]\n    B3[\"NOUN\"]\n  end\n  A1 ==>|best| A2\n  B1 -.-> B2\n  A2 ==>|best| A3\n  B2 -.-> B3\n  A1 -.-> B2\n  A2 -.-> B3\n\n  classDef best fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef other fill:#13161e,stroke:#4f8ef7,color:#e2e8f0\n  class A1,A2,A3 best\n  class B1,B2,B3 other"
+        "code": "graph LR\n  subgraph W1[\"'the'\"]\n    A1[\"DET\"]\n    B1[\"PRON\"]\n  end\n  subgraph W2[\"'saw'\"]\n    A2[\"NOUN\"]\n    B2[\"VERB\"]\n  end\n  subgraph W3[\"'.'\"]\n    A3[\".\"]\n  end\n  A1 ==>|best| A2\n  A1 -.-> B2\n  B1 -.-> B2\n  A2 ==>|best| A3\n  B2 -.-> A3\n\n  classDef best fill:#0d2818,stroke:#22c55e,color:#86efac\n  classDef other fill:#13161e,stroke:#4f8ef7,color:#e2e8f0\n  class A1,A2,A3 best\n  class B1,B2 other"
       }
     },
     {
@@ -330,6 +330,10 @@
         {
           "label": "Merged tags hide rules",
           "text": "The 12-tag set merges auxiliaries into VERB, so after \"can\" the HMM no longer knows a bare verb must follow: in \"They can fish\" it tags \"fish\" as a noun. The 17-tag set would keep AUX, at the cost of a bigger, sparser table."
+        },
+        {
+          "label": "Frequency beats context",
+          "text": "In \"The can of fish\", \"can\" is a verb so often in the training text (\"I can\", \"you can\") that even the rare DET → VERB transition doesn't overturn it: the HMM tags it VERB. spaCy gets it right."
         },
         {
           "label": "Imperatives",

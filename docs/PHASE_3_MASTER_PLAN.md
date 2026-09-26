@@ -12,7 +12,8 @@ No PyTorch/transformers until the deferred v2 cards. Images should stay well und
 ~2.5 GB DL images.
 
 **Status:** Approved 2026-09-23. Gates G1–G3 decided (see [decision gates](#decision-gates)). 3.0 done 2026-09-24;
-3a, 3b and 3c shipped 2026-09-25 (see [shipped so far](#shipped-so-far)). **3d is next.**
+3a, 3b and 3c shipped 2026-09-25, 3d on 2026-09-26 (see [shipped so far](#shipped-so-far)). **Phase 3 is
+complete**; the transformer v2 demos wait for the course.
 
 ---
 
@@ -46,7 +47,7 @@ Don't add it in a compose file first.
 | **3a** | `nlp-quora-randomforest`: duplicate question pair detector | .10 / 8020 | L2 assignment, L8 | ✅ Shipped 2026-09-25 (`v.nlp-quora-randomforest-1.0.0`, 80.1% acc on GLUE QQP) |
 | **3b** | `nlp-imdb-textrep`: text preprocessing + representation lab with an IMDB classifier comparison | .11 / 8021 | L3, L4 | ✅ Shipped 2026-09-25 (`v.nlp-imdb-textrep-1.0.0`, TF-IDF 89.9% on IMDB) |
 | **3c** | `nlp-text8-word2vec`: CBOW vs skip-gram vs fastText on text8, GloVe as reference; trained offline, loaded at startup | .12 / 8022 | L5 | ✅ Shipped 2026-09-25 (`v.nlp-text8-word2vec-1.0.0`; skip-gram WordSim 0.685, GloVe meaning analogies 65.5%) |
-| **3d** | POS tagger: hand-built HMM + Viterbi trellis vs spaCy (name at gate) | .13 / 8023 | L7 | Not started |
+| **3d** | `nlp-ewt-hmm`: POS tagger, hand-built HMM + Viterbi trellis vs spaCy on UD English EWT | .13 / 8023 | L7 | ✅ Shipped 2026-09-26 (`v.nlp-ewt-hmm-1.0.0`, HMM 94.4% vs spaCy 95.1%) |
 | v2 | Transformer sentiment / NER (compare against the classical demos) | .14+ | after the course covers transformers | Deferred |
 
 **Order is forced for 3.0 → 3a:** 3.0 creates the network and the Nginx leg. Nginx resolves
@@ -102,16 +103,18 @@ far above ADR-016's ~200 MB estimate.
 | 3d HMM + spaCy sm | ~0.2 GB |
 | **Phase 3 total** | **~1.7–2.1 GB** |
 
-**Actuals, 2026-09-25 (after 3a–3c):**
+**Actuals, 2026-09-26 (after 3a–3d):**
 
 | Container | Idle RSS | Notes |
 |---|---|---|
 | nlp-quora-randomforest | ~0.56 GB | +~0.1 GB during the ~5 min warm-up |
 | nlp-imdb-textrep | ~0.80 GB | 1.2 GB peak during the ~5 min warm-up |
 | nlp-text8-word2vec | ~0.28–0.33 GB | no warm-up training (trained offline) |
+| nlp-ewt-hmm | ~0.24 GB | ~20 s warm-up (three HMMs counted + spaCy tags the test set) |
 | nlp-mlflow | **0.51 GB** | was 1.70 GB: MLflow 3.x's job runner (6 idle worker processes, GenAI-only) is now disabled and web workers cut 4 → 2. Same change applied to ml-mlflow (1.38 → 0.51 GB) and dl-mlflow (0.76 → 0.50 GB). |
 
-NAS available memory after 3c and the MLflow trim: **~7.2 GB** (vs ~7.4 GB before Phase 3). Note that
+NAS available memory after 3c and the MLflow trim: **~7.2 GB** (vs ~7.4 GB before Phase 3); after 3d
+**~6.8 GB**, swap unchanged. Note that
 `/tmp` on the NAS is RAM-backed (tmpfs): large scratch files there count against this.
 
 **Guardrail:** after each sub-phase ships, `free -m` must still show **≥ 3 GB available**, and
@@ -244,10 +247,10 @@ otherwise the drawer shows raw braces. Each NLP demo gets a TIER 1 test that wal
 
 ## Phase 3 exit criteria
 
-- [ ] 3.0 + 3a–3d shipped; NLP domain count on landing page = **4 live**
-- [x] nlp-network stable; `/nlp/` no longer returns 503 (listing JSON; only 3d's path still 503)
-- [x] No regressions on ML/DL demos (checked after every 3a–3c deploy and the MLflow trim)
-- [ ] CIDR summary §5 slot names for 3b–3d filled in (ADR-016 amendment if anything moved)
+- [x] 3.0 + 3a–3d shipped; NLP domain count on landing page = **4 live** (2026-09-26)
+- [x] nlp-network stable; `/nlp/` no longer returns 503 (listing JSON with all four demos)
+- [x] No regressions on ML/DL demos (checked after every 3a–3d deploy and the MLflow trim)
+- [x] CIDR summary §5 slot names for 3b–3d filled in (nothing moved, so no ADR-016 amendment)
 
 ---
 
@@ -258,6 +261,7 @@ otherwise the drawer shows raw braces. Each NLP demo gets a TIER 1 test that wal
 | 3a | `nlp-quora-randomforest` | `v.nlp-quora-randomforest-1.0.0` | 80.1% accuracy, ROC-AUC 0.886 on 40,430 GLUE QQP validation pairs (lecture ~78% on 3k) |
 | 3b | `nlp-imdb-textrep` | `v.nlp-imdb-textrep-1.0.0` | IMDB test: TF-IDF 89.9% · n-grams 89.3% · one-hot 87.0% · BoW counts 86.6% |
 | 3c | `nlp-text8-word2vec` | `v.nlp-text8-word2vec-1.0.0` | Skip-gram WordSim-353 0.685 (best trained); GloVe meaning analogies 65.5% vs skip-gram 29.7%; fastText grammar analogies 71.9% |
+| 3d | `nlp-ewt-hmm` | `v.nlp-ewt-hmm-1.0.0` | EWT test (25,094 words, 12 tags): HMM 94.4% (unknown words 82.8%) vs spaCy sm 95.1% (88.1%); agreement 92.8% |
 
 Decisions made at each gate:
 - **3a data:** GLUE QQP (`nyu-mll/glue`, pinned) instead of the Kaggle CSV — no Kaggle token.
@@ -265,8 +269,13 @@ Decisions made at each gate:
 - **3b:** classifier comparison **yes**, on IMDB (`stanfordnlp/imdb`, pinned).
 - **3c:** CBOW vs skip-gram vs fastText on text8, GloVe 6B 100d (top 50k) as reference; trained
   offline because training takes ~35 min.
+- **3d:** UD English EWT r2.16 over Brown and the NLTK treebank sample (both use Penn Treebank
+  conventions that spaCy doesn't follow, which made spaCy look worse than it is; the treebank sample
+  is non-commercial). Universal 12 tags (UPOS 17 → 12, SCONJ → ADP); rare words → suffix/shape
+  classes (unknown-word accuracy 36.7% add-1 → 69.0% `<UNK>` → 82.8% classes); trained at warm-up
+  (~20 s). Reproduce with `nlp/nlp-ewt-hmm/scripts/benchmark_gate.py`.
 - **Data licences:** QQP (non-commercial) and IMDB (no stated licence) are mounted at runtime and
-  never baked into images. Each demo's `data/` folder carries a read-only `everyone` Synology ACE so
+  never baked into images. EWT is CC BY-SA 4.0 (publishable) but mounted the same way. Each demo's `data/` folder carries a read-only `everyone` Synology ACE so
   the non-root container can read it (see each project README).
 
 ---

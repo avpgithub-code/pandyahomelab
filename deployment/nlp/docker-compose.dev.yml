@@ -5,9 +5,9 @@ version: '3.8'
 #
 # Slots (docs/NETWORK_CIDR_SUMMARY.md §5/§8). Every host port binds 127.0.0.1:
 #   - nlp-quora-randomforest   172.22.0.10 → 127.0.0.1:8020   (Phase 3a)
-#   - 3b slot                  172.22.0.11 → 127.0.0.1:8021   (Phase 3b)
-#   - 3c slot                  172.22.0.12 → 127.0.0.1:8022   (Phase 3c)
-#   - 3d slot                  172.22.0.13 → 127.0.0.1:8023   (Phase 3d)
+#   - nlp-imdb-textrep         172.22.0.11 → 127.0.0.1:8021   (Phase 3b)
+#   - nlp-text8-word2vec       172.22.0.12 → 127.0.0.1:8022   (Phase 3c)
+#   - nlp-ewt-hmm              172.22.0.13 → 127.0.0.1:8023   (Phase 3d)
 #
 # Each service: MLFLOW_TRACKING_URI=http://nlp-mlflow:5000, depends_on nlp-mlflow
 # (service_healthy) only — no postgres/minio/redis (G1).
@@ -127,3 +127,39 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  nlp-ewt-hmm:
+    image: nlp-ewt-hmm:latest
+    build:
+      context: ../../nlp/nlp-ewt-hmm
+      dockerfile: docker/Dockerfile
+    container_name: nlp-ewt-hmm
+    environment:
+      PYTHONPATH: /app
+      MLFLOW_TRACKING_URI: http://nlp-mlflow:5000
+      EWT_DATA_DIR: /app/data/ewt
+    ports:
+      - "127.0.0.1:8023:8000"   # NAS-only; public traffic comes via nginx
+    volumes:
+      # UD English EWT (CC BY-SA 4.0). Publishable, but mounted like every Phase 3
+      # dataset. Non-root container; data/ewt carries a read-only `everyone` Synology ACE.
+      - /volume1/pandya-homelab/nlp/nlp-ewt-hmm/data/ewt:/app/data/ewt:ro
+    networks:
+      nlp-network:
+        ipv4_address: 172.22.0.13
+    depends_on:
+      nlp-mlflow:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      # /health answers as soon as uvicorn binds; the ~20 s warm-up (three HMMs
+      # counted + the EWT test set tagged by spaCy) runs in the background.
+      start_period: 60s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

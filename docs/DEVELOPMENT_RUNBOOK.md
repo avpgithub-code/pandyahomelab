@@ -54,7 +54,7 @@ NLP 8020–8029, Agentic 8030–8039; ADR-016 Amendment 1). All demo host ports 
 | nlp-quora-randomforest | 127.0.0.1:8020 | 172.22.0.10 |
 | nlp-imdb-textrep | 127.0.0.1:8021 | 172.22.0.11 |
 | nlp-text8-word2vec | 127.0.0.1:8022 | 172.22.0.12 |
-| *(3d, reserved)* | 127.0.0.1:8023 | 172.22.0.13 |
+| nlp-ewt-hmm | 127.0.0.1:8023 | 172.22.0.13 |
 
 Check a slot against the CIDR summary before using it; if an address isn't there, amend
 ADR-016 first.
@@ -320,6 +320,14 @@ Keep both settings on any new tracker. Inspect a container's processes with
 `/tmp` is a tmpfs, so every file there uses memory (it shows up as `shared` in `free -m`).
 1.1 GB of benchmark files once took available memory from 4.2 to 3.1 GB. Keep datasets and
 models under the project's `data/` folder, not `/tmp`.
+
+### 4.10 Tools the NAS Lacks (and What to Use Instead)
+
+| Missing | Use |
+|---|---|
+| `make` | Run the Makefile target's command directly, e.g. `python3 scripts/fetch_ewt.py` |
+| `unzip` | `python3 -m zipfile -e archive.zip dest/` |
+| A browser | `node` (`/usr/local/bin/node`) can run a demo page's inline script: `node --check` for syntax, or stub `document.getElementById` and point `fetch` at `127.0.0.1:<port>` to render every card and drawer section from the live API, then grep the output for `undefined`, `NaN` and unresolved `{{tokens}}`. It does not check layout. |
 
 ---
 

@@ -15,7 +15,7 @@ Built from lecture L7 of the End-to-End NLP course. See `docs/PHASE_3_MASTER_PLA
 
 ## Status
 
-See CHANGELOG.md. EWT test set (2,077 sentences, 25,094 words, universal 12 tags):
+Shipped as 1.0.0 on 2026-09-26 (see CHANGELOG.md). EWT test set (2,077 sentences, 25,094 words, universal 12 tags):
 
 | Tagger | Accuracy | Unknown words (9.1% of test) |
 |---|---|---|
