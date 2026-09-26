@@ -84,13 +84,13 @@ All bridge driver, local scope. The Docker name is what `external:` references i
 | Quora duplicate questions | nlp-quora-randomforest | 172.22.0.10 | 8000 | 127.0.0.1:8020 | Project Service (Phase 3a) |
 | Text representation lab | nlp-imdb-textrep | 172.22.0.11 | 8000 | 127.0.0.1:8021 | Project Service (Phase 3b) |
 | Word2Vec explorer | nlp-text8-word2vec | 172.22.0.12 | 8000 | 127.0.0.1:8022 | Project Service (Phase 3c) |
-| Project slot | nlp-<dataset-algorithm> | 172.22.0.13 | 8000 | 127.0.0.1:8023 | Reserved (Phase 3d) |
+| POS tagger (HMM vs spaCy) | nlp-ewt-hmm | 172.22.0.13 | 8000 | 127.0.0.1:8023 | Project Service (Phase 3d) |
 | Nginx (NLP leg) | pandya-nginx | 172.22.0.20 | — | — | Reverse-proxy attachment |
 
 Phase 3 deploys **nlp-mlflow only** (Phase 3 gate G1, ADR-016 Amendment 1). The postgres/minio/redis
 slots stay reserved and are brought up only when a demo actually uses one.
 Container names follow [ADR-004](adr/ADR-004-demo-naming-convention.md) (`dataset-algorithm`).
-Slot names for 3b–3d are set at each sub-phase decision gate. See
+Slot names for 3b–3d were set at each sub-phase decision gate (all four in use since 2026-09-26). See
 [PHASE_3_MASTER_PLAN.md](PHASE_3_MASTER_PLAN.md).
 
 ---

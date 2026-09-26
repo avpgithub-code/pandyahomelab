@@ -12,7 +12,7 @@ pandyaHomeLab is the platform behind the live site. It hosts hands-on demos acro
 
 - `/ml/` — Machine Learning (classification, regression, AutoML)
 - `/dl/` — Deep Learning (CNN image classification, LSTM forecasting)
-- `/nlp/` — Natural Language Processing (classical NLP: engineered features, text representations, word embeddings)
+- `/nlp/` — Natural Language Processing (classical NLP: engineered features, text representations, word embeddings, sequence labelling)
 - `/agentic/` — Agentic AI (planned)
 
 The platform itself — its network topology, service layout, deployment model, and operational discipline — is **the portfolio artifact**. The live site is what audiences interact with; this repository is the source of truth for how it works.
@@ -29,6 +29,7 @@ The platform itself — its network topology, service layout, deployment model, 
 | NLP | nlp-quora-randomforest | `/nlp/quora-randomforest/` | Duplicate question pairs: 22 engineered features + bag-of-words → Random Forest |
 | NLP | nlp-imdb-textrep | `/nlp/imdb-textrep/` | Preprocessing, stems vs lemmas, one-hot / BoW / n-grams / TF-IDF compared on IMDB |
 | NLP | nlp-text8-word2vec | `/nlp/text8-word2vec/` | Word2Vec CBOW vs skip-gram vs fastText, with GloVe as reference |
+| NLP | nlp-ewt-hmm | `/nlp/ewt-hmm/` | Part-of-speech tagging: hand-built HMM + Viterbi trellis vs spaCy on UD English EWT |
 
 Every training run is logged to its domain's MLflow tracker, each publicly browsable and read-only:
 [`/mlflow/`](https://pandyahomelab.com/mlflow/) (ML), [`mlflow-dl`](https://mlflow-dl.pandyahomelab.com/) (DL)
@@ -43,7 +44,7 @@ pandya-homelab/
 │   ├── admin-portal/  analytics-ingester/   # platform services (feedback admin, analytics)
 │   └── _templates/            # ML project template
 ├── dl/                        # Deep Learning demos: dl-mnist-cnn/  dl-lstm-forecast/
-├── nlp/                       # NLP demos: nlp-quora-randomforest/  nlp-imdb-textrep/  nlp-text8-word2vec/
+├── nlp/                       # NLP demos: nlp-quora-randomforest/  nlp-imdb-textrep/  nlp-text8-word2vec/  nlp-ewt-hmm/
 │   └── _templates/            # NLP project template + new-nlp-project.sh scaffold script
 ├── deployment/                # Docker Compose per domain (ml/, dl/, nlp/), nginx/, cloudflared/
 ├── website/                   # Live landing page + platform About content (served by Nginx)
@@ -130,7 +131,7 @@ Demos are built in phases, one domain at a time:
 |-------|--------|--------|
 | 1 | Machine Learning | Complete: 3 demos + MLflow (May 2026) |
 | 2 | Deep Learning | 2 of 3 live (May 2026); object detection not started |
-| 3 | Natural Language Processing | 3 of 4 live (September 2026); HMM part-of-speech tagger next |
+| 3 | Natural Language Processing | 4 of 4 live (September 2026); transformer demos deferred to v2 |
 | 4 | Agentic AI | Planned |
 | 6 | AWS mirror | Planned |
 
@@ -152,4 +153,4 @@ This is a personal portfolio platform. The architecture, decisions, and code are
 
 **Author:** Archit Pandya
 **Brand:** pandyaHomeLab
-**Last updated:** 2026-09-25 (8 live demos across ML, DL and NLP; 21 ADRs)
+**Last updated:** 2026-09-26 (9 live demos across ML, DL and NLP; 21 ADRs)
