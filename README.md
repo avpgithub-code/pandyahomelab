@@ -21,22 +21,28 @@ The platform itself — its network topology, service layout, deployment model, 
 
 ```
 pandya-homelab/
-├── platform/                  # Platform services (proxy, data, mlops)
-│   ├── proxy/                 # Nginx reverse proxy + TLS termination
-│   ├── data/                  # Postgres, MinIO, Redis
-│   └── mlops/                 # MLflow, Grafana, Prometheus, Loki
-├── site/                      # Static L1-L3 content (apex landing + domain pages)
-│   ├── apex/
-│   ├── ml/, dl/, nlp/, agentic/
-├── services/                  # Per-domain demos (L4 endpoints)
-│   ├── ml/, dl/, nlp/, agentic/
-├── compose/                   # Docker Compose files (platform + demos, dev-nas + prod-nas)
+├── ml/                        # Machine Learning demos, one self-contained project each
+│   ├── ml-iris-knn/  ml-housing-linear/  ml-titanic-automl/
+│   ├── admin-portal/  analytics-ingester/   # platform services (feedback admin, analytics)
+│   └── _templates/            # ML project template
+├── dl/                        # Deep Learning demos: dl-mnist-cnn/  dl-lstm-forecast/
+├── nlp/                       # NLP demos: nlp-quora-randomforest/  nlp-imdb-textrep/  nlp-text8-word2vec/
+│   └── _templates/            # NLP project template + new-nlp-project.sh scaffold script
+├── deployment/                # Docker Compose per domain (ml/, dl/, nlp/), nginx/, cloudflared/
+├── website/                   # Live landing page + platform About content (served by Nginx)
+├── site/                      # Unserved copy of the landing page for the planned static-site layout
+├── services/                  # Legacy Stage 2 placeholders (empty)
+├── backups/                   # Backup notes (image backups live outside git)
 └── docs/
-    ├── adr/                   # Active architecture decision records
-    └── archive/               # Historical artifacts (deliberation memos, designs)
+    ├── adr/                   # Architecture decision records
+    ├── archive/               # Historical artifacts (deliberation memos, designs)
+    └── *.md                   # Phase plans, NETWORK_CIDR_SUMMARY, DEVELOPMENT_RUNBOOK, walkthroughs
 ```
 
-The layout is established by **[ADR-007](docs/adr/ADR-007-repository-layout.md)**. Each top-level folder corresponds to a logical tier of the architecture.
+Every demo folder follows the same four-layer structure (`presentation-logic/`, `application-logic/`,
+`db-logic/`, `shared/`, per ADR-013) with its own Dockerfile, tests and README. The layout is
+established by **[ADR-007 (v3)](docs/adr/ADR-007-repository-layout-v3.md)**, which replaced the
+Stage 2 layout in [ADR-007](docs/adr/ADR-007-repository-layout.md).
 
 ## Architecture decisions
 
