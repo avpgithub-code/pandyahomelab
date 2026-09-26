@@ -1,6 +1,6 @@
 ---
 title: Internet Access from NAS & Domain Routing
-status: Proposed (new)
+status: Accepted (signed off 2026-05-05)
 context: |
   ADR-016 establishes 5 isolated Docker networks per the topology. However, traffic flows and
   routing rules are not yet specified. Nginx must:

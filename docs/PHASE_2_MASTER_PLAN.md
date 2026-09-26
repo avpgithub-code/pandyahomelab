@@ -2,6 +2,10 @@
 
 **Objective:** Stand up the Deep Learning domain on the pandyaHomeLab platform. Three demo projects, all reachable under `/dl/`, all tracking experiments in the shared MLflow.
 
+**Status (2026-09-25):** 2a and 2b shipped 2026-05-25; `dl-network` exists and experiments are tracked in the
+domain's own `dl-mlflow` (public read-only at `mlflow-dl.pandyahomelab.com`), not the shared ML tracker.
+2c (object detection) has not started.
+
 **Network:** First time we instantiate a second domain network on the NAS. `dl-network` (172.21.0.0/24) is in the architecture but doesn't exist yet — Phase 2a creates it.
 
 **Framework:** PyTorch (CPU-only wheels — no CUDA on the NAS). Images will be ~2.5GB; build time and bandwidth will dominate the first iteration.
@@ -12,9 +16,9 @@
 
 | Sub-phase | Project | URL | Status |
 |---|---|---|---|
-| **2a** | `dl-mnist-cnn` — CNN handwritten digit classifier | `/dl/mnist-cnn/` | Plan exists, needs drift refresh ([docs/PHASE_2A_EXECUTION_PLAN.md](PHASE_2A_EXECUTION_PLAN.md)) |
-| **2b** | `dl-lstm-forecast` — LSTM time-series forecaster | `/dl/lstm-forecast/` | Stub planned ([docs/PHASE_2B_EXECUTION_PLAN.md](PHASE_2B_EXECUTION_PLAN.md)) |
-| **2c** | `dl-yolo-object-detection` — YOLOv8 object detection | `/dl/object-detection/` | Stub planned ([docs/PHASE_2C_EXECUTION_PLAN.md](PHASE_2C_EXECUTION_PLAN.md)) |
+| **2a** | `dl-mnist-cnn` — CNN handwritten digit classifier | `/dl/mnist-cnn/` | ✅ Shipped 2026-05-25 (`v.dl-mnist-cnn-1.0.0`; [plan](PHASE_2A_EXECUTION_PLAN.md)) |
+| **2b** | `dl-lstm-forecast` — LSTM time-series forecaster | `/dl/lstm-forecast/` | ✅ Shipped 2026-05-25 (`v.dl-lstm-forecast-1.0.0`, post-tag 2b.10 polish; [plan](PHASE_2B_EXECUTION_PLAN.md)) |
+| **2c** | `dl-yolo-object-detection` — YOLOv8 object detection | `/dl/object-detection/` | Not started — stub plan only ([docs/PHASE_2C_EXECUTION_PLAN.md](PHASE_2C_EXECUTION_PLAN.md)) |
 
 **Order is forced:** 2a must ship first because it creates `dl-network`, adds Nginx attachment to it, and replaces the placeholder `/dl/` 503. 2b and 2c attach to the already-running infrastructure.
 

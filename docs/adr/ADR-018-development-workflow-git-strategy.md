@@ -1,6 +1,6 @@
 ---
 title: Development Workflow & Git Strategy
-status: Proposed (new)
+status: Accepted (signed off 2026-05-05)
 context: |
   Phase 1a begins actual implementation of ml-iris-knn. Without explicit development workflow
   and git strategy, individual developers make ad-hoc decisions leading to inconsistency:

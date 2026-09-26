@@ -1,6 +1,6 @@
 ---
 title: Project autonomy and templates — consistent scaffolding for rapid project creation
-status: Proposed (new)
+status: Accepted (signed off 2026-05-05)
 context: |
   ADR-013 locks the 3-layer pattern for every project. However, starting a new project
   with ~20 required folders and files is friction: copy/paste errors, forgotten structure elements.

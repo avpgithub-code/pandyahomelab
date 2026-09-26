@@ -1,6 +1,6 @@
 # ADR-007: Repository layout follows 3-tier multi-service shape
 
-**Status:** Accepted
+**Status:** Superseded by [ADR-007 (v3)](ADR-007-repository-layout-v3.md) (2026-05-05). Kept for history.
 **Date:** April 2026
 **Stage:** 2 (Synology Implementation)
 

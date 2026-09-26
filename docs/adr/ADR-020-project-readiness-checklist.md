@@ -1,6 +1,6 @@
 ---
 title: Project Readiness Checklist & Phase Gates
-status: Proposed (new)
+status: Accepted (signed off 2026-05-05)
 context: |
   V3 architecture and network topology are locked. Now we need explicit criteria for when
   a project is "ready to deploy" to ensure quality baseline. Each project across all four

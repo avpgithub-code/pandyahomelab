@@ -1,6 +1,6 @@
 ---
 title: Per-project 3-layer architecture — enforced internal structure for all projects
-status: Proposed (new)
+status: Accepted (signed off 2026-05-05)
 context: |
   ADR-007 (V3 revision) establishes ml/ and dl/ folders as autonomous project containers.
   However, "autonomous" must be defined concretely: what does an ideal project look like internally?
