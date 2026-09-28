@@ -73,6 +73,20 @@
       ]
     },
     {
+      "id": "dataset",
+      "title": "Dataset",
+      "icon": "📂",
+      "body": [
+        "The **California Housing** dataset: 20,640 census block groups from the 1990 US Census, compiled by R. K. Pace and R. Barry (*Sparse Spatial Autoregressions*, 1997). It is loaded with scikit-learn's `fetch_california_housing`, which downloads it from the StatLib archive.",
+        "The underlying figures are US Census data, a US government work in the **public domain**. Credit for the compiled dataset goes to Pace & Barry and the StatLib archive."
+      ],
+      "facts": [
+        {"label": "Rows", "value": "20,640"},
+        {"label": "Source", "value": "StatLib via scikit-learn"},
+        {"label": "Licence", "value": "Public domain (US Census)"}
+      ]
+    },
+    {
       "id": "walkthrough",
       "title": "Read the Code Walkthrough",
       "icon": "📖",

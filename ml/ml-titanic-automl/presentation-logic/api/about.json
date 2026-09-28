@@ -73,6 +73,20 @@
       ]
     },
     {
+      "id": "dataset",
+      "title": "Dataset",
+      "icon": "📂",
+      "body": [
+        "The **Titanic** passenger table: the 891-passenger training set popularised by Kaggle's *Titanic* competition, loaded with seaborn's `load_dataset(\"titanic\")` from the seaborn-data repository.",
+        "The rows are historical passenger records, compiled from Encyclopedia Titanica by Thomas Cason and Frank Harrell (Vanderbilt University, `titanic3`). Used here for non-commercial education, with credit to those sources."
+      ],
+      "facts": [
+        {"label": "Rows", "value": "891"},
+        {"label": "Source", "value": "seaborn-data (Kaggle / Vanderbilt titanic3)"},
+        {"label": "Use", "value": "Non-commercial education"}
+      ]
+    },
+    {
       "id": "walkthrough",
       "title": "Read the Code Walkthrough",
       "icon": "📖",

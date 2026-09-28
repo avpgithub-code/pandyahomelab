@@ -75,6 +75,20 @@
       ]
     },
     {
+      "id": "dataset",
+      "title": "Dataset",
+      "icon": "📂",
+      "body": [
+        "Fisher's **Iris** data (1936): 150 flowers, 4 measurements each, 3 species. The copy used here is the standard one distributed with the UCI Machine Learning Repository and scikit-learn, committed to the repo as `data/iris.csv`.",
+        "Licensed **CC BY 4.0** by the UCI Machine Learning Repository. Original data: R. A. Fisher, *The use of multiple measurements in taxonomic problems*, Annals of Eugenics, 1936."
+      ],
+      "facts": [
+        {"label": "Rows", "value": "150"},
+        {"label": "Source", "value": "UCI ML Repository"},
+        {"label": "Licence", "value": "CC BY 4.0"}
+      ]
+    },
+    {
       "id": "walkthrough",
       "title": "Read the Code Walkthrough",
       "icon": "📖",
