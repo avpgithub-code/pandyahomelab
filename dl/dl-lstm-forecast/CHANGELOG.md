@@ -2,6 +2,12 @@
 
 All notable changes to dl-lstm-forecast will be documented in this file.
 
+## [Unreleased] — 2026-09-28
+
+### Changed
+- `ui.html`: Chart.js 4.4.0, chartjs-adapter-date-fns 3.0.0 and Mermaid 10.9.8 now load from the site's own `/vendor/` copies instead of cdn.jsdelivr.net, so visitors' browsers contact no third party (see `website/vendor/README.md`).
+- `about.json`: the Dataset section now states the licence (Citi Bike Data License Agreement) and that the site is not affiliated with Citi Bike or Lyft.
+
 ## [1.0.1] — 2026-08-27 (post-tag polish, Phase 2b.10)
 
 ### Changed
