@@ -319,6 +319,53 @@
   <div class="empty-card">No demo activity yet in the last {{ days }} days.</div>
   {% endif %}
 
+  <h2>🧭 Visit paths</h2>
+  <div class="two-col">
+    <div class="panel">
+      <div class="panel-title">🧭 Most common journeys (first 5 pages)</div>
+      {% if journeys %}
+      <table>
+        <thead>
+          <tr><th>Journey</th><th style="text-align:right">Visits</th><th style="text-align:right">Avg time</th></tr>
+        </thead>
+        <tbody>
+          {% for row in journeys %}
+          <tr>
+            <td><code>{{ row.journey }}</code></td>
+            <td class="num">{{ row.visits }}</td>
+            <td class="num">{{ dur(row.avg_s) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty">No visits yet.</div>
+      {% endif %}
+    </div>
+    <div class="panel">
+      <div class="panel-title">➡️ Where people went next</div>
+      {% if next_pages %}
+      <table>
+        <thead>
+          <tr><th>From</th><th>To</th><th style="text-align:right">Times</th></tr>
+        </thead>
+        <tbody>
+          {% for row in next_pages %}
+          <tr>
+            <td><code>{{ row.from_page }}</code></td>
+            <td><code>{{ row.to_page }}</code></td>
+            <td class="num">{{ row.times }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty">No visits yet.</div>
+      {% endif %}
+    </div>
+  </div>
+  <p class="note">A visit is one browser tab's session; it ends after 30 minutes of no page loads. Links opened in a new tab start a new visit.</p>
+
   <h2>🌍 Countries & 🔗 Sources (real visitors)</h2>
   <div class="two-col">
 
