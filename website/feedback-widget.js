@@ -9,6 +9,8 @@
  *   - Appends widget DOM to document.body
  *   - Fetches current like count from /feedback/likes
  *   - Restores "already liked" state from localStorage
+ *   - Sends a page-view beacon to /feedback/pv, then engagement updates
+ *     (active time, scroll depth, interactions) — see pageViewBeacon below
  *
  * User interactions:
  *   - Like button       → POST /feedback/likes, increment count, lock to "Liked ✓"
@@ -24,6 +26,126 @@
   // Normalise: every page_id ends with /  (except root '/' itself is already correct)
   if (pageId !== '/' && !pageId.endsWith('/')) pageId += '/';
   const LIKED_KEY = 'phl:liked:' + pageId;
+
+  // ─── Page-view / engagement beacon ─────────────────────────────────────
+  // Tells the admin dashboard a real browser opened this page, and how long
+  // the visitor stayed engaged. No cookies: a random tab-session id lives in
+  // sessionStorage; the server keys visitors on its usual salted IP hash.
+  //   engaged time  counts only while the tab is visible AND the visitor did
+  //                 something (scroll / click / key / touch / mouse) in the last 30 s
+  //   interactions  scrolls (max 1 per 2 s), clicks, key presses, touches
+  (function pageViewBeacon() {
+    const ENDPOINT = API_BASE + '/pv';
+    const IDLE_MS = 30000;
+    const VISIT_GAP_MS = 30 * 60 * 1000;
+
+    function rid() {
+      const a = new Uint8Array(8);
+      crypto.getRandomValues(a);
+      return Array.from(a, (b) => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function visitId() {
+      const now = Date.now();
+      let v = null;
+      try { v = JSON.parse(sessionStorage.getItem('phl:visit') || 'null'); } catch (_) {}
+      if (!v || typeof v.id !== 'string' || now - v.last > VISIT_GAP_MS) v = { id: rid() };
+      v.last = now;
+      try { sessionStorage.setItem('phl:visit', JSON.stringify(v)); } catch (_) {}
+      return v.id;
+    }
+
+    function send(msg) {
+      const body = JSON.stringify(msg);
+      try {
+        if (navigator.sendBeacon && navigator.sendBeacon(ENDPOINT, body)) return;
+      } catch (_) {}
+      try { fetch(ENDPOINT, { method: 'POST', body: body, keepalive: true }); } catch (_) {}
+    }
+
+    let pv, visit, engaged, lastTick, lastActive, maxScroll, interactions, lastScrollCount, sentKey;
+
+    function scrollPct() {
+      const doc = document.documentElement;
+      const total = Math.max(doc.scrollHeight, document.body ? document.body.scrollHeight : 0);
+      if (total <= window.innerHeight) return 100;
+      return Math.min(100, Math.round((window.scrollY + window.innerHeight) / total * 100));
+    }
+
+    // Add the engaged time since the last tick, clipped to the 30 s idle window.
+    function tick() {
+      const now = Date.now();
+      if (document.visibilityState === 'visible') {
+        engaged += Math.max(0, Math.min(now, lastActive + IDLE_MS) - lastTick);
+      }
+      lastTick = now;
+    }
+
+    function activity(countIt) {
+      tick();
+      lastActive = Date.now();
+      if (countIt) interactions++;
+    }
+
+    function update() {
+      tick();
+      maxScroll = Math.max(maxScroll, scrollPct());
+      const key = engaged + ':' + maxScroll + ':' + interactions;
+      if (key === sentKey) return;          // nothing new since the last beacon
+      sentKey = key;
+      send({ t: 'update', pv: pv, v: visit, e: engaged, s: maxScroll, i: interactions });
+    }
+
+    function start() {
+      pv = rid();
+      visit = visitId();
+      engaged = 0;
+      lastTick = lastActive = Date.now();
+      maxScroll = 0;
+      interactions = 0;
+      lastScrollCount = 0;
+      sentKey = '';
+      const q = new URLSearchParams(window.location.search);
+      send({
+        t: 'start', pv: pv, v: visit, p: pageId,
+        r: document.referrer || '',
+        us: q.get('utm_source'), um: q.get('utm_medium'), uc: q.get('utm_campaign'),
+        w: window.innerWidth, l: navigator.language || '',
+      });
+    }
+
+    try {
+      start();
+
+      ['pointerdown', 'keydown', 'touchstart'].forEach((ev) =>
+        window.addEventListener(ev, () => activity(true), { passive: true, capture: true }));
+      window.addEventListener('scroll', () => {
+        const now = Date.now();
+        const counted = now - lastScrollCount > 2000;
+        if (counted) lastScrollCount = now;
+        activity(counted);
+        maxScroll = Math.max(maxScroll, scrollPct());
+      }, { passive: true });
+      let lastMove = 0;
+      window.addEventListener('mousemove', () => {
+        const now = Date.now();
+        if (now - lastMove > 1000) { lastMove = now; activity(false); }
+      }, { passive: true });
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+          update();
+        } else {
+          lastTick = lastActive = Date.now();   // coming back to the tab counts as activity
+        }
+      });
+      window.addEventListener('pagehide', update);
+      // Back/forward cache restore = a fresh page view of the same page
+      window.addEventListener('pageshow', (e) => { if (e.persisted) start(); });
+      // Heartbeat so long reads still land if the browser never fires pagehide (mobile)
+      setInterval(() => { if (document.visibilityState === 'visible') update(); }, 15000);
+    } catch (_) { /* analytics must never break the page */ }
+  })();
 
   // ─── Styles ────────────────────────────────────────────────────────────
   const css = `
