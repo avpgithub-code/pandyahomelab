@@ -122,7 +122,8 @@
       "icon": "📂",
       "body": [
         "NYC CitiBike daily ride counts, sourced from [toddwschneider/nyc-citibike-data](https://github.com/toddwschneider/nyc-citibike-data) — a well-known reference repo that publishes a daily-aggregated CSV of trip counts. **883 daily observations** spanning 2013-07-01 → 2015-11-30, the early-growth era of the CitiBike system.",
-        "Each row is one calendar day with the total number of bike trips across all stations. The committed CSV also includes weather/holiday columns (precipitation, temperature, dow, holiday) — v1.0.0 uses only the daily trips count, but those features are preserved on disk for a future multivariate extension."
+        "Each row is one calendar day with the total number of bike trips across all stations. The committed CSV also includes weather/holiday columns (precipitation, temperature, dow, holiday) — v1.0.0 uses only the daily trips count, but those features are preserved on disk for a future multivariate extension.",
+        "Trip data is published by Lyft Bikes and Scooters, LLC (operator of Citi Bike) under the **Citi Bike Data License Agreement**; the daily aggregation is from Todd W. Schneider's nyc-citibike-data project. pandyaHomeLab is not affiliated with or endorsed by Citi Bike or Lyft."
       ],
       "facts": [
         {"label": "Daily observations", "value": "883"},
@@ -131,7 +132,8 @@
         {"label": "Train days", "value": "{{split.train_samples}}"},
         {"label": "Validation days", "value": "{{split.val_samples}}"},
         {"label": "Test days", "value": "{{split.test_samples}}"},
-        {"label": "Source", "value": "toddwschneider/nyc-citibike-data"}
+        {"label": "Source", "value": "toddwschneider/nyc-citibike-data"},
+        {"label": "Licence", "value": "Citi Bike Data License Agreement"}
       ]
     },
     {

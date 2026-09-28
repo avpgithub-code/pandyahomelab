@@ -89,6 +89,20 @@
       ]
     },
     {
+      "id": "dataset",
+      "title": "Dataset",
+      "icon": "📂",
+      "body": [
+        "**MNIST**: 70,000 handwritten digits (60,000 train, 10,000 test), 28×28 greyscale, by Yann LeCun, Corinna Cortes and Christopher J. C. Burges. It is downloaded with torchvision's `datasets.MNIST`.",
+        "Licensed **CC BY-SA 3.0** by its authors."
+      ],
+      "facts": [
+        {"label": "Images", "value": "70,000"},
+        {"label": "Source", "value": "torchvision · yann.lecun.com"},
+        {"label": "Licence", "value": "CC BY-SA 3.0"}
+      ]
+    },
+    {
       "id": "walkthrough",
       "title": "Read the Code Walkthrough",
       "icon": "📖",
