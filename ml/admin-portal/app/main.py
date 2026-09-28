@@ -14,11 +14,13 @@ Nginx (no longer strips the URL prefix) maps:
     pandyahomelab.com/admin/...    → container :8000/admin/...
     pandyahomelab.com/feedback/... → container :8000/feedback/...
 """
+import asyncio
 import logging
 import os
 
 from fastapi import FastAPI
 
+from app.home_ip import refresh_loop
 from app.schema import ensure_feedback_schema
 
 logging.basicConfig(
@@ -46,6 +48,9 @@ def create_app() -> FastAPI:
             logger.info("schema bootstrapped (feedback_likes, feedback_comments, page_views, page_events)")
         except Exception as e:
             logger.warning(f"feedback schema bootstrap failed (will retry on next startup): {e}")
+            return
+        # Keep a reference so the task isn't garbage-collected.
+        app.state.home_ip_task = asyncio.create_task(refresh_loop())
 
     # Liveness probe at app root — used by the Dockerfile HEALTHCHECK.
     # No auth, no analytics logging.

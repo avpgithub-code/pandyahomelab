@@ -12,7 +12,9 @@ from datetime import datetime, timezone
 
 from app.db import get_cursor
 from app.engagement_queries import (
+    HOME,
     HUMAN,
+    fetch_home_summary,
     fetch_engagement_summary,
     fetch_human_countries,
     fetch_journeys,
@@ -31,17 +33,17 @@ WHERE {HUMAN}
   AND started_at <  NOW() - %(win)s::interval
 """
 
-COMMENTS_SQL = """
-SELECT page_id, coalesce(name, 'anonymous') AS name, body, created_at
+COMMENTS_SQL = f"""
+SELECT page_id, coalesce(name, 'anonymous') AS name, body, created_at, {HOME} AS from_home
 FROM analytics.feedback_comments
 WHERE NOT hidden AND created_at >= NOW() - %(win)s::interval
 ORDER BY created_at DESC
 LIMIT 10
 """
 
-LIKES_SQL = """
+LIKES_SQL = f"""
 SELECT count(*) AS n FROM analytics.feedback_likes
-WHERE created_at >= NOW() - %(win)s::interval
+WHERE NOT {HOME} AND created_at >= NOW() - %(win)s::interval
 """
 
 
@@ -86,6 +88,9 @@ def build_report(days: int = 7) -> str:
     bounce = s.get("bounce_pct")
     w(f"  Bounce rate     {(str(int(bounce)) + '%') if bounce is not None else '—':>6}")
     w(f"  New likes       {likes:>6}")
+    home = fetch_home_summary(days)
+    if home.get("page_views"):
+        w(f"  (Not counted: your home IP — {home['page_views']} page views in {home['visits']} visits)")
 
     pages = fetch_page_engagement(days, limit=10)
     if pages:
@@ -123,7 +128,8 @@ def build_report(days: int = 7) -> str:
         w("NEW COMMENTS")
         for c in comments:
             body = " ".join(c["body"].split())
-            w(f"  [{c['created_at']:%b %d}] {c['page_id']} — {c['name']}: {body[:200]}{'…' if len(body) > 200 else ''}")
+            tag = " (home IP)" if c["from_home"] else ""
+            w(f"  [{c['created_at']:%b %d}] {c['page_id']} — {c['name']}{tag}: {body[:200]}{'…' if len(body) > 200 else ''}")
 
     if not (s.get("visitors") or 0):
         w("")

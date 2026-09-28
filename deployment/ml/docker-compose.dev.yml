@@ -104,6 +104,10 @@ services:
   # renders Jinja2 HTML, protected by HTTP Basic Auth.
   admin-portal:
     image: admin-portal:latest
+    # Code is COPYed into the image — without `build:`, `docker compose build` is a no-op.
+    build:
+      context: ../../ml/admin-portal
+      dockerfile: docker/Dockerfile
     container_name: admin-portal
     environment:
       DATABASE_URL: postgresql://postgres:${ML_POSTGRES_PASSWORD}@ml-postgres:5432/mldb
@@ -112,6 +116,9 @@ services:
       # Same salt as the analytics-ingester — keeps ip_hash values consistent
       # so rate-limiting can match a visitor across the two services.
       ANALYTICS_IP_SALT: ${ANALYTICS_IP_SALT}
+      # DDNS name of the owner's home connection; its visits are shown as "Home IP"
+      # instead of counting as real visitors. Empty = feature off.
+      HOME_IP_HOST: ${HOME_IP_HOST:-}
     networks:
       ml-network:
         ipv4_address: 172.20.0.31

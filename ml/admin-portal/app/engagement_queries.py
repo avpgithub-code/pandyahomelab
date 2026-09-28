@@ -1,14 +1,17 @@
 """SQL for the page-view beacon (writes) and the "real visitors" dashboard (reads).
 
 A page view counts as HUMAN when the browser ran our JS, the UA isn't a known bot,
-and the visitor either interacted (scroll/click/key/touch) or kept the tab visible
-and active for at least 10 seconds. Everything on the dashboard's top half uses it.
+it didn't come from the owner's home IP, and the visitor either interacted
+(scroll/click/key/touch) or kept the tab visible and active for at least 10 seconds.
+Everything on the dashboard's top half uses it. Home-IP visits are reported
+separately (HOME_* queries).
 """
 from typing import Dict, List
 
 from app.db import get_cursor
 
-HUMAN = "NOT is_bot AND (interacted OR engaged_ms >= 10000)"
+HOME = "ip_hash IN (SELECT ip_hash FROM analytics.home_ips)"
+HUMAN = f"NOT is_bot AND NOT {HOME} AND (interacted OR engaged_ms >= 10000)"
 OWN_HOST = "(referrer_domain = 'pandyahomelab.com' OR referrer_domain LIKE '%%.pandyahomelab.com')"
 
 
@@ -88,7 +91,7 @@ def count_recent_starts(ip_hash: str) -> int:
 SUMMARY_SQL = f"""
 WITH all_pv AS (
     SELECT * FROM analytics.page_views
-    WHERE NOT is_bot AND started_at >= NOW() - %(win)s::interval
+    WHERE NOT is_bot AND NOT {HOME} AND started_at >= NOW() - %(win)s::interval
 ),
 h AS (SELECT * FROM all_pv WHERE {HUMAN}),
 v AS (
@@ -147,9 +150,11 @@ SELECT
     round(avg(h.max_scroll_pct))                                    AS avg_scroll,
     round(100.0 * count(*) FILTER (WHERE h.max_scroll_pct >= 75) / count(*)) AS read_pct,
     (SELECT count(*) FROM analytics.feedback_likes l
-      WHERE l.page_id = h.page_id AND l.created_at >= NOW() - %(win)s::interval) AS likes,
+      WHERE l.page_id = h.page_id AND l.created_at >= NOW() - %(win)s::interval
+        AND NOT l.{HOME}) AS likes,
     (SELECT count(*) FROM analytics.feedback_comments c
-      WHERE c.page_id = h.page_id AND c.created_at >= NOW() - %(win)s::interval) AS comments
+      WHERE c.page_id = h.page_id AND c.created_at >= NOW() - %(win)s::interval
+        AND NOT c.{HOME}) AS comments
 FROM h
 LEFT JOIN runs ON runs.pv_id = h.pv_id
 GROUP BY h.page_id
@@ -287,6 +292,36 @@ LIMIT %(limit)s
 """
 
 
+# The owner's own activity from the home IP — kept out of everything above.
+HOME_SUMMARY_SQL = f"""
+WITH pv AS (
+    SELECT * FROM analytics.page_views
+    WHERE {HOME} AND started_at >= NOW() - %(win)s::interval
+)
+SELECT
+    (SELECT count(*) FROM pv)                                        AS page_views,
+    (SELECT count(DISTINCT visit_id) FROM pv)                        AS visits,
+    (SELECT round(sum(engaged_ms) / 1000.0) FROM pv)                 AS engaged_s,
+    (SELECT count(*) FROM analytics.page_events e
+      WHERE e.pv_id IN (SELECT pv_id FROM pv) AND e.name LIKE 'run:%%') AS demo_runs,
+    (SELECT count(*) FROM analytics.feedback_likes
+      WHERE {HOME} AND created_at >= NOW() - %(win)s::interval)      AS likes,
+    (SELECT count(*) FROM analytics.feedback_comments
+      WHERE {HOME} AND created_at >= NOW() - %(win)s::interval)      AS comments,
+    (SELECT max(started_at) FROM pv)                                 AS last_seen,
+    (SELECT count(*) FROM analytics.home_ips)                        AS known_ips
+"""
+
+HOME_PAGES_SQL = f"""
+SELECT page_id, count(*) AS views, round(sum(engaged_ms) / 1000.0) AS engaged_s
+FROM analytics.page_views
+WHERE {HOME} AND started_at >= NOW() - %(win)s::interval
+GROUP BY page_id
+ORDER BY views DESC
+LIMIT %(limit)s
+"""
+
+
 def _fetch(sql: str, days: int, limit: int = 10) -> List[Dict]:
     with get_cursor() as cur:
         cur.execute(sql, {"win": f"{days} days", "limit": limit})
@@ -333,3 +368,12 @@ def fetch_journeys(days: int, limit: int = 10) -> List[Dict]:
 
 def fetch_next_pages(days: int, limit: int = 15) -> List[Dict]:
     return _fetch(NEXT_PAGE_SQL, days, limit)
+
+
+def fetch_home_summary(days: int) -> Dict:
+    rows = _fetch(HOME_SUMMARY_SQL, days)
+    return rows[0] if rows else {}
+
+
+def fetch_home_pages(days: int, limit: int = 10) -> List[Dict]:
+    return _fetch(HOME_PAGES_SQL, days, limit)
