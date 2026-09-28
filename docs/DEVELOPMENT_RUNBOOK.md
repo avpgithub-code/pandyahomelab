@@ -370,12 +370,41 @@ for k, n in c.most_common(30): print(n, *k)
 "
 ```
 
-A new page that loads from a new host must add it to the policy, or it shows up here.
-**To enforce:** once a week or two of reports is clean (or only shows browser extensions,
+Since 2026-09-28 the policy allows **no third-party hosts**: Mermaid and Chart.js are served
+from `website/vendor/` (see its README for versions and SHA-256), and nothing loads fonts,
+scripts or frames from elsewhere. A new page must use those copies, not a CDN. If an outside
+host is ever truly needed, add it to the policy **and** to the privacy page (§4.13).
+**To enforce:** once a week or two of reports is clean (count from 2026-09-28, when the policy
+was last tightened) (or only shows browser extensions,
 `blocked-uri` like `chrome-extension`), rename the header to `Content-Security-Policy` in the
 four `add_header … $csp_policy` lines and rebuild Nginx. Dropping `'unsafe-inline'` from
 `script-src` is a separate job: the demos' inline `<script>` blocks and `on*=` handlers
 have to move to files first.
+
+### 4.13 Visitor Analytics, Feedback & Privacy
+
+Everything runs in `admin-portal` (see `ml/admin-portal/README.md`); data lives in the
+`analytics` schema of `ml-postgres`.
+
+| What | Where |
+|---|---|
+| Real visitors (beacon) | `/admin/` top half, from `analytics.page_views` / `page_events` (sent by `website/feedback-widget.js`) |
+| Raw server log | `/admin/` bottom, `analytics.visitor_events` (analytics-ingester) — mostly scanners |
+| Owner's own visits | "🏠 Home IP" section; `HOME_IP_HOST` (Synology DDNS, in gitignored `deployment/ml/.env`) is resolved every 10 min into `analytics.home_ips` (hashes only) and excluded everywhere else |
+| Feedback | `/admin/feedback` — per-model table, `?page=/nlp/ewt-hmm/` filter, country / device / arrival source per comment and like, "🏠 you" tag, hide / unhide. Comments are never shown publicly |
+| Weekly email | DSM Task Scheduler "pandyaHomeLab weekly report", root, Mondays 08:00: `/usr/local/bin/docker exec admin-portal python -m app.weekly_report 7` |
+| Retention | `app/retention.py`, daily: analytics rows deleted after 13 months, IP hash stripped from likes / comments after 13 months. nginx raw logs ≈ 12 weeks (weekly × 12) |
+| Privacy page | `website/privacy/index.html` → `/privacy/`, linked from the landing footer and the widget ("No cookies · Privacy") |
+| Privacy contact | `privacy@pandyahomelab.com` — Cloudflare Email Routing → the owner's Gmail (catch-all left disabled) |
+
+**Keep the privacy page true.** Any change that adds a form asking for personal data, an
+embedded video or iframe, a new outside service or CDN, or changes what is collected or how
+long it is kept must update `website/privacy/index.html` and its "Last updated" date in the
+same commit.
+
+**DSM emails stop arriving** (weekly report, disk alerts): DSM shows "Gmail OAuth refresh
+token error". Control Panel → Notification → Email → Sender **Set Up** → **Sign Out** → sign
+in again with the owner's Gmail → Allow → **Save**, then **Send Test Email**.
 
 ---
 
@@ -405,6 +434,9 @@ For every new project, follow this checklist:
 - [ ] All imports use underscore names (db_logic, not db-logic)
 - [ ] Use `Optional[str]` not `str | None` (Python 3.8 on NAS)
 - [ ] fetch() in ui.html uses full path: `/ml/housing-linear/predict`
+- [ ] ui.html embeds `<script src="/feedback-widget.js"></script>` (likes, comments, beacon, privacy link)
+- [ ] Charts / diagrams load from `/vendor/…` (see `website/vendor/README.md`), never a CDN (§4.12)
+- [ ] `about.json` has a `dataset` section stating the source and its licence
 
 ### 5.4 Testing (TIER 1)
 ```bash

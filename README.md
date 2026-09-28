@@ -35,6 +35,8 @@ Every training run is logged to its domain's MLflow tracker, each publicly brows
 [`/mlflow/`](https://pandyahomelab.com/mlflow/) (ML), [`mlflow-dl`](https://mlflow-dl.pandyahomelab.com/) (DL)
 and [`mlflow-nlp`](https://mlflow-nlp.pandyahomelab.com/) (NLP).
 
+The site sets no cookies and loads nothing from third parties; visits are counted first-party for 13 months at most. See the [privacy page](https://pandyahomelab.com/privacy/).
+
 ## Repository layout
 
 ```

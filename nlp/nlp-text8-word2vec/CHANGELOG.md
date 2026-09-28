@@ -1,5 +1,10 @@
 # Changelog — nlp-text8-word2vec
 
+## [Unreleased] — 2026-09-28
+
+### Changed
+- `ui.html`: the About panel's Mermaid 10.9.8 now loads from the site's own `/vendor/` copy instead of cdn.jsdelivr.net, so visitors' browsers contact no third party (see `website/vendor/README.md`).
+
 ## [1.0.0] — 2026-09-25 (ship, tag `v.nlp-text8-word2vec-1.0.0`)
 
 ### Added
