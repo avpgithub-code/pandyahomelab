@@ -78,8 +78,10 @@ def insert_comment(page_id: str, ip_hash: str, name: Optional[str], body: str) -
 
 # ───────────────────── Admin moderation queries ────────────────────────
 
+# from_home: posted from the owner's home IP (see home_ip.py) — tagged "🏠 you" in the view.
 ADMIN_COMMENTS_SQL = """
-SELECT id, page_id, name, body, hidden, ip_hash, created_at
+SELECT id, page_id, name, body, hidden, ip_hash, created_at,
+       ip_hash IN (SELECT ip_hash FROM analytics.home_ips) AS from_home
 FROM analytics.feedback_comments
 ORDER BY created_at DESC
 LIMIT %s
@@ -91,7 +93,10 @@ SELECT
     count(*) FILTER (WHERE hidden)        AS hidden_comments,
     count(*) FILTER (WHERE NOT hidden)    AS visible_comments,
     count(DISTINCT page_id)               AS pages_with_comments,
-    (SELECT count(*) FROM analytics.feedback_likes) AS total_likes
+    count(*) FILTER (WHERE ip_hash IN (SELECT ip_hash FROM analytics.home_ips)) AS home_comments,
+    (SELECT count(*) FROM analytics.feedback_likes) AS total_likes,
+    (SELECT count(*) FROM analytics.feedback_likes
+      WHERE ip_hash IN (SELECT ip_hash FROM analytics.home_ips)) AS home_likes
 FROM analytics.feedback_comments
 """
 
