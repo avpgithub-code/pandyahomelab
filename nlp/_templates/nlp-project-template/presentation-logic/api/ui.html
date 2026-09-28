@@ -528,7 +528,7 @@
     if (_mermaidReady) return;
     await new Promise((resolve, reject) => {
       const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
+      script.src = '/vendor/mermaid-10.9.8/mermaid.min.js';
       script.onload = resolve;
       script.onerror = reject;
       document.head.appendChild(script);

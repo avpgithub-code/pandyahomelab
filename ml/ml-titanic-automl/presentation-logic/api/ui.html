@@ -595,7 +595,7 @@
   }
   async function ensureMermaid() {
     if (_mermaidReady) return;
-    await new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js'; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+    await new Promise((res, rej) => { const s = document.createElement('script'); s.src = '/vendor/mermaid-10.9.8/mermaid.min.js'; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
     mermaid.initialize({ startOnLoad: false, theme: 'dark', themeVariables: { background: '#13161e', primaryColor: '#1a1e2a', primaryTextColor: '#e2e8f0', primaryBorderColor: '#4f8ef7', lineColor: '#64748b', secondaryColor: '#252a38', tertiaryColor: '#0d0f14' } });
     _mermaidReady = true;
   }
