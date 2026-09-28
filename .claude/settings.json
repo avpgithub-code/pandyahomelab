@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ssh -o BatchMode=yes -o ConnectTimeout=15 SynologyNAS 'echo \"=== load ===\"; uptime; echo \"=== top CPU procs ===\"; ps aux --sort=-%cpu 2>/dev/null | head -8 || ps aux | head -8')",
+      "Bash(.venv/bin/python -m pytest tests/)"
+    ]
+  }
+}

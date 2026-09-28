@@ -1,0 +1,31 @@
+# Line-ending policy.
+#
+# `z:\` is an SMB mount of the NAS filesystem that Docker builds from directly, and
+# this repo is edited from Windows where core.autocrlf=true. Without these rules a
+# checkout rewrites LF→CRLF *in place* on the live NAS files: nginx mostly tolerates
+# CRLF, but a CRLF shebang breaks shell scripts outright.
+#
+# Anything consumed by Linux (configs, scripts, Dockerfiles) is pinned to LF.
+
+* text=auto
+
+*.sh        text eol=lf
+*.conf      text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+*.env       text eol=lf
+*.py        text eol=lf
+Dockerfile  text eol=lf
+Makefile    text eol=lf
+
+# Binary assets — never touch.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.xlsx binary
+*.h5  binary
+*.pkl binary
+*.joblib binary
