@@ -63,6 +63,22 @@ CREATE TABLE IF NOT EXISTS analytics.page_views (
 CREATE INDEX IF NOT EXISTS idx_pv_started  ON analytics.page_views (started_at);
 CREATE INDEX IF NOT EXISTS idx_pv_visit    ON analytics.page_views (visit_id);
 CREATE INDEX IF NOT EXISTS idx_pv_ip_time  ON analytics.page_views (ip_hash, started_at);
+
+-- Things a visitor DID on a page, sent by the same beacon: running a demo
+-- ("run:predict", "run:forecast", "run:neighbors" …), loading an example ("example"),
+-- opening the About panel ("about"). Always tied to a page_views row.
+CREATE TABLE IF NOT EXISTS analytics.page_events (
+    id          BIGSERIAL    PRIMARY KEY,
+    pv_id       CHAR(16)     NOT NULL,
+    visit_id    CHAR(16)     NOT NULL,
+    ip_hash     CHAR(64)     NOT NULL,
+    page_id     VARCHAR(255) NOT NULL,
+    name        VARCHAR(40)  NOT NULL,
+    created_at  TIMESTAMPTZ  DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_pe_created ON analytics.page_events (created_at);
+CREATE INDEX IF NOT EXISTS idx_pe_pv      ON analytics.page_events (pv_id);
 """
 
 

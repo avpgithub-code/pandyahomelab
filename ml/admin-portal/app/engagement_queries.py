@@ -37,6 +37,18 @@ WHERE pv_id   = %(pv_id)s
   AND started_at > NOW() - INTERVAL '6 hours'
 """
 
+# page_id / visit_id come from the page view itself, so an event can only attach to
+# a page view this IP started. Capped at 300 events per page view.
+EVENT_INSERT_SQL = """
+INSERT INTO analytics.page_events (pv_id, visit_id, ip_hash, page_id, name)
+SELECT pv_id, visit_id, ip_hash, page_id, %(name)s
+FROM analytics.page_views
+WHERE pv_id   = %(pv_id)s
+  AND ip_hash = %(ip_hash)s
+  AND started_at > NOW() - INTERVAL '6 hours'
+  AND (SELECT count(*) FROM analytics.page_events WHERE pv_id = %(pv_id)s) < 300
+"""
+
 RECENT_STARTS_SQL = """
 SELECT count(*) AS n FROM analytics.page_views
 WHERE ip_hash = %s AND started_at > NOW() - INTERVAL '10 minutes'
@@ -56,6 +68,12 @@ def update_page_view(pv_id: str, ip_hash: str, engaged_ms: int,
             "pv_id": pv_id, "ip_hash": ip_hash, "engaged_ms": engaged_ms,
             "max_scroll_pct": max_scroll_pct, "interactions": interactions,
         })
+        cur.connection.commit()
+
+
+def insert_page_event(pv_id: str, ip_hash: str, name: str) -> None:
+    with get_cursor() as cur:
+        cur.execute(EVENT_INSERT_SQL, {"pv_id": pv_id, "ip_hash": ip_hash, "name": name})
         cur.connection.commit()
 
 
@@ -89,7 +107,10 @@ SELECT
     (SELECT round(avg(pages)::numeric, 1) FROM v)                       AS pages_per_visit,
     (SELECT round(100.0 * count(*) FILTER (WHERE pages = 1 AND engaged_ms < 30000)
                  / NULLIF(count(*), 0)) FROM v)                         AS bounce_pct,
-    (SELECT count(*) FROM days_per_ip WHERE d > 1)                      AS returning_visitors
+    (SELECT count(*) FROM days_per_ip WHERE d > 1)                      AS returning_visitors,
+    (SELECT count(DISTINCT h.ip_hash) FROM h
+       JOIN analytics.page_events e ON e.pv_id = h.pv_id
+      WHERE e.name LIKE 'run:%%')                                       AS demo_users
 """
 
 DAILY_SQL = f"""
@@ -109,9 +130,16 @@ PAGES_SQL = f"""
 WITH h AS (
     SELECT * FROM analytics.page_views
     WHERE {HUMAN} AND started_at >= NOW() - %(win)s::interval
+),
+runs AS (
+    SELECT pv_id, count(*) AS n FROM analytics.page_events
+    WHERE name LIKE 'run:%%' AND pv_id IN (SELECT pv_id FROM h)
+    GROUP BY pv_id
 )
 SELECT
     h.page_id,
+    coalesce(sum(runs.n), 0)                                        AS runs,
+    round(100.0 * count(runs.pv_id) / count(*))                     AS ran_pct,
     count(*)                                                        AS views,
     count(DISTINCT h.ip_hash)                                       AS visitors,
     round(avg(h.engaged_ms) / 1000.0)                               AS avg_s,
@@ -123,6 +151,7 @@ SELECT
     (SELECT count(*) FROM analytics.feedback_comments c
       WHERE c.page_id = h.page_id AND c.created_at >= NOW() - %(win)s::interval) AS comments
 FROM h
+LEFT JOIN runs ON runs.pv_id = h.pv_id
 GROUP BY h.page_id
 ORDER BY views DESC
 LIMIT %(limit)s
@@ -191,6 +220,18 @@ ORDER BY bucket
 BUCKET_LABELS = {1: "< 30 s", 2: "30 s – 2 min", 3: "2 – 5 min", 4: "5 – 15 min", 5: "15 min +"}
 
 
+# What people did on each page (demo runs, examples, About panel).
+ACTIONS_SQL = f"""
+SELECT e.page_id, e.name, count(*) AS times, count(DISTINCT e.ip_hash) AS visitors
+FROM analytics.page_events e
+WHERE e.created_at >= NOW() - %(win)s::interval
+  AND e.pv_id IN (SELECT pv_id FROM analytics.page_views WHERE {HUMAN})
+GROUP BY e.page_id, e.name
+ORDER BY visitors DESC, times DESC
+LIMIT %(limit)s
+"""
+
+
 def _fetch(sql: str, days: int, limit: int = 10) -> List[Dict]:
     with get_cursor() as cur:
         cur.execute(sql, {"win": f"{days} days", "limit": limit})
@@ -225,3 +266,7 @@ def fetch_devices(days: int) -> List[Dict]:
 def fetch_engagement_buckets(days: int) -> List[Dict]:
     counts = {r["bucket"]: int(r["visits"]) for r in _fetch(ENGAGEMENT_BUCKETS_SQL, days)}
     return [{"label": BUCKET_LABELS[b], "visits": counts.get(b, 0)} for b in sorted(BUCKET_LABELS)]
+
+
+def fetch_page_actions(days: int, limit: int = 25) -> List[Dict]:
+    return _fetch(ACTIONS_SQL, days, limit)

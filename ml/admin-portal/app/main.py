@@ -43,7 +43,7 @@ def create_app() -> FastAPI:
             return
         try:
             ensure_feedback_schema(dsn)
-            logger.info("schema bootstrapped (feedback_likes, feedback_comments, page_views)")
+            logger.info("schema bootstrapped (feedback_likes, feedback_comments, page_views, page_events)")
         except Exception as e:
             logger.warning(f"feedback schema bootstrap failed (will retry on next startup): {e}")
 
