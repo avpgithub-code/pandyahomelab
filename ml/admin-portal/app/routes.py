@@ -18,6 +18,8 @@ from app.engagement_queries import (
     fetch_engagement_buckets,
     fetch_engagement_daily,
     fetch_engagement_summary,
+    fetch_home_pages,
+    fetch_home_summary,
     fetch_human_countries,
     fetch_journeys,
     fetch_next_pages,
@@ -65,6 +67,8 @@ async def dashboard(
     human_countries = fetch_human_countries(days, limit=10)
     devices = fetch_devices(days)
     buckets = fetch_engagement_buckets(days)
+    home = fetch_home_summary(days)
+    home_pages = fetch_home_pages(days, limit=10)
 
     daily_chart = [
         {
@@ -108,6 +112,8 @@ async def dashboard(
             "human_countries": human_countries,
             "devices": devices,
             "buckets": buckets,
+            "home": home,
+            "home_pages": home_pages,
             "human_chart_json": json.dumps(human_chart),
             "buckets_json": json.dumps(buckets),
             "daily_chart_json": json.dumps(daily_chart),

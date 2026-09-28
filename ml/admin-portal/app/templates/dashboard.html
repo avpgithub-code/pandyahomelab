@@ -237,6 +237,7 @@
     scrolled / clicked / typed or kept the tab active for ≥ 10 s. Time only runs while the tab is visible and
     the visitor was active in the last 30 s. Bounce = one-page visit under 30 s.
     {{ human.js_page_views or 0 }} JS page loads → {{ human.page_views or 0 }} passed the human filter.
+    Your own visits from the home IP are not included — see <a href="#home-ip">🏠 Home IP</a>.
   </p>
 
   <h2>📈 Daily real visitors</h2>
@@ -460,6 +461,45 @@
       {% endif %}
     </div>
   </div>
+
+  <h2 id="home-ip">🏠 Home IP (you) · last {{ days }} days — not counted above</h2>
+  <div class="summary-grid eight">
+    <div class="card">
+      <div class="card-label">Page views</div>
+      <div class="card-value">{{ home.page_views or 0 }}</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Visits</div>
+      <div class="card-value">{{ home.visits or 0 }}</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Time on site</div>
+      <div class="card-value small">{{ dur(home.engaged_s) }}</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Demo runs</div>
+      <div class="card-value small">{{ home.demo_runs or 0 }}</div>
+    </div>
+    <div class="card">
+      <div class="card-label">👍 / 💬</div>
+      <div class="card-value small">{{ home.likes or 0 }} / {{ home.comments or 0 }}</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Last seen</div>
+      <div class="card-value small">{% if home.last_seen %}{{ home.last_seen.strftime('%b %d %H:%M') }} UTC{% else %}—{% endif %}</div>
+    </div>
+  </div>
+  {% if home_pages %}
+  <p class="note">
+    Pages: {% for p in home_pages %}<code>{{ p.page_id }}</code> {{ p.views }}×{% if not loop.last %} · {% endif %}{% endfor %}
+  </p>
+  {% endif %}
+  <p class="note">
+    Every page load from your home internet connection (anyone on your home Wi-Fi), found by resolving
+    the <code>HOME_IP_HOST</code> DDNS name every 10 minutes. {{ home.known_ips or 0 }} home IP hash(es) on record;
+    old ones stay, so past visits stay excluded after the ISP changes the address.
+    Visits from your phone on mobile data or from another network still count as real visitors.
+  </p>
 
   <div class="raw-section">
   <h2>🛰 Raw server log · last {{ days }} days (every request — includes bots, scanners, assets)</h2>

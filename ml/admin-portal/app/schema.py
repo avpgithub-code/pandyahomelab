@@ -79,6 +79,14 @@ CREATE TABLE IF NOT EXISTS analytics.page_events (
 
 CREATE INDEX IF NOT EXISTS idx_pe_created ON analytics.page_events (created_at);
 CREATE INDEX IF NOT EXISTS idx_pe_pv      ON analytics.page_events (pv_id);
+
+-- Salted hashes of the owner's home IP (see home_ip.py). Visits from these hashes
+-- are left out of the real-visitor numbers and shown as "Home IP" instead.
+CREATE TABLE IF NOT EXISTS analytics.home_ips (
+    ip_hash     CHAR(64)     PRIMARY KEY,
+    first_seen  TIMESTAMPTZ  DEFAULT NOW(),
+    last_seen   TIMESTAMPTZ  DEFAULT NOW()
+);
 """
 
 
