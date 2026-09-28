@@ -19,6 +19,8 @@ from app.engagement_queries import (
     fetch_engagement_daily,
     fetch_engagement_summary,
     fetch_human_countries,
+    fetch_journeys,
+    fetch_next_pages,
     fetch_page_actions,
     fetch_page_engagement,
     fetch_visit_sources,
@@ -57,6 +59,8 @@ async def dashboard(
     human_daily = fetch_engagement_daily(days)
     pages = fetch_page_engagement(days, limit=20)
     actions = fetch_page_actions(days, limit=25)
+    journeys = fetch_journeys(days, limit=10)
+    next_pages = fetch_next_pages(days, limit=15)
     sources = fetch_visit_sources(days, limit=10)
     human_countries = fetch_human_countries(days, limit=10)
     devices = fetch_devices(days)
@@ -98,6 +102,8 @@ async def dashboard(
             "human_daily": human_daily,
             "pages": pages,
             "actions": actions,
+            "journeys": journeys,
+            "next_pages": next_pages,
             "sources": sources,
             "human_countries": human_countries,
             "devices": devices,

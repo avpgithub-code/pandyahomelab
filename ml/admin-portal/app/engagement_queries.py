@@ -232,6 +232,61 @@ LIMIT %(limit)s
 """
 
 
+# Visit journeys: the pages of each visit in order, repeats of the same page
+# collapsed, first 5 steps shown. Grouped so identical journeys add up.
+JOURNEYS_SQL = f"""
+WITH h AS (
+    SELECT visit_id, page_id, started_at, engaged_ms
+    FROM analytics.page_views
+    WHERE {HUMAN} AND started_at >= NOW() - %(win)s::interval
+),
+steps AS (
+    SELECT *, lag(page_id) OVER (PARTITION BY visit_id ORDER BY started_at) AS prev
+    FROM h
+),
+dedup AS (
+    SELECT visit_id, page_id, started_at,
+           row_number() OVER (PARTITION BY visit_id ORDER BY started_at) AS n,
+           count(*)     OVER (PARTITION BY visit_id)                     AS total
+    FROM steps
+    WHERE prev IS DISTINCT FROM page_id
+),
+journeys AS (
+    SELECT visit_id,
+           string_agg(page_id, ' → ' ORDER BY started_at)
+             || CASE WHEN max(total) > 5 THEN ' → …' ELSE '' END AS journey
+    FROM dedup WHERE n <= 5
+    GROUP BY visit_id
+)
+SELECT j.journey,
+       count(*)                                        AS visits,
+       round(avg(t.ms) / 1000.0)                       AS avg_s
+FROM journeys j
+JOIN (SELECT visit_id, sum(engaged_ms) AS ms FROM h GROUP BY visit_id) t USING (visit_id)
+GROUP BY j.journey
+ORDER BY visits DESC, avg_s DESC
+LIMIT %(limit)s
+"""
+
+# Page → next page within a visit: which pages send people onward, and where.
+NEXT_PAGE_SQL = f"""
+WITH steps AS (
+    SELECT visit_id, page_id,
+           lead(page_id) OVER (PARTITION BY visit_id ORDER BY started_at) AS next_page
+    FROM analytics.page_views
+    WHERE {HUMAN} AND started_at >= NOW() - %(win)s::interval
+)
+SELECT page_id AS from_page,
+       coalesce(next_page, '(left the site)')          AS to_page,
+       count(*)                                        AS times
+FROM steps
+WHERE next_page IS DISTINCT FROM page_id
+GROUP BY 1, 2
+ORDER BY times DESC
+LIMIT %(limit)s
+"""
+
+
 def _fetch(sql: str, days: int, limit: int = 10) -> List[Dict]:
     with get_cursor() as cur:
         cur.execute(sql, {"win": f"{days} days", "limit": limit})
@@ -270,3 +325,11 @@ def fetch_engagement_buckets(days: int) -> List[Dict]:
 
 def fetch_page_actions(days: int, limit: int = 25) -> List[Dict]:
     return _fetch(ACTIONS_SQL, days, limit)
+
+
+def fetch_journeys(days: int, limit: int = 10) -> List[Dict]:
+    return _fetch(JOURNEYS_SQL, days, limit)
+
+
+def fetch_next_pages(days: int, limit: int = 15) -> List[Dict]:
+    return _fetch(NEXT_PAGE_SQL, days, limit)
