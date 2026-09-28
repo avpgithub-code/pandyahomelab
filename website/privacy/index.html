@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy — pandyaHomeLab</title>
+  <meta name="description" content="What pandyaHomeLab collects when you visit, why, how long it is kept, and how to have it deleted.">
+  <link rel="canonical" href="https://pandyahomelab.com/privacy/">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d0f14; --surface: #13161e; --border: #252a38;
+      --accent: #4f8ef7; --text: #e2e8f0; --soft: #cbd5e1; --muted: #64748b;
+    }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.65;
+    }
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.25rem 2rem; border-bottom: 1px solid var(--border);
+    }
+    nav a { color: var(--text); text-decoration: none; font-weight: 800; font-size: 1.05rem; }
+    nav a em { font-style: normal; color: var(--accent); }
+    nav .back { font-weight: 500; font-size: .875rem; color: var(--muted); }
+    nav .back:hover { color: var(--text); }
+    main { max-width: 760px; margin: 0 auto; padding: 3rem 1.25rem 4rem; }
+    h1 { font-size: clamp(1.9rem, 4vw, 2.5rem); letter-spacing: -.02em; margin-bottom: .5rem; }
+    .updated { color: var(--muted); font-size: .85rem; margin-bottom: 2rem; }
+    .summary {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 1.1rem 1.4rem; margin-bottom: 2.25rem; color: var(--soft);
+    }
+    .summary strong { color: var(--text); }
+    h2 { font-size: 1.15rem; margin: 2rem 0 .6rem; }
+    p, li { color: var(--soft); font-size: .95rem; }
+    p + p { margin-top: .6rem; }
+    ul { padding-left: 1.25rem; }
+    li { margin: .3rem 0; }
+    a { color: var(--accent); }
+    code { font-family: 'SF Mono', Consolas, monospace; font-size: .85em; color: var(--text); }
+    .table-scroll { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .9rem; margin-top: .4rem; }
+    th, td { text-align: left; padding: .55rem .6rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; }
+    td { color: var(--soft); }
+    footer {
+      border-top: 1px solid var(--border); text-align: center; padding: 2rem;
+      font-size: .8rem; color: var(--muted);
+    }
+    footer a { text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/">pandya<em>HomeLab</em></a>
+  <a class="back" href="/">← Back to the site</a>
+</nav>
+
+<main>
+  <h1>Privacy</h1>
+  <p class="updated">Last updated: 28 September 2026</p>
+
+  <div class="summary">
+    <strong>In short:</strong> no cookies, no advertising, no third-party trackers, and nothing is sold or shared.
+    I count visits to see which demos people find useful, and I keep that data for 13 months at most.
+    Your IP address is replaced by a scrambled code (a hash) before anything is stored for statistics.
+  </div>
+
+  <h2>Who runs this site</h2>
+  <p>
+    pandyaHomeLab is a personal, non-commercial portfolio of machine-learning demos run by Archit Pandya.
+    For anything about your data, email <a href="mailto:privacy@pandyahomelab.com">privacy@pandyahomelab.com</a>.
+  </p>
+
+  <h2>What is collected</h2>
+  <div class="table-scroll">
+  <table>
+    <thead><tr><th>What</th><th>Why</th><th>Kept for</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Server log: your IP address, browser type, the page requested and the time</td>
+        <td>Keeping the site running and blocking abuse</td>
+        <td>About 3 months</td>
+      </tr>
+      <tr>
+        <td>Visit statistics: pages viewed, time on page, how far you scrolled, whether you ran a demo,
+            country, device type (from screen width), browser language, the site that linked you here,
+            and a hash of your IP address</td>
+        <td>Seeing which pages and demos are useful</td>
+        <td>13 months, then deleted</td>
+      </tr>
+      <tr>
+        <td>Likes and comments you choose to send, with the name you enter (optional)</td>
+        <td>Feedback on the demos. Comments are read by me and are not published on the site.</td>
+        <td>Until deleted. After 13 months the IP hash is removed from them.</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  <p style="margin-top:.8rem">
+    The IP hash is a one-way scrambled code. It lets me count a returning visitor once without storing the address itself.
+  </p>
+
+  <h2>What is not collected</h2>
+  <ul>
+    <li>No cookies of any kind.</li>
+    <li>No advertising, analytics or social-media scripts from other companies.</li>
+    <li>No accounts, no email sign-ups, no payment details.</li>
+    <li>Nothing you type into a demo is stored, apart from counting that the demo was run.</li>
+  </ul>
+
+  <h2>Storage in your browser</h2>
+  <ul>
+    <li><code>phl:visit</code> in session storage: a random ID that groups the pages of one visit. Your browser deletes it when you close the tab.</li>
+    <li><code>phl:liked:…</code> in local storage: remembers that you liked a page, so the button stays "Liked". Clear your browser's site data to remove it.</li>
+  </ul>
+
+  <h2>Who else handles the data</h2>
+  <p>
+    The site runs on my own server at home. Traffic passes through <a href="https://www.cloudflare.com/privacypolicy/" rel="noopener">Cloudflare</a>,
+    which protects and delivers the site, and email sent to the address above is forwarded by Cloudflare to my inbox.
+    Nobody else receives the data, and it is never sold.
+  </p>
+
+  <h2>Why this is allowed</h2>
+  <p>
+    Where data-protection law such as the EU/UK GDPR applies, the basis is legitimate interest: running a secure site
+    and understanding, in aggregate, how the demos are used. The data is kept to the minimum needed for that.
+  </p>
+
+  <h2>Your choices</h2>
+  <ul>
+    <li>Email <a href="mailto:privacy@pandyahomelab.com">privacy@pandyahomelab.com</a> to ask what is held about you, or to have your comments,
+        likes or visit data deleted. Anyone can ask, wherever you live. Mention the date and page of your visit so I can find it.</li>
+    <li>Block JavaScript for this site and no visit statistics are recorded at all.</li>
+    <li>If you are in the EU or UK and are unhappy with the answer, you can complain to your data-protection authority.</li>
+  </ul>
+
+  <h2>Changes</h2>
+  <p>If this page changes, the date at the top changes too.</p>
+</main>
+
+<footer>
+  © 2026 <strong>pandyaHomeLab</strong> · <a href="/">Home</a>
+</footer>
+
+</body>
+</html>

@@ -21,6 +21,7 @@ import os
 from fastapi import FastAPI
 
 from app.home_ip import refresh_loop
+from app.retention import retention_loop
 from app.schema import ensure_feedback_schema
 
 logging.basicConfig(
@@ -49,8 +50,9 @@ def create_app() -> FastAPI:
         except Exception as e:
             logger.warning(f"feedback schema bootstrap failed (will retry on next startup): {e}")
             return
-        # Keep a reference so the task isn't garbage-collected.
+        # Keep references so the tasks aren't garbage-collected.
         app.state.home_ip_task = asyncio.create_task(refresh_loop())
+        app.state.retention_task = asyncio.create_task(retention_loop())
 
     # Liveness probe at app root — used by the Dockerfile HEALTHCHECK.
     # No auth, no analytics logging.

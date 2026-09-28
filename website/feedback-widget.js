@@ -310,6 +310,13 @@
       cursor: not-allowed;
       transform: none;
     }
+    .phl-privacy {
+      margin-top: 0.85rem;
+      font-size: 0.72rem;
+      color: #64748b;
+    }
+    .phl-privacy a { color: #64748b; }
+    .phl-privacy a:hover { color: #4f8ef7; }
     .phl-message {
       margin-top: 0.85rem;
       padding: 0.6rem 0.85rem;
@@ -357,6 +364,7 @@
       + '    </div>'
       + '  </div>'
       + '  <div data-role="message"></div>'
+      + '  <div class="phl-privacy">No cookies · <a href="/privacy/">Privacy</a></div>'
       + '</div>';
     return wrapper;
   }
