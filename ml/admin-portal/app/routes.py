@@ -7,6 +7,8 @@ Externally:
 """
 import json
 from pathlib import Path
+from typing import Optional
+from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -28,6 +30,8 @@ from app.engagement_queries import (
     fetch_visit_sources,
 )
 from app.feedback_queries import (
+    fetch_feedback_by_page,
+    fetch_recent_likes,
     fetch_feedback_summary,
     fetch_recent_comments,
     toggle_comment_hidden,
@@ -42,6 +46,16 @@ from app.queries import (
 
 router = APIRouter()
 templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
+
+
+def _flag(code: Optional[str]) -> str:
+    """'IN' → 🇮🇳 (regional-indicator pair); anything else → ''."""
+    if not code or len(code) != 2 or not code.isalpha():
+        return ""
+    return "".join(chr(0x1F1E6 + ord(c) - ord("A")) for c in code.upper())
+
+
+templates.env.filters["flag"] = _flag
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -126,18 +140,26 @@ async def dashboard(
 async def feedback_moderation(
     request: Request,
     limit: int = Query(50, ge=1, le=500),
+    page: Optional[str] = Query(None, max_length=255),
     admin: str = Depends(get_current_admin),
 ):
+    page = page or None
     summary = fetch_feedback_summary()
-    comments = fetch_recent_comments(limit=limit)
+    by_page = fetch_feedback_by_page()
+    comments = fetch_recent_comments(limit=limit, page=page)
+    likes = fetch_recent_likes(limit=limit, page=page)
     return templates.TemplateResponse(
         "moderation.html",
         {
             "request": request,
             "admin": admin,
             "limit": limit,
+            "page": page,
+            "page_q": quote(page, safe="") if page else "",
             "summary": summary,
+            "by_page": by_page,
             "comments": comments,
+            "likes": likes,
         },
     )
 
@@ -145,9 +167,11 @@ async def feedback_moderation(
 @router.post("/feedback/{comment_id}/hide")
 async def feedback_toggle_hidden(
     comment_id: int,
+    page: Optional[str] = Query(None, max_length=255),
     admin: str = Depends(get_current_admin),
 ):
-    """POST from the moderation form. Flips hidden, redirects back."""
+    """POST from the moderation form. Flips hidden, redirects back (keeping the page filter)."""
     toggle_comment_hidden(comment_id)
+    back = "/admin/feedback" + (f"?page={quote(page, safe='')}" if page else "")
     # 303 See Other → POST→GET redirect (avoids the form resubmit prompt)
-    return RedirectResponse(url="/admin/feedback", status_code=303)
+    return RedirectResponse(url=back, status_code=303)

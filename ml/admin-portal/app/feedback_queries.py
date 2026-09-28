@@ -78,13 +78,77 @@ def insert_comment(page_id: str, ip_hash: str, name: Optional[str], body: str) -
 
 # ───────────────────── Admin moderation queries ────────────────────────
 
+# Where a comment or like came from: the same visitor's page view (same IP hash) that was
+# open when they sent it — preferably on the same page — and how that visit started.
+# Nothing extra is collected; it only joins the feedback to page_views. Empty for
+# feedback sent before the beacon existed (2026-09-27) or older than 13 months.
+_CONTEXT_JOIN = """
+LEFT JOIN LATERAL (
+    SELECT pv.visit_id, pv.country, pv.device
+    FROM analytics.page_views pv
+    WHERE pv.ip_hash = f.ip_hash
+      AND pv.started_at BETWEEN f.created_at - INTERVAL '6 hours' AND f.created_at + INTERVAL '1 minute'
+    ORDER BY (pv.page_id = f.page_id) DESC, pv.started_at DESC
+    LIMIT 1
+) v ON TRUE
+LEFT JOIN LATERAL (
+    SELECT CASE
+        WHEN l.utm_source IS NOT NULL THEN l.utm_source || ' (utm)'
+        WHEN l.referrer_domain IS NULL THEN 'direct'
+        WHEN l.referrer_domain = 'pandyahomelab.com' OR l.referrer_domain LIKE '%%.pandyahomelab.com' THEN 'internal'
+        ELSE l.referrer_domain
+    END AS source
+    FROM analytics.page_views l
+    WHERE l.visit_id = v.visit_id
+    ORDER BY l.started_at
+    LIMIT 1
+) src ON TRUE
+"""
+
+_PAGE_FILTER = "(%(page)s::text IS NULL OR f.page_id = %(page)s)"
+
 # from_home: posted from the owner's home IP (see home_ip.py) — tagged "🏠 you" in the view.
-ADMIN_COMMENTS_SQL = """
-SELECT id, page_id, name, body, hidden, ip_hash, created_at,
-       ip_hash IN (SELECT ip_hash FROM analytics.home_ips) AS from_home
-FROM analytics.feedback_comments
-ORDER BY created_at DESC
-LIMIT %s
+ADMIN_COMMENTS_SQL = f"""
+SELECT f.id, f.page_id, f.name, f.body, f.hidden, f.ip_hash, f.created_at,
+       f.ip_hash IN (SELECT ip_hash FROM analytics.home_ips) AS from_home,
+       v.country, v.device, src.source
+FROM analytics.feedback_comments f
+{_CONTEXT_JOIN}
+WHERE {_PAGE_FILTER}
+ORDER BY f.created_at DESC
+LIMIT %(limit)s
+"""
+
+ADMIN_LIKES_SQL = f"""
+SELECT f.page_id, f.ip_hash, f.created_at,
+       f.ip_hash IN (SELECT ip_hash FROM analytics.home_ips) AS from_home,
+       v.country, v.device, src.source
+FROM analytics.feedback_likes f
+{_CONTEXT_JOIN}
+WHERE {_PAGE_FILTER}
+ORDER BY f.created_at DESC
+LIMIT %(limit)s
+"""
+
+# One row per page that has any feedback — the "by model" table.
+ADMIN_BY_PAGE_SQL = """
+WITH home AS (SELECT ip_hash FROM analytics.home_ips),
+c AS (SELECT page_id, count(*) AS comments,
+             count(*) FILTER (WHERE ip_hash IN (SELECT ip_hash FROM home)) AS home_comments,
+             max(created_at) AS last_at
+      FROM analytics.feedback_comments GROUP BY page_id),
+l AS (SELECT page_id, count(*) AS likes,
+             count(*) FILTER (WHERE ip_hash IN (SELECT ip_hash FROM home)) AS home_likes,
+             max(created_at) AS last_at
+      FROM analytics.feedback_likes GROUP BY page_id)
+SELECT coalesce(c.page_id, l.page_id)            AS page_id,
+       coalesce(c.comments, 0)                   AS comments,
+       coalesce(c.home_comments, 0)              AS home_comments,
+       coalesce(l.likes, 0)                      AS likes,
+       coalesce(l.home_likes, 0)                 AS home_likes,
+       greatest(c.last_at, l.last_at)            AS last_at
+FROM c FULL OUTER JOIN l ON l.page_id = c.page_id
+ORDER BY last_at DESC
 """
 
 ADMIN_COMMENT_SUMMARY_SQL = """
@@ -108,10 +172,24 @@ RETURNING id, hidden
 """
 
 
-def fetch_recent_comments(limit: int = 50):
-    """Return the most recent comments for the moderation view."""
+def fetch_recent_comments(limit: int = 50, page: Optional[str] = None):
+    """Most recent comments (optionally for one page), with country / device / source."""
     with get_cursor() as cur:
-        cur.execute(ADMIN_COMMENTS_SQL, (limit,))
+        cur.execute(ADMIN_COMMENTS_SQL, {"limit": limit, "page": page})
+        return [dict(r) for r in cur.fetchall()]
+
+
+def fetch_recent_likes(limit: int = 50, page: Optional[str] = None):
+    """Most recent likes (optionally for one page), with country / device / source."""
+    with get_cursor() as cur:
+        cur.execute(ADMIN_LIKES_SQL, {"limit": limit, "page": page})
+        return [dict(r) for r in cur.fetchall()]
+
+
+def fetch_feedback_by_page():
+    """Comment and like counts per page, newest activity first."""
+    with get_cursor() as cur:
+        cur.execute(ADMIN_BY_PAGE_SQL)
         return [dict(r) for r in cur.fetchall()]
 
 
