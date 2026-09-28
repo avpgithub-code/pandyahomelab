@@ -98,6 +98,16 @@
   .status-pill.hidden  { background: rgba(250,204,21,.15); color: var(--amber); }
   .status-pill.you     { background: rgba(79,142,247,.15); color: var(--accent); margin-left: .4rem; text-transform: none; }
   .summary-note { color: var(--muted); font-size: .8rem; margin-top: .6rem; }
+  .where { color: var(--text); font-size: .78rem; margin-left: .6rem; }
+  .where.unknown { color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; font-size: .85rem; }
+  th, td { text-align: left; padding: .55rem .8rem; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-size: .65rem; text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
+  td.num, th.num { text-align: right; font-family: 'SF Mono', Consolas, monospace; }
+  tr.active td { background: var(--surface2); }
+  td a, .filter a { color: var(--accent); text-decoration: none; }
+  .filter { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: .6rem 1rem; font-size: .85rem; margin-top: 1rem; }
+  .table-scroll { overflow-x: auto; }
 
   .empty-card {
     padding: 2rem; text-align: center; color: var(--muted);
@@ -123,6 +133,14 @@
     </div>
   </header>
 
+  {% macro where(r) -%}
+    {%- if r.country or r.device or r.source -%}
+    <span class="where">{{ r.country|flag }} {{ r.country or '??' }} · {{ r.device or 'unknown device' }} · from {{ r.source or 'unknown' }}</span>
+    {%- else -%}
+    <span class="where unknown" title="No matching page view (sent before 2026-09-27, or older than 13 months)">location unknown</span>
+    {%- endif -%}
+  {%- endmacro %}
+
   <h2>📊 Summary</h2>
   <div class="summary-grid">
     <div class="card">
@@ -146,7 +164,32 @@
     From you (home IP): {{ summary.home_comments or 0 }} comment(s), {{ summary.home_likes or 0 }} like(s) — marked <span class="status-pill you">🏠 you</span> below.
   </p>
 
-  <h2>💬 Most recent {{ limit }} comments</h2>
+  <h2>🧩 Feedback by model</h2>
+  {% if by_page %}
+  <div class="table-scroll">
+  <table>
+    <thead><tr><th>Page</th><th class="num">💬 Comments</th><th class="num">👍 Likes</th><th class="num">From you</th><th>Last</th></tr></thead>
+    <tbody>
+      {% for r in by_page %}
+      <tr class="{% if page == r.page_id %}active{% endif %}">
+        <td><a href="?page={{ r.page_id|urlencode }}"><code>{{ r.page_id }}</code></a></td>
+        <td class="num">{{ r.comments }}</td>
+        <td class="num">{{ r.likes }}</td>
+        <td class="num">{{ r.home_comments + r.home_likes }}</td>
+        <td>{{ r.last_at.strftime('%Y-%m-%d %H:%M') }} UTC</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <div class="empty-card">No feedback on any page yet.</div>
+  {% endif %}
+  {% if page %}
+  <div class="filter">Showing feedback for <code>{{ page }}</code> only · <a href="/admin/feedback">show all pages</a></div>
+  {% endif %}
+
+  <h2>💬 Most recent {{ limit }} comments{% if page %} · {{ page }}{% endif %}</h2>
   {% if comments %}
   <div class="comments-list">
     {% for c in comments %}
@@ -163,8 +206,8 @@
       </div>
       <div class="comment-body">{{ c.body }}</div>
       <div class="comment-foot">
-        <span>{{ c.created_at.strftime('%Y-%m-%d %H:%M') }} UTC · ip <span class="ip-hash">{{ c.ip_hash[:8] }}…</span></span>
-        <form method="POST" action="/admin/feedback/{{ c.id }}/hide" style="display:inline">
+        <span>{{ c.created_at.strftime('%Y-%m-%d %H:%M') }} UTC · ip <span class="ip-hash">{{ c.ip_hash[:8] }}…</span>{{ where(c) }}</span>
+        <form method="POST" action="/admin/feedback/{{ c.id }}/hide{% if page %}?page={{ page_q }}{% endif %}" style="display:inline">
           {% if c.hidden %}
           <button type="submit" class="btn show">↻ Make visible</button>
           {% else %}
@@ -177,6 +220,27 @@
   </div>
   {% else %}
   <div class="empty-card">No comments yet. Once visitors submit feedback they'll show up here.</div>
+  {% endif %}
+
+  <h2>👍 Most recent {{ limit }} likes{% if page %} · {{ page }}{% endif %}</h2>
+  {% if likes %}
+  <div class="table-scroll">
+  <table>
+    <thead><tr><th>When</th><th>Page</th><th>Where</th><th>Who</th></tr></thead>
+    <tbody>
+      {% for l in likes %}
+      <tr>
+        <td>{{ l.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</td>
+        <td><code>{{ l.page_id }}</code></td>
+        <td>{{ where(l) }}</td>
+        <td>{% if l.from_home %}<span class="status-pill you">🏠 you</span>{% else %}<span class="ip-hash">{{ l.ip_hash[:8] }}…</span>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <div class="empty-card">No likes yet{% if page %} on this page{% endif %}.</div>
   {% endif %}
 
   <footer>

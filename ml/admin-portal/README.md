@@ -9,7 +9,7 @@ data in the `analytics` schema of `ml-postgres`.
 | Route | Access | What |
 |---|---|---|
 | `/admin/?days=N` | Basic Auth | Dashboard (7d / 30d / 90d / 1y) |
-| `/admin/feedback` | Basic Auth | Comment moderation (hide / unhide) |
+| `/admin/feedback?page=/nlp/ewt-hmm/` | Basic Auth | Feedback by model: comments + likes with country / device / arrival source, "🏠 you" tag, hide / unhide. `page` is optional |
 | `/feedback/likes`, `/feedback/comments` | public | Like + comment API used by `website/feedback-widget.js` |
 | `/feedback/pv` | public | Page-view / engagement beacon from the same widget |
 | `/health` | public | Docker healthcheck |
