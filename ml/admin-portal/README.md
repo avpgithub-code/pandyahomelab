@@ -1,56 +1,101 @@
 # admin-portal
 
-Admin-only dashboard for pandyaHomeLab visitor analytics. Reads from
-`analytics.visitor_events` in `ml-postgres`, renders a server-side HTML page
-behind HTTP Basic Auth.
+Admin dashboard for pandyaHomeLab visitor analytics, plus the public feedback API
+and page-view beacon. FastAPI + Jinja2, one container on `ml-network` (172.20.0.31),
+data in the `analytics` schema of `ml-postgres`.
 
-## What's in Step 2.4 (this version)
+## Routes
 
-- HTTP Basic Auth (credentials from `ADMIN_USERNAME` + `ADMIN_PASSWORD` env vars)
-- Single dashboard page: `/`
-  - **Summary cards** — total events, real visits, bot visits, unique visitors, unique paths
-  - **Daily breakdown** table — events / real / unique / bots per day
-  - **Top 5 paths** table — real visitors only
-  - **Window selector** — 7d / 30d / 90d / 1y via `?days=N` query parameter
-- `/health` endpoint for the Docker healthcheck
-- The portal route at `/admin/` is excluded from JSON analytics in Nginx,
-  so admin views don't pollute the visitor counts.
+| Route | Access | What |
+|---|---|---|
+| `/admin/?days=N` | Basic Auth | Dashboard (7d / 30d / 90d / 1y) |
+| `/admin/feedback` | Basic Auth | Comment moderation (hide / unhide) |
+| `/feedback/likes`, `/feedback/comments` | public | Like + comment API used by `website/feedback-widget.js` |
+| `/feedback/pv` | public | Page-view / engagement beacon from the same widget |
+| `/health` | public | Docker healthcheck |
 
-## What Step 2.5 will add
+Nginx keeps `/admin/*` and `/feedback/*` out of the JSON access log, so they never
+count as visits.
 
-- Chart.js line chart of daily visitors
-- Country breakdown
-- Top referrers
-- Hourly heatmap
-- Per-IP session view
+## Dashboard
 
-## Required environment
+- **Real visitors** (top half) — from `analytics.page_views` / `page_events`, filled by the
+  beacon. A page view counts when the page's JS ran, the user agent isn't a bot, it isn't
+  from the owner's home IP, and the visitor interacted or stayed active ≥ 10 s. Panels:
+  summary cards, daily chart, pages, demo actions, visit paths, countries, sources,
+  visit length, devices.
+- **🏠 Home IP (you)** — the owner's own visits, kept out of every number above.
+- **Raw server log** (bottom) — `analytics.visitor_events` from the analytics-ingester
+  (every nginx request, mostly scanners). Context only.
+
+## Background jobs (in the app process)
+
+| Job | File | Schedule | What |
+|---|---|---|---|
+| Home IP | `home_ip.py` | every 10 min | Resolves `HOME_IP_HOST` (DDNS name) and stores its salted hash in `analytics.home_ips` |
+| Retention | `retention.py` | daily | Deletes `page_views`, `page_events`, `visitor_events` older than 13 months; strips the IP hash from likes/comments older than 13 months. Matches the public `/privacy/` page |
+
+Tables are created on startup by `schema.py` (idempotent).
+
+## Weekly report
+
+```sh
+sudo docker exec admin-portal python -m app.weekly_report      # last 7 days
+sudo docker exec admin-portal python -m app.weekly_report 30   # any window
+```
+
+Plain text, meant for a DSM Task Scheduler job with "Send run details by email".
+
+## Environment
+
+Set in `deployment/ml/.env` (gitignored), passed by `deployment/ml/docker-compose.dev.yml`.
 
 | Var | Purpose |
-|-----|---------|
-| `DATABASE_URL`      | PostgreSQL DSN (same as ingester) |
-| `ADMIN_USERNAME`    | Username for Basic Auth |
-| `ADMIN_PASSWORD`    | Password for Basic Auth |
+|---|---|
+| `DATABASE_URL` | PostgreSQL DSN (same database as the ingester) |
+| `ADMIN_USERNAME`, `ADMIN_PASSWORD` | Basic Auth for `/admin/` |
+| `ANALYTICS_IP_SALT` | Salt for IP hashes — must match the analytics-ingester |
+| `HOME_IP_HOST` | DDNS name of the owner's home connection; empty turns the Home IP split off |
+
+## Build and deploy
+
+The code is copied into the image, so every change needs a rebuild:
+
+```sh
+cd deployment/ml
+sudo docker compose -f docker-compose.yml -f docker-compose.dev.yml build admin-portal
+sudo docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --no-deps admin-portal
+```
+
+Use both compose files; the dev file alone fails with "undefined network ml-network".
 
 ## Layout
 
 ```
 ml/admin-portal/
 ├── app/
-│   ├── main.py                  ← FastAPI factory + router include
-│   ├── auth.py                  ← HTTPBasic dependency (constant-time compare)
-│   ├── db.py                    ← psycopg2 connection helper, RealDictCursor
-│   ├── queries.py               ← all SQL in one place
-│   ├── routes.py                ← GET / and GET /health
-│   └── templates/
-│       └── dashboard.html       ← single Jinja2 template
+│   ├── main.py               ← FastAPI factory, startup: schema + background jobs
+│   ├── auth.py               ← HTTP Basic (constant-time compare)
+│   ├── db.py                 ← psycopg2 helper, RealDictCursor
+│   ├── schema.py             ← feedback, page_views, page_events, home_ips tables
+│   ├── routes.py             ← /admin/ dashboard + moderation
+│   ├── queries.py            ← raw server-log SQL (visitor_events)
+│   ├── engagement_queries.py ← real-visitor + Home IP SQL, beacon writes
+│   ├── beacon_routes.py      ← POST /feedback/pv
+│   ├── feedback_routes.py    ← likes + comments API
+│   ├── feedback_queries.py   ← feedback SQL
+│   ├── bot_filter.py         ← UA bot patterns (keep in sync with analytics-ingester)
+│   ├── ip_hasher.py          ← salted SHA-256 of the visitor IP
+│   ├── home_ip.py            ← Home IP resolver job
+│   ├── retention.py          ← 13-month retention job
+│   ├── weekly_report.py      ← plain-text weekly summary
+│   └── templates/            ← dashboard.html, moderation.html
 └── docker/Dockerfile
 ```
 
 ## Auth security notes
 
-- `secrets.compare_digest` used for credential comparison (prevents timing attacks)
+- `secrets.compare_digest` for credential comparison (prevents timing attacks)
 - Credentials live in `.env` (gitignored)
-- HTTPS terminates at Nginx; the admin-portal container never sees raw HTTP
-- For stronger auth later: layer Cloudflare Access on top (SSO via Google /
-  Apple / email), or migrate to bcrypt-hashed passwords + a real auth library.
+- HTTPS terminates at Cloudflare; the container only sees traffic from pandya-nginx
+- For stronger auth later: Cloudflare Access in front (SSO), or bcrypt-hashed passwords
