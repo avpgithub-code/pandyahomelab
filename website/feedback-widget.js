@@ -11,6 +11,8 @@
  *   - Restores "already liked" state from localStorage
  *   - Sends a page-view beacon to /feedback/pv, then engagement updates
  *     (active time, scroll depth, interactions) — see pageViewBeacon below
+ *   - Records actions: demo runs (same-origin POSTs), example / About clicks,
+ *     and anything a page sends via window.phl.track('name')
  *
  * User interactions:
  *   - Like button       → POST /feedback/likes, increment count, lock to "Liked ✓"
@@ -144,6 +146,44 @@
       window.addEventListener('pageshow', (e) => { if (e.persisted) start(); });
       // Heartbeat so long reads still land if the browser never fires pagehide (mobile)
       setInterval(() => { if (document.visibilityState === 'visible') update(); }, 15000);
+
+      // ── Actions: what the visitor DID ──────────────────────────────────
+      // Pages can call window.phl.track('name') directly; the common demo
+      // actions below are picked up automatically, so no demo needs editing.
+      function track(name) {
+        name = String(name || '').toLowerCase().replace(/[^a-z0-9_:.-]/g, '-').slice(0, 40);
+        if (name) send({ t: 'event', pv: pv, v: visit, n: name });
+      }
+      window.phl = window.phl || {};
+      window.phl.track = track;
+
+      // Every demo runs its model with a same-origin POST (/predict, /forecast,
+      // /neighbors …), while model-info / about / history are GETs. A successful
+      // POST → "run:<last path segment>". Our own /feedback/ calls are skipped.
+      const origFetch = window.fetch;
+      if (origFetch) {
+        window.fetch = function (input, init) {
+          const result = origFetch.apply(this, arguments);
+          try {
+            const isReq = typeof Request !== 'undefined' && input instanceof Request;
+            const method = ((init && init.method) || (isReq ? input.method : 'GET')).toUpperCase();
+            const url = new URL(isReq ? input.url : String(input), window.location.href);
+            if (method === 'POST' && url.origin === window.location.origin
+                && !url.pathname.startsWith(API_BASE + '/')) {
+              const seg = url.pathname.replace(/\/+$/, '').split('/').pop() || 'post';
+              result.then((r) => { if (r.ok) track('run:' + seg); }, () => {});
+            }
+          } catch (_) {}
+          return result;
+        };
+      }
+
+      document.addEventListener('click', (e) => {
+        const t = e.target instanceof Element ? e.target : null;
+        if (!t) return;
+        if (t.closest('.example-btn')) track('example');
+        else if (t.closest('#about-trigger')) track('about');
+      }, { capture: true, passive: true });
     } catch (_) { /* analytics must never break the page */ }
   })();
 

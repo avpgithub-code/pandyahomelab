@@ -8,6 +8,7 @@ Two message types, both JSON (sent as text/plain via navigator.sendBeacon):
   {"t":"start",  "pv":…, "v":…, "p":"/path/", "r":"<document.referrer>",
                  "us":…, "um":…, "uc":…, "w":<viewport px>, "l":"en-US"}
   {"t":"update", "pv":…, "v":…, "e":<engaged ms>, "s":<max scroll %>, "i":<interactions>}
+  {"t":"event",  "pv":…, "v":…, "n":"run:predict"}      (demo run, example, about …)
 
 No cookies. Visitor identity is the salted IP hash (same as the rest of analytics);
 `v` is a random id held in sessionStorage, so it dies with the tab.
@@ -23,6 +24,7 @@ from fastapi import APIRouter, Request, Response
 from app.bot_filter import is_bot
 from app.engagement_queries import (
     count_recent_starts,
+    insert_page_event,
     insert_page_view,
     update_page_view,
 )
@@ -32,6 +34,7 @@ logger = logging.getLogger("admin-portal.beacon")
 router = APIRouter(prefix="/feedback", tags=["beacon"])
 
 ID_RE = re.compile(r"^[a-z0-9]{16}$")
+EVENT_RE = re.compile(r"^[a-z0-9_:.-]{1,40}$")
 MAX_BODY_BYTES = 2048
 MAX_STARTS_PER_IP_10MIN = 120        # a human clicking through every page stays far below this
 MAX_ENGAGED_MS = 60 * 60 * 1000      # cap one page view at an hour of engagement
@@ -121,4 +124,8 @@ async def page_view_beacon(request: Request) -> Response:
             max_scroll_pct=_int(msg.get("s"), 0, 100),
             interactions=interactions,
         )
+    elif msg.get("t") == "event":
+        name = str(msg.get("n", "")).lower()
+        if EVENT_RE.match(name):
+            insert_page_event(pv_id=pv, ip_hash=ip_hash, name=name)
     return Response(status_code=204)

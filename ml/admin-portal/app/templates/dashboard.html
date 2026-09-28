@@ -165,9 +165,8 @@
   footer a { color: var(--accent); text-decoration: none; }
 
   /* Real-visitor section */
-  .summary-grid.seven { grid-template-columns: repeat(7, 1fr); }
-  @media (max-width: 980px) { .summary-grid.seven { grid-template-columns: repeat(4, 1fr); } }
-  @media (max-width: 720px) { .summary-grid.seven { grid-template-columns: repeat(2, 1fr); } }
+  .summary-grid.eight { grid-template-columns: repeat(4, 1fr); }
+  @media (max-width: 720px) { .summary-grid.eight { grid-template-columns: repeat(2, 1fr); } }
   .card-value.small { font-size: 1.25rem; }
   .note { color: var(--muted); font-size: .78rem; margin-top: .6rem; }
   .table-scroll { overflow-x: auto; }
@@ -199,7 +198,7 @@
   {%- endmacro %}
 
   <h2>👤 Real visitors · last {{ days }} days</h2>
-  <div class="summary-grid seven">
+  <div class="summary-grid eight">
     <div class="card real">
       <div class="card-label">Visitors</div>
       <div class="card-value">{{ human.visitors or 0 }}</div>
@@ -227,6 +226,10 @@
     <div class="card">
       <div class="card-label">Returning</div>
       <div class="card-value small">{{ human.returning_visitors or 0 }}</div>
+    </div>
+    <div class="card real">
+      <div class="card-label">Tried a demo</div>
+      <div class="card-value small">{{ human.demo_users or 0 }}</div>
     </div>
   </div>
   <p class="note">
@@ -258,6 +261,8 @@
         <th style="text-align:right">Median time</th>
         <th style="text-align:right">Avg scroll</th>
         <th style="text-align:right">Read ≥75%</th>
+        <th style="text-align:right">Ran demo</th>
+        <th style="text-align:right">Runs</th>
         <th style="text-align:right">👍</th>
         <th style="text-align:right">💬</th>
       </tr>
@@ -272,6 +277,8 @@
         <td class="num">{{ dur(row.median_s) }}</td>
         <td class="num">{{ row.avg_scroll|int }}%</td>
         <td class="num">{{ row.read_pct|int }}%</td>
+        <td class="num">{{ row.ran_pct|int }}%</td>
+        <td class="num">{{ row.runs }}</td>
         <td class="num">{{ row.likes }}</td>
         <td class="num">{{ row.comments }}</td>
       </tr>
@@ -281,6 +288,35 @@
   </div>
   {% else %}
   <div class="empty-card">No real page views yet in the last {{ days }} days.</div>
+  {% endif %}
+
+  <h2>🧪 What people did</h2>
+  {% if actions %}
+  <div class="table-scroll">
+  <table>
+    <thead>
+      <tr>
+        <th>Page</th>
+        <th>Action</th>
+        <th style="text-align:right">Times</th>
+        <th style="text-align:right">Visitors</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in actions %}
+      <tr>
+        <td><code>{{ row.page_id }}</code></td>
+        <td>{{ row.name }}</td>
+        <td class="num">{{ row.times }}</td>
+        <td class="num">{{ row.visitors }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <p class="note"><code>run:&lt;endpoint&gt;</code> = the demo was actually run (a successful call to its API) · <code>example</code> = clicked a preset example · <code>about</code> = opened the About panel.</p>
+  {% else %}
+  <div class="empty-card">No demo activity yet in the last {{ days }} days.</div>
   {% endif %}
 
   <h2>🌍 Countries & 🔗 Sources (real visitors)</h2>
