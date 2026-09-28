@@ -13,6 +13,15 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from app.auth import get_current_admin
+from app.engagement_queries import (
+    fetch_devices,
+    fetch_engagement_buckets,
+    fetch_engagement_daily,
+    fetch_engagement_summary,
+    fetch_human_countries,
+    fetch_page_engagement,
+    fetch_visit_sources,
+)
 from app.feedback_queries import (
     fetch_feedback_summary,
     fetch_recent_comments,
@@ -42,6 +51,15 @@ async def dashboard(
     countries = fetch_countries(days, limit=10)
     referrers = fetch_referrers(days, limit=10)
 
+    # Beacon-verified humans (feedback-widget.js) — the numbers to trust
+    human = fetch_engagement_summary(days)
+    human_daily = fetch_engagement_daily(days)
+    pages = fetch_page_engagement(days, limit=20)
+    sources = fetch_visit_sources(days, limit=10)
+    human_countries = fetch_human_countries(days, limit=10)
+    devices = fetch_devices(days)
+    buckets = fetch_engagement_buckets(days)
+
     daily_chart = [
         {
             "day": str(r["day"]),
@@ -52,7 +70,15 @@ async def dashboard(
     ]
     countries_chart = [
         {"country": r["country"], "visitors": int(r["visitors"] or 0)}
-        for r in countries
+        for r in human_countries
+    ]
+    human_chart = [
+        {
+            "day": str(r["day"]),
+            "visitors": int(r["visitors"] or 0),
+            "page_views": int(r["page_views"] or 0),
+        }
+        for r in reversed(human_daily)
     ]
 
     return templates.TemplateResponse(
@@ -66,6 +92,15 @@ async def dashboard(
             "top_paths": top_paths,
             "countries": countries,
             "referrers": referrers,
+            "human": human,
+            "human_daily": human_daily,
+            "pages": pages,
+            "sources": sources,
+            "human_countries": human_countries,
+            "devices": devices,
+            "buckets": buckets,
+            "human_chart_json": json.dumps(human_chart),
+            "buckets_json": json.dumps(buckets),
             "daily_chart_json": json.dumps(daily_chart),
             "countries_chart_json": json.dumps(countries_chart),
         },

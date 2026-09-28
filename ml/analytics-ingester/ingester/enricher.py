@@ -18,12 +18,17 @@ BOT_PATTERNS = (
     "uptimerobot", "pingdom", "statuscake", "site24x7",
     # Headless browsers (often automated scraping)
     "headlesschrome", "phantomjs",
+    # Vulnerability / internet-wide scanners seen in our logs
+    "l9scan", "leakix", "infrawatch", "zgrab", "masscan", "nmap", "censys",
+    "expanse", "nuclei", "odin", "internet-measurement",
 )
 
 
 def is_bot(user_agent: str) -> bool:
-    if not user_agent:
-        return False
+    # No browser sends an empty User-Agent; in our logs these were ~46% of
+    # "real" traffic and almost all webshell / .env probes.
+    if not user_agent or not user_agent.strip():
+        return True
     ua_lower = user_agent.lower()
     return any(p in ua_lower for p in BOT_PATTERNS)
 

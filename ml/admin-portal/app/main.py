@@ -8,6 +8,7 @@ Routing map:
     /feedback/likes      → public like API (anonymous)
     /feedback/comments   → public comment API (anonymous)
     /feedback/likes?page_id=...  → public like count
+    /feedback/pv         → public page-view / engagement beacon (anonymous)
 
 Nginx (no longer strips the URL prefix) maps:
     pandyahomelab.com/admin/...    → container :8000/admin/...
@@ -31,7 +32,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="pandyaHomeLab — Admin Portal",
         description="Visitor analytics dashboard + public feedback API",
-        version="1.0.4",
+        version="1.1.0",
     )
 
     @app.on_event("startup")
@@ -42,7 +43,7 @@ def create_app() -> FastAPI:
             return
         try:
             ensure_feedback_schema(dsn)
-            logger.info("feedback schema bootstrapped (feedback_likes, feedback_comments)")
+            logger.info("schema bootstrapped (feedback_likes, feedback_comments, page_views)")
         except Exception as e:
             logger.warning(f"feedback schema bootstrap failed (will retry on next startup): {e}")
 
@@ -59,6 +60,10 @@ def create_app() -> FastAPI:
     # Public feedback API — externally /feedback/... (already has prefix="/feedback")
     from app.feedback_routes import router as feedback_router
     app.include_router(feedback_router)
+
+    # Page-view / engagement beacon — externally /feedback/pv
+    from app.beacon_routes import router as beacon_router
+    app.include_router(beacon_router)
 
     return app
 
