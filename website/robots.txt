@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /feedback/
+Disallow: /health
+Disallow: /csp-report
+
+Sitemap: https://pandyahomelab.com/sitemap.xml

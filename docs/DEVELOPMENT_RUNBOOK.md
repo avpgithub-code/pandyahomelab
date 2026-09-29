@@ -437,6 +437,8 @@ For every new project, follow this checklist:
 - [ ] ui.html embeds `<script src="/feedback-widget.js"></script>` (likes, comments, beacon, privacy link)
 - [ ] Charts / diagrams load from `/vendor/…` (see `website/vendor/README.md`), never a CDN (§4.12)
 - [ ] `about.json` has a `dataset` section stating the source and its licence
+- [ ] ui.html `<head>` has a keyword-rich `<meta name="description">` (≤160 chars), `<link rel="canonical">`, Open Graph tags and `og:image` = `/og-image.png` (copy an existing demo's block)
+- [ ] Add the demo URL to `website/sitemap.xml` (Google Search Console re-reads it)
 
 ### 5.4 Testing (TIER 1)
 ```bash

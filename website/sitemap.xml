@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://pandyahomelab.com/</loc><lastmod>2026-09-28</lastmod><priority>1.0</priority></url>
+  <url><loc>https://pandyahomelab.com/ml/iris-knn/</loc><lastmod>2026-09-28</lastmod><priority>0.8</priority></url>
+  <url><loc>https://pandyahomelab.com/ml/housing-linear/</loc><lastmod>2026-09-28</lastmod><priority>0.8</priority></url>
+  <url><loc>https://pandyahomelab.com/ml/titanic-automl/</loc><lastmod>2026-09-28</lastmod><priority>0.8</priority></url>
+  <url><loc>https://pandyahomelab.com/dl/mnist-cnn/</loc><lastmod>2026-09-28</lastmod><priority>0.8</priority></url>
+  <url><loc>https://pandyahomelab.com/dl/lstm-forecast/</loc><lastmod>2026-09-28</lastmod><priority>0.8</priority></url>
+  <url><loc>https://pandyahomelab.com/nlp/quora-randomforest/</loc><lastmod>2026-09-28</lastmod><priority>0.8</priority></url>
+  <url><loc>https://pandyahomelab.com/nlp/imdb-textrep/</loc><lastmod>2026-09-28</lastmod><priority>0.8</priority></url>
+  <url><loc>https://pandyahomelab.com/nlp/text8-word2vec/</loc><lastmod>2026-09-28</lastmod><priority>0.8</priority></url>
+  <url><loc>https://pandyahomelab.com/nlp/ewt-hmm/</loc><lastmod>2026-09-28</lastmod><priority>0.8</priority></url>
+  <url><loc>https://pandyahomelab.com/privacy/</loc><lastmod>2026-09-28</lastmod><priority>0.2</priority></url>
+</urlset>
