@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Methodology and evals</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F6F8FA;color:#1F2328;font-family:'IBM Plex Sans',system-ui,sans-serif}
+a{color:#1347A3}a:hover{color:#0D3275}
+h1,h2,h3,p{margin:0}
+h1,h2{color:#0D3275}
+.wrap{width:100%;max-width:1200px;margin:0 auto;padding:0 24px;box-sizing:border-box}
+.box{background:#fff;border:1px solid #D0D7DE;border-radius:8px;padding:20px}
+.ph{border:1.5px dashed #8C959F;border-radius:6px;color:#57606A;display:flex;align-items:center;justify-content:center;text-align:center;font-size:14px;padding:12px;background:#fff}
+.lbl{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#57606A}
+.mono{font-family:'IBM Plex Mono',monospace;font-size:13px}
+.nav a{text-decoration:none;color:#FFFFFF;padding:10px 12px;border-radius:6px;min-height:44px;display:inline-flex;align-items:center;box-sizing:border-box}
+.nav a:hover{background:#0D3275;color:#FFFFFF}
+.nav a.on{background:#0D3275;color:#FFFFFF;font-weight:600;box-shadow:inset 0 -3px 0 #FF9933}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:560px}
+th,td{border-bottom:1px solid #D0D7DE;padding:8px 10px;text-align:left;vertical-align:top}
+th{color:#0D3275;font-weight:600;background:#E6EDF8}
+</style>
+</helmet>
+<div style="display: flex; flex-direction: column; gap: 24px">
+  <header style="background: #1347A3; border-bottom: 4px solid #FF9933">
+    <div class="wrap" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding-top: 8px; padding-bottom: 8px">
+      <a href="Main.dc.html" style="text-decoration: none; color: #FFFFFF; font-weight: 700">pandyaHomeLab <span style="color: #C9D6EE; font-weight: 400">/</span> cricstat</a>
+      <nav class="nav" aria-label="cricstat" style="display: flex; flex-wrap: wrap; gap: 2px">
+        <a href="Hub.dc.html">Overview</a><a href="Countries.dc.html">Countries</a><a href="Players.dc.html">Players</a><a href="Predictor.dc.html">WC 2027</a><a href="Ask.dc.html">Ask</a><a class="on" href="Methodology.dc.html">Methodology</a><a href="Licences.dc.html">Licences</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="wrap" style="display: flex; flex-direction: column; gap: 8px">
+    <h1 style="font-size: 34px">Methodology &amp; evaluation</h1>
+    <p style="color: #57606A; max-width: 760px">How the data is built, how every metric is defined, and how well the models and the analyst actually perform.</p>
+    <nav aria-label="On this page" style="display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 14px">
+      <a href="#arch">Architecture</a><a href="#pipe">Pipeline status</a><a href="#metrics">Metrics</a><a href="#pred">Predictor</a><a href="#agent">Analyst evals</a><a href="#limits">Limitations</a>
+    </nav>
+  </section>
+
+  <section class="wrap" style="display: flex; flex-direction: column; gap: 16px">
+    <div class="box" id="arch" style="display: flex; flex-direction: column; gap: 12px">
+      <h2 style="font-size: 20px">Architecture</h2>
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px">
+        <div class="ph" style="flex: 1 1 130px; height: 70px">Cricsheet · Wikidata</div><span aria-hidden="true">→</span>
+        <div class="ph" style="flex: 1 1 130px; height: 70px">cricstat-pipeline (scheduled)</div><span aria-hidden="true">→</span>
+        <div class="ph" style="flex: 1 1 130px; height: 70px">SQLite: raw → core → marts</div><span aria-hidden="true">→</span>
+        <div class="ph" style="flex: 1 1 130px; height: 70px">cricstat-api</div><span aria-hidden="true">→</span>
+        <div class="ph" style="flex: 1 1 130px; height: 70px">Pages · cricstat-agent · MCP</div>
+      </div>
+      <p style="font-size: 14px; color: #57606A">Models (ratings, simulation, win probability) train in cricstat-models and log to MLflow. Code and decisions: <a href="https://github.com/avpgithub-code/pandyahomelab">GitHub</a> · ADR-022.</p>
+    </div>
+
+    <div class="box" id="pipe" style="display: flex; flex-direction: column; gap: 10px">
+      <h2 style="font-size: 20px">Pipeline status</h2>
+      <div class="scroll"><table>
+        <thead><tr><th>Job</th><th>Schedule</th><th>Last run</th><th>Result</th><th>Added / updated / unchanged</th></tr></thead>
+        <tbody>
+          <tr><td>Recent matches</td><td>Daily</td><td>[time]</td><td>[ok / failed]</td><td>[—] / [—] / [—]</td></tr>
+          <tr><td>Player register + Wikidata</td><td>Weekly</td><td>[time]</td><td>[ok / failed]</td><td>[—] / [—] / [—]</td></tr>
+          <tr><td>Full reconcile</td><td>Monthly</td><td>[time]</td><td>[ok / failed]</td><td>[—] / [—] / [—] · removed [—]</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="box" id="metrics" style="display: flex; flex-direction: column; gap: 10px">
+      <h2 style="font-size: 20px">Metric definitions</h2>
+      <div class="scroll"><table>
+        <thead><tr><th>Metric</th><th>Definition</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Batting average</td><td class="mono">runs ÷ dismissals</td><td>Not-outs do not count as dismissals</td></tr>
+          <tr><td>Strike rate (bat)</td><td class="mono">runs ÷ balls faced × 100</td><td>Wides are not balls faced</td></tr>
+          <tr><td>Economy</td><td class="mono">runs conceded ÷ legal balls × 6</td><td>Byes and leg-byes are not charged to the bowler</td></tr>
+          <tr><td>Bowling wicket</td><td>[credited dismissal types]</td><td>Run-outs are not credited to the bowler</td></tr>
+          <tr><td>T20 phases</td><td>Overs 1–6 · 7–15 · 16–20</td><td>[Full dictionary: F4]</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="grid" id="pred">
+      <div class="box" style="display: flex; flex-direction: column; gap: 10px">
+        <h2 style="font-size: 20px">Predictor backtest</h2>
+        <div class="scroll"><table style="min-width: 360px">
+          <thead><tr><th>Tournament</th><th>Brier</th><th>Log-loss</th><th>Ranking baseline</th></tr></thead>
+          <tbody><tr><td>WC 2019</td><td>[—]</td><td>[—]</td><td>[—]</td></tr><tr><td>WC 2023</td><td>[—]</td><td>[—]</td><td>[—]</td></tr></tbody>
+        </table></div>
+      </div>
+      <div class="box" style="display: flex; flex-direction: column; gap: 10px">
+        <h2 style="font-size: 20px">Calibration</h2>
+        <div class="ph" style="height: 150px">Reliability chart: predicted vs actual win rate per probability bucket</div>
+      </div>
+    </div>
+
+    <div class="box" id="agent" style="display: flex; flex-direction: column; gap: 10px">
+      <h2 style="font-size: 20px">Analyst evaluation</h2>
+      <p style="font-size: 14px; color: #57606A">Test set: [~150] single-turn and [~30] multi-turn questions with answers computed from the database, plus refusal and clarification cases. Scored on result correctness, not SQL text.</p>
+      <div class="scroll"><table style="min-width: 720px">
+        <thead><tr><th>System</th><th>Single-turn</th><th>Multi-turn</th><th>Refusals handled</th><th>Median latency</th><th>Cost / 1k questions</th></tr></thead>
+        <tbody>
+          <tr><td>Naive text-to-SQL (baseline)</td><td>[—]%</td><td>[—]%</td><td>[—]%</td><td>[—] s</td><td>$[—]</td></tr>
+          <tr><td>cricstat agent · Claude Haiku</td><td>[—]%</td><td>[—]%</td><td>[—]%</td><td>[—] s</td><td>$[—]</td></tr>
+          <tr><td>cricstat agent · Claude Sonnet</td><td>[—]%</td><td>[—]%</td><td>[—]%</td><td>[—] s</td><td>$[—]</td></tr>
+          <tr><td>cricstat agent · open model (local)</td><td>[—]%</td><td>[—]%</td><td>[—]%</td><td>[—] s</td><td>$0</td></tr>
+          <tr><td>Fine-tuned open model (later)</td><td>[—]%</td><td>[—]%</td><td>[—]%</td><td>[—] s</td><td>$0</td></tr>
+        </tbody>
+      </table></div>
+      <p style="font-size: 13px; color: #57606A">Context: published research (CricBench, 2025) found general LLMs answer under 30% of cricket stats questions correctly.</p>
+    </div>
+
+    <div class="box" id="limits" style="display: flex; flex-direction: column; gap: 8px">
+      <h2 style="font-size: 20px">Known limitations</h2>
+      <ul style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px">
+        <li>Source data has about a one-day lag and only completed matches.</li>
+        <li>Afghanistan men's matches are withheld by the source; their forecast rating is a disclosed estimate.</li>
+        <li>Coverage is sparse before ~2012, so career totals for older players can be incomplete.</li>
+        <li>[Others found during validation]</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer style="border-top: 1px solid #D0D7DE; background: #fff; margin-top: 24px">
+    <div class="wrap" style="padding-top: 20px; padding-bottom: 28px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #57606A">
+      <div>Match data from Cricsheet (cricsheet.org), used under the Open Data Commons Attribution License 1.0. Player metadata from Wikidata (CC0).</div>
+      <div>Not affiliated with or endorsed by Cricsheet, the ICC or any cricket board.</div>
+      <div><a href="Licences.dc.html">Data &amp; licences</a> · <a href="https://pandyahomelab.com/privacy/">Privacy</a></div>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

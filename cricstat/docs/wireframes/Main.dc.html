@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Homepage with cricstat additions</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F6F8FA;color:#1F2328;font-family:'IBM Plex Sans',system-ui,sans-serif}
+a{color:#1347A3}a:hover{color:#0D3275}
+h1,h2,h3,p{margin:0}
+.wrap{width:100%;max-width:1200px;margin:0 auto;padding:0 24px;box-sizing:border-box}
+.box{background:#fff;border:1px solid #D0D7DE;border-radius:8px;padding:20px}
+.ph{border:1.5px dashed #8C959F;border-radius:6px;color:#57606A;display:flex;align-items:center;justify-content:center;text-align:center;font-size:14px;padding:12px;background:#fff}
+.lbl{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#57606A}
+.new{outline:2px solid #C2410C;outline-offset:3px}
+.tag{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;background:#C2410C;color:#fff;border-radius:4px;padding:2px 6px;margin-left:6px}
+.nav a{text-decoration:none;color:#1F2328;padding:10px 12px;border-radius:6px;min-height:44px;display:inline-flex;align-items:center;box-sizing:border-box}
+.btn{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border-radius:6px;border:1px solid #D0D7DE;background:#fff;color:#1F2328;text-decoration:none;font:inherit;box-sizing:border-box}
+.btn.pri{background:#1347A3;border-color:#1347A3;color:#fff}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+</style>
+</helmet>
+<div style="display: flex; flex-direction: column; gap: 32px; padding-bottom: 48px">
+  <header style="background: #fff; border-bottom: 1px solid #D0D7DE">
+    <div class="wrap" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding-top: 8px; padding-bottom: 8px">
+      <a href="Main.dc.html" style="text-decoration: none; color: #1F2328; font-weight: 700; font-size: 18px">pandyaHomeLab</a>
+      <nav class="nav" aria-label="Site" style="display: flex; flex-wrap: wrap; gap: 2px">
+        <a href="#ml">ML</a><a href="#dl">DL</a><a href="#nlp">NLP</a><a href="#agentic">Agentic</a>
+        <a href="Hub.dc.html" class="new" style="font-weight: 600; color: #1347A3">Cricket<span class="tag">NEW</span></a>
+        <a href="#stack">Stack</a><a href="#tools">Tools</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="wrap" style="display: flex; flex-direction: column; gap: 16px; align-items: flex-start">
+    <span class="lbl">Existing hero (unchanged copy)</span>
+    <h1 style="font-size: 44px">pandyaHomeLab</h1>
+    <p style="color: #57606A; max-width: 720px">A professional AI learning platform showcasing Machine Learning, Deep Learning, NLP, and Agentic AI.</p>
+    <div style="display: flex; flex-wrap: wrap; gap: 10px">
+      <a class="btn" href="#ml">ML Projects</a><a class="btn" href="#dl">DL Projects</a><a class="btn" href="#nlp">NLP Projects</a><a class="btn" href="#agentic">Agentic AI</a>
+      <a class="btn pri new" href="Hub.dc.html">cricstat<span class="tag">NEW</span></a>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class="box new" style="display: flex; flex-direction: column; gap: 18px; padding: 28px; background: #1347A3; border-color: #1347A3; color: #FFFFFF; border-bottom: 6px solid #FF9933">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px"><span class="lbl" style="color: #FFD199">Flagship project</span><span class="tag">NEW</span></div>
+      <h2 style="font-size: 30px">cricstat — end-to-end cricket analytics &amp; LLM project</h2>
+      <p style="color: #E6EDF8; max-width: 780px">One product across the whole stack: a daily data pipeline over 20,000+ matches, ML forecasting, and an LLM analyst with published accuracy scores.</p>
+      <div class="grid">
+        <a href="Predictor.dc.html" class="box" style="text-decoration: none; color: #1F2328; display: flex; flex-direction: column; gap: 6px"><strong>WC 2027 Predictor</strong><span style="color: #57606A; font-size: 14px">Title chances, updated as matches are played</span></a>
+        <a href="Ask.dc.html" class="box" style="text-decoration: none; color: #1F2328; display: flex; flex-direction: column; gap: 6px"><strong>Ask the Analyst</strong><span style="color: #57606A; font-size: 14px">Plain-English stats questions, every answer sourced</span></a>
+        <a href="Players.dc.html" class="box" style="text-decoration: none; color: #1F2328; display: flex; flex-direction: column; gap: 6px"><strong>Players &amp; Countries</strong><span style="color: #57606A; font-size: 14px">Men's and women's, all formats and major leagues</span></a>
+      </div>
+      <div><a class="btn" href="Hub.dc.html" style="background: #FF9933; border-color: #FF9933; color: #1F2328; font-weight: 600">Explore cricstat</a></div>
+    </div>
+  </section>
+
+  <section class="wrap" style="display: flex; flex-direction: column; gap: 24px">
+    <span class="lbl">Featured Projects (existing) — each domain gains one cross-link card</span>
+    <div id="ml" style="display: flex; flex-direction: column; gap: 12px">
+      <h3>Machine Learning · 3 live</h3>
+      <div class="grid">
+        <div class="ph" style="height: 96px">iris-knn</div><div class="ph" style="height: 96px">housing-linear</div><div class="ph" style="height: 96px">titanic-automl</div>
+        <a href="Predictor.dc.html" class="box new" style="text-decoration: none; color: #1F2328; display: flex; flex-direction: column; gap: 4px"><span class="lbl">Part of cricstat</span><strong>WC 2027 predictor</strong><span style="font-size: 14px; color: #57606A">Elo ratings + Monte Carlo</span></a>
+      </div>
+    </div>
+    <div id="dl" style="display: flex; flex-direction: column; gap: 12px">
+      <h3>Deep Learning · 2 live</h3>
+      <div class="grid">
+        <div class="ph" style="height: 96px">mnist-cnn</div><div class="ph" style="height: 96px">lstm-forecast</div>
+        <a href="Methodology.dc.html" class="box new" style="text-decoration: none; color: #1F2328; display: flex; flex-direction: column; gap: 4px"><span class="lbl">Part of cricstat</span><strong>Ball-by-ball sequence model</strong><span style="font-size: 14px; color: #57606A">In-match win probability</span></a>
+      </div>
+    </div>
+    <div id="nlp" style="display: flex; flex-direction: column; gap: 12px">
+      <h3>NLP · 4 live</h3>
+      <div class="grid">
+        <div class="ph" style="height: 96px">quora-randomforest</div><div class="ph" style="height: 96px">imdb-textrep</div><div class="ph" style="height: 96px">text8-word2vec</div><div class="ph" style="height: 96px">ewt-hmm</div>
+        <a href="Methodology.dc.html" class="box new" style="text-decoration: none; color: #1F2328; display: flex; flex-direction: column; gap: 4px"><span class="lbl">Part of cricstat · later</span><strong>Fact-checked match reports</strong><span style="font-size: 14px; color: #57606A">Data-to-text with claim verification</span></a>
+      </div>
+    </div>
+    <div id="agentic" style="display: flex; flex-direction: column; gap: 12px">
+      <h3>Agentic AI · Phase 4</h3>
+      <div class="grid">
+        <a href="Ask.dc.html" class="box new" style="text-decoration: none; color: #1F2328; display: flex; flex-direction: column; gap: 4px"><span class="lbl">Part of cricstat</span><strong>Ask the Analyst</strong><span style="font-size: 14px; color: #57606A">LangGraph agent with tools and evals</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap" id="stack" style="display: flex; flex-direction: column; gap: 12px">
+    <span class="lbl">Stack · Tools · Footer (existing, unchanged)</span>
+    <div class="ph" style="height: 120px">Built With · MLOps Infrastructure · footer</div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1500}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

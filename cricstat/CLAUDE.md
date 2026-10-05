@@ -123,3 +123,14 @@ Background: `docs/llm-strategy-research-2026-10-05.md`.
 | P1–P6 | Predictor + win prob → tools → test set → agent → public demo → extras | Later |
 
 Git: work on branch `feat/cricstat-foundation`, merge to `main` with `--no-ff` (platform workflow, ADR-018).
+
+## Next up and open TODOs (as of 2026-10-05)
+- **Next:** F3 data model (`docs/F3-data-model.md` + `schema.sql`): core tables (matches, innings, deliveries,
+  players, teams, venues, competitions), a format mapping for all 6 match types, marts shaped by the wireframes.
+- Wireframe source is copied in `docs/wireframes/` (the canvas at the F2 link is the editable master).
+- Branch `feat/cricstat-foundation` is local only (not pushed or merged). The user decides when to push.
+- F6 note: cricstat needs its own Docker network. 172.20–172.24 are taken (ml, dl, nlp, agentic-reserved, proxy), so check
+  `docs/NETWORK_CIDR_SUMMARY.md` before picking one, and write ADR-022.
+- Owner TODOs: (1) email Cricsheet to confirm the match-file licence and file the reply in `docs/`; (2) write the
+  "Why I built this" story (placeholder on the hub wireframe); (3) set up a Console API workspace with prepaid credits before P4.
+

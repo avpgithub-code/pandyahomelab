@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>World Cup 2027 predictor</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F6F8FA;color:#1F2328;font-family:'IBM Plex Sans',system-ui,sans-serif}
+a{color:#1347A3}a:hover{color:#0D3275}
+h1,h2,h3,p{margin:0}
+h1,h2{color:#0D3275}
+.wrap{width:100%;max-width:1200px;margin:0 auto;padding:0 24px;box-sizing:border-box}
+.box{background:#fff;border:1px solid #D0D7DE;border-radius:8px;padding:20px}
+.ph{border:1.5px dashed #8C959F;border-radius:6px;color:#57606A;display:flex;align-items:center;justify-content:center;text-align:center;font-size:14px;padding:12px;background:#fff}
+.lbl{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#57606A}
+.nav a{text-decoration:none;color:#FFFFFF;padding:10px 12px;border-radius:6px;min-height:44px;display:inline-flex;align-items:center;box-sizing:border-box}
+.nav a:hover{background:#0D3275;color:#FFFFFF}
+.nav a.on{background:#0D3275;color:#FFFFFF;font-weight:600;box-shadow:inset 0 -3px 0 #FF9933}
+.btn{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:6px;border:1px solid #D0D7DE;background:#fff;color:#1F2328;text-decoration:none;font:inherit;box-sizing:border-box}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:640px}
+th,td{border-bottom:1px solid #D0D7DE;padding:8px 10px;text-align:left}
+th{color:#0D3275;font-weight:600;background:#E6EDF8}
+.bar{height:14px;border-radius:3px;background:#1347A3}
+.pill{display:inline-block;background:#FF9933;color:#1F2328;font-weight:600;border-radius:999px;padding:2px 10px;font-size:13px}
+select{font:inherit;min-height:44px;padding:0 12px;border:1px solid #8C959F;border-radius:6px;background:#fff}
+</style>
+</helmet>
+<div style="display: flex; flex-direction: column; gap: 24px">
+  <header style="background: #1347A3; border-bottom: 4px solid #FF9933">
+    <div class="wrap" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding-top: 8px; padding-bottom: 8px">
+      <a href="Main.dc.html" style="text-decoration: none; color: #FFFFFF; font-weight: 700">pandyaHomeLab <span style="color: #C9D6EE; font-weight: 400">/</span> cricstat</a>
+      <nav class="nav" aria-label="cricstat" style="display: flex; flex-wrap: wrap; gap: 2px">
+        <a href="Hub.dc.html">Overview</a><a href="Countries.dc.html">Countries</a><a href="Players.dc.html">Players</a><a class="on" href="Predictor.dc.html">WC 2027</a><a href="Ask.dc.html">Ask</a><a href="Methodology.dc.html">Methodology</a><a href="Licences.dc.html">Licences</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="wrap" style="display: flex; flex-direction: column; gap: 12px">
+    <span class="lbl">Forecast · Men's ODI World Cup 2027</span>
+    <h1 style="font-size: 38px">Who will win the 2027 World Cup?</h1>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 14px; color: #57606A">
+      <span>Last updated [timestamp]</span><span>[N] simulated tournaments</span><span>Data as of [date]</span><span>Phase: [pre-tournament / group stage / knockouts]</span>
+    </div>
+    <div class="box" style="padding: 12px 16px; font-size: 14px; background: #FFF8E6; border-color: #D4A72C">
+      For education and entertainment, not betting advice. Afghanistan's men's matches are not in the source data, so their rating uses a disclosed starting value (<a href="Methodology.dc.html">details</a>).
+    </div>
+  </section>
+
+  <section class="wrap" style="display: flex; flex-direction: column; gap: 16px">
+    <div class="box" style="display: flex; flex-wrap: wrap; gap: 16px 32px; align-items: center; justify-content: space-between; background: #FFF4E5; border-color: #FF9933">
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <div style="display: flex; align-items: center; gap: 10px"><span class="pill">Following</span><strong style="font-size: 22px">India</strong></div>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 15px">
+          <span>Win title <strong>[—]%</strong></span><span>Final [—]%</span><span>Semi-final [—]%</span><span>Rating [—]</span><span>Since last update [±—] pts</span>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <label for="hl-team" style="font-size: 14px; font-weight: 600">Highlight team</label>
+        <select id="hl-team"><option>India</option><option>[Any other team]</option></select>
+      </div>
+    </div>
+    <div class="box" style="display: flex; flex-direction: column; gap: 10px">
+      <h2 style="font-size: 20px">Chances by stage</h2>
+      <div class="scroll"><table>
+        <thead><tr><th>Team</th><th>Rating</th><th>Next stage</th><th>Semi-final</th><th>Final</th><th style="width: 30%">Win title</th></tr></thead>
+        <tbody>
+          <sc-for list="{{rows}}" as="r" hint-placeholder-count="6">
+            <tr>
+              <td><a href="Countries.dc.html">{{r.name}}</a></td><td>[—]</td><td>[—]%</td><td>[—]%</td><td>[—]%</td>
+              <td><div style="display: flex; align-items: center; gap: 8px"><div class="bar" style="{{r.w}}"></div><span>[—]%</span></div></td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table></div>
+      <p style="font-size: 13px; color: #57606A">All [14] teams listed; the followed team's row is highlighted. Bar lengths here are illustrative only. The model is the same for every team — following one changes the view, not the forecast.</p>
+    </div>
+    <div class="box" style="display: flex; flex-direction: column; gap: 10px">
+      <h2 style="font-size: 20px">How the title chances have moved</h2>
+      <div class="ph" style="height: 240px">Line chart: title chance per team over time, one line per team, the followed team (India) bold in saffron, top 5 labelled · hover for date and the match that moved it</div>
+      <a href="Ask.dc.html">Ask why a team's chance changed</a>
+    </div>
+    <div class="grid">
+      <div class="box" style="display: flex; flex-direction: column; gap: 10px">
+        <h2 style="font-size: 20px">Tournament format</h2>
+        <div class="ph" style="height: 140px">Groups → next stage → semis → final, read from config · "Verify against the official fixtures when published"</div>
+      </div>
+      <div class="box" style="display: flex; flex-direction: column; gap: 10px">
+        <h2 style="font-size: 20px">How good is this model?</h2>
+        <div class="scroll"><table style="min-width: 320px">
+          <thead><tr><th>Backtest</th><th>Brier</th><th>Baseline</th></tr></thead>
+          <tbody><tr><td>WC 2019</td><td>[—]</td><td>[—]</td></tr><tr><td>WC 2023</td><td>[—]</td><td>[—]</td></tr></tbody>
+        </table></div>
+        <a href="Methodology.dc.html">Method: team ratings + Monte Carlo simulation</a>
+      </div>
+    </div>
+    <div class="box" style="display: flex; flex-direction: column; gap: 10px">
+      <h2 style="font-size: 20px">During the tournament</h2>
+      <div class="ph" style="height: 110px">Fixtures and results list · each upcoming match shows pre-match win probability · completed matches lock in</div>
+    </div>
+  </section>
+
+  <footer style="border-top: 1px solid #D0D7DE; background: #fff; margin-top: 24px">
+    <div class="wrap" style="padding-top: 20px; padding-bottom: 28px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #57606A">
+      <div>Match data from Cricsheet (cricsheet.org), used under the Open Data Commons Attribution License 1.0.</div>
+      <div>Not affiliated with or endorsed by Cricsheet, the ICC or any cricket board. Forecasts are for education and entertainment, not betting advice.</div>
+      <div><a href="Licences.dc.html">Data &amp; licences</a> · <a href="https://pandyahomelab.com/privacy/">Privacy</a></div>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1750}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const widths = [90, 75, 62, 50, 38, 25];
+    return { rows: widths.map((w, i) => ({ name: '[Team ' + (i + 1) + ']', w: 'width: ' + w + '%' })) };
+  }
+}
+</script>
+</body>
+</html>

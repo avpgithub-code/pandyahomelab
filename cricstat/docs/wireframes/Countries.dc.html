@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Country hub</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F6F8FA;color:#1F2328;font-family:'IBM Plex Sans',system-ui,sans-serif}
+a{color:#1347A3}a:hover{color:#0D3275}
+h1,h2,h3,p{margin:0}
+h1,h2{color:#0D3275}
+.wrap{width:100%;max-width:1200px;margin:0 auto;padding:0 24px;box-sizing:border-box}
+.box{background:#fff;border:1px solid #D0D7DE;border-radius:8px;padding:20px}
+.ph{border:1.5px dashed #8C959F;border-radius:6px;color:#57606A;display:flex;align-items:center;justify-content:center;text-align:center;font-size:14px;padding:12px;background:#fff}
+.lbl{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#57606A}
+.nav a{text-decoration:none;color:#FFFFFF;padding:10px 12px;border-radius:6px;min-height:44px;display:inline-flex;align-items:center;box-sizing:border-box}
+.nav a:hover{background:#0D3275;color:#FFFFFF}
+.nav a.on{background:#0D3275;color:#FFFFFF;font-weight:600;box-shadow:inset 0 -3px 0 #FF9933}
+.btn{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:6px;border:1px solid #D0D7DE;background:#fff;color:#1F2328;text-decoration:none;font:inherit;box-sizing:border-box;cursor:pointer}
+.btn.on{background:#1347A3;border-color:#1347A3;color:#fff}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:480px}
+th,td{border-bottom:1px solid #D0D7DE;padding:8px 10px;text-align:left}
+th{color:#0D3275;font-weight:600;background:#E6EDF8}
+select{font:inherit;min-height:44px;padding:0 12px;border:1px solid #8C959F;border-radius:6px;background:#fff}
+</style>
+</helmet>
+<div style="display: flex; flex-direction: column; gap: 24px">
+  <header style="background: #1347A3; border-bottom: 4px solid #FF9933">
+    <div class="wrap" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding-top: 8px; padding-bottom: 8px">
+      <a href="Main.dc.html" style="text-decoration: none; color: #FFFFFF; font-weight: 700">pandyaHomeLab <span style="color: #C9D6EE; font-weight: 400">/</span> cricstat</a>
+      <nav class="nav" aria-label="cricstat" style="display: flex; flex-wrap: wrap; gap: 2px">
+        <a href="Hub.dc.html">Overview</a><a class="on" href="Countries.dc.html">Countries</a><a href="Players.dc.html">Players</a><a href="Predictor.dc.html">WC 2027</a><a href="Ask.dc.html">Ask</a><a href="Methodology.dc.html">Methodology</a><a href="Licences.dc.html">Licences</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="wrap" style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; justify-content: space-between">
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <span class="lbl">Country</span>
+      <h1 style="font-size: 34px">[Team name]</h1>
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end">
+      <div role="group" aria-label="Team" style="display: flex; gap: 8px">
+        <sc-for list="{{genders}}" as="g" hint-placeholder-count="2">
+          <button type="button" class="{{g.cls}}" onClick="{{g.pick}}">{{g.name}}</button>
+        </sc-for>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="c-team" style="font-size: 14px; font-weight: 600">Switch team</label>
+        <select id="c-team"><option>[Team name]</option><option>[Other team]</option></select>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap" style="display: flex; flex-direction: column; gap: 16px">
+    <div class="grid">
+      <div class="box" style="display: flex; flex-direction: column; gap: 10px; grid-column: 1 / -1">
+        <h2 style="font-size: 20px">Record by format · {{gender}}</h2>
+        <div class="scroll"><table>
+          <thead><tr><th>Format</th><th>Mat</th><th>Won</th><th>Lost</th><th>Tied</th><th>NR</th><th>Win %</th></tr></thead>
+          <tbody>
+            <tr><td>Test</td><td>[—]</td><td>[—]</td><td>[—]</td><td>[—]</td><td>[—]</td><td>[—]</td></tr>
+            <tr><td>ODI</td><td>[—]</td><td>[—]</td><td>[—]</td><td>[—]</td><td>[—]</td><td>[—]</td></tr>
+            <tr><td>T20I</td><td>[—]</td><td>[—]</td><td>[—]</td><td>[—]</td><td>[—]</td><td>[—]</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div class="box" style="display: flex; flex-direction: column; gap: 8px">
+        <span class="lbl">ODI rating (from the predictor)</span>
+        <div style="font-size: 32px; font-weight: 700">[—]</div>
+        <div style="font-size: 14px; color: #57606A">Rank [—] of [—] · WC 2027 title chance [—]%</div>
+        <a href="Predictor.dc.html">See the World Cup forecast</a>
+      </div>
+      <div class="box" style="display: flex; flex-direction: column; gap: 8px">
+        <span class="lbl">Home vs away (ODI)</span>
+        <div class="ph" style="height: 96px">Win % at home · away · neutral</div>
+      </div>
+    </div>
+    <div class="box" style="display: flex; flex-direction: column; gap: 10px">
+      <h2 style="font-size: 20px">Results by year</h2>
+      <div class="ph" style="height: 200px">Stacked bars per year: won / lost / other · format filter</div>
+    </div>
+    <div class="box" style="display: flex; flex-direction: column; gap: 10px">
+      <h2 style="font-size: 20px">Head to head (ODI)</h2>
+      <div class="scroll"><table>
+        <thead><tr><th>Opponent</th><th>Mat</th><th>Won</th><th>Lost</th><th>Win %</th><th>Last result</th></tr></thead>
+        <tbody>
+          <sc-for list="{{opps}}" as="o" hint-placeholder-count="4">
+            <tr><td>{{o}}</td><td>[—]</td><td>[—]</td><td>[—]</td><td>[—]</td><td>[date · result]</td></tr>
+          </sc-for>
+        </tbody>
+      </table></div>
+    </div>
+    <div class="grid">
+      <div class="box" style="display: flex; flex-direction: column; gap: 10px">
+        <h2 style="font-size: 20px">Most runs</h2>
+        <div class="ph" style="height: 150px">Top 10 list, each linking to the player profile</div>
+      </div>
+      <div class="box" style="display: flex; flex-direction: column; gap: 10px">
+        <h2 style="font-size: 20px">Most wickets</h2>
+        <div class="ph" style="height: 150px">Top 10 list, each linking to the player profile</div>
+      </div>
+    </div>
+  </section>
+
+  <footer style="border-top: 1px solid #D0D7DE; background: #fff; margin-top: 24px">
+    <div class="wrap" style="padding-top: 20px; padding-bottom: 28px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #57606A">
+      <div>Match data from Cricsheet (cricsheet.org), used under the Open Data Commons Attribution License 1.0. Player metadata from Wikidata (CC0).</div>
+      <div>Not affiliated with or endorsed by Cricsheet, the ICC or any cricket board.</div>
+      <div><a href="Licences.dc.html">Data &amp; licences</a> · <a href="https://pandyahomelab.com/privacy/">Privacy</a></div>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1700}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { gender: "Men's" }; }
+  renderVals() {
+    const g = ["Men's", "Women's"];
+    return {
+      gender: this.state.gender,
+      genders: g.map((n) => ({ name: n, cls: n === this.state.gender ? 'btn on' : 'btn', pick: () => this.setState({ gender: n }) })),
+      opps: ['[Opponent 1]', '[Opponent 2]', '[Opponent 3]', '[Opponent 4]']
+    };
+  }
+}
+</script>
+</body>
+</html>
