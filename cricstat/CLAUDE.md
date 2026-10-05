@@ -121,7 +121,7 @@ Background: `docs/llm-strategy-research-2026-10-05.md`.
 | F3 | Data model (`docs/F3-data-model.md`, `sql/serving_schema.sql`) | Done 2026-10-05 |
 | F4 | Metric dictionary + formula tests (`docs/F4-metric-dictionary.md`) | Done 2026-10-05 |
 | F5 | API contract (`docs/F5-api-contract.md`) | Done 2026-10-05 |
-| F6 | Engineering setup (layout, Docker, networking, CI skeleton) + ADR-022 | In progress |
+| F6 | Engineering setup (`docs/F6-engineering-setup.md`) + ADR-022 (Accepted) + CI skeleton | Done 2026-10-05; pipeline deployed (DSM tasks: operator) |
 | F7 | Roadmap + decision log | Ongoing in this file |
 | F8 | Compliance & trust (licences page, privacy update, disclaimers) | Not started |
 | F9 | CI/CD & automation (ADR) | Not started |
@@ -129,6 +129,16 @@ Background: `docs/llm-strategy-research-2026-10-05.md`.
 | P1–P6 | Predictor + win prob → tools → test set → agent → public demo → extras | Later |
 
 Git: work on branch `feat/cricstat-foundation`, merge to `main` with `--no-ff` (platform workflow, ADR-018).
+
+## P4/P5 security checklist (before the agent goes public)
+- [ ] **DSM firewall:** add a deny rule for `172.25.0.0/24` placed **above** the existing `172.16.0.0/12` allow, so
+      cricstat containers (which handle visitor input) cannot open connections to DSM/host services. They only need
+      each other, Nginx and the internet. Test with the stack running (rule order matters), and record it in F6 §2.
+- [ ] Agent safeguards from F5 §5.2: per-IP limits (5/min, 20/day), global daily budget cap, kill switch,
+      30-day retention, tool output treated as data.
+- [ ] The `run_sql` fallback is read-only, SELECT-only (parsed), LIMIT-wrapped and time-limited, against views only.
+- [ ] `deployment/cricstat/.env` is mode 600, and the API key is in a dedicated Console workspace with prepaid credits and no auto-reload.
+- [ ] Privacy page updated (Anthropic as a processor, retention, no cookies) before launch (F8).
 
 ## Next up and open TODOs (as of 2026-10-05)
 - **Next:** F6 engineering setup + ADR-022. F5 is done: one GET-only API for pages, agent, MCP and evals; public ids only;

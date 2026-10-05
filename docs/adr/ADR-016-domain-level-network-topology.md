@@ -356,3 +356,12 @@ Isolation is unaffected: nlp-mlflow is still domain-local.
 Nothing moved from this amendment's allocation.
 
 **Source of truth:** [NETWORK_CIDR_SUMMARY.md](../NETWORK_CIDR_SUMMARY.md) §3–§8 and §16.
+
+## Amendment 2 — 2026-10-05: cricstat flagship network
+
+Made by [ADR-022](ADR-022-cross-domain-flagship-projects.md) (Accepted 2026-10-05):
+- New network `cricstat-network`, 172.25.0.0/24 (domain index 4, host ports 8040–8049, all on 127.0.0.1).
+- New `.40–.49` range on domain networks for cross-domain legs of flagship batch jobs; first use: `cricstat-models` at 172.20.0.40 on ml-network (logs to ml-mlflow).
+- Existing networks, slots and the "no internet access to private domain networks" invariant are unchanged.
+
+**Source of truth:** [NETWORK_CIDR_SUMMARY.md](../NETWORK_CIDR_SUMMARY.md) §1, §3, §6a, §11.

@@ -13,7 +13,10 @@ COPY . .
 
 # Python imports need underscored names; the dirs use hyphens for readability.
 # -sfn keeps this idempotent however the COPY treats the committed symlinks.
-RUN ln -sfn db-logic db_logic && \
+# chmod: on the NAS, Synology ACLs grant access while the POSIX bits are 700. COPY keeps those
+# bits, so without this the non-root runtime user (operator UID via compose) cannot read /app.
+RUN chmod -R a+rX /app && \
+    ln -sfn db-logic db_logic && \
     ln -sfn application-logic application_logic && \
     ln -sfn presentation-logic presentation_logic
 

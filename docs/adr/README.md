@@ -77,6 +77,8 @@ ADRs are immutable. Once accepted, they are not edited. If a decision changes, w
 | 018      | [Development workflow and Git strategy](ADR-018-development-workflow-git-strategy.md) | Accepted |
 | 019      | [Internet access and domain routing](ADR-019-internet-access-domain-routing.md) | Accepted |
 | 020      | [Project readiness checklist and phase gates](ADR-020-project-readiness-checklist.md) | Accepted |
+| 021      | [MLflow is publicly browsable, read-only](ADR-021-public-read-only-mlflow.md) | Accepted |
+| 022      | [Cross-domain flagship projects (cricstat)](ADR-022-cross-domain-flagship-projects.md) | Accepted |
 
 ### Stage 2 — Operations (September 2026)
 
