@@ -121,7 +121,7 @@ Background: `docs/llm-strategy-research-2026-10-05.md`.
 | F3 | Data model (`docs/F3-data-model.md`, `sql/serving_schema.sql`) | Done 2026-10-05 |
 | F4 | Metric dictionary + formula tests (`docs/F4-metric-dictionary.md`) | Done 2026-10-05 |
 | F5 | API contract (`docs/F5-api-contract.md`) | Done 2026-10-05 |
-| F6 | Engineering setup (`docs/F6-engineering-setup.md`) + ADR-022 (Accepted) + CI skeleton | Done 2026-10-05; pipeline deployed (DSM tasks: operator) |
+| F6 | Engineering setup (`docs/F6-engineering-setup.md`) + ADR-022 (Accepted) + CI skeleton | Done 2026-10-05; pipeline deployed, DSM tasks live (daily 05:30, monthly day 1 04:00; verified) |
 | F7 | Roadmap + decision log | Ongoing in this file |
 | F8 | Compliance & trust (licences page, privacy update, disclaimers) | Not started |
 | F9 | CI/CD & automation (ADR) | Not started |
