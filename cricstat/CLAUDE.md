@@ -104,7 +104,13 @@ Background: `docs/llm-strategy-research-2026-10-05.md`.
 - phases P0–P6
 - LangGraph agent with typed tools first
 - local and Hugging Face model comparison
-- WC 2027 predictor (Elo + Monte Carlo) as the P1 headline
+- WC 2027 predictor as the P1 headline, built as a **measured three-model comparison** (decided 2026-10-05):
+  (1) Elo + Monte Carlo baseline (statistics/ML, ships first); (2) gradient-boosting challenger with squad features (ML);
+  (3) squad strength from **DL player embeddings** learned by the ball-by-ball sequence model, plus Monte Carlo (DL).
+  All three are backtested on WC 2019/2023; the best-calibrated one powers the live forecast, and the comparison is published.
+  Why: about 2,600 men's ODIs is too little for DL at match level, but 11.6M deliveries suit DL. The same sequence model
+  also gives live in-match win probability. Homepage cards: ML "Elo baseline vs ML and DL challengers";
+  DL "Live win probability and player-strength ratings for the predictor".
 - API budget (separate Console workspace, prepaid credits with no auto-reload, $1–2/day cap in the app)
 
 ## Roadmap
@@ -113,8 +119,8 @@ Background: `docs/llm-strategy-research-2026-10-05.md`.
 | F1 | Product brief (`docs/F1-product-brief.md`) | Done 2026-10-05 |
 | F2 | Site map + wireframes (https://claude.ai/artifact/B9ge1q8GuwaoyxkL8hhbKz) | Done 2026-10-05 |
 | F3 | Data model (`docs/F3-data-model.md`, `sql/serving_schema.sql`) | Done 2026-10-05 |
-| F4 | Metric dictionary + formula tests | In progress |
-| F5 | API contract | Not started |
+| F4 | Metric dictionary + formula tests (`docs/F4-metric-dictionary.md`) | Done 2026-10-05 |
+| F5 | API contract | In progress |
 | F6 | Engineering setup (layout, Docker, networking, CI skeleton) + ADR-022 | Not started |
 | F7 | Roadmap + decision log | Ongoing in this file |
 | F8 | Compliance & trust (licences page, privacy update, disclaimers) | Not started |
@@ -125,7 +131,8 @@ Background: `docs/llm-strategy-research-2026-10-05.md`.
 Git: work on branch `feat/cricstat-foundation`, merge to `main` with `--no-ff` (platform workflow, ADR-018).
 
 ## Next up and open TODOs (as of 2026-10-05)
-- **Next:** F4 metric dictionary (`docs/F4-metric-dictionary.md`, `sql/reference_data.sql`, `sql/semantic_views.sql`).
+- **Next:** F5 API contract (`docs/F5-api-contract.md`). F4 is done: rules R1–R22, run-out involvements shown (labelled),
+  "All" = international + featured leagues, golden set includes India players and teams.
   F3 decisions: extra formats in the DB only ("More formats" in v1.1); venue → country map to draft; `build` command in
   cricstat-pipeline; featured leagues IPL, BBL, PSL, CPL, SA20, Hundred, MLC, T20 Blast, WPL, WBBL, Hundred women.
 - Wireframe source is copied in `docs/wireframes/` (the canvas at the F2 link is the editable master).

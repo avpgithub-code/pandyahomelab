@@ -21,8 +21,9 @@ CREATE TABLE format_map (                       -- every raw combination → dis
   level TEXT NOT NULL CHECK (level IN ('international_official','international_other','domestic')),
   PRIMARY KEY (match_type, team_type, balls_per_over));
 
-CREATE TABLE phase_defs (                       -- limited-overs phases by format family (overs are 0-based)
-  format_family TEXT NOT NULL, phase TEXT NOT NULL, from_over INTEGER NOT NULL, to_over INTEGER NOT NULL,
+CREATE TABLE phase_defs (                       -- limited-overs phases by format family (overs are 0-based;
+  format_family TEXT NOT NULL, phase TEXT NOT NULL,   -- for the Hundred an "over" is a 5-ball set)
+  from_over INTEGER NOT NULL, to_over INTEGER NOT NULL, label TEXT NOT NULL,
   PRIMARY KEY (format_family, phase));
 
 CREATE TABLE competitions (

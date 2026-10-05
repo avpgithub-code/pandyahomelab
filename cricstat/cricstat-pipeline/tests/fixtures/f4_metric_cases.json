@@ -1,0 +1,171 @@
+{
+  "_about": "F4 metric cases (2026-10-05). Hand-built scenarios with the counts the serving-DB build MUST produce. Rules: cricstat/docs/F4-metric-dictionary.md. Delivery cases use Cricsheet field names; omitted runs/extras are 0. Teams are 'Home' (batting) and 'Away' (bowling) unless stated. Consumed by the build-step tests once that step exists; test_semantic_views.py uses the 'aggregation' cases now.",
+  "delivery_cases": [
+    {
+      "id": "C1_extras_balls_faced",
+      "rules": ["R3 balls faced excludes wides, includes no-balls", "R4 byes/leg-byes not charged to bowler", "R5 legal balls exclude wides and no-balls", "R8 dot = legal ball with 0 conceded", "R10 boundary off a no-ball counts"],
+      "format": "ODI",
+      "overs": [{"over": 0, "deliveries": [
+        {"batter": "A", "bowler": "B1", "non_striker": "N", "extras": {"wides": 1}},
+        {"batter": "A", "bowler": "B1", "non_striker": "N", "runs_batter": 4, "extras": {"noballs": 1}},
+        {"batter": "A", "bowler": "B1", "non_striker": "N", "extras": {"legbyes": 2}},
+        {"batter": "A", "bowler": "B1", "non_striker": "N", "extras": {"byes": 4}},
+        {"batter": "A", "bowler": "B1", "non_striker": "N"},
+        {"batter": "A", "bowler": "B1", "non_striker": "N", "runs_batter": 1},
+        {"batter": "N", "bowler": "B1", "non_striker": "A"},
+        {"batter": "N", "bowler": "B1", "non_striker": "A"}
+      ]}],
+      "expect": {
+        "batting": {"A": {"runs": 5, "balls_faced": 5, "fours": 1, "sixes": 0, "is_out": 0}, "N": {"runs": 0, "balls_faced": 2, "is_out": 0}},
+        "bowling": {"B1": {"legal_balls": 6, "runs_conceded": 7, "wickets": 0, "maidens": 0, "wides": 1, "noballs": 1, "dots": 5}},
+        "innings": {"total_runs": 13, "legal_balls": 6, "total_wickets": 0}
+      }
+    },
+    {
+      "id": "C2_maiden_with_legbyes",
+      "rules": ["R6 maiden = one bowler's complete over with 0 conceded; byes/leg-byes allowed"],
+      "format": "ODI",
+      "overs": [{"over": 0, "deliveries": [
+        {"batter": "A", "bowler": "B2", "non_striker": "N", "extras": {"legbyes": 1}},
+        {"batter": "N", "bowler": "B2", "non_striker": "A"},
+        {"batter": "N", "bowler": "B2", "non_striker": "A"},
+        {"batter": "N", "bowler": "B2", "non_striker": "A"},
+        {"batter": "N", "bowler": "B2", "non_striker": "A"},
+        {"batter": "N", "bowler": "B2", "non_striker": "A"}
+      ]}],
+      "expect": {"bowling": {"B2": {"legal_balls": 6, "runs_conceded": 0, "maidens": 1, "dots": 6}}, "innings": {"total_runs": 1}}
+    },
+    {
+      "id": "C3_shared_over_no_maiden",
+      "rules": ["R6 an over split between two bowlers is a maiden for neither"],
+      "format": "ODI",
+      "overs": [{"over": 0, "deliveries": [
+        {"batter": "A", "bowler": "B3", "non_striker": "N"}, {"batter": "A", "bowler": "B3", "non_striker": "N"},
+        {"batter": "A", "bowler": "B3", "non_striker": "N"}, {"batter": "A", "bowler": "B4", "non_striker": "N"},
+        {"batter": "A", "bowler": "B4", "non_striker": "N"}, {"batter": "A", "bowler": "B4", "non_striker": "N"}
+      ]}],
+      "expect": {"bowling": {"B3": {"legal_balls": 3, "maidens": 0}, "B4": {"legal_balls": 3, "maidens": 0}}}
+    },
+    {
+      "id": "C4_retirements",
+      "rules": ["R1 retired hurt / retired not out = not out; retired out = out", "R2 no retirement is a bowler's wicket"],
+      "format": "T20",
+      "overs": [{"over": 0, "deliveries": [
+        {"batter": "A", "bowler": "B1", "non_striker": "C", "runs_batter": 3},
+        {"batter": "C", "bowler": "B1", "non_striker": "A", "wickets": [{"player_out": "A", "kind": "retired hurt"}]},
+        {"batter": "C", "bowler": "B1", "non_striker": "D", "runs_batter": 2},
+        {"batter": "C", "bowler": "B1", "non_striker": "D", "wickets": [{"player_out": "C", "kind": "retired out"}]}
+      ]}],
+      "expect": {
+        "batting": {"A": {"runs": 3, "balls_faced": 1, "is_out": 0}, "C": {"runs": 2, "balls_faced": 3, "is_out": 1, "dismissal_kind": "retired out"}},
+        "bowling": {"B1": {"wickets": 0}},
+        "innings": {"total_wickets": 1}
+      }
+    },
+    {
+      "id": "C5_non_striker_run_out",
+      "rules": ["R11 a batter dismissed without facing still has an innings (0 balls)", "R2 run out not credited to bowler", "R12 run-out involvement credited to listed fielders"],
+      "format": "ODI",
+      "overs": [{"over": 0, "deliveries": [
+        {"batter": "A", "bowler": "B1", "non_striker": "N", "runs_batter": 1,
+         "wickets": [{"player_out": "N", "kind": "run out", "fielders": [{"name": "F1"}]}]}
+      ]}],
+      "expect": {
+        "batting": {"A": {"runs": 1, "balls_faced": 1, "is_out": 0}, "N": {"runs": 0, "balls_faced": 0, "is_out": 1}},
+        "bowling": {"B1": {"wickets": 0}},
+        "fielding": {"F1": {"run_outs": 1, "catches": 0}}
+      }
+    },
+    {
+      "id": "C6_caught_and_bowled_and_substitute",
+      "rules": ["R12 caught and bowled = a catch for the bowler", "R12 catches as substitute are not career catches"],
+      "format": "ODI",
+      "overs": [{"over": 0, "deliveries": [
+        {"batter": "A", "bowler": "B1", "non_striker": "N", "wickets": [{"player_out": "A", "kind": "caught and bowled"}]},
+        {"batter": "N", "bowler": "B1", "non_striker": "C", "wickets": [{"player_out": "N", "kind": "caught", "fielders": [{"name": "S1", "substitute": true}]}]}
+      ]}],
+      "expect": {
+        "bowling": {"B1": {"wickets": 2}},
+        "fielding": {"B1": {"catches": 1}, "S1": {"catches": 0, "catches_as_substitute": 1}}
+      }
+    },
+    {
+      "id": "C7_super_over_excluded",
+      "rules": ["R7 super-over runs, balls and wickets are excluded from career stats", "R14 a tie decided by super over is 'tied' in records, winner recorded separately"],
+      "format": "T20",
+      "outcome": {"result": "tie", "eliminator": "Home"},
+      "innings": [
+        {"team": "Home", "overs": [{"over": 0, "deliveries": [{"batter": "A", "bowler": "B1", "non_striker": "N", "runs_batter": 6}]}]},
+        {"team": "Away", "overs": [{"over": 0, "deliveries": [{"batter": "X", "bowler": "H1", "non_striker": "Y", "runs_batter": 6}]}]},
+        {"team": "Away", "super_over": true, "overs": [{"over": 0, "deliveries": [{"batter": "X", "bowler": "H1", "non_striker": "Y", "runs_batter": 4}]}]},
+        {"team": "Home", "super_over": true, "overs": [{"over": 0, "deliveries": [{"batter": "A", "bowler": "B1", "non_striker": "N", "runs_batter": 6}]}]}
+      ],
+      "expect": {
+        "career_batting": {"A": {"runs": 6, "bat_innings": 1}},
+        "team_results": {"Home": {"outcome": "tied"}, "Away": {"outcome": "tied"}},
+        "match": {"result": "tie", "decided_by": "super_over", "winner": "Home"}
+      }
+    },
+    {
+      "id": "C8_hundred_economy_no_maidens",
+      "rules": ["R9 Hundred economy is per 6 legal balls", "R6 no maidens in the Hundred (5-ball sets)"],
+      "format": "HUNDRED",
+      "overs": [
+        {"over": 0, "deliveries": [{"batter": "A", "bowler": "B1", "non_striker": "N"}, {"batter": "A", "bowler": "B1", "non_striker": "N"}, {"batter": "A", "bowler": "B1", "non_striker": "N"}, {"batter": "A", "bowler": "B1", "non_striker": "N"}, {"batter": "A", "bowler": "B1", "non_striker": "N"}]},
+        {"over": 1, "deliveries": [{"batter": "A", "bowler": "B1", "non_striker": "N", "runs_batter": 6}, {"batter": "A", "bowler": "B1", "non_striker": "N", "runs_batter": 6}, {"batter": "A", "bowler": "B1", "non_striker": "N"}, {"batter": "A", "bowler": "B1", "non_striker": "N"}, {"batter": "A", "bowler": "B1", "non_striker": "N"}]}
+      ],
+      "expect": {"bowling": {"B1": {"legal_balls": 10, "runs_conceded": 12, "maidens": 0, "economy": 7.2}}}
+    },
+    {
+      "id": "C9_penalty_and_non_boundary",
+      "rules": ["R4 penalty runs count to the team total only", "R10 a 4 that was all run is not a boundary"],
+      "format": "ODI",
+      "overs": [{"over": 0, "deliveries": [
+        {"batter": "A", "bowler": "B1", "non_striker": "N", "runs_batter": 4, "non_boundary": true},
+        {"batter": "A", "bowler": "B1", "non_striker": "N", "extras": {"penalty": 5}}
+      ]}],
+      "expect": {
+        "batting": {"A": {"runs": 4, "balls_faced": 2, "fours": 0}},
+        "bowling": {"B1": {"runs_conceded": 4, "legal_balls": 2}},
+        "innings": {"total_runs": 9}
+      }
+    },
+    {
+      "id": "C10_no_play_match",
+      "rules": ["R13 a match abandoned without a ball is excluded from player matches and team records"],
+      "format": "ODI",
+      "outcome": {"result": "no result"},
+      "innings": [],
+      "expect": {"match": {"has_deliveries": 0}, "team_results_rows": 0, "match_players_counted": 0}
+    }
+  ],
+  "aggregation_cases": [
+    {
+      "id": "A1_batting_milestones",
+      "rules": ["R15 50s are 50–99 and 100s are 100+ (a hundred is not also a fifty)", "R15 a duck is 0 and out (0* is not a duck)", "R16 high score prefers not out on equal runs", "R17 average = runs ÷ outs; NULL with no outs"],
+      "innings": [
+        {"runs": 100, "balls_faced": 90, "is_out": 1}, {"runs": 50, "balls_faced": 60, "is_out": 1},
+        {"runs": 0, "balls_faced": 3, "is_out": 1}, {"runs": 0, "balls_faced": 1, "is_out": 0},
+        {"runs": 100, "balls_faced": 80, "is_out": 0}
+      ],
+      "expect": {"bat_innings": 5, "not_outs": 2, "runs": 250, "balls_faced": 234, "hundreds": 2, "fifties": 1, "ducks": 1,
+                 "high_score": 100, "high_score_not_out": 1, "average": 83.3333, "strike_rate": 106.8376}
+    },
+    {
+      "id": "A2_bowling_best_and_ratios",
+      "rules": ["R18 best bowling = most wickets, then fewest runs", "R17 economy per 6 legal balls; SR = balls ÷ wickets"],
+      "innings": [
+        {"legal_balls": 60, "runs_conceded": 45, "wickets": 3}, {"legal_balls": 60, "runs_conceded": 30, "wickets": 3},
+        {"legal_balls": 42, "runs_conceded": 50, "wickets": 0}, {"legal_balls": 60, "runs_conceded": 41, "wickets": 5}
+      ],
+      "expect": {"legal_balls": 222, "runs_conceded": 166, "wickets": 11, "best_bowling_wkts": 5, "best_bowling_runs": 41,
+                 "four_wkt_hauls": 0, "five_wkt_hauls": 1, "overs_display": "37.0", "average": 15.0909, "economy": 4.4865, "strike_rate": 20.1818}
+    },
+    {
+      "id": "A3_team_win_pct",
+      "rules": ["R19 win % = won ÷ (matches − no results); ties and draws stay in the denominator"],
+      "results": ["won", "won", "lost", "tied", "no_result"],
+      "expect": {"matches": 5, "won": 2, "lost": 1, "tied": 1, "no_result": 1, "win_pct": 50.0}
+    }
+  ]
+}
