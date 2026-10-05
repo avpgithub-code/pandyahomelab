@@ -130,6 +130,15 @@ Background: `docs/llm-strategy-research-2026-10-05.md`.
 
 Git: work on branch `feat/cricstat-foundation`, merge to `main` with `--no-ff` (platform workflow, ADR-018).
 
+## DSM scheduled tasks (operator creates them in DSM → Control Panel → Task Scheduler → Create → Scheduled Task → User-defined script)
+Both run as user **root**. Task Settings → Notification: tick "Send run details by email" and
+"Send run details only when the script terminates abnormally". Pipeline exit codes: 0 = ok, 1 = error, 2 = data-quality gate.
+| Task name | Schedule | Run command |
+|---|---|---|
+| cricstat daily refresh | Daily, 05:30 | `cd /volume1/pandya-homelab/deployment/cricstat && /usr/local/bin/docker compose run --rm cricstat-pipeline recent` |
+| cricstat monthly full | Monthly, day 1, 04:00 | `cd /volume1/pandya-homelab/deployment/cricstat && /usr/local/bin/docker compose run --rm cricstat-pipeline full` |
+The `build` step (P0) and model jobs (P1) are appended to these commands when they exist (F6 §4).
+
 ## P4/P5 security checklist (before the agent goes public)
 - [ ] **DSM firewall:** add a deny rule for `172.25.0.0/24` placed **above** the existing `172.16.0.0/12` allow, so
       cricstat containers (which handle visitor input) cannot open connections to DSM/host services. They only need
