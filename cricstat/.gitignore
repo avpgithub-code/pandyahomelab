@@ -1,0 +1,24 @@
+# Downloaded Cricsheet zips, the SQLite stores and run logs never go in git
+# (size, and the data has its own licence). Rebuild with cricstat-pipeline.
+/data/
+/logs/
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3*
+*.zip
+*.zip.part
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Environment
+.env
+.env.local
+.venv/
