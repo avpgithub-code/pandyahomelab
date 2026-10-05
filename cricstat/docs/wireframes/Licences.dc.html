@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Data and licences</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F6F8FA;color:#1F2328;font-family:'IBM Plex Sans',system-ui,sans-serif}
+a{color:#1347A3}a:hover{color:#0D3275}
+h1,h2,h3,p{margin:0}
+h1,h2{color:#0D3275}
+.wrap{width:100%;max-width:1200px;margin:0 auto;padding:0 24px;box-sizing:border-box}
+.box{background:#fff;border:1px solid #D0D7DE;border-radius:8px;padding:20px}
+.lbl{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#57606A}
+.nav a{text-decoration:none;color:#FFFFFF;padding:10px 12px;border-radius:6px;min-height:44px;display:inline-flex;align-items:center;box-sizing:border-box}
+.nav a:hover{background:#0D3275;color:#FFFFFF}
+.nav a.on{background:#0D3275;color:#FFFFFF;font-weight:600;box-shadow:inset 0 -3px 0 #FF9933}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:620px}
+th,td{border-bottom:1px solid #D0D7DE;padding:8px 10px;text-align:left;vertical-align:top}
+th{color:#0D3275;font-weight:600;background:#E6EDF8}
+</style>
+</helmet>
+<div style="display: flex; flex-direction: column; gap: 24px">
+  <header style="background: #1347A3; border-bottom: 4px solid #FF9933">
+    <div class="wrap" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding-top: 8px; padding-bottom: 8px">
+      <a href="Main.dc.html" style="text-decoration: none; color: #FFFFFF; font-weight: 700">pandyaHomeLab <span style="color: #C9D6EE; font-weight: 400">/</span> cricstat</a>
+      <nav class="nav" aria-label="cricstat" style="display: flex; flex-wrap: wrap; gap: 2px">
+        <a href="Hub.dc.html">Overview</a><a href="Countries.dc.html">Countries</a><a href="Players.dc.html">Players</a><a href="Predictor.dc.html">WC 2027</a><a href="Ask.dc.html">Ask</a><a href="Methodology.dc.html">Methodology</a><a class="on" href="Licences.dc.html">Licences</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="wrap" style="display: flex; flex-direction: column; gap: 16px">
+    <h1 style="font-size: 34px">Data &amp; licences</h1>
+    <div class="box" style="display: flex; flex-direction: column; gap: 8px; border-color: #1347A3">
+      <span class="lbl">Attribution</span>
+      <p style="font-size: 18px">Match data from Cricsheet (cricsheet.org), used under the Open Data Commons Attribution License 1.0.</p>
+      <p style="font-size: 14px; color: #57606A">cricstat is an independent project. It is not affiliated with or endorsed by Cricsheet, the ICC or any cricket board.</p>
+    </div>
+
+    <div class="box" style="display: flex; flex-direction: column; gap: 10px">
+      <h2 style="font-size: 20px">Sources</h2>
+      <div class="scroll"><table>
+        <thead><tr><th>Source</th><th>Used for</th><th>Licence</th></tr></thead>
+        <tbody>
+          <tr><td><a href="https://cricsheet.org">Cricsheet</a></td><td>Ball-by-ball match data, player register</td><td>ODC-BY 1.0 · attribution required</td></tr>
+          <tr><td><a href="https://www.wikidata.org">Wikidata</a></td><td>Player date and place of birth</td><td>CC0</td></tr>
+          <tr><td>[Wikipedia, if used]</td><td>[Background text for answers]</td><td>CC BY-SA 4.0 · credited where shown</td></tr>
+          <tr><td>[Live-score API, if used]</td><td>[Live tournament updates]</td><td>[Provider terms]</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="grid">
+      <div class="box" style="display: flex; flex-direction: column; gap: 10px">
+        <h2 style="font-size: 20px">AI models</h2>
+        <p style="font-size: 14px">The analyst uses [Claude models via the Anthropic API]. Open models compared on the Methodology page are listed with their licences: [model · licence].</p>
+      </div>
+      <div class="box" style="display: flex; flex-direction: column; gap: 10px">
+        <h2 style="font-size: 20px">Privacy</h2>
+        <p style="font-size: 14px">No cookies; nothing loaded from third parties. Questions sent to the analyst are processed by Anthropic and kept for [N] days, with your IP address used only for rate limiting. <a href="https://pandyahomelab.com/privacy/">Full privacy page</a></p>
+      </div>
+      <div class="box" style="display: flex; flex-direction: column; gap: 10px">
+        <h2 style="font-size: 20px">Disclaimers</h2>
+        <p style="font-size: 14px">Forecasts are for education and entertainment, not betting advice. AI answers can be wrong; each shows how it was computed. Stats are derived from the source data and may differ from official records.</p>
+      </div>
+      <div class="box" style="display: flex; flex-direction: column; gap: 10px">
+        <h2 style="font-size: 20px">Corrections</h2>
+        <p style="font-size: 14px">Spotted an error, or want your personal details reviewed? [Contact method]</p>
+      </div>
+    </div>
+  </section>
+
+  <footer style="border-top: 1px solid #D0D7DE; background: #fff; margin-top: 24px">
+    <div class="wrap" style="padding-top: 20px; padding-bottom: 28px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #57606A">
+      <div>Match data from Cricsheet (cricsheet.org), used under the Open Data Commons Attribution License 1.0.</div>
+      <div><a href="Hub.dc.html">cricstat overview</a> · <a href="https://pandyahomelab.com/privacy/">Privacy</a></div>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

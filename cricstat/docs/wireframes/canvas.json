@@ -1,0 +1,116 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "Ask.dc.html": {
+      "expand": "fill",
+      "h": 1300,
+      "is_interactive": true,
+      "title": "/cricket/ask/ — Ask the Analyst",
+      "w": 1280,
+      "x": 1360,
+      "y": 2300
+    },
+    "Countries.dc.html": {
+      "expand": "fill",
+      "h": 1700,
+      "is_interactive": true,
+      "title": "/cricket/countries/[team]/ — Country hub",
+      "w": 1280,
+      "x": 4080,
+      "y": 0
+    },
+    "Hub.dc.html": {
+      "expand": "fill",
+      "h": 1900,
+      "is_interactive": true,
+      "title": "/cricket/ — Hub",
+      "w": 1280,
+      "x": 1360,
+      "y": 0
+    },
+    "Licences.dc.html": {
+      "expand": "fill",
+      "h": 1300,
+      "is_interactive": true,
+      "title": "/cricket/licences/ — Data & Licences",
+      "w": 1280,
+      "x": 4080,
+      "y": 2300
+    },
+    "Main.dc.html": {
+      "expand": "fill",
+      "h": 1500,
+      "is_interactive": true,
+      "title": "Homepage (pandyahomelab.com) — changes",
+      "w": 1280,
+      "x": 0,
+      "y": 0
+    },
+    "Methodology.dc.html": {
+      "expand": "fill",
+      "h": 1900,
+      "is_interactive": true,
+      "title": "/cricket/methodology/ — Methodology & Evals",
+      "w": 1280,
+      "x": 2720,
+      "y": 2300
+    },
+    "Players.dc.html": {
+      "expand": "fill",
+      "h": 1900,
+      "is_interactive": true,
+      "title": "/cricket/players/[name]/ — Player profile",
+      "w": 1280,
+      "x": 2720,
+      "y": 0
+    },
+    "Predictor.dc.html": {
+      "expand": "fill",
+      "h": 1750,
+      "is_interactive": true,
+      "title": "/cricket/world-cup-2027/ — Predictor",
+      "w": 1280,
+      "x": 0,
+      "y": 2300
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-10-05T12:00:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {
+    "t1": {
+      "kind": "title1",
+      "maxW": 5360,
+      "text": "cricstat wireframes — homepage, hub, players, countries",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "t2": {
+      "kind": "title1",
+      "maxW": 5360,
+      "text": "Predictor, Ask the Analyst, and the trust pages",
+      "w": 240,
+      "x": 0,
+      "y": 2000
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Hub.dc.html",
+    "Players.dc.html",
+    "Countries.dc.html",
+    "Predictor.dc.html",
+    "Ask.dc.html",
+    "Methodology.dc.html",
+    "Licences.dc.html"
+  ],
+  "pages": [],
+  "title": "cricstat Wireframes"
+}

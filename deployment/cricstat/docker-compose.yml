@@ -1,0 +1,48 @@
+# cricstat stack (ADR-022). DRAFT, not deployed yet. Applying it creates cricstat-network.
+# Usage (from this folder):
+#   sudo docker compose build cricstat-pipeline
+#   sudo docker compose run --rm cricstat-pipeline recent      # what DSM Task Scheduler runs
+#
+# Slots (ADR-022 / docs/NETWORK_CIDR_SUMMARY.md once accepted). Host ports bind 127.0.0.1 only:
+#   cricstat-api      172.25.0.10 → 127.0.0.1:8040   (F6/P0, added when the service exists)
+#   cricstat-agent    172.25.0.11 → 127.0.0.1:8041   (P4)
+#   cricstat-phoenix  172.25.0.12 → 127.0.0.1:8042   (P4)
+#   cricstat-mcp      172.25.0.13                    (P6, reserved)
+#   cricstat-pipeline 172.25.0.14                    batch: run & exit
+#   cricstat-models   172.25.0.15 (+ ml-network 172.20.0.40 for ml-mlflow)  batch, P1
+# Images: once CD is live (F9), :latest comes from GHCR via cd-pull.sh, so do not `compose build` on the NAS.
+# Nginx joins this network at .20 when the first public service exists (nginx upstream blocks are
+# only added once their container exists; an upstream with no container crashes nginx on start).
+
+services:
+  cricstat-pipeline:
+    image: cricstat-pipeline:latest
+    # `build:` so `docker compose build` really builds (image-only services make it a silent no-op).
+    build:
+      context: ../../cricstat/cricstat-pipeline
+      dockerfile: docker/Dockerfile
+    container_name: cricstat-pipeline
+    profiles: ["batch"]            # never started by `up`; only `run --rm`
+    user: "${HOST_UID:-1026}:${HOST_GID:-100}"   # operator UID (ADR-009) so files on the bind mount stay editable
+    env_file: .env
+    environment:
+      CRICSTAT_HOME: /cricstat
+    volumes:
+      - /volume1/pandya-homelab/cricstat/data:/cricstat/data
+      - /volume1/pandya-homelab/cricstat/logs:/cricstat/logs
+    networks:
+      cricstat-network:
+        ipv4_address: 172.25.0.14
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  cricstat-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/24
+          gateway: 172.25.0.1

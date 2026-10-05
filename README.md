@@ -14,6 +14,7 @@ pandyaHomeLab is the platform behind the live site. It hosts hands-on demos acro
 - `/dl/` — Deep Learning (CNN image classification, LSTM forecasting)
 - `/nlp/` — Natural Language Processing (classical NLP: engineered features, text representations, word embeddings, sequence labelling)
 - `/agentic/` — Agentic AI (planned)
+- `/cricket/` — **cricstat**, a cross-domain flagship project (in development): cricket statistics, a 2027 ODI World Cup predictor and an LLM analyst, built end to end on open Cricsheet data
 
 The platform itself — its network topology, service layout, deployment model, and operational discipline — is **the portfolio artifact**. The live site is what audiences interact with; this repository is the source of truth for how it works.
 
@@ -47,6 +48,7 @@ pandya-homelab/
 │   └── _templates/            # ML project template
 ├── dl/                        # Deep Learning demos: dl-mnist-cnn/  dl-lstm-forecast/
 ├── nlp/                       # NLP demos: nlp-quora-randomforest/  nlp-imdb-textrep/  nlp-text8-word2vec/  nlp-ewt-hmm/
+├── cricstat/                  # Flagship cross-domain project (in development): cricstat-pipeline/ + docs/ (brief, wireframes)
 │   └── _templates/            # NLP project template + new-nlp-project.sh scaffold script
 ├── deployment/                # Docker Compose per domain (ml/, dl/, nlp/), nginx/, cloudflared/
 ├── website/                   # Live landing page + platform About content (served by Nginx)
@@ -134,7 +136,8 @@ Demos are built in phases, one domain at a time:
 | 1 | Machine Learning | Complete: 3 demos + MLflow (May 2026) |
 | 2 | Deep Learning | 2 of 3 live (May 2026); object detection not started |
 | 3 | Natural Language Processing | 4 of 4 live (September 2026); transformer demos deferred to v2 |
-| 4 | Agentic AI | Planned |
+| 4 | Agentic AI | Planned (the cricstat analyst agent is planned as its first demo) |
+| — | cricstat (flagship, cross-domain) | In development: foundation sprint started October 2026; Cricsheet ingestion pipeline built |
 | 6 | AWS mirror | Planned |
 
 Platform stages:
@@ -155,4 +158,4 @@ This is a personal portfolio platform. The architecture, decisions, and code are
 
 **Author:** Archit Pandya
 **Brand:** pandyaHomeLab
-**Last updated:** 2026-09-26 (9 live demos across ML, DL and NLP; 21 ADRs)
+**Last updated:** 2026-10-05 (9 live demos across ML, DL and NLP; 21 ADRs; cricstat in development)

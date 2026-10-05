@@ -1,0 +1,3 @@
+# cricstat-pipeline has no runtime dependencies: Python standard library only
+# (zipfile, json, sqlite3, urllib, hashlib, zlib). Runs on the NAS host's Python 3.8
+# and in the python:3.12-slim image.

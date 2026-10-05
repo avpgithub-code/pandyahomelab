@@ -1,7 +1,7 @@
 # pandyaHomeLab Network CIDR Summary
 
 **Generated:** May 5, 2026  
-**Last amended:** September 23, 2026 — [ADR-016 Amendment 1](adr/ADR-016-domain-level-network-topology.md#amendment-1--2026-09-23-host-ports-nginx-legs-platform-range)  
+**Last amended:** October 5, 2026 — ADR-016 Amendment 2 via [ADR-022](adr/ADR-022-cross-domain-flagship-projects.md) (cricstat network, §6a; cross-domain legs `.40–.49`). Previous: September 23, 2026 — [ADR-016 Amendment 1](adr/ADR-016-domain-level-network-topology.md#amendment-1--2026-09-23-host-ports-nginx-legs-platform-range)  
 **Status:** LOCKED — changes go through an ADR-016 amendment  
 
 > **Amendment 1 (2026-09-23)** reconciled this document with the running system: added the
@@ -20,6 +20,7 @@
 | dl-network | `dl_dl-network` | 172.21.0.0/24 | 172.21.0.1 | DL domain services | Live (Phase 2) |
 | nlp-network | `nlp_nlp-network` | 172.22.0.0/24 | 172.22.0.1 | NLP domain services | Active (Phase 3.0, 2026-09-24) |
 | agentic-network | `agentic_agentic-network` | 172.23.0.0/24 | 172.23.0.1 | Agentic AI domain services | Reserved (Phase 4) |
+| cricstat-network | `cricstat_cricstat-network` | 172.25.0.0/24 | 172.25.0.1 | cricstat flagship project (ADR-022) | Allocated (2026-10-05) |
 
 All bridge driver, local scope. The Docker name is what `external:` references in
 `deployment/nginx/docker-compose.yml`; it comes from the stack living in `deployment/<domain>/`.
@@ -53,6 +54,7 @@ All bridge driver, local scope. The Docker name is what `external:` references i
 | Nginx (ML leg) | pandya-nginx | 172.20.0.20 | — | — | Reverse-proxy attachment |
 | Analytics ingester | analytics-ingester | 172.20.0.30 | — | none | Platform service |
 | Admin portal | admin-portal | 172.20.0.31 | — | none | Platform service |
+| cricstat models (cross-domain leg) | cricstat-models | 172.20.0.40 | — | none | Batch job, logs to ml-mlflow (ADR-022; range `.40–.49`) — allocated |
 
 ⚠ = bound to all interfaces, not NAS-only. See §8 "Open item".
 
@@ -105,6 +107,24 @@ Slot names for 3b–3d were set at each sub-phase decision gate (all four in use
 | MLflow | agentic-mlflow | 172.23.0.5 | 5000 | none (public via `mlflow-agentic.` subdomain) | Experiment Tracking |
 | Project slots | agentic-<dataset-algorithm> | 172.23.0.10–.19 | 8000 | 127.0.0.1:8030–8039 | Reserved (e.g. `agentic-pandyalab-docs-rag`) |
 | Nginx (Agentic leg) | pandya-nginx | 172.23.0.20 | — | — | Reverse-proxy attachment |
+
+---
+
+## 6a. NAS cricstat Flagship — Service IP Assignments (ADR-022, allocated 2026-10-05)
+
+| Service | Container Name | IP Address | Container Port | Host Port (§8) | Role |
+|---|---|---|---|---|---|
+| Stats API | cricstat-api | 172.25.0.10 | 8000 | 127.0.0.1:8040 | Always-on (P0) |
+| Ask agent | cricstat-agent | 172.25.0.11 | 8000 | 127.0.0.1:8041 | Always-on (P4) |
+| Tracing (Phoenix) | cricstat-phoenix | 172.25.0.12 | 6006 | 127.0.0.1:8042 | P4; UI by SSH tunnel |
+| MCP server | cricstat-mcp | 172.25.0.13 | 8000 | none | Reserved (P6) |
+| Pipeline | cricstat-pipeline | 172.25.0.14 | — | none | Batch, run & exit |
+| Models | cricstat-models | 172.25.0.15 | — | none | Batch; also ml-network 172.20.0.40 |
+| Nginx (cricstat leg) | pandya-nginx | 172.25.0.20 | — | — | Added when cricstat-api exists |
+
+No Postgres, MinIO or Redis (SQLite files only); `.2–.5` stay unused. Domain index 4 → host ports 8040–8049.
+**Cross-domain legs:** `.40–.49` on any domain network is reserved for flagship batch jobs that need a domain
+service (e.g. MLflow); each use is listed in that domain's table.
 
 ---
 
@@ -195,6 +215,7 @@ decision.
 | 172.22.0.0/24 | nlp-network (NAS) | Allocated | None | ✅ Not in use by any Docker network (2026-09-23) |
 | 172.23.0.0/24 | agentic-network (NAS) | Allocated | None | ✅ Not in use by any Docker network (2026-09-23) |
 | 172.24.0.0/24 | pandya-proxy-network (NAS) | Live | None | ✅ Verified live 2026-09-23 |
+| 172.25.0.0/24 | cricstat-network (NAS) | Allocated | None | ✅ Not in use by any Docker network or host route (2026-10-05) |
 | 192.168.x.x | Synology NAS Management | In Use | None | NAS LAN, no Docker conflict |
 | 10.0.0.0/16 | AWS VPC | Allocated | None | ✅ AWS standard, no NAS conflict |
 | 10.0.1.0/24 | ml-subnet (AWS) | Allocated | None | ✅ Safe for AWS |

@@ -1,0 +1,16 @@
+# Data, logs and local caches never go into the image; they are mounted at runtime.
+data/
+logs/
+*.sqlite*
+*.zip
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.pyc
+.venv/
+.git/
+.env
+.env.*
+!.env.example
+tests/
+*.md
