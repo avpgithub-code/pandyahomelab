@@ -120,8 +120,8 @@ Background: `docs/llm-strategy-research-2026-10-05.md`.
 | F2 | Site map + wireframes (https://claude.ai/artifact/B9ge1q8GuwaoyxkL8hhbKz) | Done 2026-10-05 |
 | F3 | Data model (`docs/F3-data-model.md`, `sql/serving_schema.sql`) | Done 2026-10-05 |
 | F4 | Metric dictionary + formula tests (`docs/F4-metric-dictionary.md`) | Done 2026-10-05 |
-| F5 | API contract | In progress |
-| F6 | Engineering setup (layout, Docker, networking, CI skeleton) + ADR-022 | Not started |
+| F5 | API contract (`docs/F5-api-contract.md`) | Done 2026-10-05 |
+| F6 | Engineering setup (layout, Docker, networking, CI skeleton) + ADR-022 | In progress |
 | F7 | Roadmap + decision log | Ongoing in this file |
 | F8 | Compliance & trust (licences page, privacy update, disclaimers) | Not started |
 | F9 | CI/CD & automation (ADR) | Not started |
@@ -131,10 +131,8 @@ Background: `docs/llm-strategy-research-2026-10-05.md`.
 Git: work on branch `feat/cricstat-foundation`, merge to `main` with `--no-ff` (platform workflow, ADR-018).
 
 ## Next up and open TODOs (as of 2026-10-05)
-- **Next:** F5 API contract (`docs/F5-api-contract.md`). F4 is done: rules R1–R22, run-out involvements shown (labelled),
-  "All" = international + featured leagues, golden set includes India players and teams.
-  F3 decisions: extra formats in the DB only ("More formats" in v1.1); venue → country map to draft; `build` command in
-  cricstat-pipeline; featured leagues IPL, BBL, PSL, CPL, SA20, Hundred, MLC, T20 Blast, WPL, WBBL, Hundred women.
+- **Next:** F6 engineering setup + ADR-022. F5 is done: one GET-only API for pages, agent, MCP and evals; public ids only;
+  provenance envelope; agent over SSE; 20 questions/IP/day; 30-day log retention; API docs public at /cricket/api/docs.
 - Wireframe source is copied in `docs/wireframes/` (the canvas at the F2 link is the editable master).
 - Branch `feat/cricstat-foundation` is pushed to origin (2026-10-05), not merged.
 - F6 note: cricstat needs its own Docker network. 172.20–172.24 are taken (ml, dl, nlp, agentic-reserved, proxy), so check
