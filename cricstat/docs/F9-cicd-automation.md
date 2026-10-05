@@ -23,9 +23,9 @@ push / PR ──► GitHub Actions: lint + tests (py3.8, 3.12) ──► image b
 |---|---|---|
 | CI: ruff + pytest on Python 3.8 and 3.12 | `.github/workflows/cricstat-ci.yml`, job `pipeline-tests` | ✅ live (first run green) |
 | Image build and non-root smoke test | job `pipeline-image` | ✅ live. It now runs as uid 1026, so the Synology 700-bits bug is caught in CI |
-| Publish to GHCR | job `publish`, environment **`nas-production`** (required reviewer: avpgithub-code) | ✅ created; first publish pending |
-| NAS deploy | `deployment/cricstat/cd-pull.sh` (pull, NAS smoke test, retag, rollback) | written; first run after first publish |
-| NAS schedule | DSM task **"cricstat CD pull"**, daily 05:15 (before the 05:30 refresh) | operator creates it after the first successful manual run |
+| Publish to GHCR | job `publish`, environment **`nas-production`** (required reviewer: avpgithub-code) | ✅ first publish approved 2026-10-05 (`feat-cricstat-foundation`, `sha-bb73e10`); package is public, anonymous pull OK |
+| NAS deploy | `deployment/cricstat/cd-pull.sh` (pull, NAS smoke test, retag, rollback) | ✅ proven 2026-10-05: deploy, no-op re-run, rollback, roll forward, failed-pull exit 1, real `recent` run (run 5) on the GHCR image |
+| NAS schedule | DSM task **"cricstat CD pull"**, daily 05:15 (before the 05:30 refresh) | create after merging to `main` (`:main` is published on the first push to main) |
 | Action versions | checkout v7, setup-python v7, buildx v4, login v4, metadata v6, build-push v7 | updated (clears the Node.js 20 warnings) |
 
 ## 3. Rules that keep it safe
@@ -49,8 +49,8 @@ push / PR ──► GitHub Actions: lint + tests (py3.8, 3.12) ──► image b
 | Switch the manual approval to automatic | After a few clean deploys | — |
 
 ## 5. One-time steps for you
-1. **After the first publish:** make the package **public** on GitHub (Your profile → Packages → `cricstat-pipeline`
+1. ✅ Done: the package inherited **public** visibility from the repo. (Steps, if ever needed: make the package **public** on GitHub (Your profile → Packages → `cricstat-pipeline`
    → Package settings → Change visibility → Public). The repo is public and the image holds no secrets, so the NAS can
-   pull without storing a token. (The alternative is a read-only token on the NAS.)
+   pull without storing a token.)
 2. **Create the DSM task "cricstat CD pull":** daily at 05:15, user root, email on abnormal termination. Command:
    `sh /volume1/pandya-homelab/deployment/cricstat/cd-pull.sh`

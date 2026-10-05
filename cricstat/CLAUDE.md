@@ -124,7 +124,7 @@ Background: `docs/llm-strategy-research-2026-10-05.md`.
 | F6 | Engineering setup (`docs/F6-engineering-setup.md`) + ADR-022 (Accepted) + CI skeleton | Done 2026-10-05; pipeline deployed, DSM tasks live (daily 05:30, monthly day 1 04:00; verified) |
 | F7 | Roadmap + decision log | Ongoing in this file |
 | F8 | Compliance & trust (licences page, privacy update, disclaimers) | Not started |
-| F9 | CI/CD & automation (`docs/F9-cicd-automation.md`) | In progress: CI live, approval gate created, first publish pending |
+| F9 | CI/CD & automation (`docs/F9-cicd-automation.md`) | CD loop proven on the NAS 2026-10-05; DSM "cricstat CD pull" task after the merge to main |
 | P0 | Ingestion (in parallel with F-steps) → core → marts | Ingestion done 2026-10-05 (`cricstat-pipeline/`; raw.sqlite 168 MB, 22,983 matches); core/marts after F3 |
 | P1–P6 | Predictor + win prob → tools → test set → agent → public demo → extras | Later |
 
