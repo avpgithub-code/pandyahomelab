@@ -10,6 +10,7 @@
 #   cricstat-mcp      172.25.0.13                    (P6, reserved)
 #   cricstat-pipeline 172.25.0.14                    batch: run & exit
 #   cricstat-models   172.25.0.15 (+ ml-network 172.20.0.40 for ml-mlflow)  batch, P1
+# Images: once CD is live (F9), :latest comes from GHCR via cd-pull.sh, so do not `compose build` on the NAS.
 # Nginx joins this network at .20 when the first public service exists (nginx upstream blocks are
 # only added once their container exists; an upstream with no container crashes nginx on start).
 
