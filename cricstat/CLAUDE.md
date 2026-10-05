@@ -112,8 +112,8 @@ Background: `docs/llm-strategy-research-2026-10-05.md`.
 |---|---|---|
 | F1 | Product brief (`docs/F1-product-brief.md`) | Done 2026-10-05 |
 | F2 | Site map + wireframes (https://claude.ai/artifact/B9ge1q8GuwaoyxkL8hhbKz) | Done 2026-10-05 |
-| F3 | Data model (ERD + `schema.sql`) | Not started |
-| F4 | Metric dictionary + formula tests | Not started |
+| F3 | Data model (`docs/F3-data-model.md`, `sql/serving_schema.sql`) | Done 2026-10-05 |
+| F4 | Metric dictionary + formula tests | In progress |
 | F5 | API contract | Not started |
 | F6 | Engineering setup (layout, Docker, networking, CI skeleton) + ADR-022 | Not started |
 | F7 | Roadmap + decision log | Ongoing in this file |
@@ -125,10 +125,11 @@ Background: `docs/llm-strategy-research-2026-10-05.md`.
 Git: work on branch `feat/cricstat-foundation`, merge to `main` with `--no-ff` (platform workflow, ADR-018).
 
 ## Next up and open TODOs (as of 2026-10-05)
-- **Next:** F3 data model (`docs/F3-data-model.md` + `schema.sql`): core tables (matches, innings, deliveries,
-  players, teams, venues, competitions), a format mapping for all 6 match types, marts shaped by the wireframes.
+- **Next:** F4 metric dictionary (`docs/F4-metric-dictionary.md`, `sql/reference_data.sql`, `sql/semantic_views.sql`).
+  F3 decisions: extra formats in the DB only ("More formats" in v1.1); venue → country map to draft; `build` command in
+  cricstat-pipeline; featured leagues IPL, BBL, PSL, CPL, SA20, Hundred, MLC, T20 Blast, WPL, WBBL, Hundred women.
 - Wireframe source is copied in `docs/wireframes/` (the canvas at the F2 link is the editable master).
-- Branch `feat/cricstat-foundation` is local only (not pushed or merged). The user decides when to push.
+- Branch `feat/cricstat-foundation` is pushed to origin (2026-10-05), not merged.
 - F6 note: cricstat needs its own Docker network. 172.20–172.24 are taken (ml, dl, nlp, agentic-reserved, proxy), so check
   `docs/NETWORK_CIDR_SUMMARY.md` before picking one, and write ADR-022.
 - Owner TODOs: (1) email Cricsheet to confirm the match-file licence and file the reply in `docs/`; (2) write the
