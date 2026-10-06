@@ -79,3 +79,29 @@ def test_golden_figures(client, home, monkeypatch):
     ("9300", "9230", "", "124", "123", "stale"), ("9231", "9230", "", "123", "123", "DIFF")])
 def test_status_rules_match_the_pipeline(ours, ref, expl, mat_now, mat_chk, want):
     assert golden.status(ours, ref, expl, mat_now, mat_chk) == want
+
+
+def test_a_build_is_linked_only_when_it_followed_the_run(home, monkeypatch):
+    """A build finishing hours after an ingest was not part of that DSM chain."""
+    from db_logic.repository import meta_repo, ops_repo
+    from db_logic.repository.db import ServingDB
+
+    db = ServingDB(str(home / "data" / "db" / "cricstat.sqlite"))
+    build = {"build_id": 9, "built_at": "2026-10-06T15:02:00Z", "mode": "full",
+             "matches": 1, "deliveries": 1, "data_as_of": "x", "status": "success",
+             "raw_run_id": 1, "notes": "{}"}
+    runs = [{"run_id": 3, "mode": "register", "status": "success",
+             "started_at": "2026-10-06T14:30:20Z", "finished_at": "2026-10-06T14:30:23Z",
+             "added": 0, "updated": 0, "unchanged": 0, "failed": 0, "removed": 0,
+             "active_after": 1},
+            {"run_id": 2, "mode": "recent", "status": "success",
+             "started_at": "2026-10-06T10:30:08Z", "finished_at": "2026-10-06T10:30:11Z",
+             "added": 0, "updated": 0, "unchanged": 0, "failed": 0, "removed": 0,
+             "active_after": 1}]
+    monkeypatch.setattr(ops_repo, "builds", lambda db, limit=15: [dict(build)])
+    monkeypatch.setattr(meta_repo, "ingest_runs", lambda raw, limit=60: runs)
+    d, _ = admin_service.jobs(db, "unused", str(home), -5,
+                              now=datetime(2026, 10, 6, 18, 0, tzinfo=timezone.utc))
+    jobs = {j["key"]: j for j in d["jobs"]}
+    assert jobs["register"]["last_run"]["build"]["build_id"] == 9      # 32 min later: chained
+    assert jobs["daily"]["last_run"]["build"] is None                   # 4.5 h later: not
