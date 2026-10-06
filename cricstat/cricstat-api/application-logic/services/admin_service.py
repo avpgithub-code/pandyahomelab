@@ -31,6 +31,7 @@ JOBS = [
 GRACE = {"day": timedelta(hours=26), "week": timedelta(days=7, hours=2),
          "month": timedelta(days=31, hours=2)}
 TEAM_FROM = "2016-01-01"
+CHAIN_WINDOW = timedelta(hours=2)        # a full build takes ~12 min; register + build < 15 min
 
 
 def _parse(ts: Optional[str]) -> Optional[datetime]:
@@ -72,10 +73,15 @@ def jobs(db: ServingDB, raw_db: str, log_dir: str, offset_hours: float,
     def last(mode):
         return next((r for r in runs if r["mode"] == mode), None)
 
-    def build_after(ts):
-        t = _parse(ts)
-        after = [b for b in builds if t and _parse(b["built_at"]) and _parse(b["built_at"]) >= t]
-        return after[-1] if after else None
+    def build_after(run):
+        """The build the same DSM task ran right after this ingest (`… && build`): the first one
+        finishing within CHAIN_WINDOW of the run's end. A later, unrelated build is not it."""
+        end = _parse(run.get("finished_at") or run.get("started_at"))
+        if end is None:
+            return None
+        chained = [b for b in builds if _parse(b["built_at"])
+                   and end <= _parse(b["built_at"]) <= end + CHAIN_WINDOW]
+        return min(chained, key=lambda b: b["built_at"]) if chained else None
 
     out = []
     for job in JOBS:
@@ -91,7 +97,7 @@ def jobs(db: ServingDB, raw_db: str, log_dir: str, offset_hours: float,
                               "status": r["status"],
                               "detail": {k: r[k] for k in ("added", "updated", "unchanged",
                                                            "removed", "failed", "active_after")},
-                              "build": build_after(r["started_at"])}
+                              "build": build_after(r)}
         started = _parse(last_run["started_at"]) if last_run else None
         overdue = started is None or now - started > GRACE[job["every"]]
         healthy = bool(last_run) and last_run["status"] == "success" and not overdue
