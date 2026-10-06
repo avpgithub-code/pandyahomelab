@@ -42,6 +42,7 @@ Methodology page.
 | R20 | Phases | Fixed over ranges from `phase_defs`. T20: 1–6, 7–15, 16–20. **ODI phases are labelled by overs ("Overs 1–10")**, not "powerplay", because ODI powerplay rules changed over the years. Reduced-overs matches keep the same fixed ranges | test |
 | R21 | Formats | Every raw (match_type, team_type, balls_per_over) combination maps to one `format_key`. **A build fails on an unmapped combination**, so a new format is classified on purpose. Player tabs: Test, ODI, T20I, Leagues (T20_LEAGUE + HUNDRED, by competition), All | test |
 | R22 | "All" scope | Sums across the official international formats + featured leagues only, never domestic first-class / List A (those join under "More formats" in v1.1) | — |
+| R23 | Displayed ratios | Averages, strike rates, economy and win % are shown to 2 decimals **cut off, not rounded**, as published records show them (44.5989 → 44.59). The views and the API return unrounded numbers; pages and the golden comparison apply this rule (decided 2026-10-06 after Wikipedia agreed with us on every such case but the last digit) | golden |
 
 ## 2. Team-level facts
 - **Innings total** = Σ `runs_total` + penalty runs, excluding super overs.

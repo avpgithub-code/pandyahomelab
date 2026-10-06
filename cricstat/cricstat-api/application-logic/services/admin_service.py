@@ -164,10 +164,12 @@ def golden_figures(db: ServingDB, selection_path: str, now: Optional[datetime] =
                 rows, window = golden.player_rows(sel["role"], fig), "career"
                 key = (scope, sel["gender"])
                 if key not in dense:
-                    dense[key] = golden.dense_from(
-                        ops_repo.scope_matches_per_year(db, scope, sel["gender"]), now.year)
+                    per_year = ops_repo.scope_matches_per_year(db, scope, sel["gender"])
+                    dense[key] = (golden.dense_from(per_year, now.year),
+                                  min(per_year) if per_year else None)
                 label = "%s %s" % ("women's" if sel["gender"] == "female" else "men's", scope)
-                note = golden.coverage_note(fig.get("first_date"), dense[key], label)
+                note = golden.coverage_note(fig.get("first_date"), dense[key][0], label,
+                                            dense[key][1])
                 extra = {"cricinfo_ids": ids.get(sel["id"], [])}
             blocks.append(dict(kind=sel["kind"], name=sel["name"], id=sel["id"],
                                gender=sel["gender"], role=sel["role"], scope=scope, window=window,

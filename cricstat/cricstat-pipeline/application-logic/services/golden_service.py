@@ -73,10 +73,12 @@ def run(serving_db: str, validation_dir: str) -> Dict[str, object]:
                     figures, window = golden.player_rows(sel["role"], fig), "career"
                     key = (scope, sel["gender"])
                     if key not in dense:
-                        dense[key] = golden.dense_from(golden_store.matches_per_year(
-                            conn, scope, sel["gender"]), int(time.strftime("%Y", time.gmtime())))
+                        per_year = golden_store.matches_per_year(conn, scope, sel["gender"])
+                        dense[key] = (golden.dense_from(per_year, int(time.strftime(
+                            "%Y", time.gmtime()))), min(per_year) if per_year else None)
                     label = "%s %s" % ("women's" if sel["gender"] == "female" else "men's", scope)
-                    note = golden.coverage_note(fig.get("first_date"), dense[key], label)
+                    note = golden.coverage_note(fig.get("first_date"), dense[key][0], label,
+                                                dense[key][1])
                 mat_now = dict(figures).get("Mat", "")
                 for metric, ours in figures:
                     prev = kept.get((sel["id"], scope, metric), {})

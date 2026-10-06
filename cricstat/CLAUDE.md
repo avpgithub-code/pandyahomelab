@@ -239,6 +239,21 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
 - **Step 4 must:** block `/cricket/api/v1/admin/` in Nginx (internal only).
 - The host `cricstat-pipeline golden` command stays for offline use; the admin page is the main workflow now.
 
+## Golden follow-up (done 2026-10-06, branch `feat/cricstat-golden-followup`, merged)
+- First Verify References run: 53/53 Wikipedia articles found, 539 suggestions, 188 equal ours (accepted).
+- **F4 R23 (decided):** displayed ratios are cut to 2 decimals, not rounded (published records do this; Warner 44.5989 is
+  44.59). API/views stay unrounded; golden formatting (API + pipeline) and the pages apply R23. With R23: 193 agree.
+- Admin labels each differing block from the match counts (coverage gap · Wikipedia newer · Wikipedia older/fewer ·
+  missing = withheld Afghanistan matches or a Cricsheet gap · same matches, a figure differs). New bulk action
+  "Explain coverage gaps" (≈193 rows in 40 blocks): reference = Wikipedia's figure, explanation "career predates dense
+  Cricsheet coverage; our data has M of N matches". Coverage hint now also flags careers that start within a year of
+  where our data for that format begins (Ponting/Kallis/Muralitharan ODIs).
+- Open item: **Ecclestone T20I bowling** — same matches (113), wickets (154) and best (4/18) as Wikipedia, but ~5 more
+  runs conceded (2535 vs ~2530 → 16.46 vs 16.43). Candidates: her 5-run wides (e.g. matches 1230855, 1260101, 1289273,
+  1343936). Check those scorecards by hand; no rule change on a guess.
+- 19 blocks with a few missing matches remain for review (many are India v Afghanistan; e.g. de Villiers Tests 106 v 114,
+  Shakib ODIs 211 v 247 look like Cricsheet gaps).
+
 ## Next up and open TODOs (as of 2026-10-05, end of the foundation sprint)
 - **Decided next step: P0.** F8's texts (Data & Licences page, privacy-page additions, disclaimers) are written inside P0,
   because P0 is the first time pages go public. P0 scope, in order:

@@ -41,7 +41,7 @@ golden-set checks and the eval harness. If a number appears on the site, it came
   | `min_innings`, `min_balls`, `min_wickets` | qualification thresholds |
   | `limit`, `offset` | `limit` ≤ 100, default 20 |
 - **Numbers:** returned unrounded. Undefined values (e.g. an average with no dismissals) are `null`.
-  The page shows "—". Rounding is the page's job.
+  The page shows "—". Display is the page's job: ratios are cut to 2 decimals, not rounded (F4 R23).
 - **Every response uses one envelope**, which also carries the provenance the Ask page shows:
   ```json
   {

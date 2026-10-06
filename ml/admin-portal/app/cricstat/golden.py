@@ -36,8 +36,39 @@ def status(ours: str, reference: str, explanation: str, mat_now: str = "",
     return "explained" if (explanation or "").strip() else "DIFF"
 
 
-def merge(blocks: List[dict], refs: Dict[Key, dict], sugg: Dict[Key, dict]) -> List[dict]:
-    """Attach reference, suggestion and status to every row of every block (in place)."""
+COVERAGE_EXPLANATION = ("Career predates dense Cricsheet coverage for this format: our data has %s"
+                        " of %s matches.")
+
+
+def wiki_note(block: dict, wiki_mat: str, as_of: str, data_as_of: str) -> str:
+    """Why Wikipedia's figures for this block differ from ours, when the match counts tell us.
+    Labels only; nothing becomes a reference without the owner's action."""
+    ours = block.get("mat") or ""
+    if not (wiki_mat.isdigit() and ours.isdigit()):
+        return ""
+    n = int(wiki_mat) - int(ours)
+    when = "Wikipedia as of %s, our data as of %s" % (as_of or "?", data_as_of or "?")
+    if n < 0:
+        older = as_of and data_as_of and as_of < data_as_of
+        return ("Wikipedia shows %d fewer match(es): its figures are older than ours (%s)."
+                % (-n, when)) if older else "Wikipedia shows %d fewer match(es) (%s)." % (-n, when)
+    if n > 0:
+        if block.get("coverage_note"):
+            return ("Coverage gap: Wikipedia has %d more match(es); this career starts before our"
+                    " data is dense." % n)
+        if as_of and data_as_of and as_of > data_as_of:
+            return ("Wikipedia is newer and has %d more match(es) (%s): some may be after our"
+                    " data date; any others are withheld Afghanistan matches or Cricsheet gaps."
+                    % (n, when))
+        return ("%d match(es) missing from our data: Cricsheet withholds Afghanistan men's"
+                " matches; otherwise a Cricsheet gap (%s)." % (n, when))
+    return ""
+
+
+def merge(blocks: List[dict], refs: Dict[Key, dict], sugg: Dict[Key, dict],
+          data_as_of: str = "") -> List[dict]:
+    """Attach reference, suggestion and status to every row of every block (in place), and a
+    block-level note explaining a match-count difference with Wikipedia."""
     for b in blocks:
         for row in b["rows"]:
             key = (b["id"], b["scope"], row["metric"])
@@ -54,7 +85,29 @@ def merge(blocks: List[dict], refs: Dict[Key, dict], sugg: Dict[Key, dict]) -> L
             row["status"] = status(row["ours"], row["reference"], row["explanation"], b["mat"],
                                    row["mat_at_check"])
         b["statuses"] = [r["status"] for r in b["rows"]]
+        mat_sugg = sugg.get((b["id"], b["scope"], "Mat"), {})
+        differs = any(r["suggestion"] and not r["suggestion_agrees"] for r in b["rows"])
+        b["wiki_mat"] = mat_sugg.get("value") or ""
+        b["wiki_note"] = wiki_note(b, b["wiki_mat"], mat_sugg.get("as_of") or "", data_as_of) \
+            if differs else ""
+        if differs and not b["wiki_note"] and b["wiki_mat"] == b.get("mat"):
+            b["wiki_note"] = ("Same number of matches but a figure differs: possibly a scoring"
+                              " difference in one match. Worth a look.")
     return blocks
+
+
+def coverage_explanations(blocks: List[dict]) -> List[tuple]:
+    """(block, row, explanation) for rows to bulk-explain: the block has a coverage note,
+    Wikipedia counts more matches, the row has a differing suggestion and no reference yet."""
+    out = []
+    for b in blocks:
+        wm, om = b.get("wiki_mat") or "", b.get("mat") or ""
+        if not (b.get("coverage_note") and wm.isdigit() and om.isdigit() and int(wm) > int(om)):
+            continue
+        for r in b["rows"]:
+            if r["suggestion"] and not r["suggestion_agrees"] and not r["reference"]:
+                out.append((b, r, COVERAGE_EXPLANATION % (om, wm)))
+    return out
 
 
 def summary(blocks: Iterable[dict]) -> Dict[str, int]:
