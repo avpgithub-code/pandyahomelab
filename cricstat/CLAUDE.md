@@ -125,7 +125,7 @@ Background: `docs/llm-strategy-research-2026-10-05.md`.
 | F7 | Roadmap + decision log | Ongoing in this file (current to 2026-10-05) |
 | F8 | Compliance & trust (licences page, privacy update, disclaimers) | Folded into P0 (decided 2026-10-05) |
 | F9 | CI/CD & automation (`docs/F9-cicd-automation.md`) | Done 2026-10-05: CI + approval gate + GHCR + NAS cd-pull.sh (DSM daily 05:15); merged to main |
-| P0 | Ingestion → serving-DB build → cricstat-api → first live pages (+F8) | Ingestion done and deployed with CI/CD; **build step is next** |
+| P0 | Ingestion → serving-DB build → cricstat-api → first live pages (+F8) | Ingestion deployed. **P0.1 build + register done 2026-10-06** (merged; full build 11m50s on the NAS, all checks pass). Next: P0.2 golden figures |
 | P1–P6 | Predictor + win prob → tools → test set → agent → public demo → extras | Later |
 
 Git: work on branch `feat/cricstat-foundation`, merge to `main` with `--no-ff` (platform workflow, ADR-018).
@@ -150,6 +150,31 @@ The `build` step (P0) and model jobs (P1) are appended to these commands when th
 - [ ] `deployment/cricstat/.env` is mode 600, and the API key is in a dedicated Console workspace with prepaid credits and no auto-reload.
 - [ ] Privacy page updated (Anthropic as a processor, retention, no cookies) before launch (F8).
 
+## P0.1 serving-DB build (done 2026-10-06, branch `feat/cricstat-p0-build`, merged)
+- `cricstat-pipeline build [--full|--incremental]` and `register [--people-csv --names-csv]`. Same image, same exit codes.
+- **Measured on the NAS (host Python 3.8):** full build 11m50s (load 10m, indexes+marts 80s, checks 30s), peak RSS
+  0.87 GB; `cricstat.sqlite` = **1.13 GB** (F3 estimated 1.5–2.5 GB). Incremental 67s (6s file copy); a no-op exits in <1s
+  without touching the live file. Rows: 22,983 matches, 11,615,100 deliveries, 436k batting / 301k bowling atoms,
+  903k phase rows, 42k player_career rows, 13,705 players, 970 venues (679 canonical).
+- Decisions (approved by the user 2026-10-06): register CSVs land in raw.sqlite (migration 0002, `register_people/_names`;
+  ingest_runs mode `register`) and every build applies them; `players` = people named in match registries (umpires and
+  never-played Register entries are left out); featured leagues are seeded in `reference_data.sql` (event-name variants
+  share a slug: t20-blast, the-hundred-men/-women…); scopes = every format key + featured slugs + LEAGUES + ALL;
+  `rules_sha` (schema, reference data, transform code) changes force a full build; a failed check keeps the live DB and
+  saves `cricstat.sqlite.failed`; `bowling_innings.wides/noballs` count balls, and their runs are extras in the team
+  total and also charged to the bowler's runs_conceded (F4 R4); the venue map draft is accepted (France for New Caledonia,
+  Colombia for Bogotá).
+- **Source issue found:** 10 Cricsheet ids are shared by a man and a woman (Register merges, e.g. 764f35d8 "N Sharma":
+  UAE women + Middlesex men). The build gives each id its majority gender and warns. Add these to the Cricsheet email.
+- Gotchas: pytest and ruff silently skip any folder named `build/` (tests live in `tests/serving/`); a long reader of
+  raw.sqlite blocks the ingest writer in DELETE mode, so build always runs after ingest, never alongside;
+  `/var/tmp` is on DSM's 2.3 GB root fs, so the build uses `temp_store=MEMORY`.
+- Venue map: `sql/venue_map.csv` (draft, 970 rows, `checked` column for the user). Country = Cricsheet team name of the
+  cricket nation (Wales → England, NI → Ireland, Caribbean → West Indies).
+- **Image context moved to `cricstat/`** (needs `sql/`); CI/publish/compose updated; publish also triggers on `cricstat/sql/**`.
+- DSM commands once the image is published (operator edits the tasks): daily `… run --rm cricstat-pipeline recent && …
+  run --rm cricstat-pipeline build`; monthly `… full && … build --full`; new weekly Sunday 06:00 `… register && … build`.
+
 ## Next up and open TODOs (as of 2026-10-05, end of the foundation sprint)
 - **Decided next step: P0.** F8's texts (Data & Licences page, privacy-page additions, disclaimers) are written inside P0,
   because P0 is the first time pages go public. P0 scope, in order:
@@ -166,6 +191,6 @@ The `build` step (P0) and model jobs (P1) are appended to these commands when th
 - **Workflow:** feature branch per sub-phase (e.g. `feat/cricstat-p0-build`), `--no-ff` merge, push. Docker calls via
   `sudo -n docker` (each one is gated by an ask rule). Never `docker compose build` on the NAS now that CD is live.
 - **Owner TODOs:** (1) email Cricsheet to confirm the match-file licence (and mention the `playeer_out` typo in match
-  1410291), and file the reply in `docs/`; (2) write the "Why I built this" story (placeholder on the hub wireframe);
+  1410291 and the 10 man/woman shared Register ids listed under P0.1), and file the reply in `docs/`; (2) write the "Why I built this" story (placeholder on the hub wireframe);
   (3) set up a Console API workspace with prepaid credits before P4.
 - Wireframe source is copied in `docs/wireframes/`. The canvas at the F2 link is the editable master.

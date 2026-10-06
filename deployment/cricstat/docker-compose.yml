@@ -19,8 +19,8 @@ services:
     image: cricstat-pipeline:latest
     # `build:` so `docker compose build` really builds (image-only services make it a silent no-op).
     build:
-      context: ../../cricstat/cricstat-pipeline
-      dockerfile: docker/Dockerfile
+      context: ../../cricstat                  # needs cricstat/sql/ (F6 §1)
+      dockerfile: cricstat-pipeline/docker/Dockerfile
     container_name: cricstat-pipeline
     profiles: ["batch"]            # never started by `up`; only `run --rm`
     user: "${HOST_UID:-1026}:${HOST_GID:-100}"   # operator UID (ADR-009) so files on the bind mount stay editable

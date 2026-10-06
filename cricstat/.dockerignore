@@ -1,0 +1,18 @@
+# Build context for cricstat images is cricstat/ (F6 §1). Data, logs, docs and caches never go in.
+data/
+logs/
+docs/
+web/
+.git
+**/__pycache__/
+**/.pytest_cache/
+**/.ruff_cache/
+**/*.pyc
+**/.venv/
+**/tests/
+**/*.md
+**/*.sqlite*
+**/*.zip
+**/.env
+**/.env.*
+!**/.env.example

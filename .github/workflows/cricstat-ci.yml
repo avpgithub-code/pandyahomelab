@@ -42,6 +42,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Build cricstat-pipeline image (no push)
-        run: docker build -f cricstat/cricstat-pipeline/docker/Dockerfile -t cricstat-pipeline:ci cricstat/cricstat-pipeline
+        run: docker build -f cricstat/cricstat-pipeline/docker/Dockerfile -t cricstat-pipeline:ci cricstat
       - name: Smoke test as a non-root user (catches unreadable /app, the Synology 700-bits trap)
         run: docker run --rm -u 1026:100 cricstat-pipeline:ci --help
+      - name: Smoke test the build step's SQL is in the image and readable
+        run: docker run --rm -u 1026:100 --entrypoint python3 cricstat-pipeline:ci -c "import os; [open(os.path.join('/cricstat/sql', n)).read() for n in ('serving_schema.sql', 'reference_data.sql', 'semantic_views.sql', 'semantic_catalog.sql', 'venue_map.csv')]"

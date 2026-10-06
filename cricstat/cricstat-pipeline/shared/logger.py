@@ -18,10 +18,10 @@ def _formatter():
     return fmt
 
 
-def setup_logging(log_dir, level="INFO", quiet=False):
+def setup_logging(log_dir, level="INFO", quiet=False, prefix="ingest"):
     """Attach the dated file handler and the stderr handler. Returns the log file path."""
     os.makedirs(log_dir, exist_ok=True)
-    path = os.path.join(log_dir, "ingest-%s.log" % time.strftime("%Y%m%d", time.gmtime()))
+    path = os.path.join(log_dir, "%s-%s.log" % (prefix, time.strftime("%Y%m%d", time.gmtime())))
     root = logging.getLogger(LOGGER_NAME)
     for h in list(root.handlers):
         root.removeHandler(h)
