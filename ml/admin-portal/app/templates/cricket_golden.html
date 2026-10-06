@@ -27,6 +27,7 @@
 
   <p class="muted">Our figures (from the live serving DB) next to a reference you confirm from public records.
     Teams count matches from 2016-01-01 to {{ window_to or '…' }}; players compare whole careers.
+    Ratios are cut to 2 decimals, not rounded, as published records show them (F4 R23).
     A difference needs an explanation; a row turns <span class="stale">stale</span> when the player or team has played
     more matches since you checked it (re-check it, it does not fail). Never scraped from ESPNcricinfo.</p>
 
@@ -39,6 +40,9 @@
     </form>
     <form method="post" action="/admin/cricket/golden/accept-agreeing">
       <button type="submit" {% if not s.suggestion_agrees %}disabled{% endif %}>Accept suggestions that equal ours</button>
+    </form>
+    <form method="post" action="/admin/cricket/golden/explain-coverage">
+      <button type="submit" title="Take Wikipedia's figure and record 'career predates dense Cricsheet coverage' for blocks with a ⚠ coverage note">Explain coverage gaps</button>
     </form>
     <a class="btn" href="/admin/cricket/golden.csv">Export CSV</a>
     {% if running %}<a class="btn" href="">Refresh</a>{% endif %}
@@ -76,6 +80,7 @@
       <h3>{{ b.name }} · {{ b.scope }} <small>{{ b.window }} · Mat {{ b.mat }}{% if b.why %} · {{ b.why }}{% endif %}</small></h3>
     </div>
     {% if b.coverage_note %}<div class="note">⚠ {{ b.coverage_note }}</div>{% endif %}
+    {% if b.wiki_note %}<div class="note" style="color:var(--accent)">ⓘ {{ b.wiki_note }}</div>{% endif %}
     <form method="post" action="/admin/cricket/golden/save">
       <input type="hidden" name="entity_id" value="{{ b.id }}"><input type="hidden" name="scope" value="{{ b.scope }}">
       <div class="table-scroll"><table>

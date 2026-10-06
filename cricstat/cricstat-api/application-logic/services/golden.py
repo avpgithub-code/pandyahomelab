@@ -5,6 +5,7 @@ formatting and status rules must stay identical — tests/test_admin.py pins the
 Pure functions; no SQL, no I/O.
 """
 import statistics
+from decimal import ROUND_DOWN, Decimal
 from typing import Dict, List, Optional
 
 BATTING = [("Mat", "matches"), ("Inn", "bat_innings"), ("NO", "bat_not_outs"),
@@ -20,12 +21,18 @@ ROLE_SECTIONS = {"bat": (BATTING,), "keep": (BATTING, KEEPING), "bowl": (BOWLING
 RATIOS = {"Ave", "Bowl Ave", "Econ", "Win %"}
 
 
+def trunc2(value: float) -> str:
+    """Two decimals, cut off rather than rounded, as published records show them (F4 R23):
+    44.5989… → "44.59". Decimal(repr()) avoids binary-float surprises such as 0.29 → 0.28."""
+    return str(Decimal(repr(value)).quantize(Decimal("0.01"), rounding=ROUND_DOWN))
+
+
 def fmt(metric: str, value) -> str:
-    """Render like a published scorecard table: ratios to 2 dp, '-' when undefined."""
+    """Render like a published scorecard table: ratios cut to 2 dp (R23), '-' when undefined."""
     if value is None:
         return "-"
     if metric in RATIOS:
-        return "%.2f" % value
+        return trunc2(value)
     return str(value)
 
 
@@ -95,9 +102,17 @@ def dense_from(per_year: Dict[int, int], current_year: int) -> Optional[int]:
     return start
 
 
-def coverage_note(first_date: Optional[str], dense_year: Optional[int], label: str) -> str:
-    """Flag careers that begin before the data is dense for this format."""
-    if not first_date or dense_year is None or int(first_date[:4]) >= dense_year:
+def coverage_note(first_date: Optional[str], dense_year: Optional[int], label: str,
+                  start_year: Optional[int] = None) -> str:
+    """Flag careers that may be incomplete in our data: they begin before the data is dense for
+    this format, or within a year of where our data for it starts (the career may predate it)."""
+    if not first_date:
+        return ""
+    year = int(first_date[:4])
+    if start_year is not None and year <= start_year + 1:
+        return ("our %s data starts in %d and this career starts %s in it: it may predate the data"
+                " (compare Mat first)" % (label, start_year, first_date))
+    if dense_year is None or year >= dense_year:
         return ""
     return ("our data has far fewer %s matches per year before %d, and this career starts %s in"
             " it: it may be incomplete (compare Mat first)" % (label, dense_year, first_date))

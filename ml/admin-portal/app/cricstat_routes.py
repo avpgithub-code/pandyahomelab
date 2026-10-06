@@ -5,6 +5,7 @@
     POST /admin/cricket/golden/verify         → start Verify References (one run at a time)
     POST /admin/cricket/golden/save           → save one block's references / explanations
     POST /admin/cricket/golden/accept-agreeing → accept every suggestion that equals our figure
+    POST /admin/cricket/golden/explain-coverage → accept + explain coverage-gap blocks in bulk
     POST /admin/cricket/golden/check          → run the golden check now
     GET  /admin/cricket/golden.csv            → export (same columns as docs/validation)
 
@@ -174,6 +175,23 @@ async def golden_accept_agreeing(request: Request, admin: str = Depends(get_curr
                                      today, "", r["ours"], b["mat"])
                 n += 1
     return back("/admin/cricket/golden", "Accepted %d suggestion(s) that equal our figures." % n)
+
+
+@router.post("/golden/explain-coverage")
+async def golden_explain_coverage(request: Request, admin: str = Depends(get_current_admin)):
+    """Careers that start before Cricsheet is dense: take Wikipedia's figure as the reference
+    and record why ours is lower, for every such row without a reference yet."""
+    same_origin(request)
+    view = runner.golden_view()
+    today = date.today().isoformat()
+    rows = golden.coverage_explanations(view["blocks"])
+    for b, r, why in rows:
+        store.save_reference((b["id"], b["scope"], r["metric"]), r["suggestion"],
+                             "Wikipedia infobox, as of %s" % (r["suggestion_as_of"] or "?"),
+                             today, why, r["ours"], b["mat"])
+    blocks = len({(b["id"], b["scope"]) for b, _, _ in rows})
+    return back("/admin/cricket/golden", "Explained %d row(s) in %d coverage-gap block(s)."
+                % (len(rows), blocks))
 
 
 @router.post("/golden/check")

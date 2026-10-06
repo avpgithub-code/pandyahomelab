@@ -83,3 +83,28 @@ def test_suggestion_rows_and_csv():
     text = golden.to_csv(golden.merge(_blocks(), {}, {}))
     assert text.splitlines()[0].split(",") == golden.CSV_COLUMNS
     assert len(text.splitlines()) == 4
+
+
+def test_wiki_notes_explain_match_count_differences():
+    b = {"mat": "100", "coverage_note": ""}
+    assert "older than ours" in golden.wiki_note(b, "95", "2026-01-01", "2026-09-17")
+    assert "newer" in golden.wiki_note(b, "104", "2026-09-28", "2026-09-17")
+    assert "Afghanistan" in golden.wiki_note(b, "104", "2026-09-01", "2026-09-17")
+    assert golden.wiki_note(dict(b, coverage_note="thin"), "232", "x", "y").startswith(
+        "Coverage gap: Wikipedia has 132 more")
+    assert golden.wiki_note(b, "100", "x", "y") == ""
+
+
+def test_coverage_explanations_only_fill_unreferenced_gap_rows():
+    blocks = [{"kind": "player", "id": "p1", "name": "Old Timer", "scope": "ODI", "mat": "76",
+               "window": "career", "coverage_note": "thin data",
+               "rows": [{"metric": "Mat", "ours": "76"}, {"metric": "Runs", "ours": "2949"},
+                        {"metric": "HS", "ours": "125*"}]}]
+    sugg = {("p1", "ODI", "Mat"): {"value": "232"}, ("p1", "ODI", "Runs"): {"value": "7805"},
+            ("p1", "ODI", "HS"): {"value": "125*"}}
+    refs = {("p1", "ODI", "Runs"): {"reference": "7805", "explanation": "already done"}}
+    merged = golden.merge(blocks, refs, sugg, "2026-09-17")
+    rows = golden.coverage_explanations(merged)
+    assert [(r["metric"], why) for _, r, why in rows] == [
+        ("Mat", golden.COVERAGE_EXPLANATION % ("76", "232"))]
+    assert merged[0]["wiki_note"].startswith("Coverage gap")

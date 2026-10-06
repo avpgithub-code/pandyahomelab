@@ -21,7 +21,8 @@ CHECK_EVERY = timedelta(days=7)
 def golden_view() -> dict:
     """Our figures merged with references and suggestions, plus counts."""
     data = api_client.get("/v1/admin/golden")
-    blocks = golden.merge(data["blocks"], store.references(), store.suggestions())
+    blocks = golden.merge(data["blocks"], store.references(), store.suggestions(),
+                          data["window_to"])
     return dict(data, blocks=blocks, summary=golden.summary(blocks))
 
 

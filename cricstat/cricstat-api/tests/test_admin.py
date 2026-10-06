@@ -105,3 +105,16 @@ def test_a_build_is_linked_only_when_it_followed_the_run(home, monkeypatch):
     jobs = {j["key"]: j for j in d["jobs"]}
     assert jobs["register"]["last_run"]["build"]["build_id"] == 9      # 32 min later: chained
     assert jobs["daily"]["last_run"]["build"] is None                   # 4.5 h later: not
+
+
+@pytest.mark.parametrize("value,want", [(44.598985, "44.59"), (30.208406, "30.20"),
+                                        (26.125843, "26.12"), (50.0, "50.00"), (0.29, "0.29"),
+                                        (16.461039, "16.46")])
+def test_ratios_are_cut_not_rounded_like_published_records(value, want):
+    assert golden.fmt("Ave", value) == want
+
+
+def test_coverage_note_flags_careers_that_may_predate_the_data():
+    assert "may predate the data" in golden.coverage_note("2003-01-10", 2003, "men's ODI", 2002)
+    assert "far fewer" in golden.coverage_note("2009-03-10", 2016, "women's ODI", 2007)
+    assert golden.coverage_note("2012-01-01", 2003, "men's ODI", 2002) == ""

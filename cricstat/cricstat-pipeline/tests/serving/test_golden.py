@@ -19,6 +19,7 @@ def test_player_rows_format_like_a_published_table():
            "bat_hundreds": 1, "bat_fifties": 0, "fld_catches": 2, "fld_stumpings": 0}
     rows = dict(golden.player_rows("keep", fig))
     assert rows["HS"] == "100*" and rows["Ave"] == "60.00" and "SR" not in rows
+    assert golden.fmt("Ave", 44.598985) == "44.59"          # F4 R23: cut, not rounded
     assert rows["Mat"] == "3" and rows["St"] == "0"
     bowl = dict(golden.player_rows("bowl", {"matches": 1, "bowl_best_bowling_wkts": 5,
                                             "bowl_best_bowling_runs": 41, "bowl_average": None}))
@@ -45,6 +46,7 @@ def test_dense_from_and_coverage_note():
     assert golden.coverage_note("2009-03-10", 2016, "women's ODI").startswith(
         "our data has far fewer women's ODI matches per year before 2016")
     assert golden.coverage_note("2017-01-01", 2016, "women's ODI") == ""
+    assert "may predate the data" in golden.coverage_note("2003-01-10", 2003, "men's ODI", 2002)
     assert golden.dense_from({}, 2026) is None
 
 
