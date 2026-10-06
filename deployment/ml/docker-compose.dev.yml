@@ -119,9 +119,14 @@ services:
       # DDNS name of the owner's home connection; its visits are shown as "Home IP"
       # instead of counting as real visitors. Empty = feature off.
       HOME_IP_HOST: ${HOME_IP_HOST:-}
+      # cricstat section (/admin/cricket): reads cricstat-api's internal admin endpoints.
+      CRICSTAT_API_URL: http://172.25.0.10:8000
     networks:
       ml-network:
         ipv4_address: 172.20.0.31
+      # Platform-services slot .31 on cricstat-network (ADR-016 range .30–.39; NETWORK_CIDR_SUMMARY §6a).
+      cricstat-network:
+        ipv4_address: 172.25.0.31
     depends_on:
       ml-postgres:
         condition: service_healthy
@@ -181,3 +186,9 @@ services:
 
 volumes:
   analytics_ingester_checkpoint:
+
+networks:
+  # Created by deployment/cricstat (cricstat must be up first); admin-portal only reads its API.
+  cricstat-network:
+    external: true
+    name: cricstat_cricstat-network

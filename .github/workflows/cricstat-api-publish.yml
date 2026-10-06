@@ -1,5 +1,5 @@
 # cricstat-api publish (F9 pattern, P0.3). Builds, smoke-tests and publishes the API image to GHCR, behind the
-# `nas-production` approval gate. Runs ONLY when cricstat/cricstat-api/** changes on main (docs-only
+# `nas-production` approval gate. Runs ONLY when the API code or the golden selection changes on main (docs-only
 # changes no longer ask for approval), or when started by hand. The NAS pulls it via cd-pull.sh.
 # Lint/tests live in cricstat-ci.yml and run on every change.
 name: cricstat-api-publish
@@ -7,7 +7,7 @@ name: cricstat-api-publish
 on:
   push:
     branches: [main]
-    paths: ["cricstat/cricstat-api/**"]   # the image's only input; edits to this file: test with a manual run
+    paths: ["cricstat/cricstat-api/**", "cricstat/docs/validation/golden-selection.csv"]   # image inputs; edits to this file: test with a manual run
   workflow_dispatch:
 
 permissions:
@@ -30,7 +30,7 @@ jobs:
       - name: Build for smoke test
         uses: docker/build-push-action@v7
         with:
-          context: cricstat/cricstat-api
+          context: cricstat
           file: cricstat/cricstat-api/docker/Dockerfile
           load: true
           tags: cricstat-api:smoke
@@ -61,7 +61,7 @@ jobs:
       - name: Publish (same build, from cache)
         uses: docker/build-push-action@v7
         with:
-          context: cricstat/cricstat-api
+          context: cricstat
           file: cricstat/cricstat-api/docker/Dockerfile
           platforms: linux/amd64        # the NAS is x86_64
           push: true

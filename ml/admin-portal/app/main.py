@@ -5,6 +5,7 @@ Routing map:
     /admin/              → dashboard (Basic Auth)
     /admin/feedback      → moderation view (Basic Auth)
     /admin/feedback/{id}/hide → toggle hidden flag (Basic Auth, POST)
+    /admin/cricket/...   → cricstat jobs, data overview, golden-figure review (Basic Auth)
     /feedback/likes      → public like API (anonymous)
     /feedback/comments   → public comment API (anonymous)
     /feedback/likes?page_id=...  → public like count
@@ -20,6 +21,8 @@ import os
 
 from fastapi import FastAPI
 
+from app.cricstat import store as cricstat_store
+from app.cricstat.runner import weekly_check_loop
 from app.home_ip import refresh_loop
 from app.retention import retention_loop
 from app.schema import ensure_feedback_schema
@@ -53,6 +56,11 @@ def create_app() -> FastAPI:
         # Keep references so the tasks aren't garbage-collected.
         app.state.home_ip_task = asyncio.create_task(refresh_loop())
         app.state.retention_task = asyncio.create_task(retention_loop())
+        try:                                          # cricstat golden review (P0.3b)
+            cricstat_store.ensure_schema()
+            app.state.cricstat_task = asyncio.create_task(weekly_check_loop())
+        except Exception as e:
+            logger.warning(f"cricstat schema bootstrap failed: {e}")
 
     # Liveness probe at app root — used by the Dockerfile HEALTHCHECK.
     # No auth, no analytics logging.
@@ -63,6 +71,10 @@ def create_app() -> FastAPI:
     # Admin views (Basic Auth required) — externally /admin/...
     from app.routes import router as admin_router
     app.include_router(admin_router, prefix="/admin", tags=["admin"])
+
+    # cricstat section (Basic Auth) — externally /admin/cricket/...
+    from app.cricstat_routes import router as cricstat_router
+    app.include_router(cricstat_router, prefix="/admin/cricket", tags=["cricstat"])
 
     # Public feedback API — externally /feedback/... (already has prefix="/feedback")
     from app.feedback_routes import router as feedback_router

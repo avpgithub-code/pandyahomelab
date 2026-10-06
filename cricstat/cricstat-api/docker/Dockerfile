@@ -1,6 +1,7 @@
 # cricstat-api — always-on, GET-only stats API (F5). Reads the serving DB read-only.
-# Build context: cricstat/cricstat-api/
-#   docker build -f docker/Dockerfile -t cricstat-api:latest .
+# Build context: cricstat/ (the image also carries docs/validation/golden-selection.csv for the
+# admin golden view, P0.3b)
+#   docker build -f cricstat-api/docker/Dockerfile -t cricstat-api:latest .
 FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -9,18 +10,19 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     CRICSTAT_HOME=/cricstat
 
 WORKDIR /app
-COPY requirements.txt .
+COPY cricstat-api/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-COPY . .
+COPY cricstat-api/ .
+COPY docs/validation/golden-selection.csv /cricstat/docs/validation/golden-selection.csv
 
 # chmod: on the NAS, Synology ACLs grant access while the POSIX bits are 700. COPY keeps those
 # bits, so without this the non-root runtime user (operator UID via compose) cannot read /app.
 # -sfn: Python imports need the underscored names; the folders use hyphens.
-RUN chmod -R a+rX /app && \
+RUN chmod -R a+rX /app /cricstat/docs && \
     ln -sfn db-logic db_logic && \
     ln -sfn application-logic application_logic && \
     ln -sfn presentation-logic presentation_logic && \
-    useradd -m -u 1000 appuser && mkdir -p /cricstat/data/db
+    useradd -m -u 1000 appuser && mkdir -p /cricstat/data/db /cricstat/logs
 USER appuser
 
 EXPOSE 8000

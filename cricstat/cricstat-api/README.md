@@ -8,7 +8,8 @@ It reads the serving database that `cricstat-pipeline build` produces and never 
 | Container | `cricstat-api` · always on · cricstat-network `172.25.0.10:8000` → host `127.0.0.1:8040` |
 | Public path | `/cricket/api/` (Nginx strips the prefix; the app answers at `/v1/...`) |
 | Runtime | Python 3.12 image (code also runs on the NAS host's 3.8 for tests) · FastAPI · one uvicorn worker |
-| Data | `cricstat/data/db/` mounted **read-only as a directory** (a file mount would hide each new build) |
+| Data | `cricstat/data/db/` mounted **read-only as a directory** (a file mount would hide each new build); `cricstat/logs/` read-only (CD-pull log) |
+| Image | built from `cricstat/` (also carries `docs/validation/golden-selection.csv`) |
 
 ## Layers (ADR-013)
 
@@ -29,6 +30,7 @@ It reads the serving database that `cricstat-pipeline build` produces and never 
 | `GET /v1/search?q=&type=player\|team\|competition&gender=&limit=` | Ranked, with disambiguation facts |
 | `GET /v1/players/{id}` · `/career` · `/years` · `/phases` · `/splits?by=` · `/innings` | `scope=` ALL (default), TEST, ODI, T20I, LEAGUES, a league slug… |
 | `GET /v1/teams?gender=&type=` · `/teams/{slug}` · `/record` · `/results` · `/head-to-head` · `/home-away` · `/years` · `/top-players` | Team slug = name + men/women, e.g. `india-women` |
+| `GET /v1/admin/jobs` · `/v1/admin/overview` · `/v1/admin/golden` | **Internal** (P0.3b): for the admin portal over cricstat-network; Nginx must block `/cricket/api/v1/admin/`. `Cache-Control: no-store`; not in the OpenAPI schema |
 | `GET /openapi.json` | Schema. Swagger/ReDoc pages are off: they load scripts from a CDN, which the site's privacy promise rules out |
 
 Additions to F5 (non-breaking): `GET /v1/teams` (team picker) and `GET /v1/teams/{slug}/years` (results by year).

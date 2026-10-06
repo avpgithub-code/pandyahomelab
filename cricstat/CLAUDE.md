@@ -125,7 +125,7 @@ Background: `docs/llm-strategy-research-2026-10-05.md`.
 | F7 | Roadmap + decision log | Ongoing in this file (current to 2026-10-05) |
 | F8 | Compliance & trust (licences page, privacy update, disclaimers) | Folded into P0 (decided 2026-10-05) |
 | F9 | CI/CD & automation (`docs/F9-cicd-automation.md`) | Done 2026-10-05: CI + approval gate + GHCR + NAS cd-pull.sh (DSM daily 05:15); merged to main |
-| P0 | Ingestion → serving-DB build → cricstat-api → first live pages (+F8) | Ingestion deployed. **P0.1 build + register done 2026-10-06** (merged; full build 11m50s on the NAS, all checks pass). **P0.2 golden figures done 2026-10-06** (draft set; user fills references). **P0.3 cricstat-api done 2026-10-06** (merged; deploys via publish approval + cd-pull). Then P0.3b `/admin/cricket`, P0.4 pages |
+| P0 | Ingestion → serving-DB build → cricstat-api → first live pages (+F8) | Ingestion deployed. **P0.1 build + register done 2026-10-06** (merged; full build 11m50s on the NAS, all checks pass). **P0.2 golden figures done 2026-10-06** (draft set; user fills references). **P0.3 cricstat-api done 2026-10-06** (deployed). **P0.3b `/admin/cricket` done 2026-10-06** (merged; API via publish + cd-pull, admin portal rebuilt on the NAS). Then P0.4 pages |
 | P1–P6 | Predictor + win prob → tools → test set → agent → public demo → extras | Later |
 
 Git: work on branch `feat/cricstat-foundation`, merge to `main` with `--no-ff` (platform workflow, ADR-018).
@@ -216,7 +216,7 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   on the weekly register task, not the Verify References button; role = Wikidata when present, else derived, with
   the source stated in the API.
 
-## P0.3b `/admin/cricket` (decided 2026-10-06, built after cricstat-api)
+## P0.3b `/admin/cricket` (done 2026-10-06, branch `feat/cricstat-p0-admin`, merged)
 - A Cricket section in the existing admin portal (`ml/admin-portal`, Basic Auth): (1) scheduled-job status (CD pull,
   daily, weekly register, monthly full; last run, status, duration, counts, build checks/warnings), (2) data at a glance
   (matches, deliveries, players, data_as_of, size, matches per year by format/gender), (3) golden figures with a manual
@@ -229,6 +229,15 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   portal's Postgres and `golden` exports them to docs/validation. ESPNcricinfo is never scraped (terms; sources policy).
 - Wikipedia covers players' Test/ODI/T20I Mat, Runs, Ave, 100s, HS, Wkts, BBI, Bowl Ave, 5w, Ct/St; IPL/WPL, team
   records, Inn, NO and Econ stay manual. A weekly scheduled golden check moves here too (not a host script).
+- Built: cricstat-api `/v1/admin/{jobs,overview,golden}` (no-store; golden selection baked into the API image, so the
+  API image builds from `cricstat/`; logs mounted read-only for the CD-pull log); admin portal `app/cricstat/`
+  (wiki, golden, store, runner, api_client), `app/cricstat_routes.py`, templates `cricket.html`, `cricket_golden.html`;
+  Postgres schema `cricstat`; weekly check loop; cricstat section in the weekly report email; "🏏 Cricket" link on
+  `/admin/`. POSTs are same-origin checked (Basic Auth is sent automatically, so CSRF matters).
+- Wikipedia pages found via Wikidata P2697 (Cricinfo id): 3/3 on a live test. Infobox quirks handled: women's
+  WTest/WODI/WT20I columns, a date without a year.
+- **Step 4 must:** block `/cricket/api/v1/admin/` in Nginx (internal only).
+- The host `cricstat-pipeline golden` command stays for offline use; the admin page is the main workflow now.
 
 ## Next up and open TODOs (as of 2026-10-05, end of the foundation sprint)
 - **Decided next step: P0.** F8's texts (Data & Licences page, privacy-page additions, disclaimers) are written inside P0,

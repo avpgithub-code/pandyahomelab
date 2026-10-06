@@ -1,7 +1,11 @@
-# Build context for cricstat images is cricstat/ (F6 §1). Data, logs, docs and caches never go in.
+# Build context for cricstat images is cricstat/ (F6 §1). Data, logs, docs and caches never go in
+# (one exception: the golden selection, which cricstat-api serves to the admin page).
 data/
 logs/
-docs/
+docs/*
+!docs/validation
+docs/validation/*
+!docs/validation/golden-selection.csv
 web/
 .git
 **/__pycache__/

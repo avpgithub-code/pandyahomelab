@@ -17,7 +17,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, Response
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from application_logic.services import meta_service, players_service, teams_service
+from application_logic.services import admin_service, meta_service, players_service, teams_service
 from application_logic.services.common import catalog_defs, team_slugs
 from db_logic.repository import meta_repo
 from db_logic.repository.db import QueryTimeout, ServingDB
@@ -207,6 +207,28 @@ def create_app(cfg: Optional[Config] = None) -> FastAPI:
                     limit: Optional[int] = None):
         return envelope(request, *teams_service.top_players(db, slug, scope, metric, date_from,
                                                             date_to, limit))
+
+    # ── Internal admin views (P0.3b) — for the admin portal only; Nginx keeps them off the public
+    #    site. Not cached: job status changes independently of the build id.
+    def admin(data_defs):
+        data, defs = data_defs
+        b = build()
+        return JSONResponse({"data": data, "meta": {"build_id": b.get("build_id"),
+                                                    "data_as_of": b.get("data_as_of"),
+                                                    "metrics": defs}},
+                            headers={"Cache-Control": "no-store"})
+
+    @app.get("/v1/admin/jobs", include_in_schema=False)
+    def admin_jobs():
+        return admin(admin_service.jobs(db, cfg.RAW_DB, cfg.LOG_DIR, cfg.NAS_UTC_OFFSET))
+
+    @app.get("/v1/admin/overview", include_in_schema=False)
+    def admin_overview():
+        return admin(admin_service.overview(db, cfg.SERVING_DB, cfg.RAW_DB))
+
+    @app.get("/v1/admin/golden", include_in_schema=False)
+    def admin_golden():
+        return admin(admin_service.golden_figures(db, cfg.GOLDEN_SELECTION))
 
     return app
 

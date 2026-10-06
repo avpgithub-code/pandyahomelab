@@ -12,6 +12,8 @@ data in the `analytics` schema of `ml-postgres`.
 | `/admin/feedback?page=/nlp/ewt-hmm/` | Basic Auth | Feedback by model: comments + likes with country / device / arrival source, "🏠 you" tag, hide / unhide. `page` is optional |
 | `/feedback/likes`, `/feedback/comments` | public | Like + comment API used by `website/feedback-widget.js` |
 | `/feedback/pv` | public | Page-view / engagement beacon from the same widget |
+| `/admin/cricket` | Basic Auth | cricstat: scheduled jobs (CD pull, daily, weekly register, monthly), recent builds, data at a glance, golden summary |
+| `/admin/cricket/golden` | Basic Auth | Golden-figure review: our figures vs references; **Verify References** (Wikipedia suggestions), accept/explain, export CSV |
 | `/health` | public | Docker healthcheck |
 
 Nginx keeps `/admin/*` and `/feedback/*` out of the JSON access log, so they never
@@ -35,7 +37,21 @@ count as visits.
 | Home IP | `home_ip.py` | every 10 min | Resolves `HOME_IP_HOST` (DDNS name) and stores its salted hash in `analytics.home_ips` |
 | Retention | `retention.py` | daily | Deletes `page_views`, `page_events`, `visitor_events` older than 13 months; strips the IP hash from likes/comments older than 13 months. Matches the public `/privacy/` page |
 
-Tables are created on startup by `schema.py` (idempotent).
+| cricstat golden check | `cricstat/runner.py` | weekly (checked hourly) | Recomputes golden statuses against cricstat-api; summary in `cricstat.golden_run`, shown in the weekly report |
+
+Tables are created on startup by `schema.py` and `cricstat/store.py` (idempotent).
+
+## cricstat section (P0.3b)
+
+- Data: cricstat-api's internal `/v1/admin/{jobs,overview,golden}` over cricstat-network (the container
+  joins it at 172.25.0.31; `CRICSTAT_API_URL`). No cricstat files are mounted here.
+- Golden references, explanations and Wikipedia suggestions live in Postgres schema `cricstat`
+  (`golden_reference`, `golden_suggestion`, `golden_run`). "Export CSV" gives the same columns as
+  `cricstat/docs/validation/golden-figures.csv`; commit it to keep a record in the repo.
+- Verify References: manual, one run at a time; Wikidata (P2697 = Cricinfo id) → English Wikipedia article →
+  "Infobox cricketer" Test/ODI/T20I columns. Suggestions only; never ESPNcricinfo.
+- POSTs under `/admin/cricket` refuse cross-site requests (Origin/Referer must match the host).
+- Tests: `python3 -m pytest tests -q` (pure parts, no network or database).
 
 ## Weekly report
 
