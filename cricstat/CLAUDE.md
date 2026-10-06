@@ -125,7 +125,7 @@ Background: `docs/llm-strategy-research-2026-10-05.md`.
 | F7 | Roadmap + decision log | Ongoing in this file (current to 2026-10-05) |
 | F8 | Compliance & trust (licences page, privacy update, disclaimers) | Folded into P0 (decided 2026-10-05) |
 | F9 | CI/CD & automation (`docs/F9-cicd-automation.md`) | Done 2026-10-05: CI + approval gate + GHCR + NAS cd-pull.sh (DSM daily 05:15); merged to main |
-| P0 | Ingestion → serving-DB build → cricstat-api → first live pages (+F8) | Ingestion deployed. **P0.1 build + register done 2026-10-06** (merged; full build 11m50s on the NAS, all checks pass). Next: P0.2 golden figures |
+| P0 | Ingestion → serving-DB build → cricstat-api → first live pages (+F8) | Ingestion deployed. **P0.1 build + register done 2026-10-06** (merged; full build 11m50s on the NAS, all checks pass). **P0.2 golden figures done 2026-10-06** (draft set; user fills references). Next: P0.3 cricstat-api, then P0.3b `/admin/cricket` |
 | P1–P6 | Predictor + win prob → tools → test set → agent → public demo → extras | Later |
 
 Git: work on branch `feat/cricstat-foundation`, merge to `main` with `--no-ff` (platform workflow, ADR-018).
@@ -136,9 +136,11 @@ Both run as user **root**. Task Settings → Notification: tick "Send run detail
 | Task name | Schedule | Run command |
 |---|---|---|
 | cricstat CD pull | Daily, 05:15 | `sh /volume1/pandya-homelab/deployment/cricstat/cd-pull.sh` |
-| cricstat daily refresh | Daily, 05:30 | `cd /volume1/pandya-homelab/deployment/cricstat && /usr/local/bin/docker compose run --rm cricstat-pipeline recent` |
-| cricstat monthly full | Monthly, day 1, 04:00 | `cd /volume1/pandya-homelab/deployment/cricstat && /usr/local/bin/docker compose run --rm cricstat-pipeline full` |
-The `build` step (P0) and model jobs (P1) are appended to these commands when they exist (F6 §4).
+| cricstat daily refresh | Daily, 05:30 | `cd /volume1/pandya-homelab/deployment/cricstat && /usr/local/bin/docker compose run --rm cricstat-pipeline recent && /usr/local/bin/docker compose run --rm cricstat-pipeline build` |
+| cricstat weekly register | Weekly, Sunday 06:00 | `cd /volume1/pandya-homelab/deployment/cricstat && /usr/local/bin/docker compose run --rm cricstat-pipeline register && /usr/local/bin/docker compose run --rm cricstat-pipeline build` |
+| cricstat monthly full | Monthly, day 1, 04:00 | `cd /volume1/pandya-homelab/deployment/cricstat && /usr/local/bin/docker compose run --rm cricstat-pipeline full && /usr/local/bin/docker compose run --rm cricstat-pipeline build --full` |
+Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deployed by cd-pull; a by-hand containerised
+`build` returned `unchanged` in 4s, same rules_sha as the host). Model jobs (P1) get appended later (F6 §4).
 
 ## P4/P5 security checklist (before the agent goes public)
 - [ ] **DSM firewall:** add a deny rule for `172.25.0.0/24` placed **above** the existing `172.16.0.0/12` allow, so
@@ -174,6 +176,35 @@ The `build` step (P0) and model jobs (P1) are appended to these commands when th
 - **Image context moved to `cricstat/`** (needs `sql/`); CI/publish/compose updated; publish also triggers on `cricstat/sql/**`.
 - DSM commands once the image is published (operator edits the tasks): daily `… run --rm cricstat-pipeline recent && …
   run --rm cricstat-pipeline build`; monthly `… full && … build --full`; new weekly Sunday 06:00 `… register && … build`.
+
+## P0.2 golden-figure set (done 2026-10-06, branch `feat/cricstat-p0-golden`, merged)
+- `docs/validation/golden-selection.csv`: 53 players (31 men, 22 women; 13 India men, 9 India women) and 10 teams
+  (India men + women, Australia, England men + women, Pakistan, South Africa, New Zealand women, Mumbai Indians).
+- `docs/validation/golden-figures.csv`: 1,012 rows (trimmed 2026-10-06: each player's 2 main scopes; batting Mat, Inn,
+  NO, Runs, HS, Ave, 100; bowling Mat, Inn, Wkts, BBI, Ave, Econ, 5w; keepers + Ct, St; teams Mat, W, L, T, D, NR, Win %).
+  The user fills `reference`, `source`, `checked_on` and, for any difference, `explanation`.
+  `cricstat-pipeline golden` (host only; docs/ is not in the image) regenerates `ours` and keeps those columns; an
+  unexplained difference exits 2.
+- Window rolls forward: teams 2016-01-01..data_as_of; players whole careers. The first run after a reference is entered
+  snapshots `ours_at_check` + `mat_at_check`; if that player/team's Mat later changes the row turns `stale` (re-check: type
+  the new reference and blank `mat_at_check`), not a failure. A figure that moves while Mat is unchanged = regression → DIFF.
+- `coverage_note` hints where a career starts before the data is dense (men's Tests ~2005, ODIs 2003, T20Is 2012;
+  women's ODIs 2016, T20Is 2018 — partly real gaps, partly the 2018 T20I-status expansion). Known differences to expect:
+  Afghanistan men's matches are withheld (e.g. Kohli's T20I 122* is missing), pre-coverage careers (Tendulkar, Mithali).
+
+## P0.3b `/admin/cricket` (decided 2026-10-06, built after cricstat-api)
+- A Cricket section in the existing admin portal (`ml/admin-portal`, Basic Auth): (1) scheduled-job status (CD pull,
+  daily, weekly register, monthly full; last run, status, duration, counts, build checks/warnings), (2) data at a glance
+  (matches, deliveries, players, data_as_of, size, matches per year by format/gender), (3) golden figures with a manual
+  **Verify References** button.
+- Data comes through cricstat-api (internal-only admin endpoints, blocked from public `/cricket/api/` by Nginx); the
+  admin portal joins cricstat-network. No cricstat file mounts into the admin container, no Docker socket.
+- Verify References: manual only; runs inside the admin portal; fetches Wikipedia infoboxes (MediaWiki API, CC BY-SA,
+  descriptive User-Agent) for the fixed selection only (no user-supplied URLs); one run at a time (button disabled while
+  running, no timer). Wikipedia figures are suggestions; the user accepts or explains each; decisions live in the
+  portal's Postgres and `golden` exports them to docs/validation. ESPNcricinfo is never scraped (terms; sources policy).
+- Wikipedia covers players' Test/ODI/T20I Mat, Runs, Ave, 100s, HS, Wkts, BBI, Bowl Ave, 5w, Ct/St; IPL/WPL, team
+  records, Inn, NO and Econ stay manual. A weekly scheduled golden check moves here too (not a host script).
 
 ## Next up and open TODOs (as of 2026-10-05, end of the foundation sprint)
 - **Decided next step: P0.** F8's texts (Data & Licences page, privacy-page additions, disclaimers) are written inside P0,

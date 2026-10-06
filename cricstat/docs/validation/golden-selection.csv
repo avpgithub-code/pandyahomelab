@@ -1,0 +1,64 @@
+kind,id,name,gender,scopes,role,why
+player,ba607b88,V Kohli,male,TEST;ODI,bat,India men; post-2012 career
+player,740742ef,RG Sharma,male,ODI;ipl,bat,India men; ODI double hundreds
+player,b4b99816,Shubman Gill,male,TEST;ODI,bat,India men; recent career (full coverage)
+player,b17e2f24,KL Rahul,male,TEST;ODI,keep,India men; keeper-batter
+player,271f83cd,SA Yadav,male,T20I;ipl,bat,India men; T20 specialist
+player,4a8a2e3b,MS Dhoni,male,ODI;ipl,keep,India men; keeper; career from 2004 (inside coverage)
+player,8ba8195d,V Sehwag,male,TEST;ODI,bat,India men; career began 1999 (coverage gap expected)
+player,d2c2b2d5,SR Tendulkar,male,TEST;ODI,bat,India men; career 1989-2013 (large coverage gap expected)
+player,462411b3,JJ Bumrah,male,TEST;ipl,bowl,India men; fast bowler
+player,8cf9814c,Mohammed Shami,male,TEST;ODI,bowl,India men; fast bowler
+player,495d42a5,R Ashwin,male,TEST;ipl,bowl,India men; off-spinner
+player,fe93fd9d,RA Jadeja,male,TEST;ODI,all,India men; all-rounder
+player,57ee1fde,YS Chahal,male,T20I;ipl,bowl,India men; leg-spinner; IPL wickets
+player,ec2269dc,M Raj,female,ODI;T20I,bat,India women; career 1999-2022 (women's coverage gap expected)
+player,84f1ae7f,J Goswami,female,ODI;T20I,bowl,India women; career 2002-2022 (coverage gap expected)
+player,53cd8da6,H Kaur,female,ODI;T20I,bat,India women; captain
+player,5d2eda89,S Mandhana,female,ODI;T20I,bat,India women; opener
+player,201fef33,DB Sharma,female,ODI;T20I,all,India women; all-rounder
+player,d8f59089,Shafali Verma,female,T20I;wpl,bat,India women; recent career (full coverage)
+player,721e0199,RM Ghosh,female,ODI;T20I,keep,India women; keeper
+player,7298db76,Renuka Singh,female,ODI;T20I,bowl,India women; fast bowler
+player,237ec05b,RS Gayakwad,female,ODI;T20I,bowl,India women; left-arm spinner
+player,a343262c,JE Root,male,TEST;ODI,bat,England men; most Test runs of the 2010s-2020s
+player,99b75528,JC Buttler,male,ODI;T20I,keep,England men; keeper
+player,d12143bf,JM Anderson,male,TEST;ODI,bowl,England men; career began 2002/03 (check coverage)
+player,eba6a852,SCJ Broad,male,TEST;ODI,bowl,England men; career 2006-2023 (inside coverage)
+player,30a45b23,SPD Smith,male,TEST;ODI,bat,Australia men
+player,dcce6f09,DA Warner,male,TEST;ipl,bat,Australia men; IPL
+player,96a6a7ad,NM Lyon,male,TEST,bowl,Australia men; off-spinner
+player,ded9240e,PJ Cummins,male,TEST;ODI,bowl,Australia men; fast bowler
+player,3fb19989,MA Starc,male,TEST;ODI,bowl,Australia men; left-arm fast
+player,7d415ea5,RT Ponting,male,TEST;ODI,bat,Australia men; career 1995-2012 (coverage gap expected)
+player,d027ba9f,KS Williamson,male,TEST;ODI,bat,New Zealand men
+player,a818c1be,TA Boult,male,TEST;ODI,bowl,New Zealand men; left-arm fast
+player,8a75e999,Babar Azam,male,ODI;T20I,bat,Pakistan men
+player,c4487b84,AB de Villiers,male,TEST;ODI,keep,South Africa men; keeper-batter; career 2004-2018
+player,372455c4,Q de Kock,male,ODI;ipl,keep,South Africa men; keeper
+player,86dc8f2e,JH Kallis,male,TEST;ODI,all,South Africa men; career 1995-2014 (coverage gap expected)
+player,6b71e6cf,KC Sangakkara,male,TEST;ODI,keep,Sri Lanka men; career 2000-2015 (small gap expected)
+player,4ba44e19,M Muralitharan,male,TEST;ODI,bowl,Sri Lanka men; career 1992-2011 (large gap expected)
+player,7dc35884,Shakib Al Hasan,male,ODI;T20I,all,Bangladesh men; all-rounder
+player,db584dad,CH Gayle,male,T20I;ipl,bat,West Indies men; T20 and IPL
+player,9d430b40,SP Narine,male,T20I;ipl,bowl,West Indies men; IPL spinner
+player,5f547c8b,Rashid Khan,male,ipl,bowl,Afghanistan men: internationals withheld by Cricsheet; IPL only
+player,27e003ce,MM Lanning,female,ODI;T20I,bat,Australia women; captain
+player,be150fc8,EA Perry,female,ODI;T20I,all,Australia women; all-rounder; career from 2007
+player,321644de,AJ Healy,female,ODI;T20I,keep,Australia women; keeper
+player,f3a18a0c,NR Sciver,female,ODI;T20I,all,England women; all-rounder (now Sciver-Brunt)
+player,cdb82f1c,S Ecclestone,female,ODI;T20I,bowl,England women; left-arm spinner
+player,d4188b60,CM Edwards,female,ODI;T20I,bat,England women; career 1996-2016 (coverage gap expected)
+player,89bbc67a,SW Bates,female,ODI;T20I,bat,New Zealand women
+player,e60f81c9,L Wolvaardt,female,ODI;T20I,bat,South Africa women; captain
+player,d32cf49a,HK Matthews,female,ODI;T20I,all,West Indies women; all-rounder
+team,India|male|international,India men,male,TEST;ODI;T20I,team,featured team
+team,India|female|international,India women,female,ODI;T20I,team,featured team
+team,Australia|male|international,Australia men,male,TEST;ODI;T20I,team,
+team,Australia|female|international,Australia women,female,ODI;T20I,team,
+team,England|male|international,England men,male,TEST;ODI;T20I,team,
+team,England|female|international,England women,female,ODI;T20I,team,
+team,Pakistan|male|international,Pakistan men,male,TEST;ODI;T20I,team,
+team,South Africa|male|international,South Africa men,male,TEST;ODI;T20I,team,
+team,New Zealand|female|international,New Zealand women,female,ODI;T20I,team,
+team,Mumbai Indians|male|club,Mumbai Indians,male,ipl,team,IPL franchise (league team record)
