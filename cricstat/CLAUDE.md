@@ -125,7 +125,7 @@ Background: `docs/llm-strategy-research-2026-10-05.md`.
 | F7 | Roadmap + decision log | Ongoing in this file (current to 2026-10-05) |
 | F8 | Compliance & trust (licences page, privacy update, disclaimers) | Folded into P0 (decided 2026-10-05) |
 | F9 | CI/CD & automation (`docs/F9-cicd-automation.md`) | Done 2026-10-05: CI + approval gate + GHCR + NAS cd-pull.sh (DSM daily 05:15); merged to main |
-| P0 | Ingestion → serving-DB build → cricstat-api → first live pages (+F8) | Ingestion deployed. **P0.1 build + register done 2026-10-06** (merged; full build 11m50s on the NAS, all checks pass). **P0.2 golden figures done 2026-10-06** (draft set; user fills references). Next: P0.3 cricstat-api, then P0.3b `/admin/cricket` |
+| P0 | Ingestion → serving-DB build → cricstat-api → first live pages (+F8) | Ingestion deployed. **P0.1 build + register done 2026-10-06** (merged; full build 11m50s on the NAS, all checks pass). **P0.2 golden figures done 2026-10-06** (draft set; user fills references). **P0.3 cricstat-api done 2026-10-06** (merged; deploys via publish approval + cd-pull). Then P0.3b `/admin/cricket`, P0.4 pages |
 | P1–P6 | Predictor + win prob → tools → test set → agent → public demo → extras | Later |
 
 Git: work on branch `feat/cricstat-foundation`, merge to `main` with `--no-ff` (platform workflow, ADR-018).
@@ -191,6 +191,30 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
 - `coverage_note` hints where a career starts before the data is dense (men's Tests ~2005, ODIs 2003, T20Is 2012;
   women's ODIs 2016, T20Is 2018 — partly real gaps, partly the 2018 T20I-status expansion). Known differences to expect:
   Afghanistan men's matches are withheld (e.g. Kohli's T20I 122* is missing), pre-coverage careers (Tendulkar, Mithali).
+
+## P0.3 cricstat-api (done 2026-10-06, branch `feat/cricstat-p0-api`, merged)
+- `cricstat/cricstat-api/`: FastAPI, GET-only, 4 layers, stdlib sqlite3. Endpoints: health, status, meta (scopes,
+  competitions, metrics), search, players (profile, career, years, phases, splits, innings), teams (list, identity,
+  record, results, head-to-head, home-away, years, top-players). F5 additions: `GET /v1/teams`, `/teams/{slug}/years`.
+- Envelope with provenance; problem+json; ETag = build id (304); Cache-Control public 300 s / swr 3600 s.
+- DB: `mode=ro&immutable=1` (the pipeline only ever replaces the file), reopen when the inode changes, process-wide
+  per-build caches, startup warm-up, background read-through of each new file into the page cache (5 s for 1.13 GB;
+  cold random reads on the NAS disks had taken 1–10 s). Query time limit 10 s → 503.
+- Measured on the live DB (host, warm): 82 requests p50 12 ms, p95 39 ms, max 131 ms (F5 target p95 < 300 ms).
+- Ratios: views where they apply; `metrics.py` mirrors them for years/phases/splits/windows (tests compare).
+  `Scopes.clause()` mirrors marts.sql (tests compare every scope).
+- Swagger/ReDoc are off (they load scripts from a CDN, against the privacy promise); `/openapi.json` is served.
+  A self-hosted docs page belongs to P0.4. Team slug = name + men/women (+ `-club` on a clash).
+- Container: 172.25.0.10 → 127.0.0.1:8040, read-only rootfs, cap_drop ALL, no-new-privileges, 512 MB, data/db mounted
+  read-only as a directory, one uvicorn worker. `cd-pull.sh` now smoke-tests the API on the NAS against the real DB
+  (port 8049), restarts it via compose, health-checks it and rolls back on failure; a service never published yet is
+  skipped, not a failure. CI: api-tests (py3.8/3.12) + api-image (non-root, read-only, expects 503 no_db).
+  Publish: `cricstat-api-publish.yml` (only `cricstat/cricstat-api/**`, approval gate).
+- Decisions (user, 2026-10-06): docs page self-hosted in P0.4 (no CDN); team slug `-club` suffix OK (only Barbados
+  women clashes today; slugs are URL labels only, the predictor uses team identity name+gender+type); derived role OK
+  to start. Wikidata enrichment (DOB, birthplace, country, and "position played" where present) is an automatic step
+  on the weekly register task, not the Verify References button; role = Wikidata when present, else derived, with
+  the source stated in the API.
 
 ## P0.3b `/admin/cricket` (decided 2026-10-06, built after cricstat-api)
 - A Cricket section in the existing admin portal (`ml/admin-portal`, Basic Auth): (1) scheduled-job status (CD pull,

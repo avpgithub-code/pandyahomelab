@@ -8,14 +8,20 @@
 #
 # Each new image must pass a smoke test ON THE NAS (its CPU has no AVX; CI runners do) before it is
 # tagged `<service>:latest`, the tag docker-compose.yml runs. The image it replaces is kept as
-# `<service>:previous`. Batch services pick up `latest` on their next scheduled run; always-on
-# services (cricstat-api, P0) will also be restarted and health-checked here.
+# `<service>:previous`. Batch services pick up `latest` on their next scheduled run. Always-on
+# services (cricstat-api) are then restarted and health-checked; if the live check fails, the
+# previous image is put back and restarted, and the run exits 1 (DSM email).
 set -eu
 
 DOCKER=${DOCKER:-/usr/local/bin/docker}
 REGISTRY=ghcr.io/avpgithub-code
 TAG=${CRICSTAT_IMAGE_TAG:-main}
-SERVICES="cricstat-pipeline"
+SERVICES="cricstat-pipeline cricstat-api"
+ALWAYS_ON="cricstat-api"
+HERE=$(cd "$(dirname "$0")" && pwd)
+COMPOSE="$DOCKER compose -f $HERE/docker-compose.yml"
+DATA_DB=/volume1/pandya-homelab/cricstat/data/db
+API_URL=http://127.0.0.1:8040/v1/health
 LOG_DIR=/volume1/pandya-homelab/cricstat/logs
 mkdir -p "$LOG_DIR"
 LOG="$LOG_DIR/cd-$(date -u +%Y%m%d).log"
@@ -26,19 +32,56 @@ short() { echo "$1" | sed 's/^sha256://' | cut -c1-12; }
 smoke() {  # $1 = service, $2 = image; run as the operator UID like compose does
   case "$1" in
     cricstat-pipeline) $DOCKER run --rm -u 1026:100 "$2" --help >/dev/null 2>&1 ;;
+    cricstat-api) smoke_api "$2" ;;
     *) log "no smoke test defined for $1"; return 1 ;;
   esac
+}
+
+wait_healthy() {  # $1 = URL; healthy = HTTP 200 with a build_id, within ~60 s
+  i=0
+  while [ $i -lt 30 ]; do
+    if curl -fsS --max-time 3 "$1" 2>/dev/null | grep -q '"build_id":[0-9]'; then return 0; fi
+    i=$((i + 1)); sleep 2
+  done
+  return 1
+}
+
+smoke_api() {  # throwaway container on 127.0.0.1:8049 against the real DB (read-only)
+  name=cricstat-api-smoke
+  $DOCKER rm -f "$name" >/dev/null 2>&1 || true
+  $DOCKER run -d --name "$name" -u 1026:100 --read-only --tmpfs /tmp \
+    -v "$DATA_DB:/cricstat/data/db:ro" -p 127.0.0.1:8049:8000 "$1" >/dev/null 2>&1 || return 1
+  ok=0
+  if wait_healthy http://127.0.0.1:8049/v1/health \
+     && curl -fsS --max-time 10 http://127.0.0.1:8049/v1/status >/dev/null 2>&1; then ok=1; fi
+  [ $ok -eq 1 ] || $DOCKER logs --tail 20 "$name" 2>&1 | sed 's/^/  smoke: /' | tee -a "$LOG"
+  $DOCKER rm -f "$name" >/dev/null 2>&1 || true
+  [ $ok -eq 1 ]
+}
+
+is_always_on() { case " $ALWAYS_ON " in *" $1 "*) return 0 ;; esac; return 1; }
+
+restart() {  # recreate the container from <service>:latest and check it live
+  $COMPOSE up -d --no-deps --force-recreate "$1" >/dev/null 2>&1 && wait_healthy "$API_URL"
 }
 
 deploy() {
   svc=$1
   remote="$REGISTRY/$svc:$TAG"
   if ! $DOCKER pull -q "$remote" >/dev/null 2>&1; then
+    if ! $DOCKER image inspect "$svc:latest" >/dev/null 2>&1; then
+      log "skip $svc: $remote not published yet (never deployed here)"; return 0
+    fi
     log "FAIL $svc: cannot pull $remote"; return 1
   fi
   new=$($DOCKER image inspect -f '{{.Id}}' "$remote")
   old=$($DOCKER image inspect -f '{{.Id}}' "$svc:latest" 2>/dev/null || echo none)
   if [ "$new" = "$old" ]; then
+    if is_always_on "$svc" && ! curl -fsS --max-time 3 "$API_URL" >/dev/null 2>&1; then
+      if restart "$svc"; then log "ok $svc up to date ($(short "$new")); was down, restarted"
+      else log "FAIL $svc: up to date but unhealthy after restart"; return 1; fi
+      return 0
+    fi
     log "ok $svc up to date ($(short "$new"))"; return 0
   fi
   if ! smoke "$svc" "$remote"; then
@@ -46,6 +89,15 @@ deploy() {
   fi
   [ "$old" != none ] && $DOCKER tag "$svc:latest" "$svc:previous"
   $DOCKER tag "$remote" "$svc:latest"
+  if is_always_on "$svc" && ! restart "$svc"; then
+    if [ "$old" != none ]; then
+      $DOCKER tag "$svc:previous" "$svc:latest"
+      if restart "$svc"; then state="restored $(short "$old")"; else state="RESTORE ALSO FAILED"; fi
+    else
+      state="no previous image"
+    fi
+    log "FAIL $svc: $(short "$new") unhealthy after restart; rolled back: $state"; return 1
+  fi
   log "deployed $svc $(short "$new") from $remote (previous $(short "$old"))"
 }
 
@@ -55,6 +107,9 @@ rollback() {
     log "FAIL $svc: no previous image to roll back to"; return 1
   fi
   $DOCKER tag "$svc:previous" "$svc:latest"
+  if is_always_on "$svc" && ! restart "$svc"; then
+    log "FAIL $svc: unhealthy after rollback"; return 1
+  fi
   log "rolled back $svc to $(short "$($DOCKER image inspect -f '{{.Id}}' "$svc:latest")")"
 }
 

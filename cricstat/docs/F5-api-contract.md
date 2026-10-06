@@ -202,3 +202,13 @@ The **MCP server** (P6) exposes the same tools, except `run_sql`, by calling the
 3. **Streaming: Server-Sent Events.** One request per question; it works with the existing Nginx per-IP limits and logs,
    and Cloudflare passes it through. WebSockets were rejected (more code and config for two-way traffic we don't need).
    The live World Cup tracker polls every few minutes instead.
+
+## 8. Implementation notes (P0.3, 2026-10-06)
+- **Additions** (non-breaking): `GET /v1/teams?gender=&type=` (team picker) and `GET /v1/teams/{slug}/years`
+  (Countries "Results by year").
+- **Dates:** `from`/`to` accept `YYYY-MM-DD`, a year (`2023`) or a season (`2023-24` = 1 Jul 2023 – 30 Jun 2024).
+- **Scopes** accepted everywhere: `ALL`, `LEAGUES`, any format key (`TEST`, `ODI`, `T20I`, `HUNDRED`…) and featured
+  league slugs (`ipl`, `wpl`, `bbl`…). `phases` with `ALL`, `LEAGUES` or a multi-day format → 422.
+- **Docs:** decision 7.1 is pending a self-hosted docs page (P0.4): Swagger/ReDoc load scripts from a CDN, which the
+  privacy promise rules out, so only `/openapi.json` is served for now.
+- **Time limit:** a query over 10 s is interrupted → 503 "Query took too long".

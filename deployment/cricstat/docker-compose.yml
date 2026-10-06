@@ -1,4 +1,4 @@
-# cricstat stack (ADR-022). DRAFT, not deployed yet. Applying it creates cricstat-network.
+# cricstat stack (ADR-022). cricstat-pipeline is a batch job; cricstat-api is always on (P0).
 # Usage (from this folder):
 #   sudo docker compose build cricstat-pipeline
 #   sudo docker compose run --rm cricstat-pipeline recent      # what DSM Task Scheduler runs
@@ -33,6 +33,43 @@ services:
     networks:
       cricstat-network:
         ipv4_address: 172.25.0.14
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  cricstat-api:
+    image: cricstat-api:latest       # from GHCR via cd-pull.sh; `build:` only for emergencies
+    build:
+      context: ../../cricstat/cricstat-api
+      dockerfile: docker/Dockerfile
+    container_name: cricstat-api
+    user: "${HOST_UID:-1026}:${HOST_GID:-100}"
+    environment:
+      CRICSTAT_HOME: /cricstat
+    volumes:
+      # The DIRECTORY, read-only: a file mount would keep showing the old build after each swap.
+      - /volume1/pandya-homelab/cricstat/data/db:/cricstat/data/db:ro
+    ports:
+      - "127.0.0.1:8040:8000"
+    networks:
+      cricstat-network:
+        ipv4_address: 172.25.0.10
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    mem_limit: 512m
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/v1/health', timeout=4)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
     logging:
       driver: "json-file"
       options:
