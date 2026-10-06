@@ -42,8 +42,8 @@ services:
   cricstat-api:
     image: cricstat-api:latest       # from GHCR via cd-pull.sh; `build:` only for emergencies
     build:
-      context: ../../cricstat/cricstat-api
-      dockerfile: docker/Dockerfile
+      context: ../../cricstat                  # image also carries docs/validation/golden-selection.csv
+      dockerfile: cricstat-api/docker/Dockerfile
     container_name: cricstat-api
     user: "${HOST_UID:-1026}:${HOST_GID:-100}"
     environment:
@@ -51,6 +51,7 @@ services:
     volumes:
       # The DIRECTORY, read-only: a file mount would keep showing the old build after each swap.
       - /volume1/pandya-homelab/cricstat/data/db:/cricstat/data/db:ro
+      - /volume1/pandya-homelab/cricstat/logs:/cricstat/logs:ro   # CD-pull log for /v1/admin/jobs
     ports:
       - "127.0.0.1:8040:8000"
     networks:

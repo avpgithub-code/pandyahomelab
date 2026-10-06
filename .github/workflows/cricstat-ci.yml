@@ -73,7 +73,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Build cricstat-api image (no push)
-        run: docker build -f cricstat/cricstat-api/docker/Dockerfile -t cricstat-api:ci cricstat/cricstat-api
+        run: docker build -f cricstat/cricstat-api/docker/Dockerfile -t cricstat-api:ci cricstat
       - name: Smoke test as the operator UID, read-only root, no DB → expect 503 no_db
         run: |
           docker run -d --name api -u 1026:100 --read-only --tmpfs /tmp -p 127.0.0.1:8049:8000 cricstat-api:ci
@@ -83,3 +83,5 @@ jobs:
             sleep 1
           done
           docker logs api; exit 1
+      - name: The golden selection is in the image and readable by the operator UID
+        run: docker run --rm -u 1026:100 --entrypoint python3 cricstat-api:ci -c "print(len(open('/cricstat/docs/validation/golden-selection.csv').readlines()))"

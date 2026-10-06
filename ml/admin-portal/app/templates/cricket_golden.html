@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>pandyaHomeLab — Admin · Golden figures</title>
+{% include "cricket_base.css.html" %}
+<style>
+  .block { margin-top:1.4rem; scroll-margin-top:1rem; }
+  .block-head { display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap; align-items:baseline; margin-bottom:.4rem; }
+  .block-head h3 { font-size:1rem; } .block-head h3 small { color:var(--muted); font-weight:500; }
+  .note { color:var(--amber); font-size:.78rem; margin:.2rem 0 .4rem; }
+  td.sugg.agree { color:var(--green); } td.sugg.disagree { color:var(--amber); }
+  td input[type=text] { min-width:70px; } td.wide input { min-width:180px; }
+  .filters { display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; margin:.6rem 0 0; }
+  .filters input[type=text] { width:200px; } .filters select { width:auto; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>pandya<em>HomeLab</em> · Golden figures</h1>
+    <div class="meta">Signed in as <strong>{{ admin }}</strong> <a href="/admin/cricket">← Cricket</a></div>
+  </header>
+  {% if msg %}<div class="banner">{{ msg }}</div>{% endif %}
+  {% if error %}<div class="banner err">cricstat-api is not reachable: <code>{{ error }}</code></div>{% endif %}
+
+  <p class="muted">Our figures (from the live serving DB) next to a reference you confirm from public records.
+    Teams count matches from 2016-01-01 to {{ window_to or '…' }}; players compare whole careers.
+    A difference needs an explanation; a row turns <span class="stale">stale</span> when the player or team has played
+    more matches since you checked it (re-check it, it does not fail). Never scraped from ESPNcricinfo.</p>
+
+  {% set s = summary %}
+  <div class="row" style="margin-top:.8rem">
+    {% set running = verify and verify.status == 'running' %}
+    <form method="post" action="/admin/cricket/golden/verify">
+      <button class="primary" type="submit" {% if running %}disabled{% endif %}>
+        {% if running %}Verifying… (started {{ verify.started_at.strftime('%H:%M') }} UTC){% else %}Verify References{% endif %}</button>
+    </form>
+    <form method="post" action="/admin/cricket/golden/accept-agreeing">
+      <button type="submit" {% if not s.suggestion_agrees %}disabled{% endif %}>Accept suggestions that equal ours</button>
+    </form>
+    <a class="btn" href="/admin/cricket/golden.csv">Export CSV</a>
+    {% if running %}<a class="btn" href="">Refresh</a>{% endif %}
+  </div>
+  <p class="muted" style="margin-top:.4rem">
+    Verify References reads each player's Wikipedia infobox (found via Wikidata by Cricinfo id) — Test/ODI/T20I only;
+    IPL/WPL, teams, Inn, NO and Econ stay manual.
+    {% if verify %}Last run {{ verify.started_at.strftime('%Y-%m-%d %H:%M') }} UTC: {{ verify.status }}
+      {% if verify.summary %}· {{ verify.summary.articles }} of {{ verify.summary.players }} articles · {{ verify.summary.suggestions }} suggestions
+        {% if verify.summary.not_found %}· no article: {{ verify.summary.not_found|join(', ') }}{% endif %}{% endif %}
+      {% if verify.error %}<span class="bad">{{ verify.error }}</span>{% endif %}{% endif %}
+  </p>
+
+  <div class="cards" style="margin-top:.6rem">
+    <div class="card"><div class="card-label">With a reference</div><div class="card-value">{{ s.with_reference or 0 }} / {{ s.rows or 0 }}</div></div>
+    <div class="card"><div class="card-label match">Match</div><div class="card-value match">{{ s.match or 0 }}</div></div>
+    <div class="card"><div class="card-label explained">Explained</div><div class="card-value explained">{{ s.explained or 0 }}</div></div>
+    <div class="card"><div class="card-label stale">Stale</div><div class="card-value stale">{{ s.stale or 0 }}</div></div>
+    <div class="card"><div class="card-label DIFF">DIFF</div><div class="card-value DIFF">{{ s.DIFF or 0 }}</div></div>
+  </div>
+
+  <form class="filters" method="get" action="/admin/cricket/golden">
+    <input type="text" name="q" value="{{ q }}" placeholder="Player or team">
+    <select name="status">
+      {% for st in statuses %}<option value="{{ st }}" {% if st == status %}selected{% endif %}>{{ {'': 'All rows', 'unchecked': 'Has unchecked rows', 'suggested': 'Has a new suggestion'}.get(st, 'Has ' + st) }}</option>{% endfor %}
+    </select>
+    <button type="submit">Filter</button>
+    <span class="muted">{{ blocks|length }} block(s)</span>
+  </form>
+  {% if missing %}<div class="banner err">Not in the data: {{ missing|join(', ') }}</div>{% endif %}
+
+  {% for b in blocks %}
+  <div class="block" id="b-{{ b.id|replace('|', '-') }}-{{ b.scope }}">
+    <div class="block-head">
+      <h3>{{ b.name }} · {{ b.scope }} <small>{{ b.window }} · Mat {{ b.mat }}{% if b.why %} · {{ b.why }}{% endif %}</small></h3>
+    </div>
+    {% if b.coverage_note %}<div class="note">⚠ {{ b.coverage_note }}</div>{% endif %}
+    <form method="post" action="/admin/cricket/golden/save">
+      <input type="hidden" name="entity_id" value="{{ b.id }}"><input type="hidden" name="scope" value="{{ b.scope }}">
+      <div class="table-scroll"><table>
+        <thead><tr><th>Metric</th><th class="num">Ours</th><th class="num">Wikipedia</th><th>Accept</th><th>Reference</th><th>Source</th><th>Explanation (for a difference)</th><th>Status</th><th>Clear</th></tr></thead>
+        <tbody>
+        {% for r in b.rows %}
+          <tr>
+            <td>{{ r.metric }}</td>
+            <td class="num mono">{{ r.ours }}</td>
+            <td class="num mono sugg {{ ('agree' if r.suggestion_agrees else 'disagree') if r.suggestion }}"
+                title="{{ 'as of ' ~ r.suggestion_as_of if r.suggestion_as_of }}">
+              {% if r.suggestion %}<a href="{{ r.suggestion_url }}" target="_blank" rel="noopener noreferrer" class="{{ 'match' if r.suggestion_agrees else 'stale' }}">{{ r.suggestion }}</a>{% else %}<span class="muted">—</span>{% endif %}</td>
+            <td>{% if r.suggestion %}<input type="checkbox" name="accept__{{ r.metric }}" value="1" title="Use Wikipedia's figure">{% endif %}</td>
+            <td><input type="text" name="ref__{{ r.metric }}" value="{{ r.reference }}"></td>
+            <td class="wide"><input type="text" name="src__{{ r.metric }}" value="{{ r.source }}" placeholder="e.g. ICC records page"></td>
+            <td class="wide"><input type="text" name="expl__{{ r.metric }}" value="{{ r.explanation }}"></td>
+            <td>{% if r.status %}<span class="pill {{ r.status }}" title="{{ 'checked ' ~ r.checked_on if r.checked_on }}{{ ' · Mat then ' ~ r.mat_at_check if r.mat_at_check }}">{{ r.status }}</span>{% endif %}</td>
+            <td>{% if r.reference %}<input type="checkbox" name="clear__{{ r.metric }}" value="1" title="Remove this reference">{% endif %}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table></div>
+      <div class="row" style="margin-top:.4rem"><button type="submit">Save {{ b.name }} · {{ b.scope }}</button></div>
+    </form>
+  </div>
+  {% else %}
+    {% if not error %}<div class="banner">No blocks match this filter.</div>{% endif %}
+  {% endfor %}
+  <footer>Suggestions from Wikipedia (CC BY-SA), found via Wikidata (CC0) · match data from Cricsheet, ODC-BY 1.0</footer>
+</div>
+</body>
+</html>

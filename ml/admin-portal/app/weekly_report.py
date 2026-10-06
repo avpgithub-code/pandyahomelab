@@ -134,6 +134,13 @@ def build_report(days: int = 7) -> str:
     if not (s.get("visitors") or 0):
         w("")
         w("No real visitors recorded in this window.")
+
+    try:                                     # cricstat jobs + golden check (P0.3b)
+        from app.cricstat.runner import report_lines
+        out.extend(report_lines())
+    except Exception as e:                   # never lose the visitor report over cricstat
+        w("")
+        w(f"CRICSTAT section failed: {e}")
     return "\n".join(out)
 
 

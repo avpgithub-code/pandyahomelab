@@ -13,14 +13,17 @@ def all_teams(db: ServingDB) -> List[dict]:
                   " GROUP BY t.team_key ORDER BY matches DESC")
 
 
-def record(db: ServingDB, team_key: int, scope: Optional[str]) -> List[dict]:
-    if scope:
-        where, args = db.scopes().clause(scope, "r")
+def record(db: ServingDB, team_key: int, scope: Optional[str], date_from: Optional[str] = None,
+           date_to: Optional[str] = None) -> List[dict]:
+    if scope or date_from or date_to:
+        where, args = db.scopes().clause(scope, "r") if scope else ("1", [])
+        dates, dargs = _dates("r.start_date", date_from, date_to)
         return db.all(
             "SELECT COUNT(*) AS matches, SUM(r.outcome = 'won') AS won,"
             " SUM(r.outcome = 'lost') AS lost, SUM(r.outcome = 'tied') AS tied,"
             " SUM(r.outcome = 'drawn') AS drawn, SUM(r.outcome = 'no_result') AS no_result"
-            " FROM team_results r WHERE r.team_key = ? AND %s" % where, [team_key] + args)
+            " FROM team_results r WHERE r.team_key = ? AND %s %s" % (where, dates),
+            [team_key] + args + dargs)
     return db.all("SELECT format_key, matches, won, lost, tied, drawn, no_result, win_pct"
                   " FROM v_team_record WHERE team_key = ?"
                   " ORDER BY CASE format_key WHEN 'TEST' THEN 1 WHEN 'ODI' THEN 2"

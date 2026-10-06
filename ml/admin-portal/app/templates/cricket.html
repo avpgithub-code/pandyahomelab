@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>pandyaHomeLab — Admin · Cricket</title>
+<script src="/vendor/chart.js-4.4.0/chart.umd.min.js"></script>
+{% include "cricket_base.css.html" %}
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>pandya<em>HomeLab</em> · Cricket</h1>
+    <div class="meta">Signed in as <strong>{{ admin }}</strong>
+      <a href="/admin/">← Visitors dashboard</a> <a href="/admin/cricket/golden">Golden figures →</a></div>
+  </header>
+  {% if msg %}<div class="banner">{{ msg }}</div>{% endif %}
+  {% if error %}<div class="banner err">cricstat-api is not reachable: <code>{{ error }}</code></div>{% endif %}
+
+  {% if jobs %}
+  <h2>⏱ Scheduled jobs <span class="muted">(NAS time UTC{{ '%+g' % jobs.nas_utc_offset_hours }}; shown in UTC)</span></h2>
+  <div class="table-scroll"><table>
+    <thead><tr><th>Job</th><th>Schedule</th><th>Last run (UTC)</th><th>Status</th><th>Result</th><th>Next run (UTC)</th></tr></thead>
+    <tbody>
+    {% for j in jobs.jobs %}{% set lr = j.last_run %}
+      <tr>
+        <td><strong>{{ j.name }}</strong><br><span class="muted mono">{{ j.command }}</span></td>
+        <td>{{ j.schedule }}</td>
+        <td>{{ (lr.started_at or '')[:16]|replace('T', ' ') if lr else 'never' }}</td>
+        <td>{% if j.healthy %}<span class="pill ok">ok</span>{% elif j.overdue %}<span class="pill warn">overdue</span>{% else %}<span class="pill bad">{{ lr.status if lr else 'no run' }}</span>{% endif %}</td>
+        <td class="mono">
+          {% if lr and j.key == 'cd_pull' %}{% for l in lr.detail %}{{ l }}<br>{% endfor %}
+          {% elif lr %}+{{ lr.detail.added }} added · {{ lr.detail.updated }} updated{% if lr.detail.removed %} · {{ lr.detail.removed }} removed{% endif %} · {{ lr.detail.active_after }} active
+            {% if lr.build %}<br>→ build {{ lr.build.build_id }} ({{ lr.build.mode }}, {{ lr.build.status }}){% endif %}{% endif %}
+        </td>
+        <td>{{ j.next_run[:16]|replace('T', ' ') }}</td>
+      </tr>
+    {% endfor %}
+    </tbody></table></div>
+
+  <h2>🏗 Recent serving-DB builds</h2>
+  <div class="table-scroll"><table>
+    <thead><tr><th class="num">Build</th><th>Built (UTC)</th><th>Mode</th><th>Status</th><th class="num">Matches</th><th>Data as of</th><th>Changed</th><th>Warnings / failures</th></tr></thead>
+    <tbody>
+    {% for b in jobs.builds[:8] %}
+      <tr>
+        <td class="num">{{ b.build_id }}</td><td>{{ b.built_at[:16]|replace('T', ' ') }}</td>
+        <td>{{ b.mode }}{% if b.notes.escalated %}<br><span class="muted">{{ b.notes.escalated }}</span>{% endif %}</td>
+        <td><span class="pill {{ 'ok' if b.status == 'success' else 'bad' }}">{{ b.status }}</span></td>
+        <td class="num">{{ '{:,}'.format(b.matches or 0) }}</td><td>{{ b.data_as_of }}</td>
+        <td>{{ b.notes.changed if b.notes.changed is not none else '' }}</td>
+        <td>{% for f in b.notes.failures or [] %}<div class="bad">{{ f }}</div>{% endfor %}{% for w in b.notes.warnings or [] %}<div class="warn">{{ w }}</div>{% endfor %}</td>
+      </tr>
+    {% endfor %}
+    </tbody></table></div>
+  {% endif %}
+
+  {% if overview %}{% set c = overview.counts %}
+  <h2>📊 Data at a glance <span class="muted">(build {{ overview.build.build_id }}, data as of {{ overview.build.data_as_of }})</span></h2>
+  <div class="cards">
+    <div class="card"><div class="card-label">Matches</div><div class="card-value">{{ '{:,}'.format(c.matches) }}</div></div>
+    <div class="card"><div class="card-label">Deliveries</div><div class="card-value">{{ '{:,}'.format(overview.build.deliveries or 0) }}</div></div>
+    <div class="card"><div class="card-label">Players</div><div class="card-value">{{ '{:,}'.format(c.players) }}</div></div>
+    <div class="card"><div class="card-label">Teams · venues</div><div class="card-value">{{ c.teams }} · {{ c.venues }}</div></div>
+    <div class="card"><div class="card-label">Serving DB</div><div class="card-value">{{ '%.2f' % ((overview.files.serving_db or 0) / 1e9) }} GB</div><div class="card-sub">raw store {{ '%.0f' % ((overview.files.raw_db or 0) / 1e6) }} MB</div></div>
+  </div>
+  {% for w in overview.warnings %}<div class="banner">⚠ {{ w }}</div>{% endfor %}
+  <div class="grid2" style="margin-top:.75rem">
+    <div class="chart-card"><div class="card-label">Men's matches per year</div><div class="chart-wrap"><canvas id="male"></canvas></div></div>
+    <div class="chart-card"><div class="card-label">Women's matches per year</div><div class="chart-wrap"><canvas id="female"></canvas></div></div>
+  </div>
+  {% endif %}
+
+  <h2>🎯 Golden figures {% if window_to %}<span class="muted">(teams 2016-01-01 → {{ window_to }}; players whole careers)</span>{% endif %}</h2>
+  {% if golden %}
+  <div class="cards">
+    <div class="card"><div class="card-label">Rows</div><div class="card-value">{{ golden.rows }}</div><div class="card-sub">{{ golden.with_reference }} with a reference</div></div>
+    <div class="card"><div class="card-label match">Match</div><div class="card-value match">{{ golden.match }}</div></div>
+    <div class="card"><div class="card-label explained">Explained</div><div class="card-value explained">{{ golden.explained }}</div></div>
+    <div class="card"><div class="card-label stale">Stale</div><div class="card-value stale">{{ golden.stale }}</div><div class="card-sub">played more since checked</div></div>
+    <div class="card"><div class="card-label DIFF">DIFF</div><div class="card-value DIFF">{{ golden.DIFF }}</div><div class="card-sub">unexplained</div></div>
+    <div class="card"><div class="card-label">Suggestions</div><div class="card-value">{{ golden.suggested }}</div><div class="card-sub">{{ golden.suggestion_agrees }} equal ours</div></div>
+  </div>
+  {% endif %}
+  <div class="row" style="margin-top:.75rem">
+    <a class="btn" href="/admin/cricket/golden">Review golden figures →</a>
+    <form method="post" action="/admin/cricket/golden/check"><button type="submit">Run golden check now</button></form>
+    <span class="muted">Runs by itself weekly; results go into the weekly report email.</span>
+  </div>
+  {% if runs %}
+  <div class="table-scroll" style="margin-top:.75rem"><table>
+    <thead><tr><th>Run</th><th>Kind</th><th>Started (UTC)</th><th>Status</th><th>Summary</th></tr></thead>
+    <tbody>{% for r in runs %}<tr><td>{{ r.run_id }}</td><td>{{ r.kind }}</td><td>{{ r.started_at.strftime('%Y-%m-%d %H:%M') }}</td>
+      <td><span class="pill {{ 'ok' if r.status == 'success' else ('warn' if r.status == 'running' else 'bad') }}">{{ r.status }}</span></td>
+      <td class="mono">{% if r.summary %}{% for k, v in r.summary.items() if k not in ('diffs', 'not_found') %}{{ k }} {{ v }}{{ ' · ' if not loop.last }}{% endfor %}{% endif %}{{ r.error or '' }}</td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% endif %}
+  <footer>Match data from Cricsheet (cricsheet.org), ODC-BY 1.0 · suggestions from Wikipedia (CC BY-SA), checked by hand</footer>
+</div>
+<script>
+const data = {{ chart|safe }};
+const colors = {"Test": "#1347A3", "ODI": "#4f8ef7", "T20I": "#FF9933", "Leagues": "#a855f7", "Other": "#475569"};
+for (const g of ["male", "female"]) {
+  const el = document.getElementById(g);
+  if (!el || !window.Chart || !data[g]) continue;
+  new Chart(el, {type: "bar", data: {labels: data[g].years, datasets: Object.entries(data[g].series)
+      .map(([k, v]) => ({label: k, data: v, backgroundColor: colors[k] || "#475569"}))},
+    options: {responsive: true, maintainAspectRatio: false, plugins: {legend: {labels: {color: "#94a3b8"}}},
+      scales: {x: {stacked: true, ticks: {color: "#64748b"}, grid: {display: false}},
+               y: {stacked: true, ticks: {color: "#64748b"}, grid: {color: "#1e2330"}}}}});
+}
+</script>
+</body>
+</html>

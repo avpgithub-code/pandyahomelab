@@ -50,7 +50,8 @@ smoke_api() {  # throwaway container on 127.0.0.1:8049 against the real DB (read
   name=cricstat-api-smoke
   $DOCKER rm -f "$name" >/dev/null 2>&1 || true
   $DOCKER run -d --name "$name" -u 1026:100 --read-only --tmpfs /tmp \
-    -v "$DATA_DB:/cricstat/data/db:ro" -p 127.0.0.1:8049:8000 "$1" >/dev/null 2>&1 || return 1
+    -v "$DATA_DB:/cricstat/data/db:ro" -v "$LOG_DIR:/cricstat/logs:ro" \
+    -p 127.0.0.1:8049:8000 "$1" >/dev/null 2>&1 || return 1
   ok=0
   if wait_healthy http://127.0.0.1:8049/v1/health \
      && curl -fsS --max-time 10 http://127.0.0.1:8049/v1/status >/dev/null 2>&1; then ok=1; fi
@@ -75,7 +76,9 @@ deploy() {
     log "FAIL $svc: cannot pull $remote"; return 1
   fi
   new=$($DOCKER image inspect -f '{{.Id}}' "$remote")
-  old=$($DOCKER image inspect -f '{{.Id}}' "$svc:latest" 2>/dev/null || echo none)
+  # On a first deploy there is no :latest; inspect then fails (and may still print an empty line).
+  old=$($DOCKER image inspect -f '{{.Id}}' "$svc:latest" 2>/dev/null) || old=none
+  [ -n "$old" ] || old=none
   if [ "$new" = "$old" ]; then
     if is_always_on "$svc" && ! curl -fsS --max-time 3 "$API_URL" >/dev/null 2>&1; then
       if restart "$svc"; then log "ok $svc up to date ($(short "$new")); was down, restarted"
@@ -87,7 +90,7 @@ deploy() {
   if ! smoke "$svc" "$remote"; then
     log "FAIL $svc: smoke test failed for $remote ($(short "$new")); kept $(short "$old")"; return 1
   fi
-  [ "$old" != none ] && $DOCKER tag "$svc:latest" "$svc:previous"
+  if [ "$old" != none ]; then $DOCKER tag "$svc:latest" "$svc:previous"; fi
   $DOCKER tag "$remote" "$svc:latest"
   if is_always_on "$svc" && ! restart "$svc"; then
     if [ "$old" != none ]; then

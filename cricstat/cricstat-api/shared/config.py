@@ -18,6 +18,10 @@ class Config:
         self.HOME = os.path.abspath(os.getenv("CRICSTAT_HOME", _DEFAULT_HOME))
         self.SERVING_DB = self._path("CRICSTAT_SERVING_DB", "data/db/cricstat.sqlite")
         self.RAW_DB = self._path("CRICSTAT_RAW_DB", "data/db/raw.sqlite")
+        self.LOG_DIR = self._path("CRICSTAT_LOG_DIR", "logs")
+        self.GOLDEN_SELECTION = self._path("CRICSTAT_GOLDEN_SELECTION",
+                                           "docs/validation/golden-selection.csv")
+        self.NAS_UTC_OFFSET = float(os.getenv("CRICSTAT_NAS_UTC_OFFSET", "-5"))
         self.LOG_LEVEL = os.getenv("CRICSTAT_LOG_LEVEL", "INFO").upper()
         self.CACHE_MAX_AGE = int(os.getenv("CRICSTAT_API_CACHE_MAX_AGE", "300"))
         self.CACHE_SWR = int(os.getenv("CRICSTAT_API_CACHE_SWR", "3600"))

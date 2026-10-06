@@ -121,6 +121,7 @@ Slot names for 3b–3d were set at each sub-phase decision gate (all four in use
 | Pipeline | cricstat-pipeline | 172.25.0.14 | — | none | Batch, run & exit |
 | Models | cricstat-models | 172.25.0.15 | — | none | Batch; also ml-network 172.20.0.40 |
 | Nginx (cricstat leg) | pandya-nginx | 172.25.0.20 | — | — | Added when cricstat-api exists |
+| Admin portal (platform leg) | admin-portal | 172.25.0.31 | — | none | Reads cricstat-api `/v1/admin/*` for `/admin/cricket` (P0.3b, 2026-10-06) |
 
 No Postgres, MinIO or Redis (SQLite files only); `.2–.5` stay unused. Domain index 4 → host ports 8040–8049.
 **Cross-domain legs:** `.40–.49` on any domain network is reserved for flagship batch jobs that need a domain
