@@ -62,7 +62,12 @@ Unit cases prove the rules. The golden set checks the real data **end to end** o
    `docs/validation/golden-figures.csv` with the source and the date checked.
 3. **Tolerance:** an exact match is expected for post-2012 careers. Any difference must be explained, e.g. a match
    missing from Cricsheet, or the Afghanistan exclusion. Unexplained differences block the release.
-4. **Run in CI:** the golden check runs after every full build. The result is published on the Methodology page as
+4. **Draft (2026-10-06):** `docs/validation/golden-selection.csv` + `golden-figures.csv`, produced by
+   `cricstat-pipeline golden`. Teams are compared from 2016-01-01 (fully covered) to the latest data date, so the window
+   moves forward with every build; player careers are compared whole, with a coverage hint where the data is thin.
+   Because the figures keep growing, a checked row is snapshotted; once that player's or team's match count changes it
+   becomes "stale" (re-check), while a figure that moves with an unchanged match count is a regression and fails.
+5. **Run in CI:** the golden check runs after every full build. The result is published on the Methodology page as
    "N of M figures match exactly; differences explained."
 
 ## 4. What the agent sees

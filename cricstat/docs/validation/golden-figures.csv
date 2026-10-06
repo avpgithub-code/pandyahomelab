@@ -1,0 +1,1013 @@
+kind,name,id,gender,scope,window,metric,ours,reference,status,source,checked_on,explanation,ours_at_check,mat_at_check,coverage_note,why
+player,V Kohli,ba607b88,male,TEST,career,Mat,123,,,,,,,,,India men; post-2012 career
+player,V Kohli,ba607b88,male,TEST,career,Inn,210,,,,,,,,,India men; post-2012 career
+player,V Kohli,ba607b88,male,TEST,career,NO,13,,,,,,,,,India men; post-2012 career
+player,V Kohli,ba607b88,male,TEST,career,Runs,9230,,,,,,,,,India men; post-2012 career
+player,V Kohli,ba607b88,male,TEST,career,HS,254*,,,,,,,,,India men; post-2012 career
+player,V Kohli,ba607b88,male,TEST,career,Ave,46.85,,,,,,,,,India men; post-2012 career
+player,V Kohli,ba607b88,male,TEST,career,100,30,,,,,,,,,India men; post-2012 career
+player,V Kohli,ba607b88,male,ODI,career,Mat,311,,,,,,,,,India men; post-2012 career
+player,V Kohli,ba607b88,male,ODI,career,Inn,300,,,,,,,,,India men; post-2012 career
+player,V Kohli,ba607b88,male,ODI,career,NO,46,,,,,,,,,India men; post-2012 career
+player,V Kohli,ba607b88,male,ODI,career,Runs,14819,,,,,,,,,India men; post-2012 career
+player,V Kohli,ba607b88,male,ODI,career,HS,183,,,,,,,,,India men; post-2012 career
+player,V Kohli,ba607b88,male,ODI,career,Ave,58.34,,,,,,,,,India men; post-2012 career
+player,V Kohli,ba607b88,male,ODI,career,100,54,,,,,,,,,India men; post-2012 career
+player,RG Sharma,740742ef,male,ODI,career,Mat,281,,,,,,,,,India men; ODI double hundreds
+player,RG Sharma,740742ef,male,ODI,career,Inn,273,,,,,,,,,India men; ODI double hundreds
+player,RG Sharma,740742ef,male,ODI,career,NO,35,,,,,,,,,India men; ODI double hundreds
+player,RG Sharma,740742ef,male,ODI,career,Runs,11532,,,,,,,,,India men; ODI double hundreds
+player,RG Sharma,740742ef,male,ODI,career,HS,264,,,,,,,,,India men; ODI double hundreds
+player,RG Sharma,740742ef,male,ODI,career,Ave,48.45,,,,,,,,,India men; ODI double hundreds
+player,RG Sharma,740742ef,male,ODI,career,100,33,,,,,,,,,India men; ODI double hundreds
+player,RG Sharma,740742ef,male,ipl,career,Mat,281,,,,,,,,,India men; ODI double hundreds
+player,RG Sharma,740742ef,male,ipl,career,Inn,276,,,,,,,,,India men; ODI double hundreds
+player,RG Sharma,740742ef,male,ipl,career,NO,31,,,,,,,,,India men; ODI double hundreds
+player,RG Sharma,740742ef,male,ipl,career,Runs,7329,,,,,,,,,India men; ODI double hundreds
+player,RG Sharma,740742ef,male,ipl,career,HS,109*,,,,,,,,,India men; ODI double hundreds
+player,RG Sharma,740742ef,male,ipl,career,Ave,29.91,,,,,,,,,India men; ODI double hundreds
+player,RG Sharma,740742ef,male,ipl,career,100,2,,,,,,,,,India men; ODI double hundreds
+player,Shubman Gill,b4b99816,male,TEST,career,Mat,42,,,,,,,,,India men; recent career (full coverage)
+player,Shubman Gill,b4b99816,male,TEST,career,Inn,76,,,,,,,,,India men; recent career (full coverage)
+player,Shubman Gill,b4b99816,male,TEST,career,NO,7,,,,,,,,,India men; recent career (full coverage)
+player,Shubman Gill,b4b99816,male,TEST,career,Runs,2917,,,,,,,,,India men; recent career (full coverage)
+player,Shubman Gill,b4b99816,male,TEST,career,HS,269,,,,,,,,,India men; recent career (full coverage)
+player,Shubman Gill,b4b99816,male,TEST,career,Ave,42.28,,,,,,,,,India men; recent career (full coverage)
+player,Shubman Gill,b4b99816,male,TEST,career,100,10,,,,,,,,,India men; recent career (full coverage)
+player,Shubman Gill,b4b99816,male,ODI,career,Mat,64,,,,,,,,,India men; recent career (full coverage)
+player,Shubman Gill,b4b99816,male,ODI,career,Inn,64,,,,,,,,,India men; recent career (full coverage)
+player,Shubman Gill,b4b99816,male,ODI,career,NO,9,,,,,,,,,India men; recent career (full coverage)
+player,Shubman Gill,b4b99816,male,ODI,career,Runs,3141,,,,,,,,,India men; recent career (full coverage)
+player,Shubman Gill,b4b99816,male,ODI,career,HS,208,,,,,,,,,India men; recent career (full coverage)
+player,Shubman Gill,b4b99816,male,ODI,career,Ave,57.11,,,,,,,,,India men; recent career (full coverage)
+player,Shubman Gill,b4b99816,male,ODI,career,100,8,,,,,,,,,India men; recent career (full coverage)
+player,KL Rahul,b17e2f24,male,TEST,career,Mat,68,,,,,,,,,India men; keeper-batter
+player,KL Rahul,b17e2f24,male,TEST,career,Inn,120,,,,,,,,,India men; keeper-batter
+player,KL Rahul,b17e2f24,male,TEST,career,NO,5,,,,,,,,,India men; keeper-batter
+player,KL Rahul,b17e2f24,male,TEST,career,Runs,4134,,,,,,,,,India men; keeper-batter
+player,KL Rahul,b17e2f24,male,TEST,career,HS,199,,,,,,,,,India men; keeper-batter
+player,KL Rahul,b17e2f24,male,TEST,career,Ave,35.95,,,,,,,,,India men; keeper-batter
+player,KL Rahul,b17e2f24,male,TEST,career,100,11,,,,,,,,,India men; keeper-batter
+player,KL Rahul,b17e2f24,male,TEST,career,Ct,89,,,,,,,,,India men; keeper-batter
+player,KL Rahul,b17e2f24,male,TEST,career,St,0,,,,,,,,,India men; keeper-batter
+player,KL Rahul,b17e2f24,male,ODI,career,Mat,93,,,,,,,,,India men; keeper-batter
+player,KL Rahul,b17e2f24,male,ODI,career,Inn,86,,,,,,,,,India men; keeper-batter
+player,KL Rahul,b17e2f24,male,ODI,career,NO,20,,,,,,,,,India men; keeper-batter
+player,KL Rahul,b17e2f24,male,ODI,career,Runs,3283,,,,,,,,,India men; keeper-batter
+player,KL Rahul,b17e2f24,male,ODI,career,HS,112*,,,,,,,,,India men; keeper-batter
+player,KL Rahul,b17e2f24,male,ODI,career,Ave,49.74,,,,,,,,,India men; keeper-batter
+player,KL Rahul,b17e2f24,male,ODI,career,100,8,,,,,,,,,India men; keeper-batter
+player,KL Rahul,b17e2f24,male,ODI,career,Ct,81,,,,,,,,,India men; keeper-batter
+player,KL Rahul,b17e2f24,male,ODI,career,St,9,,,,,,,,,India men; keeper-batter
+player,SA Yadav,271f83cd,male,T20I,career,Mat,110,,,,,,,,,India men; T20 specialist
+player,SA Yadav,271f83cd,male,T20I,career,Inn,105,,,,,,,,,India men; T20 specialist
+player,SA Yadav,271f83cd,male,T20I,career,NO,17,,,,,,,,,India men; T20 specialist
+player,SA Yadav,271f83cd,male,T20I,career,Runs,3213,,,,,,,,,India men; T20 specialist
+player,SA Yadav,271f83cd,male,T20I,career,HS,117,,,,,,,,,India men; T20 specialist
+player,SA Yadav,271f83cd,male,T20I,career,Ave,36.51,,,,,,,,,India men; T20 specialist
+player,SA Yadav,271f83cd,male,T20I,career,100,4,,,,,,,,,India men; T20 specialist
+player,SA Yadav,271f83cd,male,ipl,career,Mat,179,,,,,,,,,India men; T20 specialist
+player,SA Yadav,271f83cd,male,ipl,career,Inn,164,,,,,,,,,India men; T20 specialist
+player,SA Yadav,271f83cd,male,ipl,career,NO,28,,,,,,,,,India men; T20 specialist
+player,SA Yadav,271f83cd,male,ipl,career,Runs,4581,,,,,,,,,India men; T20 specialist
+player,SA Yadav,271f83cd,male,ipl,career,HS,103*,,,,,,,,,India men; T20 specialist
+player,SA Yadav,271f83cd,male,ipl,career,Ave,33.68,,,,,,,,,India men; T20 specialist
+player,SA Yadav,271f83cd,male,ipl,career,100,2,,,,,,,,,India men; T20 specialist
+player,MS Dhoni,4a8a2e3b,male,ODI,career,Mat,331,,,,,,,,,India men; keeper; career from 2004 (inside coverage)
+player,MS Dhoni,4a8a2e3b,male,ODI,career,Inn,279,,,,,,,,,India men; keeper; career from 2004 (inside coverage)
+player,MS Dhoni,4a8a2e3b,male,ODI,career,NO,79,,,,,,,,,India men; keeper; career from 2004 (inside coverage)
+player,MS Dhoni,4a8a2e3b,male,ODI,career,Runs,10274,,,,,,,,,India men; keeper; career from 2004 (inside coverage)
+player,MS Dhoni,4a8a2e3b,male,ODI,career,HS,148,,,,,,,,,India men; keeper; career from 2004 (inside coverage)
+player,MS Dhoni,4a8a2e3b,male,ODI,career,Ave,51.37,,,,,,,,,India men; keeper; career from 2004 (inside coverage)
+player,MS Dhoni,4a8a2e3b,male,ODI,career,100,9,,,,,,,,,India men; keeper; career from 2004 (inside coverage)
+player,MS Dhoni,4a8a2e3b,male,ODI,career,Ct,308,,,,,,,,,India men; keeper; career from 2004 (inside coverage)
+player,MS Dhoni,4a8a2e3b,male,ODI,career,St,118,,,,,,,,,India men; keeper; career from 2004 (inside coverage)
+player,MS Dhoni,4a8a2e3b,male,ipl,career,Mat,277,,,,,,,,,India men; keeper; career from 2004 (inside coverage)
+player,MS Dhoni,4a8a2e3b,male,ipl,career,Inn,242,,,,,,,,,India men; keeper; career from 2004 (inside coverage)
+player,MS Dhoni,4a8a2e3b,male,ipl,career,NO,100,,,,,,,,,India men; keeper; career from 2004 (inside coverage)
+player,MS Dhoni,4a8a2e3b,male,ipl,career,Runs,5439,,,,,,,,,India men; keeper; career from 2004 (inside coverage)
+player,MS Dhoni,4a8a2e3b,male,ipl,career,HS,84*,,,,,,,,,India men; keeper; career from 2004 (inside coverage)
+player,MS Dhoni,4a8a2e3b,male,ipl,career,Ave,38.30,,,,,,,,,India men; keeper; career from 2004 (inside coverage)
+player,MS Dhoni,4a8a2e3b,male,ipl,career,100,0,,,,,,,,,India men; keeper; career from 2004 (inside coverage)
+player,MS Dhoni,4a8a2e3b,male,ipl,career,Ct,158,,,,,,,,,India men; keeper; career from 2004 (inside coverage)
+player,MS Dhoni,4a8a2e3b,male,ipl,career,St,47,,,,,,,,,India men; keeper; career from 2004 (inside coverage)
+player,V Sehwag,8ba8195d,male,TEST,career,Mat,76,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2001-12-19 in it: it may be incomplete (compare Mat first)",India men; career began 1999 (coverage gap expected)
+player,V Sehwag,8ba8195d,male,TEST,career,Inn,134,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2001-12-19 in it: it may be incomplete (compare Mat first)",India men; career began 1999 (coverage gap expected)
+player,V Sehwag,8ba8195d,male,TEST,career,NO,5,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2001-12-19 in it: it may be incomplete (compare Mat first)",India men; career began 1999 (coverage gap expected)
+player,V Sehwag,8ba8195d,male,TEST,career,Runs,5969,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2001-12-19 in it: it may be incomplete (compare Mat first)",India men; career began 1999 (coverage gap expected)
+player,V Sehwag,8ba8195d,male,TEST,career,HS,319,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2001-12-19 in it: it may be incomplete (compare Mat first)",India men; career began 1999 (coverage gap expected)
+player,V Sehwag,8ba8195d,male,TEST,career,Ave,46.27,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2001-12-19 in it: it may be incomplete (compare Mat first)",India men; career began 1999 (coverage gap expected)
+player,V Sehwag,8ba8195d,male,TEST,career,100,15,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2001-12-19 in it: it may be incomplete (compare Mat first)",India men; career began 1999 (coverage gap expected)
+player,V Sehwag,8ba8195d,male,ODI,career,Mat,169,,,,,,,,"our data has far fewer men's ODI matches per year before 2003, and this career starts 2002-06-29 in it: it may be incomplete (compare Mat first)",India men; career began 1999 (coverage gap expected)
+player,V Sehwag,8ba8195d,male,ODI,career,Inn,165,,,,,,,,"our data has far fewer men's ODI matches per year before 2003, and this career starts 2002-06-29 in it: it may be incomplete (compare Mat first)",India men; career began 1999 (coverage gap expected)
+player,V Sehwag,8ba8195d,male,ODI,career,NO,2,,,,,,,,"our data has far fewer men's ODI matches per year before 2003, and this career starts 2002-06-29 in it: it may be incomplete (compare Mat first)",India men; career began 1999 (coverage gap expected)
+player,V Sehwag,8ba8195d,male,ODI,career,Runs,5763,,,,,,,,"our data has far fewer men's ODI matches per year before 2003, and this career starts 2002-06-29 in it: it may be incomplete (compare Mat first)",India men; career began 1999 (coverage gap expected)
+player,V Sehwag,8ba8195d,male,ODI,career,HS,219,,,,,,,,"our data has far fewer men's ODI matches per year before 2003, and this career starts 2002-06-29 in it: it may be incomplete (compare Mat first)",India men; career began 1999 (coverage gap expected)
+player,V Sehwag,8ba8195d,male,ODI,career,Ave,35.36,,,,,,,,"our data has far fewer men's ODI matches per year before 2003, and this career starts 2002-06-29 in it: it may be incomplete (compare Mat first)",India men; career began 1999 (coverage gap expected)
+player,V Sehwag,8ba8195d,male,ODI,career,100,10,,,,,,,,"our data has far fewer men's ODI matches per year before 2003, and this career starts 2002-06-29 in it: it may be incomplete (compare Mat first)",India men; career began 1999 (coverage gap expected)
+player,SR Tendulkar,d2c2b2d5,male,TEST,career,Mat,82,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2001-12-19 in it: it may be incomplete (compare Mat first)",India men; career 1989-2013 (large coverage gap expected)
+player,SR Tendulkar,d2c2b2d5,male,TEST,career,Inn,139,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2001-12-19 in it: it may be incomplete (compare Mat first)",India men; career 1989-2013 (large coverage gap expected)
+player,SR Tendulkar,d2c2b2d5,male,TEST,career,NO,16,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2001-12-19 in it: it may be incomplete (compare Mat first)",India men; career 1989-2013 (large coverage gap expected)
+player,SR Tendulkar,d2c2b2d5,male,TEST,career,Runs,6416,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2001-12-19 in it: it may be incomplete (compare Mat first)",India men; career 1989-2013 (large coverage gap expected)
+player,SR Tendulkar,d2c2b2d5,male,TEST,career,HS,248*,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2001-12-19 in it: it may be incomplete (compare Mat first)",India men; career 1989-2013 (large coverage gap expected)
+player,SR Tendulkar,d2c2b2d5,male,TEST,career,Ave,52.16,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2001-12-19 in it: it may be incomplete (compare Mat first)",India men; career 1989-2013 (large coverage gap expected)
+player,SR Tendulkar,d2c2b2d5,male,TEST,career,100,18,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2001-12-19 in it: it may be incomplete (compare Mat first)",India men; career 1989-2013 (large coverage gap expected)
+player,SR Tendulkar,d2c2b2d5,male,ODI,career,Mat,146,,,,,,,,"our data has far fewer men's ODI matches per year before 2003, and this career starts 2002-06-29 in it: it may be incomplete (compare Mat first)",India men; career 1989-2013 (large coverage gap expected)
+player,SR Tendulkar,d2c2b2d5,male,ODI,career,Inn,144,,,,,,,,"our data has far fewer men's ODI matches per year before 2003, and this career starts 2002-06-29 in it: it may be incomplete (compare Mat first)",India men; career 1989-2013 (large coverage gap expected)
+player,SR Tendulkar,d2c2b2d5,male,ODI,career,NO,10,,,,,,,,"our data has far fewer men's ODI matches per year before 2003, and this career starts 2002-06-29 in it: it may be incomplete (compare Mat first)",India men; career 1989-2013 (large coverage gap expected)
+player,SR Tendulkar,d2c2b2d5,male,ODI,career,Runs,6433,,,,,,,,"our data has far fewer men's ODI matches per year before 2003, and this career starts 2002-06-29 in it: it may be incomplete (compare Mat first)",India men; career 1989-2013 (large coverage gap expected)
+player,SR Tendulkar,d2c2b2d5,male,ODI,career,HS,200*,,,,,,,,"our data has far fewer men's ODI matches per year before 2003, and this career starts 2002-06-29 in it: it may be incomplete (compare Mat first)",India men; career 1989-2013 (large coverage gap expected)
+player,SR Tendulkar,d2c2b2d5,male,ODI,career,Ave,48.01,,,,,,,,"our data has far fewer men's ODI matches per year before 2003, and this career starts 2002-06-29 in it: it may be incomplete (compare Mat first)",India men; career 1989-2013 (large coverage gap expected)
+player,SR Tendulkar,d2c2b2d5,male,ODI,career,100,16,,,,,,,,"our data has far fewer men's ODI matches per year before 2003, and this career starts 2002-06-29 in it: it may be incomplete (compare Mat first)",India men; career 1989-2013 (large coverage gap expected)
+player,JJ Bumrah,462411b3,male,TEST,career,Mat,52,,,,,,,,,India men; fast bowler
+player,JJ Bumrah,462411b3,male,TEST,career,Bowl Inn,99,,,,,,,,,India men; fast bowler
+player,JJ Bumrah,462411b3,male,TEST,career,Wkts,234,,,,,,,,,India men; fast bowler
+player,JJ Bumrah,462411b3,male,TEST,career,BBI,6/27,,,,,,,,,India men; fast bowler
+player,JJ Bumrah,462411b3,male,TEST,career,Bowl Ave,19.79,,,,,,,,,India men; fast bowler
+player,JJ Bumrah,462411b3,male,TEST,career,Econ,2.77,,,,,,,,,India men; fast bowler
+player,JJ Bumrah,462411b3,male,TEST,career,5w,16,,,,,,,,,India men; fast bowler
+player,JJ Bumrah,462411b3,male,ipl,career,Mat,158,,,,,,,,,India men; fast bowler
+player,JJ Bumrah,462411b3,male,ipl,career,Bowl Inn,158,,,,,,,,,India men; fast bowler
+player,JJ Bumrah,462411b3,male,ipl,career,Wkts,187,,,,,,,,,India men; fast bowler
+player,JJ Bumrah,462411b3,male,ipl,career,BBI,5/10,,,,,,,,,India men; fast bowler
+player,JJ Bumrah,462411b3,male,ipl,career,Bowl Ave,23.75,,,,,,,,,India men; fast bowler
+player,JJ Bumrah,462411b3,male,ipl,career,Econ,7.34,,,,,,,,,India men; fast bowler
+player,JJ Bumrah,462411b3,male,ipl,career,5w,2,,,,,,,,,India men; fast bowler
+player,Mohammed Shami,8cf9814c,male,TEST,career,Mat,64,,,,,,,,,India men; fast bowler
+player,Mohammed Shami,8cf9814c,male,TEST,career,Bowl Inn,122,,,,,,,,,India men; fast bowler
+player,Mohammed Shami,8cf9814c,male,TEST,career,Wkts,229,,,,,,,,,India men; fast bowler
+player,Mohammed Shami,8cf9814c,male,TEST,career,BBI,6/56,,,,,,,,,India men; fast bowler
+player,Mohammed Shami,8cf9814c,male,TEST,career,Bowl Ave,27.71,,,,,,,,,India men; fast bowler
+player,Mohammed Shami,8cf9814c,male,TEST,career,Econ,3.31,,,,,,,,,India men; fast bowler
+player,Mohammed Shami,8cf9814c,male,TEST,career,5w,6,,,,,,,,,India men; fast bowler
+player,Mohammed Shami,8cf9814c,male,ODI,career,Mat,106,,,,,,,,,India men; fast bowler
+player,Mohammed Shami,8cf9814c,male,ODI,career,Bowl Inn,105,,,,,,,,,India men; fast bowler
+player,Mohammed Shami,8cf9814c,male,ODI,career,Wkts,200,,,,,,,,,India men; fast bowler
+player,Mohammed Shami,8cf9814c,male,ODI,career,BBI,7/57,,,,,,,,,India men; fast bowler
+player,Mohammed Shami,8cf9814c,male,ODI,career,Bowl Ave,24.32,,,,,,,,,India men; fast bowler
+player,Mohammed Shami,8cf9814c,male,ODI,career,Econ,5.59,,,,,,,,,India men; fast bowler
+player,Mohammed Shami,8cf9814c,male,ODI,career,5w,6,,,,,,,,,India men; fast bowler
+player,R Ashwin,495d42a5,male,TEST,career,Mat,105,,,,,,,,,India men; off-spinner
+player,R Ashwin,495d42a5,male,TEST,career,Bowl Inn,198,,,,,,,,,India men; off-spinner
+player,R Ashwin,495d42a5,male,TEST,career,Wkts,532,,,,,,,,,India men; off-spinner
+player,R Ashwin,495d42a5,male,TEST,career,BBI,7/59,,,,,,,,,India men; off-spinner
+player,R Ashwin,495d42a5,male,TEST,career,Bowl Ave,24.12,,,,,,,,,India men; off-spinner
+player,R Ashwin,495d42a5,male,TEST,career,Econ,2.84,,,,,,,,,India men; off-spinner
+player,R Ashwin,495d42a5,male,TEST,career,5w,37,,,,,,,,,India men; off-spinner
+player,R Ashwin,495d42a5,male,ipl,career,Mat,219,,,,,,,,,India men; off-spinner
+player,R Ashwin,495d42a5,male,ipl,career,Bowl Inn,217,,,,,,,,,India men; off-spinner
+player,R Ashwin,495d42a5,male,ipl,career,Wkts,187,,,,,,,,,India men; off-spinner
+player,R Ashwin,495d42a5,male,ipl,career,BBI,4/34,,,,,,,,,India men; off-spinner
+player,R Ashwin,495d42a5,male,ipl,career,Bowl Ave,30.22,,,,,,,,,India men; off-spinner
+player,R Ashwin,495d42a5,male,ipl,career,Econ,7.20,,,,,,,,,India men; off-spinner
+player,R Ashwin,495d42a5,male,ipl,career,5w,0,,,,,,,,,India men; off-spinner
+player,RA Jadeja,fe93fd9d,male,TEST,career,Mat,90,,,,,,,,,India men; all-rounder
+player,RA Jadeja,fe93fd9d,male,TEST,career,Inn,135,,,,,,,,,India men; all-rounder
+player,RA Jadeja,fe93fd9d,male,TEST,career,NO,26,,,,,,,,,India men; all-rounder
+player,RA Jadeja,fe93fd9d,male,TEST,career,Runs,4140,,,,,,,,,India men; all-rounder
+player,RA Jadeja,fe93fd9d,male,TEST,career,HS,175*,,,,,,,,,India men; all-rounder
+player,RA Jadeja,fe93fd9d,male,TEST,career,Ave,37.98,,,,,,,,,India men; all-rounder
+player,RA Jadeja,fe93fd9d,male,TEST,career,100,6,,,,,,,,,India men; all-rounder
+player,RA Jadeja,fe93fd9d,male,TEST,career,Bowl Inn,169,,,,,,,,,India men; all-rounder
+player,RA Jadeja,fe93fd9d,male,TEST,career,Wkts,350,,,,,,,,,India men; all-rounder
+player,RA Jadeja,fe93fd9d,male,TEST,career,BBI,7/42,,,,,,,,,India men; all-rounder
+player,RA Jadeja,fe93fd9d,male,TEST,career,Bowl Ave,25.64,,,,,,,,,India men; all-rounder
+player,RA Jadeja,fe93fd9d,male,TEST,career,Econ,2.59,,,,,,,,,India men; all-rounder
+player,RA Jadeja,fe93fd9d,male,TEST,career,5w,15,,,,,,,,,India men; all-rounder
+player,RA Jadeja,fe93fd9d,male,ODI,career,Mat,207,,,,,,,,,India men; all-rounder
+player,RA Jadeja,fe93fd9d,male,ODI,career,Inn,141,,,,,,,,,India men; all-rounder
+player,RA Jadeja,fe93fd9d,male,ODI,career,NO,52,,,,,,,,,India men; all-rounder
+player,RA Jadeja,fe93fd9d,male,ODI,career,Runs,2880,,,,,,,,,India men; all-rounder
+player,RA Jadeja,fe93fd9d,male,ODI,career,HS,87,,,,,,,,,India men; all-rounder
+player,RA Jadeja,fe93fd9d,male,ODI,career,Ave,32.36,,,,,,,,,India men; all-rounder
+player,RA Jadeja,fe93fd9d,male,ODI,career,100,0,,,,,,,,,India men; all-rounder
+player,RA Jadeja,fe93fd9d,male,ODI,career,Bowl Inn,199,,,,,,,,,India men; all-rounder
+player,RA Jadeja,fe93fd9d,male,ODI,career,Wkts,225,,,,,,,,,India men; all-rounder
+player,RA Jadeja,fe93fd9d,male,ODI,career,BBI,5/33,,,,,,,,,India men; all-rounder
+player,RA Jadeja,fe93fd9d,male,ODI,career,Bowl Ave,37.17,,,,,,,,,India men; all-rounder
+player,RA Jadeja,fe93fd9d,male,ODI,career,Econ,4.90,,,,,,,,,India men; all-rounder
+player,RA Jadeja,fe93fd9d,male,ODI,career,5w,2,,,,,,,,,India men; all-rounder
+player,YS Chahal,57ee1fde,male,T20I,career,Mat,80,,,,,,,,,India men; leg-spinner; IPL wickets
+player,YS Chahal,57ee1fde,male,T20I,career,Bowl Inn,79,,,,,,,,,India men; leg-spinner; IPL wickets
+player,YS Chahal,57ee1fde,male,T20I,career,Wkts,96,,,,,,,,,India men; leg-spinner; IPL wickets
+player,YS Chahal,57ee1fde,male,T20I,career,BBI,6/25,,,,,,,,,India men; leg-spinner; IPL wickets
+player,YS Chahal,57ee1fde,male,T20I,career,Bowl Ave,25.09,,,,,,,,,India men; leg-spinner; IPL wickets
+player,YS Chahal,57ee1fde,male,T20I,career,Econ,8.19,,,,,,,,,India men; leg-spinner; IPL wickets
+player,YS Chahal,57ee1fde,male,T20I,career,5w,1,,,,,,,,,India men; leg-spinner; IPL wickets
+player,YS Chahal,57ee1fde,male,ipl,career,Mat,189,,,,,,,,,India men; leg-spinner; IPL wickets
+player,YS Chahal,57ee1fde,male,ipl,career,Bowl Inn,184,,,,,,,,,India men; leg-spinner; IPL wickets
+player,YS Chahal,57ee1fde,male,ipl,career,Wkts,233,,,,,,,,,India men; leg-spinner; IPL wickets
+player,YS Chahal,57ee1fde,male,ipl,career,BBI,5/40,,,,,,,,,India men; leg-spinner; IPL wickets
+player,YS Chahal,57ee1fde,male,ipl,career,Bowl Ave,23.25,,,,,,,,,India men; leg-spinner; IPL wickets
+player,YS Chahal,57ee1fde,male,ipl,career,Econ,8.05,,,,,,,,,India men; leg-spinner; IPL wickets
+player,YS Chahal,57ee1fde,male,ipl,career,5w,1,,,,,,,,,India men; leg-spinner; IPL wickets
+player,M Raj,ec2269dc,female,ODI,career,Mat,76,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2008-05-08 in it: it may be incomplete (compare Mat first)",India women; career 1999-2022 (women's coverage gap expected)
+player,M Raj,ec2269dc,female,ODI,career,Inn,70,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2008-05-08 in it: it may be incomplete (compare Mat first)",India women; career 1999-2022 (women's coverage gap expected)
+player,M Raj,ec2269dc,female,ODI,career,NO,19,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2008-05-08 in it: it may be incomplete (compare Mat first)",India women; career 1999-2022 (women's coverage gap expected)
+player,M Raj,ec2269dc,female,ODI,career,Runs,2949,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2008-05-08 in it: it may be incomplete (compare Mat first)",India women; career 1999-2022 (women's coverage gap expected)
+player,M Raj,ec2269dc,female,ODI,career,HS,125*,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2008-05-08 in it: it may be incomplete (compare Mat first)",India women; career 1999-2022 (women's coverage gap expected)
+player,M Raj,ec2269dc,female,ODI,career,Ave,57.82,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2008-05-08 in it: it may be incomplete (compare Mat first)",India women; career 1999-2022 (women's coverage gap expected)
+player,M Raj,ec2269dc,female,ODI,career,100,2,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2008-05-08 in it: it may be incomplete (compare Mat first)",India women; career 1999-2022 (women's coverage gap expected)
+player,M Raj,ec2269dc,female,T20I,career,Mat,47,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-18 in it: it may be incomplete (compare Mat first)",India women; career 1999-2022 (women's coverage gap expected)
+player,M Raj,ec2269dc,female,T20I,career,Inn,44,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-18 in it: it may be incomplete (compare Mat first)",India women; career 1999-2022 (women's coverage gap expected)
+player,M Raj,ec2269dc,female,T20I,career,NO,10,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-18 in it: it may be incomplete (compare Mat first)",India women; career 1999-2022 (women's coverage gap expected)
+player,M Raj,ec2269dc,female,T20I,career,Runs,1280,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-18 in it: it may be incomplete (compare Mat first)",India women; career 1999-2022 (women's coverage gap expected)
+player,M Raj,ec2269dc,female,T20I,career,HS,97*,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-18 in it: it may be incomplete (compare Mat first)",India women; career 1999-2022 (women's coverage gap expected)
+player,M Raj,ec2269dc,female,T20I,career,Ave,37.65,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-18 in it: it may be incomplete (compare Mat first)",India women; career 1999-2022 (women's coverage gap expected)
+player,M Raj,ec2269dc,female,T20I,career,100,0,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-18 in it: it may be incomplete (compare Mat first)",India women; career 1999-2022 (women's coverage gap expected)
+player,J Goswami,84f1ae7f,female,ODI,career,Mat,66,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2008-05-08 in it: it may be incomplete (compare Mat first)",India women; career 2002-2022 (coverage gap expected)
+player,J Goswami,84f1ae7f,female,ODI,career,Bowl Inn,66,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2008-05-08 in it: it may be incomplete (compare Mat first)",India women; career 2002-2022 (coverage gap expected)
+player,J Goswami,84f1ae7f,female,ODI,career,Wkts,97,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2008-05-08 in it: it may be incomplete (compare Mat first)",India women; career 2002-2022 (coverage gap expected)
+player,J Goswami,84f1ae7f,female,ODI,career,BBI,4/17,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2008-05-08 in it: it may be incomplete (compare Mat first)",India women; career 2002-2022 (coverage gap expected)
+player,J Goswami,84f1ae7f,female,ODI,career,Bowl Ave,21.73,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2008-05-08 in it: it may be incomplete (compare Mat first)",India women; career 2002-2022 (coverage gap expected)
+player,J Goswami,84f1ae7f,female,ODI,career,Econ,3.79,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2008-05-08 in it: it may be incomplete (compare Mat first)",India women; career 2002-2022 (coverage gap expected)
+player,J Goswami,84f1ae7f,female,ODI,career,5w,0,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2008-05-08 in it: it may be incomplete (compare Mat first)",India women; career 2002-2022 (coverage gap expected)
+player,J Goswami,84f1ae7f,female,T20I,career,Mat,30,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-18 in it: it may be incomplete (compare Mat first)",India women; career 2002-2022 (coverage gap expected)
+player,J Goswami,84f1ae7f,female,T20I,career,Bowl Inn,29,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-18 in it: it may be incomplete (compare Mat first)",India women; career 2002-2022 (coverage gap expected)
+player,J Goswami,84f1ae7f,female,T20I,career,Wkts,23,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-18 in it: it may be incomplete (compare Mat first)",India women; career 2002-2022 (coverage gap expected)
+player,J Goswami,84f1ae7f,female,T20I,career,BBI,3/11,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-18 in it: it may be incomplete (compare Mat first)",India women; career 2002-2022 (coverage gap expected)
+player,J Goswami,84f1ae7f,female,T20I,career,Bowl Ave,24.74,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-18 in it: it may be incomplete (compare Mat first)",India women; career 2002-2022 (coverage gap expected)
+player,J Goswami,84f1ae7f,female,T20I,career,Econ,5.79,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-18 in it: it may be incomplete (compare Mat first)",India women; career 2002-2022 (coverage gap expected)
+player,J Goswami,84f1ae7f,female,T20I,career,5w,0,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-18 in it: it may be incomplete (compare Mat first)",India women; career 2002-2022 (coverage gap expected)
+player,H Kaur,53cd8da6,female,ODI,career,Mat,115,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2009-03-10 in it: it may be incomplete (compare Mat first)",India women; captain
+player,H Kaur,53cd8da6,female,ODI,career,Inn,101,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2009-03-10 in it: it may be incomplete (compare Mat first)",India women; captain
+player,H Kaur,53cd8da6,female,ODI,career,NO,17,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2009-03-10 in it: it may be incomplete (compare Mat first)",India women; captain
+player,H Kaur,53cd8da6,female,ODI,career,Runs,3328,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2009-03-10 in it: it may be incomplete (compare Mat first)",India women; captain
+player,H Kaur,53cd8da6,female,ODI,career,HS,171*,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2009-03-10 in it: it may be incomplete (compare Mat first)",India women; captain
+player,H Kaur,53cd8da6,female,ODI,career,Ave,39.62,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2009-03-10 in it: it may be incomplete (compare Mat first)",India women; captain
+player,H Kaur,53cd8da6,female,ODI,career,100,6,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2009-03-10 in it: it may be incomplete (compare Mat first)",India women; captain
+player,H Kaur,53cd8da6,female,T20I,career,Mat,160,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-18 in it: it may be incomplete (compare Mat first)",India women; captain
+player,H Kaur,53cd8da6,female,T20I,career,Inn,144,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-18 in it: it may be incomplete (compare Mat first)",India women; captain
+player,H Kaur,53cd8da6,female,T20I,career,NO,34,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-18 in it: it may be incomplete (compare Mat first)",India women; captain
+player,H Kaur,53cd8da6,female,T20I,career,Runs,3410,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-18 in it: it may be incomplete (compare Mat first)",India women; captain
+player,H Kaur,53cd8da6,female,T20I,career,HS,103,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-18 in it: it may be incomplete (compare Mat first)",India women; captain
+player,H Kaur,53cd8da6,female,T20I,career,Ave,31.00,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-18 in it: it may be incomplete (compare Mat first)",India women; captain
+player,H Kaur,53cd8da6,female,T20I,career,100,1,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-18 in it: it may be incomplete (compare Mat first)",India women; captain
+player,S Mandhana,5d2eda89,female,ODI,career,Mat,99,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2014-08-21 in it: it may be incomplete (compare Mat first)",India women; opener
+player,S Mandhana,5d2eda89,female,ODI,career,Inn,99,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2014-08-21 in it: it may be incomplete (compare Mat first)",India women; opener
+player,S Mandhana,5d2eda89,female,ODI,career,NO,7,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2014-08-21 in it: it may be incomplete (compare Mat first)",India women; opener
+player,S Mandhana,5d2eda89,female,ODI,career,Runs,4728,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2014-08-21 in it: it may be incomplete (compare Mat first)",India women; opener
+player,S Mandhana,5d2eda89,female,ODI,career,HS,136,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2014-08-21 in it: it may be incomplete (compare Mat first)",India women; opener
+player,S Mandhana,5d2eda89,female,ODI,career,Ave,51.39,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2014-08-21 in it: it may be incomplete (compare Mat first)",India women; opener
+player,S Mandhana,5d2eda89,female,ODI,career,100,13,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2014-08-21 in it: it may be incomplete (compare Mat first)",India women; opener
+player,S Mandhana,5d2eda89,female,T20I,career,Mat,159,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2014-03-24 in it: it may be incomplete (compare Mat first)",India women; opener
+player,S Mandhana,5d2eda89,female,T20I,career,Inn,153,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2014-03-24 in it: it may be incomplete (compare Mat first)",India women; opener
+player,S Mandhana,5d2eda89,female,T20I,career,NO,14,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2014-03-24 in it: it may be incomplete (compare Mat first)",India women; opener
+player,S Mandhana,5d2eda89,female,T20I,career,Runs,4440,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2014-03-24 in it: it may be incomplete (compare Mat first)",India women; opener
+player,S Mandhana,5d2eda89,female,T20I,career,HS,124,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2014-03-24 in it: it may be incomplete (compare Mat first)",India women; opener
+player,S Mandhana,5d2eda89,female,T20I,career,Ave,31.94,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2014-03-24 in it: it may be incomplete (compare Mat first)",India women; opener
+player,S Mandhana,5d2eda89,female,T20I,career,100,2,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2014-03-24 in it: it may be incomplete (compare Mat first)",India women; opener
+player,DB Sharma,201fef33,female,ODI,career,Mat,112,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2015-07-06 in it: it may be incomplete (compare Mat first)",India women; all-rounder
+player,DB Sharma,201fef33,female,ODI,career,Inn,95,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2015-07-06 in it: it may be incomplete (compare Mat first)",India women; all-rounder
+player,DB Sharma,201fef33,female,ODI,career,NO,28,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2015-07-06 in it: it may be incomplete (compare Mat first)",India women; all-rounder
+player,DB Sharma,201fef33,female,ODI,career,Runs,2387,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2015-07-06 in it: it may be incomplete (compare Mat first)",India women; all-rounder
+player,DB Sharma,201fef33,female,ODI,career,HS,93,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2015-07-06 in it: it may be incomplete (compare Mat first)",India women; all-rounder
+player,DB Sharma,201fef33,female,ODI,career,Ave,35.63,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2015-07-06 in it: it may be incomplete (compare Mat first)",India women; all-rounder
+player,DB Sharma,201fef33,female,ODI,career,100,0,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2015-07-06 in it: it may be incomplete (compare Mat first)",India women; all-rounder
+player,DB Sharma,201fef33,female,ODI,career,Bowl Inn,111,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2015-07-06 in it: it may be incomplete (compare Mat first)",India women; all-rounder
+player,DB Sharma,201fef33,female,ODI,career,Wkts,146,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2015-07-06 in it: it may be incomplete (compare Mat first)",India women; all-rounder
+player,DB Sharma,201fef33,female,ODI,career,BBI,6/31,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2015-07-06 in it: it may be incomplete (compare Mat first)",India women; all-rounder
+player,DB Sharma,201fef33,female,ODI,career,Bowl Ave,29.27,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2015-07-06 in it: it may be incomplete (compare Mat first)",India women; all-rounder
+player,DB Sharma,201fef33,female,ODI,career,Econ,4.60,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2015-07-06 in it: it may be incomplete (compare Mat first)",India women; all-rounder
+player,DB Sharma,201fef33,female,ODI,career,5w,3,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2015-07-06 in it: it may be incomplete (compare Mat first)",India women; all-rounder
+player,DB Sharma,201fef33,female,T20I,career,Mat,150,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2016-01-31 in it: it may be incomplete (compare Mat first)",India women; all-rounder
+player,DB Sharma,201fef33,female,T20I,career,Inn,99,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2016-01-31 in it: it may be incomplete (compare Mat first)",India women; all-rounder
+player,DB Sharma,201fef33,female,T20I,career,NO,42,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2016-01-31 in it: it may be incomplete (compare Mat first)",India women; all-rounder
+player,DB Sharma,201fef33,female,T20I,career,Runs,1282,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2016-01-31 in it: it may be incomplete (compare Mat first)",India women; all-rounder
+player,DB Sharma,201fef33,female,T20I,career,HS,64,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2016-01-31 in it: it may be incomplete (compare Mat first)",India women; all-rounder
+player,DB Sharma,201fef33,female,T20I,career,Ave,22.49,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2016-01-31 in it: it may be incomplete (compare Mat first)",India women; all-rounder
+player,DB Sharma,201fef33,female,T20I,career,100,0,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2016-01-31 in it: it may be incomplete (compare Mat first)",India women; all-rounder
+player,DB Sharma,201fef33,female,T20I,career,Bowl Inn,147,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2016-01-31 in it: it may be incomplete (compare Mat first)",India women; all-rounder
+player,DB Sharma,201fef33,female,T20I,career,Wkts,178,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2016-01-31 in it: it may be incomplete (compare Mat first)",India women; all-rounder
+player,DB Sharma,201fef33,female,T20I,career,BBI,5/10,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2016-01-31 in it: it may be incomplete (compare Mat first)",India women; all-rounder
+player,DB Sharma,201fef33,female,T20I,career,Bowl Ave,18.71,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2016-01-31 in it: it may be incomplete (compare Mat first)",India women; all-rounder
+player,DB Sharma,201fef33,female,T20I,career,Econ,6.32,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2016-01-31 in it: it may be incomplete (compare Mat first)",India women; all-rounder
+player,DB Sharma,201fef33,female,T20I,career,5w,2,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2016-01-31 in it: it may be incomplete (compare Mat first)",India women; all-rounder
+player,Shafali Verma,d8f59089,female,T20I,career,Mat,116,,,,,,,,,India women; recent career (full coverage)
+player,Shafali Verma,d8f59089,female,T20I,career,Inn,115,,,,,,,,,India women; recent career (full coverage)
+player,Shafali Verma,d8f59089,female,T20I,career,NO,6,,,,,,,,,India women; recent career (full coverage)
+player,Shafali Verma,d8f59089,female,T20I,career,Runs,3137,,,,,,,,,India women; recent career (full coverage)
+player,Shafali Verma,d8f59089,female,T20I,career,HS,81,,,,,,,,,India women; recent career (full coverage)
+player,Shafali Verma,d8f59089,female,T20I,career,Ave,28.78,,,,,,,,,India women; recent career (full coverage)
+player,Shafali Verma,d8f59089,female,T20I,career,100,0,,,,,,,,,India women; recent career (full coverage)
+player,Shafali Verma,d8f59089,female,wpl,career,Mat,37,,,,,,,,,India women; recent career (full coverage)
+player,Shafali Verma,d8f59089,female,wpl,career,Inn,37,,,,,,,,,India women; recent career (full coverage)
+player,Shafali Verma,d8f59089,female,wpl,career,NO,3,,,,,,,,,India women; recent career (full coverage)
+player,Shafali Verma,d8f59089,female,wpl,career,Runs,1124,,,,,,,,,India women; recent career (full coverage)
+player,Shafali Verma,d8f59089,female,wpl,career,HS,84,,,,,,,,,India women; recent career (full coverage)
+player,Shafali Verma,d8f59089,female,wpl,career,Ave,33.06,,,,,,,,,India women; recent career (full coverage)
+player,Shafali Verma,d8f59089,female,wpl,career,100,0,,,,,,,,,India women; recent career (full coverage)
+player,RM Ghosh,721e0199,female,ODI,career,Mat,54,,,,,,,,,India women; keeper
+player,RM Ghosh,721e0199,female,ODI,career,Inn,52,,,,,,,,,India women; keeper
+player,RM Ghosh,721e0199,female,ODI,career,NO,10,,,,,,,,,India women; keeper
+player,RM Ghosh,721e0199,female,ODI,career,Runs,1208,,,,,,,,,India women; keeper
+player,RM Ghosh,721e0199,female,ODI,career,HS,96,,,,,,,,,India women; keeper
+player,RM Ghosh,721e0199,female,ODI,career,Ave,28.76,,,,,,,,,India women; keeper
+player,RM Ghosh,721e0199,female,ODI,career,100,0,,,,,,,,,India women; keeper
+player,RM Ghosh,721e0199,female,ODI,career,Ct,36,,,,,,,,,India women; keeper
+player,RM Ghosh,721e0199,female,ODI,career,St,9,,,,,,,,,India women; keeper
+player,RM Ghosh,721e0199,female,T20I,career,Mat,93,,,,,,,,,India women; keeper
+player,RM Ghosh,721e0199,female,T20I,career,Inn,78,,,,,,,,,India women; keeper
+player,RM Ghosh,721e0199,female,T20I,career,NO,25,,,,,,,,,India women; keeper
+player,RM Ghosh,721e0199,female,T20I,career,Runs,1382,,,,,,,,,India women; keeper
+player,RM Ghosh,721e0199,female,T20I,career,HS,64*,,,,,,,,,India women; keeper
+player,RM Ghosh,721e0199,female,T20I,career,Ave,26.08,,,,,,,,,India women; keeper
+player,RM Ghosh,721e0199,female,T20I,career,100,0,,,,,,,,,India women; keeper
+player,RM Ghosh,721e0199,female,T20I,career,Ct,47,,,,,,,,,India women; keeper
+player,RM Ghosh,721e0199,female,T20I,career,St,41,,,,,,,,,India women; keeper
+player,Renuka Singh,7298db76,female,ODI,career,Mat,29,,,,,,,,,India women; fast bowler
+player,Renuka Singh,7298db76,female,ODI,career,Bowl Inn,29,,,,,,,,,India women; fast bowler
+player,Renuka Singh,7298db76,female,ODI,career,Wkts,42,,,,,,,,,India women; fast bowler
+player,Renuka Singh,7298db76,female,ODI,career,BBI,5/29,,,,,,,,,India women; fast bowler
+player,Renuka Singh,7298db76,female,ODI,career,Bowl Ave,27.57,,,,,,,,,India women; fast bowler
+player,Renuka Singh,7298db76,female,ODI,career,Econ,4.92,,,,,,,,,India women; fast bowler
+player,Renuka Singh,7298db76,female,ODI,career,5w,1,,,,,,,,,India women; fast bowler
+player,Renuka Singh,7298db76,female,T20I,career,Mat,65,,,,,,,,,India women; fast bowler
+player,Renuka Singh,7298db76,female,T20I,career,Bowl Inn,64,,,,,,,,,India women; fast bowler
+player,Renuka Singh,7298db76,female,T20I,career,Wkts,70,,,,,,,,,India women; fast bowler
+player,Renuka Singh,7298db76,female,T20I,career,BBI,5/15,,,,,,,,,India women; fast bowler
+player,Renuka Singh,7298db76,female,T20I,career,Bowl Ave,22.50,,,,,,,,,India women; fast bowler
+player,Renuka Singh,7298db76,female,T20I,career,Econ,6.65,,,,,,,,,India women; fast bowler
+player,Renuka Singh,7298db76,female,T20I,career,5w,1,,,,,,,,,India women; fast bowler
+player,RS Gayakwad,237ec05b,female,ODI,career,Mat,46,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2014-08-21 in it: it may be incomplete (compare Mat first)",India women; left-arm spinner
+player,RS Gayakwad,237ec05b,female,ODI,career,Bowl Inn,46,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2014-08-21 in it: it may be incomplete (compare Mat first)",India women; left-arm spinner
+player,RS Gayakwad,237ec05b,female,ODI,career,Wkts,71,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2014-08-21 in it: it may be incomplete (compare Mat first)",India women; left-arm spinner
+player,RS Gayakwad,237ec05b,female,ODI,career,BBI,5/15,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2014-08-21 in it: it may be incomplete (compare Mat first)",India women; left-arm spinner
+player,RS Gayakwad,237ec05b,female,ODI,career,Bowl Ave,22.44,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2014-08-21 in it: it may be incomplete (compare Mat first)",India women; left-arm spinner
+player,RS Gayakwad,237ec05b,female,ODI,career,Econ,3.89,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2014-08-21 in it: it may be incomplete (compare Mat first)",India women; left-arm spinner
+player,RS Gayakwad,237ec05b,female,ODI,career,5w,1,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2014-08-21 in it: it may be incomplete (compare Mat first)",India women; left-arm spinner
+player,RS Gayakwad,237ec05b,female,T20I,career,Mat,51,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2016-01-29 in it: it may be incomplete (compare Mat first)",India women; left-arm spinner
+player,RS Gayakwad,237ec05b,female,T20I,career,Bowl Inn,48,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2016-01-29 in it: it may be incomplete (compare Mat first)",India women; left-arm spinner
+player,RS Gayakwad,237ec05b,female,T20I,career,Wkts,51,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2016-01-29 in it: it may be incomplete (compare Mat first)",India women; left-arm spinner
+player,RS Gayakwad,237ec05b,female,T20I,career,BBI,3/9,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2016-01-29 in it: it may be incomplete (compare Mat first)",India women; left-arm spinner
+player,RS Gayakwad,237ec05b,female,T20I,career,Bowl Ave,19.80,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2016-01-29 in it: it may be incomplete (compare Mat first)",India women; left-arm spinner
+player,RS Gayakwad,237ec05b,female,T20I,career,Econ,6.16,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2016-01-29 in it: it may be incomplete (compare Mat first)",India women; left-arm spinner
+player,RS Gayakwad,237ec05b,female,T20I,career,5w,0,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2016-01-29 in it: it may be incomplete (compare Mat first)",India women; left-arm spinner
+player,JE Root,a343262c,male,TEST,career,Mat,169,,,,,,,,,England men; most Test runs of the 2010s-2020s
+player,JE Root,a343262c,male,TEST,career,Inn,309,,,,,,,,,England men; most Test runs of the 2010s-2020s
+player,JE Root,a343262c,male,TEST,career,NO,26,,,,,,,,,England men; most Test runs of the 2010s-2020s
+player,JE Root,a343262c,male,TEST,career,Runs,14278,,,,,,,,,England men; most Test runs of the 2010s-2020s
+player,JE Root,a343262c,male,TEST,career,HS,262,,,,,,,,,England men; most Test runs of the 2010s-2020s
+player,JE Root,a343262c,male,TEST,career,Ave,50.45,,,,,,,,,England men; most Test runs of the 2010s-2020s
+player,JE Root,a343262c,male,TEST,career,100,41,,,,,,,,,England men; most Test runs of the 2010s-2020s
+player,JE Root,a343262c,male,ODI,career,Mat,186,,,,,,,,,England men; most Test runs of the 2010s-2020s
+player,JE Root,a343262c,male,ODI,career,Inn,177,,,,,,,,,England men; most Test runs of the 2010s-2020s
+player,JE Root,a343262c,male,ODI,career,NO,28,,,,,,,,,England men; most Test runs of the 2010s-2020s
+player,JE Root,a343262c,male,ODI,career,Runs,7578,,,,,,,,,England men; most Test runs of the 2010s-2020s
+player,JE Root,a343262c,male,ODI,career,HS,166*,,,,,,,,,England men; most Test runs of the 2010s-2020s
+player,JE Root,a343262c,male,ODI,career,Ave,50.86,,,,,,,,,England men; most Test runs of the 2010s-2020s
+player,JE Root,a343262c,male,ODI,career,100,19,,,,,,,,,England men; most Test runs of the 2010s-2020s
+player,JC Buttler,99b75528,male,ODI,career,Mat,197,,,,,,,,,England men; keeper
+player,JC Buttler,99b75528,male,ODI,career,Inn,171,,,,,,,,,England men; keeper
+player,JC Buttler,99b75528,male,ODI,career,NO,31,,,,,,,,,England men; keeper
+player,JC Buttler,99b75528,male,ODI,career,Runs,5529,,,,,,,,,England men; keeper
+player,JC Buttler,99b75528,male,ODI,career,HS,162*,,,,,,,,,England men; keeper
+player,JC Buttler,99b75528,male,ODI,career,Ave,39.49,,,,,,,,,England men; keeper
+player,JC Buttler,99b75528,male,ODI,career,100,11,,,,,,,,,England men; keeper
+player,JC Buttler,99b75528,male,ODI,career,Ct,237,,,,,,,,,England men; keeper
+player,JC Buttler,99b75528,male,ODI,career,St,38,,,,,,,,,England men; keeper
+player,JC Buttler,99b75528,male,T20I,career,Mat,159,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2011-08-31 in it: it may be incomplete (compare Mat first)",England men; keeper
+player,JC Buttler,99b75528,male,T20I,career,Inn,146,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2011-08-31 in it: it may be incomplete (compare Mat first)",England men; keeper
+player,JC Buttler,99b75528,male,T20I,career,NO,23,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2011-08-31 in it: it may be incomplete (compare Mat first)",England men; keeper
+player,JC Buttler,99b75528,male,T20I,career,Runs,4283,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2011-08-31 in it: it may be incomplete (compare Mat first)",England men; keeper
+player,JC Buttler,99b75528,male,T20I,career,HS,131,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2011-08-31 in it: it may be incomplete (compare Mat first)",England men; keeper
+player,JC Buttler,99b75528,male,T20I,career,Ave,34.82,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2011-08-31 in it: it may be incomplete (compare Mat first)",England men; keeper
+player,JC Buttler,99b75528,male,T20I,career,100,2,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2011-08-31 in it: it may be incomplete (compare Mat first)",England men; keeper
+player,JC Buttler,99b75528,male,T20I,career,Ct,96,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2011-08-31 in it: it may be incomplete (compare Mat first)",England men; keeper
+player,JC Buttler,99b75528,male,T20I,career,St,22,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2011-08-31 in it: it may be incomplete (compare Mat first)",England men; keeper
+player,JM Anderson,d12143bf,male,TEST,career,Mat,182,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2003-07-24 in it: it may be incomplete (compare Mat first)",England men; career began 2002/03 (check coverage)
+player,JM Anderson,d12143bf,male,TEST,career,Bowl Inn,339,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2003-07-24 in it: it may be incomplete (compare Mat first)",England men; career began 2002/03 (check coverage)
+player,JM Anderson,d12143bf,male,TEST,career,Wkts,682,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2003-07-24 in it: it may be incomplete (compare Mat first)",England men; career began 2002/03 (check coverage)
+player,JM Anderson,d12143bf,male,TEST,career,BBI,7/42,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2003-07-24 in it: it may be incomplete (compare Mat first)",England men; career began 2002/03 (check coverage)
+player,JM Anderson,d12143bf,male,TEST,career,Bowl Ave,26.41,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2003-07-24 in it: it may be incomplete (compare Mat first)",England men; career began 2002/03 (check coverage)
+player,JM Anderson,d12143bf,male,TEST,career,Econ,2.77,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2003-07-24 in it: it may be incomplete (compare Mat first)",England men; career began 2002/03 (check coverage)
+player,JM Anderson,d12143bf,male,TEST,career,5w,31,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2003-07-24 in it: it may be incomplete (compare Mat first)",England men; career began 2002/03 (check coverage)
+player,JM Anderson,d12143bf,male,ODI,career,Mat,179,,,,,,,,,England men; career began 2002/03 (check coverage)
+player,JM Anderson,d12143bf,male,ODI,career,Bowl Inn,177,,,,,,,,,England men; career began 2002/03 (check coverage)
+player,JM Anderson,d12143bf,male,ODI,career,Wkts,250,,,,,,,,,England men; career began 2002/03 (check coverage)
+player,JM Anderson,d12143bf,male,ODI,career,BBI,5/23,,,,,,,,,England men; career began 2002/03 (check coverage)
+player,JM Anderson,d12143bf,male,ODI,career,Bowl Ave,29.28,,,,,,,,,England men; career began 2002/03 (check coverage)
+player,JM Anderson,d12143bf,male,ODI,career,Econ,4.97,,,,,,,,,England men; career began 2002/03 (check coverage)
+player,JM Anderson,d12143bf,male,ODI,career,5w,2,,,,,,,,,England men; career began 2002/03 (check coverage)
+player,SCJ Broad,eba6a852,male,TEST,career,Mat,167,,,,,,,,,England men; career 2006-2023 (inside coverage)
+player,SCJ Broad,eba6a852,male,TEST,career,Bowl Inn,309,,,,,,,,,England men; career 2006-2023 (inside coverage)
+player,SCJ Broad,eba6a852,male,TEST,career,Wkts,604,,,,,,,,,England men; career 2006-2023 (inside coverage)
+player,SCJ Broad,eba6a852,male,TEST,career,BBI,8/15,,,,,,,,,England men; career 2006-2023 (inside coverage)
+player,SCJ Broad,eba6a852,male,TEST,career,Bowl Ave,27.68,,,,,,,,,England men; career 2006-2023 (inside coverage)
+player,SCJ Broad,eba6a852,male,TEST,career,Econ,2.98,,,,,,,,,England men; career 2006-2023 (inside coverage)
+player,SCJ Broad,eba6a852,male,TEST,career,5w,20,,,,,,,,,England men; career 2006-2023 (inside coverage)
+player,SCJ Broad,eba6a852,male,ODI,career,Mat,117,,,,,,,,,England men; career 2006-2023 (inside coverage)
+player,SCJ Broad,eba6a852,male,ODI,career,Bowl Inn,117,,,,,,,,,England men; career 2006-2023 (inside coverage)
+player,SCJ Broad,eba6a852,male,ODI,career,Wkts,173,,,,,,,,,England men; career 2006-2023 (inside coverage)
+player,SCJ Broad,eba6a852,male,ODI,career,BBI,5/23,,,,,,,,,England men; career 2006-2023 (inside coverage)
+player,SCJ Broad,eba6a852,male,ODI,career,Bowl Ave,30.27,,,,,,,,,England men; career 2006-2023 (inside coverage)
+player,SCJ Broad,eba6a852,male,ODI,career,Econ,5.31,,,,,,,,,England men; career 2006-2023 (inside coverage)
+player,SCJ Broad,eba6a852,male,ODI,career,5w,1,,,,,,,,,England men; career 2006-2023 (inside coverage)
+player,SPD Smith,30a45b23,male,TEST,career,Mat,125,,,,,,,,,Australia men
+player,SPD Smith,30a45b23,male,TEST,career,Inn,223,,,,,,,,,Australia men
+player,SPD Smith,30a45b23,male,TEST,career,NO,28,,,,,,,,,Australia men
+player,SPD Smith,30a45b23,male,TEST,career,Runs,10920,,,,,,,,,Australia men
+player,SPD Smith,30a45b23,male,TEST,career,HS,239,,,,,,,,,Australia men
+player,SPD Smith,30a45b23,male,TEST,career,Ave,56.00,,,,,,,,,Australia men
+player,SPD Smith,30a45b23,male,TEST,career,100,37,,,,,,,,,Australia men
+player,SPD Smith,30a45b23,male,ODI,career,Mat,167,,,,,,,,,Australia men
+player,SPD Smith,30a45b23,male,ODI,career,Inn,151,,,,,,,,,Australia men
+player,SPD Smith,30a45b23,male,ODI,career,NO,19,,,,,,,,,Australia men
+player,SPD Smith,30a45b23,male,ODI,career,Runs,5668,,,,,,,,,Australia men
+player,SPD Smith,30a45b23,male,ODI,career,HS,164,,,,,,,,,Australia men
+player,SPD Smith,30a45b23,male,ODI,career,Ave,42.94,,,,,,,,,Australia men
+player,SPD Smith,30a45b23,male,ODI,career,100,12,,,,,,,,,Australia men
+player,DA Warner,dcce6f09,male,TEST,career,Mat,112,,,,,,,,,Australia men; IPL
+player,DA Warner,dcce6f09,male,TEST,career,Inn,205,,,,,,,,,Australia men; IPL
+player,DA Warner,dcce6f09,male,TEST,career,NO,8,,,,,,,,,Australia men; IPL
+player,DA Warner,dcce6f09,male,TEST,career,Runs,8786,,,,,,,,,Australia men; IPL
+player,DA Warner,dcce6f09,male,TEST,career,HS,335*,,,,,,,,,Australia men; IPL
+player,DA Warner,dcce6f09,male,TEST,career,Ave,44.60,,,,,,,,,Australia men; IPL
+player,DA Warner,dcce6f09,male,TEST,career,100,26,,,,,,,,,Australia men; IPL
+player,DA Warner,dcce6f09,male,ipl,career,Mat,184,,,,,,,,,Australia men; IPL
+player,DA Warner,dcce6f09,male,ipl,career,Inn,184,,,,,,,,,Australia men; IPL
+player,DA Warner,dcce6f09,male,ipl,career,NO,22,,,,,,,,,Australia men; IPL
+player,DA Warner,dcce6f09,male,ipl,career,Runs,6565,,,,,,,,,Australia men; IPL
+player,DA Warner,dcce6f09,male,ipl,career,HS,126,,,,,,,,,Australia men; IPL
+player,DA Warner,dcce6f09,male,ipl,career,Ave,40.52,,,,,,,,,Australia men; IPL
+player,DA Warner,dcce6f09,male,ipl,career,100,4,,,,,,,,,Australia men; IPL
+player,NM Lyon,96a6a7ad,male,TEST,career,Mat,143,,,,,,,,,Australia men; off-spinner
+player,NM Lyon,96a6a7ad,male,TEST,career,Bowl Inn,265,,,,,,,,,Australia men; off-spinner
+player,NM Lyon,96a6a7ad,male,TEST,career,Wkts,571,,,,,,,,,Australia men; off-spinner
+player,NM Lyon,96a6a7ad,male,TEST,career,BBI,8/50,,,,,,,,,Australia men; off-spinner
+player,NM Lyon,96a6a7ad,male,TEST,career,Bowl Ave,30.21,,,,,,,,,Australia men; off-spinner
+player,NM Lyon,96a6a7ad,male,TEST,career,Econ,2.95,,,,,,,,,Australia men; off-spinner
+player,NM Lyon,96a6a7ad,male,TEST,career,5w,24,,,,,,,,,Australia men; off-spinner
+player,PJ Cummins,ded9240e,male,TEST,career,Mat,74,,,,,,,,,Australia men; fast bowler
+player,PJ Cummins,ded9240e,male,TEST,career,Bowl Inn,137,,,,,,,,,Australia men; fast bowler
+player,PJ Cummins,ded9240e,male,TEST,career,Wkts,322,,,,,,,,,Australia men; fast bowler
+player,PJ Cummins,ded9240e,male,TEST,career,BBI,6/23,,,,,,,,,Australia men; fast bowler
+player,PJ Cummins,ded9240e,male,TEST,career,Bowl Ave,21.91,,,,,,,,,Australia men; fast bowler
+player,PJ Cummins,ded9240e,male,TEST,career,Econ,2.89,,,,,,,,,Australia men; fast bowler
+player,PJ Cummins,ded9240e,male,TEST,career,5w,14,,,,,,,,,Australia men; fast bowler
+player,PJ Cummins,ded9240e,male,ODI,career,Mat,88,,,,,,,,,Australia men; fast bowler
+player,PJ Cummins,ded9240e,male,ODI,career,Bowl Inn,88,,,,,,,,,Australia men; fast bowler
+player,PJ Cummins,ded9240e,male,ODI,career,Wkts,140,,,,,,,,,Australia men; fast bowler
+player,PJ Cummins,ded9240e,male,ODI,career,BBI,5/70,,,,,,,,,Australia men; fast bowler
+player,PJ Cummins,ded9240e,male,ODI,career,Bowl Ave,28.78,,,,,,,,,Australia men; fast bowler
+player,PJ Cummins,ded9240e,male,ODI,career,Econ,5.27,,,,,,,,,Australia men; fast bowler
+player,PJ Cummins,ded9240e,male,ODI,career,5w,1,,,,,,,,,Australia men; fast bowler
+player,MA Starc,3fb19989,male,TEST,career,Mat,107,,,,,,,,,Australia men; left-arm fast
+player,MA Starc,3fb19989,male,TEST,career,Bowl Inn,206,,,,,,,,,Australia men; left-arm fast
+player,MA Starc,3fb19989,male,TEST,career,Wkts,445,,,,,,,,,Australia men; left-arm fast
+player,MA Starc,3fb19989,male,TEST,career,BBI,7/58,,,,,,,,,Australia men; left-arm fast
+player,MA Starc,3fb19989,male,TEST,career,Bowl Ave,26.13,,,,,,,,,Australia men; left-arm fast
+player,MA Starc,3fb19989,male,TEST,career,Econ,3.43,,,,,,,,,Australia men; left-arm fast
+player,MA Starc,3fb19989,male,TEST,career,5w,19,,,,,,,,,Australia men; left-arm fast
+player,MA Starc,3fb19989,male,ODI,career,Mat,126,,,,,,,,,Australia men; left-arm fast
+player,MA Starc,3fb19989,male,ODI,career,Bowl Inn,126,,,,,,,,,Australia men; left-arm fast
+player,MA Starc,3fb19989,male,ODI,career,Wkts,239,,,,,,,,,Australia men; left-arm fast
+player,MA Starc,3fb19989,male,ODI,career,BBI,6/28,,,,,,,,,Australia men; left-arm fast
+player,MA Starc,3fb19989,male,ODI,career,Bowl Ave,23.69,,,,,,,,,Australia men; left-arm fast
+player,MA Starc,3fb19989,male,ODI,career,Econ,5.26,,,,,,,,,Australia men; left-arm fast
+player,MA Starc,3fb19989,male,ODI,career,5w,9,,,,,,,,,Australia men; left-arm fast
+player,RT Ponting,7d415ea5,male,TEST,career,Mat,89,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2002-12-26 in it: it may be incomplete (compare Mat first)",Australia men; career 1995-2012 (coverage gap expected)
+player,RT Ponting,7d415ea5,male,TEST,career,Inn,159,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2002-12-26 in it: it may be incomplete (compare Mat first)",Australia men; career 1995-2012 (coverage gap expected)
+player,RT Ponting,7d415ea5,male,TEST,career,NO,11,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2002-12-26 in it: it may be incomplete (compare Mat first)",Australia men; career 1995-2012 (coverage gap expected)
+player,RT Ponting,7d415ea5,male,TEST,career,Runs,6733,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2002-12-26 in it: it may be incomplete (compare Mat first)",Australia men; career 1995-2012 (coverage gap expected)
+player,RT Ponting,7d415ea5,male,TEST,career,HS,221,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2002-12-26 in it: it may be incomplete (compare Mat first)",Australia men; career 1995-2012 (coverage gap expected)
+player,RT Ponting,7d415ea5,male,TEST,career,Ave,45.49,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2002-12-26 in it: it may be incomplete (compare Mat first)",Australia men; career 1995-2012 (coverage gap expected)
+player,RT Ponting,7d415ea5,male,TEST,career,100,17,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2002-12-26 in it: it may be incomplete (compare Mat first)",Australia men; career 1995-2012 (coverage gap expected)
+player,RT Ponting,7d415ea5,male,ODI,career,Mat,198,,,,,,,,,Australia men; career 1995-2012 (coverage gap expected)
+player,RT Ponting,7d415ea5,male,ODI,career,Inn,190,,,,,,,,,Australia men; career 1995-2012 (coverage gap expected)
+player,RT Ponting,7d415ea5,male,ODI,career,NO,17,,,,,,,,,Australia men; career 1995-2012 (coverage gap expected)
+player,RT Ponting,7d415ea5,male,ODI,career,Runs,6979,,,,,,,,,Australia men; career 1995-2012 (coverage gap expected)
+player,RT Ponting,7d415ea5,male,ODI,career,HS,164,,,,,,,,,Australia men; career 1995-2012 (coverage gap expected)
+player,RT Ponting,7d415ea5,male,ODI,career,Ave,40.34,,,,,,,,,Australia men; career 1995-2012 (coverage gap expected)
+player,RT Ponting,7d415ea5,male,ODI,career,100,16,,,,,,,,,Australia men; career 1995-2012 (coverage gap expected)
+player,KS Williamson,d027ba9f,male,TEST,career,Mat,110,,,,,,,,,New Zealand men
+player,KS Williamson,d027ba9f,male,TEST,career,Inn,195,,,,,,,,,New Zealand men
+player,KS Williamson,d027ba9f,male,TEST,career,NO,19,,,,,,,,,New Zealand men
+player,KS Williamson,d027ba9f,male,TEST,career,Runs,9515,,,,,,,,,New Zealand men
+player,KS Williamson,d027ba9f,male,TEST,career,HS,251,,,,,,,,,New Zealand men
+player,KS Williamson,d027ba9f,male,TEST,career,Ave,54.06,,,,,,,,,New Zealand men
+player,KS Williamson,d027ba9f,male,TEST,career,100,33,,,,,,,,,New Zealand men
+player,KS Williamson,d027ba9f,male,ODI,career,Mat,173,,,,,,,,,New Zealand men
+player,KS Williamson,d027ba9f,male,ODI,career,Inn,165,,,,,,,,,New Zealand men
+player,KS Williamson,d027ba9f,male,ODI,career,NO,17,,,,,,,,,New Zealand men
+player,KS Williamson,d027ba9f,male,ODI,career,Runs,7145,,,,,,,,,New Zealand men
+player,KS Williamson,d027ba9f,male,ODI,career,HS,148,,,,,,,,,New Zealand men
+player,KS Williamson,d027ba9f,male,ODI,career,Ave,48.28,,,,,,,,,New Zealand men
+player,KS Williamson,d027ba9f,male,ODI,career,100,15,,,,,,,,,New Zealand men
+player,TA Boult,a818c1be,male,TEST,career,Mat,78,,,,,,,,,New Zealand men; left-arm fast
+player,TA Boult,a818c1be,male,TEST,career,Bowl Inn,149,,,,,,,,,New Zealand men; left-arm fast
+player,TA Boult,a818c1be,male,TEST,career,Wkts,317,,,,,,,,,New Zealand men; left-arm fast
+player,TA Boult,a818c1be,male,TEST,career,BBI,6/30,,,,,,,,,New Zealand men; left-arm fast
+player,TA Boult,a818c1be,male,TEST,career,Bowl Ave,27.50,,,,,,,,,New Zealand men; left-arm fast
+player,TA Boult,a818c1be,male,TEST,career,Econ,3.00,,,,,,,,,New Zealand men; left-arm fast
+player,TA Boult,a818c1be,male,TEST,career,5w,10,,,,,,,,,New Zealand men; left-arm fast
+player,TA Boult,a818c1be,male,ODI,career,Mat,111,,,,,,,,,New Zealand men; left-arm fast
+player,TA Boult,a818c1be,male,ODI,career,Bowl Inn,110,,,,,,,,,New Zealand men; left-arm fast
+player,TA Boult,a818c1be,male,ODI,career,Wkts,206,,,,,,,,,New Zealand men; left-arm fast
+player,TA Boult,a818c1be,male,ODI,career,BBI,7/34,,,,,,,,,New Zealand men; left-arm fast
+player,TA Boult,a818c1be,male,ODI,career,Bowl Ave,24.56,,,,,,,,,New Zealand men; left-arm fast
+player,TA Boult,a818c1be,male,ODI,career,Econ,5.04,,,,,,,,,New Zealand men; left-arm fast
+player,TA Boult,a818c1be,male,ODI,career,5w,6,,,,,,,,,New Zealand men; left-arm fast
+player,Babar Azam,8a75e999,male,ODI,career,Mat,137,,,,,,,,,Pakistan men
+player,Babar Azam,8a75e999,male,ODI,career,Inn,134,,,,,,,,,Pakistan men
+player,Babar Azam,8a75e999,male,ODI,career,NO,16,,,,,,,,,Pakistan men
+player,Babar Azam,8a75e999,male,ODI,career,Runs,6328,,,,,,,,,Pakistan men
+player,Babar Azam,8a75e999,male,ODI,career,HS,158,,,,,,,,,Pakistan men
+player,Babar Azam,8a75e999,male,ODI,career,Ave,53.63,,,,,,,,,Pakistan men
+player,Babar Azam,8a75e999,male,ODI,career,100,20,,,,,,,,,Pakistan men
+player,Babar Azam,8a75e999,male,T20I,career,Mat,142,,,,,,,,,Pakistan men
+player,Babar Azam,8a75e999,male,T20I,career,Inn,134,,,,,,,,,Pakistan men
+player,Babar Azam,8a75e999,male,T20I,career,NO,18,,,,,,,,,Pakistan men
+player,Babar Azam,8a75e999,male,T20I,career,Runs,4545,,,,,,,,,Pakistan men
+player,Babar Azam,8a75e999,male,T20I,career,HS,122,,,,,,,,,Pakistan men
+player,Babar Azam,8a75e999,male,T20I,career,Ave,39.18,,,,,,,,,Pakistan men
+player,Babar Azam,8a75e999,male,T20I,career,100,3,,,,,,,,,Pakistan men
+player,AB de Villiers,c4487b84,male,TEST,career,Mat,106,,,,,,,,,South Africa men; keeper-batter; career 2004-2018
+player,AB de Villiers,c4487b84,male,TEST,career,Inn,175,,,,,,,,,South Africa men; keeper-batter; career 2004-2018
+player,AB de Villiers,c4487b84,male,TEST,career,NO,17,,,,,,,,,South Africa men; keeper-batter; career 2004-2018
+player,AB de Villiers,c4487b84,male,TEST,career,Runs,8182,,,,,,,,,South Africa men; keeper-batter; career 2004-2018
+player,AB de Villiers,c4487b84,male,TEST,career,HS,278*,,,,,,,,,South Africa men; keeper-batter; career 2004-2018
+player,AB de Villiers,c4487b84,male,TEST,career,Ave,51.78,,,,,,,,,South Africa men; keeper-batter; career 2004-2018
+player,AB de Villiers,c4487b84,male,TEST,career,100,21,,,,,,,,,South Africa men; keeper-batter; career 2004-2018
+player,AB de Villiers,c4487b84,male,TEST,career,Ct,210,,,,,,,,,South Africa men; keeper-batter; career 2004-2018
+player,AB de Villiers,c4487b84,male,TEST,career,St,5,,,,,,,,,South Africa men; keeper-batter; career 2004-2018
+player,AB de Villiers,c4487b84,male,ODI,career,Mat,222,,,,,,,,,South Africa men; keeper-batter; career 2004-2018
+player,AB de Villiers,c4487b84,male,ODI,career,Inn,213,,,,,,,,,South Africa men; keeper-batter; career 2004-2018
+player,AB de Villiers,c4487b84,male,ODI,career,NO,38,,,,,,,,,South Africa men; keeper-batter; career 2004-2018
+player,AB de Villiers,c4487b84,male,ODI,career,Runs,9435,,,,,,,,,South Africa men; keeper-batter; career 2004-2018
+player,AB de Villiers,c4487b84,male,ODI,career,HS,176,,,,,,,,,South Africa men; keeper-batter; career 2004-2018
+player,AB de Villiers,c4487b84,male,ODI,career,Ave,53.91,,,,,,,,,South Africa men; keeper-batter; career 2004-2018
+player,AB de Villiers,c4487b84,male,ODI,career,100,25,,,,,,,,,South Africa men; keeper-batter; career 2004-2018
+player,AB de Villiers,c4487b84,male,ODI,career,Ct,174,,,,,,,,,South Africa men; keeper-batter; career 2004-2018
+player,AB de Villiers,c4487b84,male,ODI,career,St,5,,,,,,,,,South Africa men; keeper-batter; career 2004-2018
+player,Q de Kock,372455c4,male,ODI,career,Mat,159,,,,,,,,,South Africa men; keeper
+player,Q de Kock,372455c4,male,ODI,career,Inn,159,,,,,,,,,South Africa men; keeper
+player,Q de Kock,372455c4,male,ODI,career,NO,8,,,,,,,,,South Africa men; keeper
+player,Q de Kock,372455c4,male,ODI,career,Runs,7014,,,,,,,,,South Africa men; keeper
+player,Q de Kock,372455c4,male,ODI,career,HS,178,,,,,,,,,South Africa men; keeper
+player,Q de Kock,372455c4,male,ODI,career,Ave,46.45,,,,,,,,,South Africa men; keeper
+player,Q de Kock,372455c4,male,ODI,career,100,23,,,,,,,,,South Africa men; keeper
+player,Q de Kock,372455c4,male,ODI,career,Ct,207,,,,,,,,,South Africa men; keeper
+player,Q de Kock,372455c4,male,ODI,career,St,18,,,,,,,,,South Africa men; keeper
+player,Q de Kock,372455c4,male,ipl,career,Mat,118,,,,,,,,,South Africa men; keeper
+player,Q de Kock,372455c4,male,ipl,career,Inn,118,,,,,,,,,South Africa men; keeper
+player,Q de Kock,372455c4,male,ipl,career,NO,8,,,,,,,,,South Africa men; keeper
+player,Q de Kock,372455c4,male,ipl,career,Runs,3441,,,,,,,,,South Africa men; keeper
+player,Q de Kock,372455c4,male,ipl,career,HS,140*,,,,,,,,,South Africa men; keeper
+player,Q de Kock,372455c4,male,ipl,career,Ave,31.28,,,,,,,,,South Africa men; keeper
+player,Q de Kock,372455c4,male,ipl,career,100,3,,,,,,,,,South Africa men; keeper
+player,Q de Kock,372455c4,male,ipl,career,Ct,75,,,,,,,,,South Africa men; keeper
+player,Q de Kock,372455c4,male,ipl,career,St,17,,,,,,,,,South Africa men; keeper
+player,JH Kallis,86dc8f2e,male,TEST,career,Mat,89,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2002-12-26 in it: it may be incomplete (compare Mat first)",South Africa men; career 1995-2014 (coverage gap expected)
+player,JH Kallis,86dc8f2e,male,TEST,career,Inn,151,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2002-12-26 in it: it may be incomplete (compare Mat first)",South Africa men; career 1995-2014 (coverage gap expected)
+player,JH Kallis,86dc8f2e,male,TEST,career,NO,14,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2002-12-26 in it: it may be incomplete (compare Mat first)",South Africa men; career 1995-2014 (coverage gap expected)
+player,JH Kallis,86dc8f2e,male,TEST,career,Runs,7405,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2002-12-26 in it: it may be incomplete (compare Mat first)",South Africa men; career 1995-2014 (coverage gap expected)
+player,JH Kallis,86dc8f2e,male,TEST,career,HS,224,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2002-12-26 in it: it may be incomplete (compare Mat first)",South Africa men; career 1995-2014 (coverage gap expected)
+player,JH Kallis,86dc8f2e,male,TEST,career,Ave,54.05,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2002-12-26 in it: it may be incomplete (compare Mat first)",South Africa men; career 1995-2014 (coverage gap expected)
+player,JH Kallis,86dc8f2e,male,TEST,career,100,28,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2002-12-26 in it: it may be incomplete (compare Mat first)",South Africa men; career 1995-2014 (coverage gap expected)
+player,JH Kallis,86dc8f2e,male,TEST,career,Bowl Inn,147,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2002-12-26 in it: it may be incomplete (compare Mat first)",South Africa men; career 1995-2014 (coverage gap expected)
+player,JH Kallis,86dc8f2e,male,TEST,career,Wkts,141,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2002-12-26 in it: it may be incomplete (compare Mat first)",South Africa men; career 1995-2014 (coverage gap expected)
+player,JH Kallis,86dc8f2e,male,TEST,career,BBI,6/54,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2002-12-26 in it: it may be incomplete (compare Mat first)",South Africa men; career 1995-2014 (coverage gap expected)
+player,JH Kallis,86dc8f2e,male,TEST,career,Bowl Ave,34.03,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2002-12-26 in it: it may be incomplete (compare Mat first)",South Africa men; career 1995-2014 (coverage gap expected)
+player,JH Kallis,86dc8f2e,male,TEST,career,Econ,2.91,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2002-12-26 in it: it may be incomplete (compare Mat first)",South Africa men; career 1995-2014 (coverage gap expected)
+player,JH Kallis,86dc8f2e,male,TEST,career,5w,2,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2002-12-26 in it: it may be incomplete (compare Mat first)",South Africa men; career 1995-2014 (coverage gap expected)
+player,JH Kallis,86dc8f2e,male,ODI,career,Mat,138,,,,,,,,,South Africa men; career 1995-2014 (coverage gap expected)
+player,JH Kallis,86dc8f2e,male,ODI,career,Inn,132,,,,,,,,,South Africa men; career 1995-2014 (coverage gap expected)
+player,JH Kallis,86dc8f2e,male,ODI,career,NO,21,,,,,,,,,South Africa men; career 1995-2014 (coverage gap expected)
+player,JH Kallis,86dc8f2e,male,ODI,career,Runs,4929,,,,,,,,,South Africa men; career 1995-2014 (coverage gap expected)
+player,JH Kallis,86dc8f2e,male,ODI,career,HS,128*,,,,,,,,,South Africa men; career 1995-2014 (coverage gap expected)
+player,JH Kallis,86dc8f2e,male,ODI,career,Ave,44.41,,,,,,,,,South Africa men; career 1995-2014 (coverage gap expected)
+player,JH Kallis,86dc8f2e,male,ODI,career,100,8,,,,,,,,,South Africa men; career 1995-2014 (coverage gap expected)
+player,JH Kallis,86dc8f2e,male,ODI,career,Bowl Inn,116,,,,,,,,,South Africa men; career 1995-2014 (coverage gap expected)
+player,JH Kallis,86dc8f2e,male,ODI,career,Wkts,92,,,,,,,,,South Africa men; career 1995-2014 (coverage gap expected)
+player,JH Kallis,86dc8f2e,male,ODI,career,BBI,3/3,,,,,,,,,South Africa men; career 1995-2014 (coverage gap expected)
+player,JH Kallis,86dc8f2e,male,ODI,career,Bowl Ave,35.92,,,,,,,,,South Africa men; career 1995-2014 (coverage gap expected)
+player,JH Kallis,86dc8f2e,male,ODI,career,Econ,5.12,,,,,,,,,South Africa men; career 1995-2014 (coverage gap expected)
+player,JH Kallis,86dc8f2e,male,ODI,career,5w,0,,,,,,,,,South Africa men; career 1995-2014 (coverage gap expected)
+player,KC Sangakkara,6b71e6cf,male,TEST,career,Mat,85,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2003-12-18 in it: it may be incomplete (compare Mat first)",Sri Lanka men; career 2000-2015 (small gap expected)
+player,KC Sangakkara,6b71e6cf,male,TEST,career,Inn,151,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2003-12-18 in it: it may be incomplete (compare Mat first)",Sri Lanka men; career 2000-2015 (small gap expected)
+player,KC Sangakkara,6b71e6cf,male,TEST,career,NO,12,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2003-12-18 in it: it may be incomplete (compare Mat first)",Sri Lanka men; career 2000-2015 (small gap expected)
+player,KC Sangakkara,6b71e6cf,male,TEST,career,Runs,8489,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2003-12-18 in it: it may be incomplete (compare Mat first)",Sri Lanka men; career 2000-2015 (small gap expected)
+player,KC Sangakkara,6b71e6cf,male,TEST,career,HS,319,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2003-12-18 in it: it may be incomplete (compare Mat first)",Sri Lanka men; career 2000-2015 (small gap expected)
+player,KC Sangakkara,6b71e6cf,male,TEST,career,Ave,61.07,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2003-12-18 in it: it may be incomplete (compare Mat first)",Sri Lanka men; career 2000-2015 (small gap expected)
+player,KC Sangakkara,6b71e6cf,male,TEST,career,100,29,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2003-12-18 in it: it may be incomplete (compare Mat first)",Sri Lanka men; career 2000-2015 (small gap expected)
+player,KC Sangakkara,6b71e6cf,male,TEST,career,Ct,70,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2003-12-18 in it: it may be incomplete (compare Mat first)",Sri Lanka men; career 2000-2015 (small gap expected)
+player,KC Sangakkara,6b71e6cf,male,TEST,career,St,10,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2003-12-18 in it: it may be incomplete (compare Mat first)",Sri Lanka men; career 2000-2015 (small gap expected)
+player,KC Sangakkara,6b71e6cf,male,ODI,career,Mat,298,,,,,,,,"our data has far fewer men's ODI matches per year before 2003, and this career starts 2002-06-27 in it: it may be incomplete (compare Mat first)",Sri Lanka men; career 2000-2015 (small gap expected)
+player,KC Sangakkara,6b71e6cf,male,ODI,career,Inn,284,,,,,,,,"our data has far fewer men's ODI matches per year before 2003, and this career starts 2002-06-27 in it: it may be incomplete (compare Mat first)",Sri Lanka men; career 2000-2015 (small gap expected)
+player,KC Sangakkara,6b71e6cf,male,ODI,career,NO,32,,,,,,,,"our data has far fewer men's ODI matches per year before 2003, and this career starts 2002-06-27 in it: it may be incomplete (compare Mat first)",Sri Lanka men; career 2000-2015 (small gap expected)
+player,KC Sangakkara,6b71e6cf,male,ODI,career,Runs,11640,,,,,,,,"our data has far fewer men's ODI matches per year before 2003, and this career starts 2002-06-27 in it: it may be incomplete (compare Mat first)",Sri Lanka men; career 2000-2015 (small gap expected)
+player,KC Sangakkara,6b71e6cf,male,ODI,career,HS,169,,,,,,,,"our data has far fewer men's ODI matches per year before 2003, and this career starts 2002-06-27 in it: it may be incomplete (compare Mat first)",Sri Lanka men; career 2000-2015 (small gap expected)
+player,KC Sangakkara,6b71e6cf,male,ODI,career,Ave,46.19,,,,,,,,"our data has far fewer men's ODI matches per year before 2003, and this career starts 2002-06-27 in it: it may be incomplete (compare Mat first)",Sri Lanka men; career 2000-2015 (small gap expected)
+player,KC Sangakkara,6b71e6cf,male,ODI,career,100,24,,,,,,,,"our data has far fewer men's ODI matches per year before 2003, and this career starts 2002-06-27 in it: it may be incomplete (compare Mat first)",Sri Lanka men; career 2000-2015 (small gap expected)
+player,KC Sangakkara,6b71e6cf,male,ODI,career,Ct,324,,,,,,,,"our data has far fewer men's ODI matches per year before 2003, and this career starts 2002-06-27 in it: it may be incomplete (compare Mat first)",Sri Lanka men; career 2000-2015 (small gap expected)
+player,KC Sangakkara,6b71e6cf,male,ODI,career,St,75,,,,,,,,"our data has far fewer men's ODI matches per year before 2003, and this career starts 2002-06-27 in it: it may be incomplete (compare Mat first)",Sri Lanka men; career 2000-2015 (small gap expected)
+player,M Muralitharan,4ba44e19,male,TEST,career,Mat,38,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2003-12-18 in it: it may be incomplete (compare Mat first)",Sri Lanka men; career 1992-2011 (large gap expected)
+player,M Muralitharan,4ba44e19,male,TEST,career,Bowl Inn,70,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2003-12-18 in it: it may be incomplete (compare Mat first)",Sri Lanka men; career 1992-2011 (large gap expected)
+player,M Muralitharan,4ba44e19,male,TEST,career,Wkts,243,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2003-12-18 in it: it may be incomplete (compare Mat first)",Sri Lanka men; career 1992-2011 (large gap expected)
+player,M Muralitharan,4ba44e19,male,TEST,career,BBI,8/70,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2003-12-18 in it: it may be incomplete (compare Mat first)",Sri Lanka men; career 1992-2011 (large gap expected)
+player,M Muralitharan,4ba44e19,male,TEST,career,Bowl Ave,22.85,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2003-12-18 in it: it may be incomplete (compare Mat first)",Sri Lanka men; career 1992-2011 (large gap expected)
+player,M Muralitharan,4ba44e19,male,TEST,career,Econ,2.79,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2003-12-18 in it: it may be incomplete (compare Mat first)",Sri Lanka men; career 1992-2011 (large gap expected)
+player,M Muralitharan,4ba44e19,male,TEST,career,5w,21,,,,,,,,"our data has far fewer men's TEST matches per year before 2005, and this career starts 2003-12-18 in it: it may be incomplete (compare Mat first)",Sri Lanka men; career 1992-2011 (large gap expected)
+player,M Muralitharan,4ba44e19,male,ODI,career,Mat,126,,,,,,,,,Sri Lanka men; career 1992-2011 (large gap expected)
+player,M Muralitharan,4ba44e19,male,ODI,career,Bowl Inn,124,,,,,,,,,Sri Lanka men; career 1992-2011 (large gap expected)
+player,M Muralitharan,4ba44e19,male,ODI,career,Wkts,190,,,,,,,,,Sri Lanka men; career 1992-2011 (large gap expected)
+player,M Muralitharan,4ba44e19,male,ODI,career,BBI,5/29,,,,,,,,,Sri Lanka men; career 1992-2011 (large gap expected)
+player,M Muralitharan,4ba44e19,male,ODI,career,Bowl Ave,24.10,,,,,,,,,Sri Lanka men; career 1992-2011 (large gap expected)
+player,M Muralitharan,4ba44e19,male,ODI,career,Econ,4.09,,,,,,,,,Sri Lanka men; career 1992-2011 (large gap expected)
+player,M Muralitharan,4ba44e19,male,ODI,career,5w,2,,,,,,,,,Sri Lanka men; career 1992-2011 (large gap expected)
+player,Shakib Al Hasan,7dc35884,male,ODI,career,Mat,211,,,,,,,,,Bangladesh men; all-rounder
+player,Shakib Al Hasan,7dc35884,male,ODI,career,Inn,200,,,,,,,,,Bangladesh men; all-rounder
+player,Shakib Al Hasan,7dc35884,male,ODI,career,NO,26,,,,,,,,,Bangladesh men; all-rounder
+player,Shakib Al Hasan,7dc35884,male,ODI,career,Runs,6638,,,,,,,,,Bangladesh men; all-rounder
+player,Shakib Al Hasan,7dc35884,male,ODI,career,HS,124*,,,,,,,,,Bangladesh men; all-rounder
+player,Shakib Al Hasan,7dc35884,male,ODI,career,Ave,38.15,,,,,,,,,Bangladesh men; all-rounder
+player,Shakib Al Hasan,7dc35884,male,ODI,career,100,8,,,,,,,,,Bangladesh men; all-rounder
+player,Shakib Al Hasan,7dc35884,male,ODI,career,Bowl Inn,205,,,,,,,,,Bangladesh men; all-rounder
+player,Shakib Al Hasan,7dc35884,male,ODI,career,Wkts,258,,,,,,,,,Bangladesh men; all-rounder
+player,Shakib Al Hasan,7dc35884,male,ODI,career,BBI,5/30,,,,,,,,,Bangladesh men; all-rounder
+player,Shakib Al Hasan,7dc35884,male,ODI,career,Bowl Ave,31.55,,,,,,,,,Bangladesh men; all-rounder
+player,Shakib Al Hasan,7dc35884,male,ODI,career,Econ,4.59,,,,,,,,,Bangladesh men; all-rounder
+player,Shakib Al Hasan,7dc35884,male,ODI,career,5w,3,,,,,,,,,Bangladesh men; all-rounder
+player,Shakib Al Hasan,7dc35884,male,T20I,career,Mat,113,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2007-09-13 in it: it may be incomplete (compare Mat first)",Bangladesh men; all-rounder
+player,Shakib Al Hasan,7dc35884,male,T20I,career,Inn,110,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2007-09-13 in it: it may be incomplete (compare Mat first)",Bangladesh men; all-rounder
+player,Shakib Al Hasan,7dc35884,male,T20I,career,NO,13,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2007-09-13 in it: it may be incomplete (compare Mat first)",Bangladesh men; all-rounder
+player,Shakib Al Hasan,7dc35884,male,T20I,career,Runs,2295,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2007-09-13 in it: it may be incomplete (compare Mat first)",Bangladesh men; all-rounder
+player,Shakib Al Hasan,7dc35884,male,T20I,career,HS,84,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2007-09-13 in it: it may be incomplete (compare Mat first)",Bangladesh men; all-rounder
+player,Shakib Al Hasan,7dc35884,male,T20I,career,Ave,23.66,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2007-09-13 in it: it may be incomplete (compare Mat first)",Bangladesh men; all-rounder
+player,Shakib Al Hasan,7dc35884,male,T20I,career,100,0,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2007-09-13 in it: it may be incomplete (compare Mat first)",Bangladesh men; all-rounder
+player,Shakib Al Hasan,7dc35884,male,T20I,career,Bowl Inn,110,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2007-09-13 in it: it may be incomplete (compare Mat first)",Bangladesh men; all-rounder
+player,Shakib Al Hasan,7dc35884,male,T20I,career,Wkts,131,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2007-09-13 in it: it may be incomplete (compare Mat first)",Bangladesh men; all-rounder
+player,Shakib Al Hasan,7dc35884,male,T20I,career,BBI,5/20,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2007-09-13 in it: it may be incomplete (compare Mat first)",Bangladesh men; all-rounder
+player,Shakib Al Hasan,7dc35884,male,T20I,career,Bowl Ave,20.95,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2007-09-13 in it: it may be incomplete (compare Mat first)",Bangladesh men; all-rounder
+player,Shakib Al Hasan,7dc35884,male,T20I,career,Econ,6.92,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2007-09-13 in it: it may be incomplete (compare Mat first)",Bangladesh men; all-rounder
+player,Shakib Al Hasan,7dc35884,male,T20I,career,5w,2,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2007-09-13 in it: it may be incomplete (compare Mat first)",Bangladesh men; all-rounder
+player,CH Gayle,db584dad,male,T20I,career,Mat,79,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2006-02-16 in it: it may be incomplete (compare Mat first)",West Indies men; T20 and IPL
+player,CH Gayle,db584dad,male,T20I,career,Inn,75,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2006-02-16 in it: it may be incomplete (compare Mat first)",West Indies men; T20 and IPL
+player,CH Gayle,db584dad,male,T20I,career,NO,7,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2006-02-16 in it: it may be incomplete (compare Mat first)",West Indies men; T20 and IPL
+player,CH Gayle,db584dad,male,T20I,career,Runs,1899,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2006-02-16 in it: it may be incomplete (compare Mat first)",West Indies men; T20 and IPL
+player,CH Gayle,db584dad,male,T20I,career,HS,117,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2006-02-16 in it: it may be incomplete (compare Mat first)",West Indies men; T20 and IPL
+player,CH Gayle,db584dad,male,T20I,career,Ave,27.93,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2006-02-16 in it: it may be incomplete (compare Mat first)",West Indies men; T20 and IPL
+player,CH Gayle,db584dad,male,T20I,career,100,2,,,,,,,,"our data has far fewer men's T20I matches per year before 2012, and this career starts 2006-02-16 in it: it may be incomplete (compare Mat first)",West Indies men; T20 and IPL
+player,CH Gayle,db584dad,male,ipl,career,Mat,141,,,,,,,,,West Indies men; T20 and IPL
+player,CH Gayle,db584dad,male,ipl,career,Inn,141,,,,,,,,,West Indies men; T20 and IPL
+player,CH Gayle,db584dad,male,ipl,career,NO,16,,,,,,,,,West Indies men; T20 and IPL
+player,CH Gayle,db584dad,male,ipl,career,Runs,4965,,,,,,,,,West Indies men; T20 and IPL
+player,CH Gayle,db584dad,male,ipl,career,HS,175*,,,,,,,,,West Indies men; T20 and IPL
+player,CH Gayle,db584dad,male,ipl,career,Ave,39.72,,,,,,,,,West Indies men; T20 and IPL
+player,CH Gayle,db584dad,male,ipl,career,100,6,,,,,,,,,West Indies men; T20 and IPL
+player,SP Narine,9d430b40,male,T20I,career,Mat,48,,,,,,,,,West Indies men; IPL spinner
+player,SP Narine,9d430b40,male,T20I,career,Bowl Inn,46,,,,,,,,,West Indies men; IPL spinner
+player,SP Narine,9d430b40,male,T20I,career,Wkts,48,,,,,,,,,West Indies men; IPL spinner
+player,SP Narine,9d430b40,male,T20I,career,BBI,4/12,,,,,,,,,West Indies men; IPL spinner
+player,SP Narine,9d430b40,male,T20I,career,Bowl Ave,21.73,,,,,,,,,West Indies men; IPL spinner
+player,SP Narine,9d430b40,male,T20I,career,Econ,6.04,,,,,,,,,West Indies men; IPL spinner
+player,SP Narine,9d430b40,male,T20I,career,5w,0,,,,,,,,,West Indies men; IPL spinner
+player,SP Narine,9d430b40,male,ipl,career,Mat,201,,,,,,,,,West Indies men; IPL spinner
+player,SP Narine,9d430b40,male,ipl,career,Bowl Inn,200,,,,,,,,,West Indies men; IPL spinner
+player,SP Narine,9d430b40,male,ipl,career,Wkts,207,,,,,,,,,West Indies men; IPL spinner
+player,SP Narine,9d430b40,male,ipl,career,BBI,5/19,,,,,,,,,West Indies men; IPL spinner
+player,SP Narine,9d430b40,male,ipl,career,Bowl Ave,25.42,,,,,,,,,West Indies men; IPL spinner
+player,SP Narine,9d430b40,male,ipl,career,Econ,6.79,,,,,,,,,West Indies men; IPL spinner
+player,SP Narine,9d430b40,male,ipl,career,5w,1,,,,,,,,,West Indies men; IPL spinner
+player,Rashid Khan,5f547c8b,male,ipl,career,Mat,153,,,,,,,,,Afghanistan men: internationals withheld by Cricsheet; IPL only
+player,Rashid Khan,5f547c8b,male,ipl,career,Bowl Inn,153,,,,,,,,,Afghanistan men: internationals withheld by Cricsheet; IPL only
+player,Rashid Khan,5f547c8b,male,ipl,career,Wkts,179,,,,,,,,,Afghanistan men: internationals withheld by Cricsheet; IPL only
+player,Rashid Khan,5f547c8b,male,ipl,career,BBI,4/24,,,,,,,,,Afghanistan men: internationals withheld by Cricsheet; IPL only
+player,Rashid Khan,5f547c8b,male,ipl,career,Bowl Ave,23.92,,,,,,,,,Afghanistan men: internationals withheld by Cricsheet; IPL only
+player,Rashid Khan,5f547c8b,male,ipl,career,Econ,7.28,,,,,,,,,Afghanistan men: internationals withheld by Cricsheet; IPL only
+player,Rashid Khan,5f547c8b,male,ipl,career,5w,0,,,,,,,,,Afghanistan men: internationals withheld by Cricsheet; IPL only
+player,MM Lanning,27e003ce,female,ODI,career,Mat,77,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2012-12-12 in it: it may be incomplete (compare Mat first)",Australia women; captain
+player,MM Lanning,27e003ce,female,ODI,career,Inn,76,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2012-12-12 in it: it may be incomplete (compare Mat first)",Australia women; captain
+player,MM Lanning,27e003ce,female,ODI,career,NO,13,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2012-12-12 in it: it may be incomplete (compare Mat first)",Australia women; captain
+player,MM Lanning,27e003ce,female,ODI,career,Runs,3555,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2012-12-12 in it: it may be incomplete (compare Mat first)",Australia women; captain
+player,MM Lanning,27e003ce,female,ODI,career,HS,152*,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2012-12-12 in it: it may be incomplete (compare Mat first)",Australia women; captain
+player,MM Lanning,27e003ce,female,ODI,career,Ave,56.43,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2012-12-12 in it: it may be incomplete (compare Mat first)",Australia women; captain
+player,MM Lanning,27e003ce,female,ODI,career,100,10,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2012-12-12 in it: it may be incomplete (compare Mat first)",Australia women; captain
+player,MM Lanning,27e003ce,female,T20I,career,Mat,100,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2010-12-30 in it: it may be incomplete (compare Mat first)",Australia women; captain
+player,MM Lanning,27e003ce,female,T20I,career,Inn,89,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2010-12-30 in it: it may be incomplete (compare Mat first)",Australia women; captain
+player,MM Lanning,27e003ce,female,T20I,career,NO,25,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2010-12-30 in it: it may be incomplete (compare Mat first)",Australia women; captain
+player,MM Lanning,27e003ce,female,T20I,career,Runs,2538,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2010-12-30 in it: it may be incomplete (compare Mat first)",Australia women; captain
+player,MM Lanning,27e003ce,female,T20I,career,HS,133*,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2010-12-30 in it: it may be incomplete (compare Mat first)",Australia women; captain
+player,MM Lanning,27e003ce,female,T20I,career,Ave,39.66,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2010-12-30 in it: it may be incomplete (compare Mat first)",Australia women; captain
+player,MM Lanning,27e003ce,female,T20I,career,100,1,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2010-12-30 in it: it may be incomplete (compare Mat first)",Australia women; captain
+player,EA Perry,be150fc8,female,ODI,career,Mat,109,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2009-06-29 in it: it may be incomplete (compare Mat first)",Australia women; all-rounder; career from 2007
+player,EA Perry,be150fc8,female,ODI,career,Inn,101,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2009-06-29 in it: it may be incomplete (compare Mat first)",Australia women; all-rounder; career from 2007
+player,EA Perry,be150fc8,female,ODI,career,NO,34,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2009-06-29 in it: it may be incomplete (compare Mat first)",Australia women; all-rounder; career from 2007
+player,EA Perry,be150fc8,female,ODI,career,Runs,3750,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2009-06-29 in it: it may be incomplete (compare Mat first)",Australia women; all-rounder; career from 2007
+player,EA Perry,be150fc8,female,ODI,career,HS,107*,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2009-06-29 in it: it may be incomplete (compare Mat first)",Australia women; all-rounder; career from 2007
+player,EA Perry,be150fc8,female,ODI,career,Ave,55.97,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2009-06-29 in it: it may be incomplete (compare Mat first)",Australia women; all-rounder; career from 2007
+player,EA Perry,be150fc8,female,ODI,career,100,2,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2009-06-29 in it: it may be incomplete (compare Mat first)",Australia women; all-rounder; career from 2007
+player,EA Perry,be150fc8,female,ODI,career,Bowl Inn,81,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2009-06-29 in it: it may be incomplete (compare Mat first)",Australia women; all-rounder; career from 2007
+player,EA Perry,be150fc8,female,ODI,career,Wkts,76,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2009-06-29 in it: it may be incomplete (compare Mat first)",Australia women; all-rounder; career from 2007
+player,EA Perry,be150fc8,female,ODI,career,BBI,7/22,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2009-06-29 in it: it may be incomplete (compare Mat first)",Australia women; all-rounder; career from 2007
+player,EA Perry,be150fc8,female,ODI,career,Bowl Ave,30.41,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2009-06-29 in it: it may be incomplete (compare Mat first)",Australia women; all-rounder; career from 2007
+player,EA Perry,be150fc8,female,ODI,career,Econ,4.53,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2009-06-29 in it: it may be incomplete (compare Mat first)",Australia women; all-rounder; career from 2007
+player,EA Perry,be150fc8,female,ODI,career,5w,1,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2009-06-29 in it: it may be incomplete (compare Mat first)",Australia women; all-rounder; career from 2007
+player,EA Perry,be150fc8,female,T20I,career,Mat,137,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-19 in it: it may be incomplete (compare Mat first)",Australia women; all-rounder; career from 2007
+player,EA Perry,be150fc8,female,T20I,career,Inn,103,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-19 in it: it may be incomplete (compare Mat first)",Australia women; all-rounder; career from 2007
+player,EA Perry,be150fc8,female,T20I,career,NO,35,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-19 in it: it may be incomplete (compare Mat first)",Australia women; all-rounder; career from 2007
+player,EA Perry,be150fc8,female,T20I,career,Runs,2179,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-19 in it: it may be incomplete (compare Mat first)",Australia women; all-rounder; career from 2007
+player,EA Perry,be150fc8,female,T20I,career,HS,75,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-19 in it: it may be incomplete (compare Mat first)",Australia women; all-rounder; career from 2007
+player,EA Perry,be150fc8,female,T20I,career,Ave,32.04,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-19 in it: it may be incomplete (compare Mat first)",Australia women; all-rounder; career from 2007
+player,EA Perry,be150fc8,female,T20I,career,100,0,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-19 in it: it may be incomplete (compare Mat first)",Australia women; all-rounder; career from 2007
+player,EA Perry,be150fc8,female,T20I,career,Bowl Inn,98,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-19 in it: it may be incomplete (compare Mat first)",Australia women; all-rounder; career from 2007
+player,EA Perry,be150fc8,female,T20I,career,Wkts,87,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-19 in it: it may be incomplete (compare Mat first)",Australia women; all-rounder; career from 2007
+player,EA Perry,be150fc8,female,T20I,career,BBI,4/12,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-19 in it: it may be incomplete (compare Mat first)",Australia women; all-rounder; career from 2007
+player,EA Perry,be150fc8,female,T20I,career,Bowl Ave,18.28,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-19 in it: it may be incomplete (compare Mat first)",Australia women; all-rounder; career from 2007
+player,EA Perry,be150fc8,female,T20I,career,Econ,5.90,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-19 in it: it may be incomplete (compare Mat first)",Australia women; all-rounder; career from 2007
+player,EA Perry,be150fc8,female,T20I,career,5w,0,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-19 in it: it may be incomplete (compare Mat first)",Australia women; all-rounder; career from 2007
+player,AJ Healy,321644de,female,ODI,career,Mat,104,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2012-12-14 in it: it may be incomplete (compare Mat first)",Australia women; keeper
+player,AJ Healy,321644de,female,ODI,career,Inn,96,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2012-12-14 in it: it may be incomplete (compare Mat first)",Australia women; keeper
+player,AJ Healy,321644de,female,ODI,career,NO,8,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2012-12-14 in it: it may be incomplete (compare Mat first)",Australia women; keeper
+player,AJ Healy,321644de,female,ODI,career,Runs,3338,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2012-12-14 in it: it may be incomplete (compare Mat first)",Australia women; keeper
+player,AJ Healy,321644de,female,ODI,career,HS,170,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2012-12-14 in it: it may be incomplete (compare Mat first)",Australia women; keeper
+player,AJ Healy,321644de,female,ODI,career,Ave,37.93,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2012-12-14 in it: it may be incomplete (compare Mat first)",Australia women; keeper
+player,AJ Healy,321644de,female,ODI,career,100,7,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2012-12-14 in it: it may be incomplete (compare Mat first)",Australia women; keeper
+player,AJ Healy,321644de,female,ODI,career,Ct,63,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2012-12-14 in it: it may be incomplete (compare Mat first)",Australia women; keeper
+player,AJ Healy,321644de,female,ODI,career,St,33,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2012-12-14 in it: it may be incomplete (compare Mat first)",Australia women; keeper
+player,AJ Healy,321644de,female,T20I,career,Mat,131,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2010-05-13 in it: it may be incomplete (compare Mat first)",Australia women; keeper
+player,AJ Healy,321644de,female,T20I,career,Inn,117,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2010-05-13 in it: it may be incomplete (compare Mat first)",Australia women; keeper
+player,AJ Healy,321644de,female,T20I,career,NO,17,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2010-05-13 in it: it may be incomplete (compare Mat first)",Australia women; keeper
+player,AJ Healy,321644de,female,T20I,career,Runs,2710,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2010-05-13 in it: it may be incomplete (compare Mat first)",Australia women; keeper
+player,AJ Healy,321644de,female,T20I,career,HS,148*,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2010-05-13 in it: it may be incomplete (compare Mat first)",Australia women; keeper
+player,AJ Healy,321644de,female,T20I,career,Ave,27.10,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2010-05-13 in it: it may be incomplete (compare Mat first)",Australia women; keeper
+player,AJ Healy,321644de,female,T20I,career,100,1,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2010-05-13 in it: it may be incomplete (compare Mat first)",Australia women; keeper
+player,AJ Healy,321644de,female,T20I,career,Ct,56,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2010-05-13 in it: it may be incomplete (compare Mat first)",Australia women; keeper
+player,AJ Healy,321644de,female,T20I,career,St,55,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2010-05-13 in it: it may be incomplete (compare Mat first)",Australia women; keeper
+player,NR Sciver,f3a18a0c,female,ODI,career,Mat,113,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2013-07-01 in it: it may be incomplete (compare Mat first)",England women; all-rounder (now Sciver-Brunt)
+player,NR Sciver,f3a18a0c,female,ODI,career,Inn,101,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2013-07-01 in it: it may be incomplete (compare Mat first)",England women; all-rounder (now Sciver-Brunt)
+player,NR Sciver,f3a18a0c,female,ODI,career,NO,18,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2013-07-01 in it: it may be incomplete (compare Mat first)",England women; all-rounder (now Sciver-Brunt)
+player,NR Sciver,f3a18a0c,female,ODI,career,Runs,4013,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2013-07-01 in it: it may be incomplete (compare Mat first)",England women; all-rounder (now Sciver-Brunt)
+player,NR Sciver,f3a18a0c,female,ODI,career,HS,148*,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2013-07-01 in it: it may be incomplete (compare Mat first)",England women; all-rounder (now Sciver-Brunt)
+player,NR Sciver,f3a18a0c,female,ODI,career,Ave,48.35,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2013-07-01 in it: it may be incomplete (compare Mat first)",England women; all-rounder (now Sciver-Brunt)
+player,NR Sciver,f3a18a0c,female,ODI,career,100,10,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2013-07-01 in it: it may be incomplete (compare Mat first)",England women; all-rounder (now Sciver-Brunt)
+player,NR Sciver,f3a18a0c,female,ODI,career,Bowl Inn,97,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2013-07-01 in it: it may be incomplete (compare Mat first)",England women; all-rounder (now Sciver-Brunt)
+player,NR Sciver,f3a18a0c,female,ODI,career,Wkts,79,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2013-07-01 in it: it may be incomplete (compare Mat first)",England women; all-rounder (now Sciver-Brunt)
+player,NR Sciver,f3a18a0c,female,ODI,career,BBI,4/59,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2013-07-01 in it: it may be incomplete (compare Mat first)",England women; all-rounder (now Sciver-Brunt)
+player,NR Sciver,f3a18a0c,female,ODI,career,Bowl Ave,32.19,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2013-07-01 in it: it may be incomplete (compare Mat first)",England women; all-rounder (now Sciver-Brunt)
+player,NR Sciver,f3a18a0c,female,ODI,career,Econ,4.62,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2013-07-01 in it: it may be incomplete (compare Mat first)",England women; all-rounder (now Sciver-Brunt)
+player,NR Sciver,f3a18a0c,female,ODI,career,5w,0,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2013-07-01 in it: it may be incomplete (compare Mat first)",England women; all-rounder (now Sciver-Brunt)
+player,NR Sciver,f3a18a0c,female,T20I,career,Mat,131,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2013-07-05 in it: it may be incomplete (compare Mat first)",England women; all-rounder (now Sciver-Brunt)
+player,NR Sciver,f3a18a0c,female,T20I,career,Inn,126,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2013-07-05 in it: it may be incomplete (compare Mat first)",England women; all-rounder (now Sciver-Brunt)
+player,NR Sciver,f3a18a0c,female,T20I,career,NO,29,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2013-07-05 in it: it may be incomplete (compare Mat first)",England women; all-rounder (now Sciver-Brunt)
+player,NR Sciver,f3a18a0c,female,T20I,career,Runs,3061,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2013-07-05 in it: it may be incomplete (compare Mat first)",England women; all-rounder (now Sciver-Brunt)
+player,NR Sciver,f3a18a0c,female,T20I,career,HS,82,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2013-07-05 in it: it may be incomplete (compare Mat first)",England women; all-rounder (now Sciver-Brunt)
+player,NR Sciver,f3a18a0c,female,T20I,career,Ave,31.56,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2013-07-05 in it: it may be incomplete (compare Mat first)",England women; all-rounder (now Sciver-Brunt)
+player,NR Sciver,f3a18a0c,female,T20I,career,100,0,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2013-07-05 in it: it may be incomplete (compare Mat first)",England women; all-rounder (now Sciver-Brunt)
+player,NR Sciver,f3a18a0c,female,T20I,career,Bowl Inn,110,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2013-07-05 in it: it may be incomplete (compare Mat first)",England women; all-rounder (now Sciver-Brunt)
+player,NR Sciver,f3a18a0c,female,T20I,career,Wkts,80,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2013-07-05 in it: it may be incomplete (compare Mat first)",England women; all-rounder (now Sciver-Brunt)
+player,NR Sciver,f3a18a0c,female,T20I,career,BBI,4/15,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2013-07-05 in it: it may be incomplete (compare Mat first)",England women; all-rounder (now Sciver-Brunt)
+player,NR Sciver,f3a18a0c,female,T20I,career,Bowl Ave,24.34,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2013-07-05 in it: it may be incomplete (compare Mat first)",England women; all-rounder (now Sciver-Brunt)
+player,NR Sciver,f3a18a0c,female,T20I,career,Econ,6.62,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2013-07-05 in it: it may be incomplete (compare Mat first)",England women; all-rounder (now Sciver-Brunt)
+player,NR Sciver,f3a18a0c,female,T20I,career,5w,0,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2013-07-05 in it: it may be incomplete (compare Mat first)",England women; all-rounder (now Sciver-Brunt)
+player,S Ecclestone,cdb82f1c,female,ODI,career,Mat,79,,,,,,,,,England women; left-arm spinner
+player,S Ecclestone,cdb82f1c,female,ODI,career,Bowl Inn,78,,,,,,,,,England women; left-arm spinner
+player,S Ecclestone,cdb82f1c,female,ODI,career,Wkts,133,,,,,,,,,England women; left-arm spinner
+player,S Ecclestone,cdb82f1c,female,ODI,career,BBI,6/36,,,,,,,,,England women; left-arm spinner
+player,S Ecclestone,cdb82f1c,female,ODI,career,Bowl Ave,19.62,,,,,,,,,England women; left-arm spinner
+player,S Ecclestone,cdb82f1c,female,ODI,career,Econ,3.71,,,,,,,,,England women; left-arm spinner
+player,S Ecclestone,cdb82f1c,female,ODI,career,5w,2,,,,,,,,,England women; left-arm spinner
+player,S Ecclestone,cdb82f1c,female,T20I,career,Mat,113,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2016-07-03 in it: it may be incomplete (compare Mat first)",England women; left-arm spinner
+player,S Ecclestone,cdb82f1c,female,T20I,career,Bowl Inn,112,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2016-07-03 in it: it may be incomplete (compare Mat first)",England women; left-arm spinner
+player,S Ecclestone,cdb82f1c,female,T20I,career,Wkts,154,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2016-07-03 in it: it may be incomplete (compare Mat first)",England women; left-arm spinner
+player,S Ecclestone,cdb82f1c,female,T20I,career,BBI,4/18,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2016-07-03 in it: it may be incomplete (compare Mat first)",England women; left-arm spinner
+player,S Ecclestone,cdb82f1c,female,T20I,career,Bowl Ave,16.46,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2016-07-03 in it: it may be incomplete (compare Mat first)",England women; left-arm spinner
+player,S Ecclestone,cdb82f1c,female,T20I,career,Econ,6.04,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2016-07-03 in it: it may be incomplete (compare Mat first)",England women; left-arm spinner
+player,S Ecclestone,cdb82f1c,female,T20I,career,5w,0,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2016-07-03 in it: it may be incomplete (compare Mat first)",England women; left-arm spinner
+player,CM Edwards,d4188b60,female,ODI,career,Mat,27,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2009-03-10 in it: it may be incomplete (compare Mat first)",England women; career 1996-2016 (coverage gap expected)
+player,CM Edwards,d4188b60,female,ODI,career,Inn,26,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2009-03-10 in it: it may be incomplete (compare Mat first)",England women; career 1996-2016 (coverage gap expected)
+player,CM Edwards,d4188b60,female,ODI,career,NO,2,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2009-03-10 in it: it may be incomplete (compare Mat first)",England women; career 1996-2016 (coverage gap expected)
+player,CM Edwards,d4188b60,female,ODI,career,Runs,1054,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2009-03-10 in it: it may be incomplete (compare Mat first)",England women; career 1996-2016 (coverage gap expected)
+player,CM Edwards,d4188b60,female,ODI,career,HS,138,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2009-03-10 in it: it may be incomplete (compare Mat first)",England women; career 1996-2016 (coverage gap expected)
+player,CM Edwards,d4188b60,female,ODI,career,Ave,43.92,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2009-03-10 in it: it may be incomplete (compare Mat first)",England women; career 1996-2016 (coverage gap expected)
+player,CM Edwards,d4188b60,female,ODI,career,100,4,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2009-03-10 in it: it may be incomplete (compare Mat first)",England women; career 1996-2016 (coverage gap expected)
+player,CM Edwards,d4188b60,female,T20I,career,Mat,46,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-19 in it: it may be incomplete (compare Mat first)",England women; career 1996-2016 (coverage gap expected)
+player,CM Edwards,d4188b60,female,T20I,career,Inn,45,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-19 in it: it may be incomplete (compare Mat first)",England women; career 1996-2016 (coverage gap expected)
+player,CM Edwards,d4188b60,female,T20I,career,NO,6,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-19 in it: it may be incomplete (compare Mat first)",England women; career 1996-2016 (coverage gap expected)
+player,CM Edwards,d4188b60,female,T20I,career,Runs,1090,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-19 in it: it may be incomplete (compare Mat first)",England women; career 1996-2016 (coverage gap expected)
+player,CM Edwards,d4188b60,female,T20I,career,HS,77*,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-19 in it: it may be incomplete (compare Mat first)",England women; career 1996-2016 (coverage gap expected)
+player,CM Edwards,d4188b60,female,T20I,career,Ave,27.95,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-19 in it: it may be incomplete (compare Mat first)",England women; career 1996-2016 (coverage gap expected)
+player,CM Edwards,d4188b60,female,T20I,career,100,0,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-19 in it: it may be incomplete (compare Mat first)",England women; career 1996-2016 (coverage gap expected)
+player,SW Bates,89bbc67a,female,ODI,career,Mat,107,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2007-03-05 in it: it may be incomplete (compare Mat first)",New Zealand women
+player,SW Bates,89bbc67a,female,ODI,career,Inn,102,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2007-03-05 in it: it may be incomplete (compare Mat first)",New Zealand women
+player,SW Bates,89bbc67a,female,ODI,career,NO,9,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2007-03-05 in it: it may be incomplete (compare Mat first)",New Zealand women
+player,SW Bates,89bbc67a,female,ODI,career,Runs,3389,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2007-03-05 in it: it may be incomplete (compare Mat first)",New Zealand women
+player,SW Bates,89bbc67a,female,ODI,career,HS,126,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2007-03-05 in it: it may be incomplete (compare Mat first)",New Zealand women
+player,SW Bates,89bbc67a,female,ODI,career,Ave,36.44,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2007-03-05 in it: it may be incomplete (compare Mat first)",New Zealand women
+player,SW Bates,89bbc67a,female,ODI,career,100,6,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2007-03-05 in it: it may be incomplete (compare Mat first)",New Zealand women
+player,SW Bates,89bbc67a,female,T20I,career,Mat,123,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-18 in it: it may be incomplete (compare Mat first)",New Zealand women
+player,SW Bates,89bbc67a,female,T20I,career,Inn,117,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-18 in it: it may be incomplete (compare Mat first)",New Zealand women
+player,SW Bates,89bbc67a,female,T20I,career,NO,11,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-18 in it: it may be incomplete (compare Mat first)",New Zealand women
+player,SW Bates,89bbc67a,female,T20I,career,Runs,3207,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-18 in it: it may be incomplete (compare Mat first)",New Zealand women
+player,SW Bates,89bbc67a,female,T20I,career,HS,124*,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-18 in it: it may be incomplete (compare Mat first)",New Zealand women
+player,SW Bates,89bbc67a,female,T20I,career,Ave,30.25,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-18 in it: it may be incomplete (compare Mat first)",New Zealand women
+player,SW Bates,89bbc67a,female,T20I,career,100,1,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2009-06-18 in it: it may be incomplete (compare Mat first)",New Zealand women
+player,L Wolvaardt,e60f81c9,female,ODI,career,Mat,120,,,,,,,,,South Africa women; captain
+player,L Wolvaardt,e60f81c9,female,ODI,career,Inn,119,,,,,,,,,South Africa women; captain
+player,L Wolvaardt,e60f81c9,female,ODI,career,NO,16,,,,,,,,,South Africa women; captain
+player,L Wolvaardt,e60f81c9,female,ODI,career,Runs,5384,,,,,,,,,South Africa women; captain
+player,L Wolvaardt,e60f81c9,female,ODI,career,HS,184*,,,,,,,,,South Africa women; captain
+player,L Wolvaardt,e60f81c9,female,ODI,career,Ave,52.27,,,,,,,,,South Africa women; captain
+player,L Wolvaardt,e60f81c9,female,ODI,career,100,12,,,,,,,,,South Africa women; captain
+player,L Wolvaardt,e60f81c9,female,T20I,career,Mat,104,,,,,,,,,South Africa women; captain
+player,L Wolvaardt,e60f81c9,female,T20I,career,Inn,98,,,,,,,,,South Africa women; captain
+player,L Wolvaardt,e60f81c9,female,T20I,career,NO,23,,,,,,,,,South Africa women; captain
+player,L Wolvaardt,e60f81c9,female,T20I,career,Runs,2977,,,,,,,,,South Africa women; captain
+player,L Wolvaardt,e60f81c9,female,T20I,career,HS,126*,,,,,,,,,South Africa women; captain
+player,L Wolvaardt,e60f81c9,female,T20I,career,Ave,39.69,,,,,,,,,South Africa women; captain
+player,L Wolvaardt,e60f81c9,female,T20I,career,100,4,,,,,,,,,South Africa women; captain
+player,HK Matthews,d32cf49a,female,ODI,career,Mat,87,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2014-11-11 in it: it may be incomplete (compare Mat first)",West Indies women; all-rounder
+player,HK Matthews,d32cf49a,female,ODI,career,Inn,85,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2014-11-11 in it: it may be incomplete (compare Mat first)",West Indies women; all-rounder
+player,HK Matthews,d32cf49a,female,ODI,career,NO,5,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2014-11-11 in it: it may be incomplete (compare Mat first)",West Indies women; all-rounder
+player,HK Matthews,d32cf49a,female,ODI,career,Runs,3204,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2014-11-11 in it: it may be incomplete (compare Mat first)",West Indies women; all-rounder
+player,HK Matthews,d32cf49a,female,ODI,career,HS,159*,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2014-11-11 in it: it may be incomplete (compare Mat first)",West Indies women; all-rounder
+player,HK Matthews,d32cf49a,female,ODI,career,Ave,40.05,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2014-11-11 in it: it may be incomplete (compare Mat first)",West Indies women; all-rounder
+player,HK Matthews,d32cf49a,female,ODI,career,100,12,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2014-11-11 in it: it may be incomplete (compare Mat first)",West Indies women; all-rounder
+player,HK Matthews,d32cf49a,female,ODI,career,Bowl Inn,83,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2014-11-11 in it: it may be incomplete (compare Mat first)",West Indies women; all-rounder
+player,HK Matthews,d32cf49a,female,ODI,career,Wkts,116,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2014-11-11 in it: it may be incomplete (compare Mat first)",West Indies women; all-rounder
+player,HK Matthews,d32cf49a,female,ODI,career,BBI,4/15,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2014-11-11 in it: it may be incomplete (compare Mat first)",West Indies women; all-rounder
+player,HK Matthews,d32cf49a,female,ODI,career,Bowl Ave,24.95,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2014-11-11 in it: it may be incomplete (compare Mat first)",West Indies women; all-rounder
+player,HK Matthews,d32cf49a,female,ODI,career,Econ,4.33,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2014-11-11 in it: it may be incomplete (compare Mat first)",West Indies women; all-rounder
+player,HK Matthews,d32cf49a,female,ODI,career,5w,0,,,,,,,,"our data has far fewer women's ODI matches per year before 2016, and this career starts 2014-11-11 in it: it may be incomplete (compare Mat first)",West Indies women; all-rounder
+player,HK Matthews,d32cf49a,female,T20I,career,Mat,115,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2014-11-02 in it: it may be incomplete (compare Mat first)",West Indies women; all-rounder
+player,HK Matthews,d32cf49a,female,T20I,career,Inn,115,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2014-11-02 in it: it may be incomplete (compare Mat first)",West Indies women; all-rounder
+player,HK Matthews,d32cf49a,female,T20I,career,NO,11,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2014-11-02 in it: it may be incomplete (compare Mat first)",West Indies women; all-rounder
+player,HK Matthews,d32cf49a,female,T20I,career,Runs,3188,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2014-11-02 in it: it may be incomplete (compare Mat first)",West Indies women; all-rounder
+player,HK Matthews,d32cf49a,female,T20I,career,HS,132,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2014-11-02 in it: it may be incomplete (compare Mat first)",West Indies women; all-rounder
+player,HK Matthews,d32cf49a,female,T20I,career,Ave,30.65,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2014-11-02 in it: it may be incomplete (compare Mat first)",West Indies women; all-rounder
+player,HK Matthews,d32cf49a,female,T20I,career,100,3,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2014-11-02 in it: it may be incomplete (compare Mat first)",West Indies women; all-rounder
+player,HK Matthews,d32cf49a,female,T20I,career,Bowl Inn,109,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2014-11-02 in it: it may be incomplete (compare Mat first)",West Indies women; all-rounder
+player,HK Matthews,d32cf49a,female,T20I,career,Wkts,119,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2014-11-02 in it: it may be incomplete (compare Mat first)",West Indies women; all-rounder
+player,HK Matthews,d32cf49a,female,T20I,career,BBI,4/10,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2014-11-02 in it: it may be incomplete (compare Mat first)",West Indies women; all-rounder
+player,HK Matthews,d32cf49a,female,T20I,career,Bowl Ave,19.14,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2014-11-02 in it: it may be incomplete (compare Mat first)",West Indies women; all-rounder
+player,HK Matthews,d32cf49a,female,T20I,career,Econ,6.29,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2014-11-02 in it: it may be incomplete (compare Mat first)",West Indies women; all-rounder
+player,HK Matthews,d32cf49a,female,T20I,career,5w,0,,,,,,,,"our data has far fewer women's T20I matches per year before 2018, and this career starts 2014-11-02 in it: it may be incomplete (compare Mat first)",West Indies women; all-rounder
+team,India men,India|male|international,male,TEST,2016-01-01..2026-09-17,Mat,104,,,,,,,,,featured team
+team,India men,India|male|international,male,TEST,2016-01-01..2026-09-17,Won,58,,,,,,,,,featured team
+team,India men,India|male|international,male,TEST,2016-01-01..2026-09-17,Lost,31,,,,,,,,,featured team
+team,India men,India|male|international,male,TEST,2016-01-01..2026-09-17,Tied,0,,,,,,,,,featured team
+team,India men,India|male|international,male,TEST,2016-01-01..2026-09-17,Drawn,15,,,,,,,,,featured team
+team,India men,India|male|international,male,TEST,2016-01-01..2026-09-17,NR,0,,,,,,,,,featured team
+team,India men,India|male|international,male,TEST,2016-01-01..2026-09-17,Win %,55.77,,,,,,,,,featured team
+team,India men,India|male|international,male,ODI,2016-01-01..2026-09-17,Mat,184,,,,,,,,,featured team
+team,India men,India|male|international,male,ODI,2016-01-01..2026-09-17,Won,120,,,,,,,,,featured team
+team,India men,India|male|international,male,ODI,2016-01-01..2026-09-17,Lost,57,,,,,,,,,featured team
+team,India men,India|male|international,male,ODI,2016-01-01..2026-09-17,Tied,2,,,,,,,,,featured team
+team,India men,India|male|international,male,ODI,2016-01-01..2026-09-17,Drawn,0,,,,,,,,,featured team
+team,India men,India|male|international,male,ODI,2016-01-01..2026-09-17,NR,5,,,,,,,,,featured team
+team,India men,India|male|international,male,ODI,2016-01-01..2026-09-17,Win %,67.04,,,,,,,,,featured team
+team,India men,India|male|international,male,T20I,2016-01-01..2026-09-17,Mat,222,,,,,,,,,featured team
+team,India men,India|male|international,male,T20I,2016-01-01..2026-09-17,Won,154,,,,,,,,,featured team
+team,India men,India|male|international,male,T20I,2016-01-01..2026-09-17,Lost,57,,,,,,,,,featured team
+team,India men,India|male|international,male,T20I,2016-01-01..2026-09-17,Tied,5,,,,,,,,,featured team
+team,India men,India|male|international,male,T20I,2016-01-01..2026-09-17,Drawn,0,,,,,,,,,featured team
+team,India men,India|male|international,male,T20I,2016-01-01..2026-09-17,NR,6,,,,,,,,,featured team
+team,India men,India|male|international,male,T20I,2016-01-01..2026-09-17,Win %,71.30,,,,,,,,,featured team
+team,India women,India|female|international,female,ODI,2016-01-01..2026-09-17,Mat,114,,,,,,,,,featured team
+team,India women,India|female|international,female,ODI,2016-01-01..2026-09-17,Won,66,,,,,,,,,featured team
+team,India women,India|female|international,female,ODI,2016-01-01..2026-09-17,Lost,46,,,,,,,,,featured team
+team,India women,India|female|international,female,ODI,2016-01-01..2026-09-17,Tied,1,,,,,,,,,featured team
+team,India women,India|female|international,female,ODI,2016-01-01..2026-09-17,Drawn,0,,,,,,,,,featured team
+team,India women,India|female|international,female,ODI,2016-01-01..2026-09-17,NR,1,,,,,,,,,featured team
+team,India women,India|female|international,female,ODI,2016-01-01..2026-09-17,Win %,58.41,,,,,,,,,featured team
+team,India women,India|female|international,female,T20I,2016-01-01..2026-09-17,Mat,163,,,,,,,,,featured team
+team,India women,India|female|international,female,T20I,2016-01-01..2026-09-17,Won,93,,,,,,,,,featured team
+team,India women,India|female|international,female,T20I,2016-01-01..2026-09-17,Lost,63,,,,,,,,,featured team
+team,India women,India|female|international,female,T20I,2016-01-01..2026-09-17,Tied,1,,,,,,,,,featured team
+team,India women,India|female|international,female,T20I,2016-01-01..2026-09-17,Drawn,0,,,,,,,,,featured team
+team,India women,India|female|international,female,T20I,2016-01-01..2026-09-17,NR,6,,,,,,,,,featured team
+team,India women,India|female|international,female,T20I,2016-01-01..2026-09-17,Win %,59.24,,,,,,,,,featured team
+team,Australia men,Australia|male|international,male,TEST,2016-01-01..2026-09-17,Mat,99,,,,,,,,,
+team,Australia men,Australia|male|international,male,TEST,2016-01-01..2026-09-17,Won,57,,,,,,,,,
+team,Australia men,Australia|male|international,male,TEST,2016-01-01..2026-09-17,Lost,28,,,,,,,,,
+team,Australia men,Australia|male|international,male,TEST,2016-01-01..2026-09-17,Tied,0,,,,,,,,,
+team,Australia men,Australia|male|international,male,TEST,2016-01-01..2026-09-17,Drawn,14,,,,,,,,,
+team,Australia men,Australia|male|international,male,TEST,2016-01-01..2026-09-17,NR,0,,,,,,,,,
+team,Australia men,Australia|male|international,male,TEST,2016-01-01..2026-09-17,Win %,57.58,,,,,,,,,
+team,Australia men,Australia|male|international,male,ODI,2016-01-01..2026-09-17,Mat,161,,,,,,,,,
+team,Australia men,Australia|male|international,male,ODI,2016-01-01..2026-09-17,Won,85,,,,,,,,,
+team,Australia men,Australia|male|international,male,ODI,2016-01-01..2026-09-17,Lost,73,,,,,,,,,
+team,Australia men,Australia|male|international,male,ODI,2016-01-01..2026-09-17,Tied,0,,,,,,,,,
+team,Australia men,Australia|male|international,male,ODI,2016-01-01..2026-09-17,Drawn,0,,,,,,,,,
+team,Australia men,Australia|male|international,male,ODI,2016-01-01..2026-09-17,NR,3,,,,,,,,,
+team,Australia men,Australia|male|international,male,ODI,2016-01-01..2026-09-17,Win %,53.80,,,,,,,,,
+team,Australia men,Australia|male|international,male,T20I,2016-01-01..2026-09-17,Mat,149,,,,,,,,,
+team,Australia men,Australia|male|international,male,T20I,2016-01-01..2026-09-17,Won,86,,,,,,,,,
+team,Australia men,Australia|male|international,male,T20I,2016-01-01..2026-09-17,Lost,56,,,,,,,,,
+team,Australia men,Australia|male|international,male,T20I,2016-01-01..2026-09-17,Tied,1,,,,,,,,,
+team,Australia men,Australia|male|international,male,T20I,2016-01-01..2026-09-17,Drawn,0,,,,,,,,,
+team,Australia men,Australia|male|international,male,T20I,2016-01-01..2026-09-17,NR,6,,,,,,,,,
+team,Australia men,Australia|male|international,male,T20I,2016-01-01..2026-09-17,Win %,60.14,,,,,,,,,
+team,Australia women,Australia|female|international,female,ODI,2016-01-01..2026-09-17,Mat,102,,,,,,,,,
+team,Australia women,Australia|female|international,female,ODI,2016-01-01..2026-09-17,Won,90,,,,,,,,,
+team,Australia women,Australia|female|international,female,ODI,2016-01-01..2026-09-17,Lost,11,,,,,,,,,
+team,Australia women,Australia|female|international,female,ODI,2016-01-01..2026-09-17,Tied,0,,,,,,,,,
+team,Australia women,Australia|female|international,female,ODI,2016-01-01..2026-09-17,Drawn,0,,,,,,,,,
+team,Australia women,Australia|female|international,female,ODI,2016-01-01..2026-09-17,NR,1,,,,,,,,,
+team,Australia women,Australia|female|international,female,ODI,2016-01-01..2026-09-17,Win %,89.11,,,,,,,,,
+team,Australia women,Australia|female|international,female,T20I,2016-01-01..2026-09-17,Mat,127,,,,,,,,,
+team,Australia women,Australia|female|international,female,T20I,2016-01-01..2026-09-17,Won,98,,,,,,,,,
+team,Australia women,Australia|female|international,female,T20I,2016-01-01..2026-09-17,Lost,22,,,,,,,,,
+team,Australia women,Australia|female|international,female,T20I,2016-01-01..2026-09-17,Tied,2,,,,,,,,,
+team,Australia women,Australia|female|international,female,T20I,2016-01-01..2026-09-17,Drawn,0,,,,,,,,,
+team,Australia women,Australia|female|international,female,T20I,2016-01-01..2026-09-17,NR,5,,,,,,,,,
+team,Australia women,Australia|female|international,female,T20I,2016-01-01..2026-09-17,Win %,80.33,,,,,,,,,
+team,England men,England|male|international,male,TEST,2016-01-01..2026-09-17,Mat,134,,,,,,,,,
+team,England men,England|male|international,male,TEST,2016-01-01..2026-09-17,Won,63,,,,,,,,,
+team,England men,England|male|international,male,TEST,2016-01-01..2026-09-17,Lost,55,,,,,,,,,
+team,England men,England|male|international,male,TEST,2016-01-01..2026-09-17,Tied,0,,,,,,,,,
+team,England men,England|male|international,male,TEST,2016-01-01..2026-09-17,Drawn,16,,,,,,,,,
+team,England men,England|male|international,male,TEST,2016-01-01..2026-09-17,NR,0,,,,,,,,,
+team,England men,England|male|international,male,TEST,2016-01-01..2026-09-17,Win %,47.01,,,,,,,,,
+team,England men,England|male|international,male,ODI,2016-01-01..2026-09-17,Mat,162,,,,,,,,,
+team,England men,England|male|international,male,ODI,2016-01-01..2026-09-17,Won,93,,,,,,,,,
+team,England men,England|male|international,male,ODI,2016-01-01..2026-09-17,Lost,59,,,,,,,,,
+team,England men,England|male|international,male,ODI,2016-01-01..2026-09-17,Tied,2,,,,,,,,,
+team,England men,England|male|international,male,ODI,2016-01-01..2026-09-17,Drawn,0,,,,,,,,,
+team,England men,England|male|international,male,ODI,2016-01-01..2026-09-17,NR,8,,,,,,,,,
+team,England men,England|male|international,male,ODI,2016-01-01..2026-09-17,Win %,60.39,,,,,,,,,
+team,England men,England|male|international,male,T20I,2016-01-01..2026-09-17,Mat,151,,,,,,,,,
+team,England men,England|male|international,male,T20I,2016-01-01..2026-09-17,Won,87,,,,,,,,,
+team,England men,England|male|international,male,T20I,2016-01-01..2026-09-17,Lost,56,,,,,,,,,
+team,England men,England|male|international,male,T20I,2016-01-01..2026-09-17,Tied,1,,,,,,,,,
+team,England men,England|male|international,male,T20I,2016-01-01..2026-09-17,Drawn,0,,,,,,,,,
+team,England men,England|male|international,male,T20I,2016-01-01..2026-09-17,NR,7,,,,,,,,,
+team,England men,England|male|international,male,T20I,2016-01-01..2026-09-17,Win %,60.42,,,,,,,,,
+team,England women,England|female|international,female,ODI,2016-01-01..2026-09-17,Mat,116,,,,,,,,,
+team,England women,England|female|international,female,ODI,2016-01-01..2026-09-17,Won,76,,,,,,,,,
+team,England women,England|female|international,female,ODI,2016-01-01..2026-09-17,Lost,36,,,,,,,,,
+team,England women,England|female|international,female,ODI,2016-01-01..2026-09-17,Tied,0,,,,,,,,,
+team,England women,England|female|international,female,ODI,2016-01-01..2026-09-17,Drawn,0,,,,,,,,,
+team,England women,England|female|international,female,ODI,2016-01-01..2026-09-17,NR,4,,,,,,,,,
+team,England women,England|female|international,female,ODI,2016-01-01..2026-09-17,Win %,67.86,,,,,,,,,
+team,England women,England|female|international,female,T20I,2016-01-01..2026-09-17,Mat,141,,,,,,,,,
+team,England women,England|female|international,female,T20I,2016-01-01..2026-09-17,Won,103,,,,,,,,,
+team,England women,England|female|international,female,T20I,2016-01-01..2026-09-17,Lost,36,,,,,,,,,
+team,England women,England|female|international,female,T20I,2016-01-01..2026-09-17,Tied,1,,,,,,,,,
+team,England women,England|female|international,female,T20I,2016-01-01..2026-09-17,Drawn,0,,,,,,,,,
+team,England women,England|female|international,female,T20I,2016-01-01..2026-09-17,NR,1,,,,,,,,,
+team,England women,England|female|international,female,T20I,2016-01-01..2026-09-17,Win %,73.57,,,,,,,,,
+team,Pakistan men,Pakistan|male|international,male,TEST,2016-01-01..2026-09-17,Mat,79,,,,,,,,,
+team,Pakistan men,Pakistan|male|international,male,TEST,2016-01-01..2026-09-17,Won,27,,,,,,,,,
+team,Pakistan men,Pakistan|male|international,male,TEST,2016-01-01..2026-09-17,Lost,44,,,,,,,,,
+team,Pakistan men,Pakistan|male|international,male,TEST,2016-01-01..2026-09-17,Tied,0,,,,,,,,,
+team,Pakistan men,Pakistan|male|international,male,TEST,2016-01-01..2026-09-17,Drawn,8,,,,,,,,,
+team,Pakistan men,Pakistan|male|international,male,TEST,2016-01-01..2026-09-17,NR,0,,,,,,,,,
+team,Pakistan men,Pakistan|male|international,male,TEST,2016-01-01..2026-09-17,Win %,34.18,,,,,,,,,
+team,Pakistan men,Pakistan|male|international,male,ODI,2016-01-01..2026-09-17,Mat,141,,,,,,,,,
+team,Pakistan men,Pakistan|male|international,male,ODI,2016-01-01..2026-09-17,Won,72,,,,,,,,,
+team,Pakistan men,Pakistan|male|international,male,ODI,2016-01-01..2026-09-17,Lost,65,,,,,,,,,
+team,Pakistan men,Pakistan|male|international,male,ODI,2016-01-01..2026-09-17,Tied,1,,,,,,,,,
+team,Pakistan men,Pakistan|male|international,male,ODI,2016-01-01..2026-09-17,Drawn,0,,,,,,,,,
+team,Pakistan men,Pakistan|male|international,male,ODI,2016-01-01..2026-09-17,NR,3,,,,,,,,,
+team,Pakistan men,Pakistan|male|international,male,ODI,2016-01-01..2026-09-17,Win %,52.17,,,,,,,,,
+team,Pakistan men,Pakistan|male|international,male,T20I,2016-01-01..2026-09-17,Mat,194,,,,,,,,,
+team,Pakistan men,Pakistan|male|international,male,T20I,2016-01-01..2026-09-17,Won,112,,,,,,,,,
+team,Pakistan men,Pakistan|male|international,male,T20I,2016-01-01..2026-09-17,Lost,74,,,,,,,,,
+team,Pakistan men,Pakistan|male|international,male,T20I,2016-01-01..2026-09-17,Tied,1,,,,,,,,,
+team,Pakistan men,Pakistan|male|international,male,T20I,2016-01-01..2026-09-17,Drawn,0,,,,,,,,,
+team,Pakistan men,Pakistan|male|international,male,T20I,2016-01-01..2026-09-17,NR,7,,,,,,,,,
+team,Pakistan men,Pakistan|male|international,male,T20I,2016-01-01..2026-09-17,Win %,59.89,,,,,,,,,
+team,South Africa men,South Africa|male|international,male,TEST,2016-01-01..2026-09-17,Mat,82,,,,,,,,,
+team,South Africa men,South Africa|male|international,male,TEST,2016-01-01..2026-09-17,Won,47,,,,,,,,,
+team,South Africa men,South Africa|male|international,male,TEST,2016-01-01..2026-09-17,Lost,29,,,,,,,,,
+team,South Africa men,South Africa|male|international,male,TEST,2016-01-01..2026-09-17,Tied,0,,,,,,,,,
+team,South Africa men,South Africa|male|international,male,TEST,2016-01-01..2026-09-17,Drawn,6,,,,,,,,,
+team,South Africa men,South Africa|male|international,male,TEST,2016-01-01..2026-09-17,NR,0,,,,,,,,,
+team,South Africa men,South Africa|male|international,male,TEST,2016-01-01..2026-09-17,Win %,57.32,,,,,,,,,
+team,South Africa men,South Africa|male|international,male,ODI,2016-01-01..2026-09-17,Mat,148,,,,,,,,,
+team,South Africa men,South Africa|male|international,male,ODI,2016-01-01..2026-09-17,Won,83,,,,,,,,,
+team,South Africa men,South Africa|male|international,male,ODI,2016-01-01..2026-09-17,Lost,59,,,,,,,,,
+team,South Africa men,South Africa|male|international,male,ODI,2016-01-01..2026-09-17,Tied,0,,,,,,,,,
+team,South Africa men,South Africa|male|international,male,ODI,2016-01-01..2026-09-17,Drawn,0,,,,,,,,,
+team,South Africa men,South Africa|male|international,male,ODI,2016-01-01..2026-09-17,NR,6,,,,,,,,,
+team,South Africa men,South Africa|male|international,male,ODI,2016-01-01..2026-09-17,Win %,58.45,,,,,,,,,
+team,South Africa men,South Africa|male|international,male,T20I,2016-01-01..2026-09-17,Mat,151,,,,,,,,,
+team,South Africa men,South Africa|male|international,male,T20I,2016-01-01..2026-09-17,Won,79,,,,,,,,,
+team,South Africa men,South Africa|male|international,male,T20I,2016-01-01..2026-09-17,Lost,69,,,,,,,,,
+team,South Africa men,South Africa|male|international,male,T20I,2016-01-01..2026-09-17,Tied,1,,,,,,,,,
+team,South Africa men,South Africa|male|international,male,T20I,2016-01-01..2026-09-17,Drawn,0,,,,,,,,,
+team,South Africa men,South Africa|male|international,male,T20I,2016-01-01..2026-09-17,NR,2,,,,,,,,,
+team,South Africa men,South Africa|male|international,male,T20I,2016-01-01..2026-09-17,Win %,53.02,,,,,,,,,
+team,New Zealand women,New Zealand|female|international,female,ODI,2016-01-01..2026-09-17,Mat,108,,,,,,,,,
+team,New Zealand women,New Zealand|female|international,female,ODI,2016-01-01..2026-09-17,Won,46,,,,,,,,,
+team,New Zealand women,New Zealand|female|international,female,ODI,2016-01-01..2026-09-17,Lost,56,,,,,,,,,
+team,New Zealand women,New Zealand|female|international,female,ODI,2016-01-01..2026-09-17,Tied,1,,,,,,,,,
+team,New Zealand women,New Zealand|female|international,female,ODI,2016-01-01..2026-09-17,Drawn,0,,,,,,,,,
+team,New Zealand women,New Zealand|female|international,female,ODI,2016-01-01..2026-09-17,NR,5,,,,,,,,,
+team,New Zealand women,New Zealand|female|international,female,ODI,2016-01-01..2026-09-17,Win %,44.66,,,,,,,,,
+team,New Zealand women,New Zealand|female|international,female,T20I,2016-01-01..2026-09-17,Mat,120,,,,,,,,,
+team,New Zealand women,New Zealand|female|international,female,T20I,2016-01-01..2026-09-17,Won,63,,,,,,,,,
+team,New Zealand women,New Zealand|female|international,female,T20I,2016-01-01..2026-09-17,Lost,53,,,,,,,,,
+team,New Zealand women,New Zealand|female|international,female,T20I,2016-01-01..2026-09-17,Tied,1,,,,,,,,,
+team,New Zealand women,New Zealand|female|international,female,T20I,2016-01-01..2026-09-17,Drawn,0,,,,,,,,,
+team,New Zealand women,New Zealand|female|international,female,T20I,2016-01-01..2026-09-17,NR,3,,,,,,,,,
+team,New Zealand women,New Zealand|female|international,female,T20I,2016-01-01..2026-09-17,Win %,53.85,,,,,,,,,
+team,Mumbai Indians,Mumbai Indians|male|club,male,ipl,2016-01-01..2026-09-17,Mat,165,,,,,,,,,IPL franchise (league team record)
+team,Mumbai Indians,Mumbai Indians|male|club,male,ipl,2016-01-01..2026-09-17,Won,82,,,,,,,,,IPL franchise (league team record)
+team,Mumbai Indians,Mumbai Indians|male|club,male,ipl,2016-01-01..2026-09-17,Lost,79,,,,,,,,,IPL franchise (league team record)
+team,Mumbai Indians,Mumbai Indians|male|club,male,ipl,2016-01-01..2026-09-17,Tied,4,,,,,,,,,IPL franchise (league team record)
+team,Mumbai Indians,Mumbai Indians|male|club,male,ipl,2016-01-01..2026-09-17,Drawn,0,,,,,,,,,IPL franchise (league team record)
+team,Mumbai Indians,Mumbai Indians|male|club,male,ipl,2016-01-01..2026-09-17,NR,0,,,,,,,,,IPL franchise (league team record)
+team,Mumbai Indians,Mumbai Indians|male|club,male,ipl,2016-01-01..2026-09-17,Win %,49.70,,,,,,,,,IPL franchise (league team record)
