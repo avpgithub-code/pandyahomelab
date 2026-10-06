@@ -1,7 +1,5 @@
-# cricstat CI/CD (F6 skeleton → F9). Pull-based CD: this workflow only PUBLISHES images to GHCR;
-# the NAS pulls them itself (deployment/cricstat/cd-pull.sh), so no inbound access or runner on the NAS.
-#   every push/PR touching cricstat → lint + tests (py3.8 & 3.12) + image build + smoke test
-#   push to main, or manual run      → publish to ghcr.io, behind the `nas-production` approval gate
+# cricstat CI (F6/F9): every push/PR touching cricstat → lint + tests (py3.8 & 3.12) + image build + smoke.
+# Publishing is separate (cricstat-publish.yml) so docs-only changes never ask for a deploy approval.
 name: cricstat-ci
 
 on:
@@ -47,39 +45,3 @@ jobs:
         run: docker build -f cricstat/cricstat-pipeline/docker/Dockerfile -t cricstat-pipeline:ci cricstat/cricstat-pipeline
       - name: Smoke test as a non-root user (catches unreadable /app, the Synology 700-bits trap)
         run: docker run --rm -u 1026:100 cricstat-pipeline:ci --help
-
-  publish:
-    # Never on pull requests. On main automatically; on other branches only when run by hand.
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
-    needs: pipeline-image
-    runs-on: ubuntu-22.04
-    environment: nas-production          # required reviewer = the approval gate (F9)
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: actions/checkout@v7
-      - uses: docker/setup-buildx-action@v4
-      - uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - id: meta
-        uses: docker/metadata-action@v6
-        with:
-          images: ghcr.io/avpgithub-code/cricstat-pipeline
-          tags: |
-            type=ref,event=branch
-            type=sha,prefix=sha-
-          labels: |
-            org.opencontainers.image.title=cricstat-pipeline
-            org.opencontainers.image.description=Cricsheet ingestion job for cricstat (pandyaHomeLab)
-      - uses: docker/build-push-action@v7
-        with:
-          context: cricstat/cricstat-pipeline
-          file: cricstat/cricstat-pipeline/docker/Dockerfile
-          platforms: linux/amd64        # the NAS is x86_64
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}

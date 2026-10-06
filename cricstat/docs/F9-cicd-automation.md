@@ -1,6 +1,6 @@
 # F9 — cricstat CI/CD and automation
 
-Status: **in progress** (2026-10-05). It pilots platform Stage 3 (CI/CD) for one project first.
+Status: **done** (2026-10-05). It pilots platform Stage 3 (CI/CD) for one project first.
 The design was decided in planning: CI on every change, **pull-based** CD (no inbound ports and no runner on the NAS),
 a manual approval gate first, then automatic deploys once proven.
 
@@ -23,13 +23,14 @@ push / PR ──► GitHub Actions: lint + tests (py3.8, 3.12) ──► image b
 |---|---|---|
 | CI: ruff + pytest on Python 3.8 and 3.12 | `.github/workflows/cricstat-ci.yml`, job `pipeline-tests` | ✅ live (first run green) |
 | Image build and non-root smoke test | job `pipeline-image` | ✅ live. It now runs as uid 1026, so the Synology 700-bits bug is caught in CI |
-| Publish to GHCR | job `publish`, environment **`nas-production`** (required reviewer: avpgithub-code) | ✅ first publish approved 2026-10-05 (`feat-cricstat-foundation`, `sha-bb73e10`); package is public, anonymous pull OK |
+| Publish to GHCR | `.github/workflows/cricstat-publish.yml` (only when `cricstat/cricstat-pipeline/**` changes on main, or by hand), environment **`nas-production`** (required reviewer: avpgithub-code) | ✅ first publish approved 2026-10-05 (`feat-cricstat-foundation`, `sha-bb73e10`); package is public, anonymous pull OK |
 | NAS deploy | `deployment/cricstat/cd-pull.sh` (pull, NAS smoke test, retag, rollback) | ✅ proven 2026-10-05: deploy, no-op re-run, rollback, roll forward, failed-pull exit 1, real `recent` run (run 5) on the GHCR image |
-| NAS schedule | DSM task **"cricstat CD pull"**, daily 05:15 (before the 05:30 refresh) | create after merging to `main` (`:main` is published on the first push to main) |
+| NAS schedule | DSM task **"cricstat CD pull"**, daily 05:15 (before the 05:30 refresh) | ✅ live 2026-10-05 (verified with synoschedtask). `:main` published from merge `2e5cddc` and deployed to the NAS |
 | Action versions | checkout v7, setup-python v7, buildx v4, login v4, metadata v6, build-push v7 | updated (clears the Node.js 20 warnings) |
 
 ## 3. Rules that keep it safe
-- **Publishing needs your approval** on GitHub (Actions → the run → "Review deployments"). PRs never publish.
+- **Publishing needs your approval** on GitHub (Actions → the run → "Review deployments"). PRs never publish, and
+  docs-only changes never ask (the publish workflow only runs when the image's own files change).
 - **Every new image is smoke-tested on the NAS itself** before it goes live. CI runners have AVX and the NAS doesn't,
   so passing in CI is not enough.
 - **The previous image is always kept** (`:previous`), and `sh cd-pull.sh rollback` swaps it back in seconds.
@@ -52,5 +53,5 @@ push / PR ──► GitHub Actions: lint + tests (py3.8, 3.12) ──► image b
 1. ✅ Done: the package inherited **public** visibility from the repo. (Steps, if ever needed: make the package **public** on GitHub (Your profile → Packages → `cricstat-pipeline`
    → Package settings → Change visibility → Public). The repo is public and the image holds no secrets, so the NAS can
    pull without storing a token.)
-2. **Create the DSM task "cricstat CD pull":** daily at 05:15, user root, email on abnormal termination. Command:
+2. ✅ Done: **DSM task "cricstat CD pull":** daily at 05:15, user root, email on abnormal termination. Command:
    `sh /volume1/pandya-homelab/deployment/cricstat/cd-pull.sh`

@@ -137,7 +137,7 @@ Demos are built in phases, one domain at a time:
 | 2 | Deep Learning | 2 of 3 live (May 2026); object detection not started |
 | 3 | Natural Language Processing | 4 of 4 live (September 2026); transformer demos deferred to v2 |
 | 4 | Agentic AI | Planned (the cricstat analyst agent is planned as its first demo) |
-| — | cricstat (flagship, cross-domain) | In development: foundation sprint started October 2026; Cricsheet ingestion pipeline built |
+| — | cricstat (flagship, cross-domain) | In development: foundation sprint done (Oct 2026); daily Cricsheet pipeline live on the NAS with CI/CD; next P0 (stats API + first pages) |
 | 6 | AWS mirror | Planned |
 
 Platform stages:
@@ -146,7 +146,7 @@ Platform stages:
 |-------|-------|--------|
 | 1 | Conceptual architecture and design | Complete (April 2026) |
 | 2 | Synology implementation | Complete (May 2026) |
-| 3 | CI/CD pipelines | Future |
+| 3 | CI/CD pipelines | Piloted by cricstat (Oct 2026): GitHub Actions CI, GHCR, approval gate, pull-based NAS deploy |
 | 4 | AWS deployment | Future |
 | 5 | TLS automation, observability hardening | Future |
 
