@@ -1,5 +1,5 @@
 # cricstat publish (F9). Builds, smoke-tests and publishes the pipeline image to GHCR, behind the
-# `nas-production` approval gate. Runs ONLY when the image's own files change on main (docs-only
+# `nas-production` approval gate. Runs ONLY when the image's inputs (pipeline code or cricstat/sql) change on main (docs-only
 # changes no longer ask for approval), or when started by hand. The NAS pulls it via cd-pull.sh.
 # Lint/tests live in cricstat-ci.yml and run on every change.
 name: cricstat-publish
@@ -7,7 +7,7 @@ name: cricstat-publish
 on:
   push:
     branches: [main]
-    paths: ["cricstat/cricstat-pipeline/**"]   # edits to this file: test with a manual run
+    paths: ["cricstat/cricstat-pipeline/**", "cricstat/sql/**"]   # image inputs; edits to this file: test with a manual run
   workflow_dispatch:
 
 permissions:
@@ -30,7 +30,7 @@ jobs:
       - name: Build for smoke test
         uses: docker/build-push-action@v7
         with:
-          context: cricstat/cricstat-pipeline
+          context: cricstat
           file: cricstat/cricstat-pipeline/docker/Dockerfile
           load: true
           tags: cricstat-pipeline:smoke
@@ -50,11 +50,11 @@ jobs:
             type=sha,prefix=sha-
           labels: |
             org.opencontainers.image.title=cricstat-pipeline
-            org.opencontainers.image.description=Cricsheet ingestion job for cricstat (pandyaHomeLab)
+            org.opencontainers.image.description=Cricsheet ingestion, register and serving-DB build job for cricstat (pandyaHomeLab)
       - name: Publish (same build, from cache)
         uses: docker/build-push-action@v7
         with:
-          context: cricstat/cricstat-pipeline
+          context: cricstat
           file: cricstat/cricstat-pipeline/docker/Dockerfile
           platforms: linux/amd64        # the NAS is x86_64
           push: true

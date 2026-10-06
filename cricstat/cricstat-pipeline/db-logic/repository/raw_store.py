@@ -100,6 +100,56 @@ class RawStore:
             return None
         return dict(zip([d[0] for d in cur.description], row))
 
+    def iter_active(self, match_ids: Optional[Iterable[str]] = None):
+        """Yield (match_id, sha256, revision, json_zlib) for active matches, oldest first
+        (so surrogate keys follow match order). match_ids limits it to those ids."""
+        sql = ("SELECT match_id, sha256, revision, json_zlib FROM matches_raw"
+               " WHERE removed_at IS NULL")
+        if match_ids is None:
+            yield from self.conn.execute(sql + " ORDER BY start_date, match_id")
+            return
+        ids = sorted(match_ids)
+        for i in range(0, len(ids), 500):
+            chunk = ids[i:i + 500]
+            yield from self.conn.execute(
+                sql + " AND match_id IN (%s) ORDER BY start_date, match_id"
+                % ", ".join("?" * len(chunk)), chunk)
+
+    def active_hashes(self) -> Dict[str, str]:
+        return dict(self.conn.execute(
+            "SELECT match_id, sha256 FROM matches_raw WHERE removed_at IS NULL"))
+
+    def latest_run(self, modes: Tuple[str, ...] = ("full", "recent")) -> Optional[dict]:
+        cur = self.conn.execute(
+            "SELECT * FROM ingest_runs WHERE status = 'success' AND mode IN (%s)"
+            " ORDER BY run_id DESC LIMIT 1" % ", ".join("?" * len(modes)), modes)
+        row = cur.fetchone()
+        return dict(zip([d[0] for d in cur.description], row)) if row else None
+
+    # -- register ---------------------------------------------------------------------
+    def register_people(self) -> List[tuple]:
+        """[(identifier, name, unique_name, keys_json)]; empty until `register` has run."""
+        return self.conn.execute(
+            "SELECT identifier, name, unique_name, keys_json FROM register_people").fetchall()
+
+    def register_names(self) -> List[tuple]:
+        return self.conn.execute("SELECT identifier, name FROM register_names").fetchall()
+
+    def replace_register(self, people: List[tuple], names: List[tuple]) -> Dict[str, int]:
+        """Full replace inside the caller's transaction. Returns added/updated/unchanged/removed
+        counts for people (by identifier, comparing every column)."""
+        old = {r[0]: r for r in self.register_people()}
+        new = {r[0]: r for r in people}
+        counts = {"added": sum(1 for k in new if k not in old),
+                  "updated": sum(1 for k, r in new.items() if k in old and old[k] != r),
+                  "unchanged": sum(1 for k, r in new.items() if old.get(k) == r),
+                  "removed": sum(1 for k in old if k not in new)}
+        self.conn.execute("DELETE FROM register_people")
+        self.conn.execute("DELETE FROM register_names")
+        self.conn.executemany("INSERT INTO register_people VALUES (?,?,?,?)", people)
+        self.conn.executemany("INSERT OR IGNORE INTO register_names VALUES (?,?)", names)
+        return counts
+
     # -- writes ---------------------------------------------------------------------
     def insert_match(self, rec: dict, now: str, run_id: int):
         self.conn.execute(

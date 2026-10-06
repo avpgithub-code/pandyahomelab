@@ -1,26 +1,30 @@
 # cricstat-pipeline
 
-P0 ingestion for cricstat: downloads Cricsheet's ball-by-ball JSON zips and keeps every
-match file, byte for byte, in a raw SQLite store with a run log. Later stages (core
-tables, marts, models) read from this store and never from the zips.
+P0 data pipeline for cricstat. `full`/`recent` download Cricsheet's ball-by-ball JSON zips
+and keep every match file, byte for byte, in a raw SQLite store with a run log. `register`
+stores the Cricsheet Register next to them. `build` turns the raw store into the serving
+database (`data/db/cricstat.sqlite`) that the API and agent read: core tables, marts,
+F4 views and the semantic catalog, quality-checked before an atomic swap.
 
 | | |
 |---|---|
-| Container | `cricstat-pipeline` · scheduled job, no port (image not built yet) |
+| Container | `cricstat-pipeline` · scheduled job, no port (image from GHCR via `cd-pull.sh`) |
 | Runtime | Python standard library only · 3.8 (NAS host) and 3.12 (container) |
 | Raw store | `cricstat/data/db/raw.sqlite` (journal_mode=DELETE, safe to mount read-only) |
-| Logs | `cricstat/logs/ingest-YYYYMMDD.log` |
+| Serving DB | `cricstat/data/db/cricstat.sqlite` (built from raw; schema = `cricstat/sql/`) |
+| Logs | `cricstat/logs/{ingest,build,register}-YYYYMMDD.log` |
 
 ## Layers (ADR-013)
 
 | Layer | What lives there |
 |---|---|
 | `presentation-logic/cli/` | argparse CLI, JSON summary on stdout, exit codes (a job has no HTTP API) |
-| `application-logic/services/` | `refresh_service` (download or `--zip-path`, then ingest, then prune) and `ingest_service` (the one-transaction upsert) |
-| `application-logic/quality/` | data-quality gates, pure functions, checked before COMMIT |
-| `db-logic/loaders/` | `downloader` (urllib, retries, atomic rename, retention) and `cricsheet_zip` (reads members in memory, never extracts) |
-| `db-logic/transforms/` | `match_record`: validate a match file, extract indexed columns, zlib the exact bytes |
-| `db-logic/repository/` + `db-logic/migrations/` | `raw_store` (SQLite access, migrations runner) and versioned `NNNN_*.sql` files |
+| `application-logic/services/` | `refresh_service` (download or `--zip-path`, then ingest, then prune), `ingest_service` (the one-transaction upsert), `build_service` (serving DB, full/incremental, swap), `register_service` (Register CSVs) |
+| `application-logic/quality/` | `gates` (ingest) and `build_checks` (serving DB), pure functions over measured counts |
+| `db-logic/loaders/` | `downloader` (urllib, retries, atomic rename, retention), `cricsheet_zip` (reads members in memory, never extracts), `register_csv` |
+| `db-logic/transforms/` | `match_record` (validate a file, zlib the exact bytes) and `match_facts` (one match → serving rows, applying the F4 rules loaded from `reference_data.sql`) |
+| `db-logic/repository/` + `db-logic/migrations/` | `raw_store`, `serving_store` (schema, keys, inserts, marts, checks' measurements) and versioned `NNNN_*.sql` files |
+| `db-logic/marts/` | `marts.sql`: player_career / player_year / player_teams from the atoms (counts only) |
 | `shared/` | env config, logging, exceptions |
 
 The underscored names (`db_logic` etc.) are committed symlinks so Python can import the hyphenated folders.
@@ -34,6 +38,9 @@ python3 -m presentation_logic.cli full      # monthly: all_json.zip (~147 MB), d
 python3 -m presentation_logic.cli recent    # daily: recently_added_7_json.zip, upsert only
 python3 -m presentation_logic.cli full --zip-path ../data/raw/all_json-20261005.zip   # no network
 python3 -m presentation_logic.cli recent --quiet   # only warnings on stderr (Task Scheduler)
+python3 -m presentation_logic.cli register         # weekly: people.csv + names.csv → raw store
+python3 -m presentation_logic.cli build            # after every ingest: incremental serving DB
+python3 -m presentation_logic.cli build --full     # monthly / after a rule change: from scratch
 ```
 
 What a run does, in one SQLite transaction:
@@ -59,6 +66,33 @@ Re-running the same zip gives 0 added / 0 updated.
 | Empty (`full`) | the zip has no match files |
 | match_id | not a gate: non-digit ids are stored, counted (`nondigit_ids`) and listed in `notes` |
 
+### Serving-DB build
+
+`build` writes `data/db/cricstat.sqlite.new`, checks it, records the build in `build_info`, then
+`os.replace`s it over the live file (readers reopen when `build_info` changes).
+
+| Mode | What it does |
+|---|---|
+| `--full` | Every active raw match → core tables (bulk load, indexes after) → marts → views → catalog |
+| `--incremental` (default) | Copies the live DB, re-inserts only matches whose raw sha256 changed or that were removed, recomputes marts, players, venues, views, catalog. Becomes `full` when there is no live DB or `rules_sha` changed (schema, `reference_data.sql`, transform code). Does nothing, and keeps the live file, when nothing changed |
+
+The cricket rules are data (`cricstat/sql/reference_data.sql`); ratios exist only in
+`semantic_views.sql`; `semantic_catalog.sql` describes them; `venue_map.csv` (hand-checked)
+gives venues a country for home/away. Players are everyone named in a match registry; the
+Register supplies their full names, cross-site ids (`key_cricinfo`, `_2`, `_3` → `cricinfo`)
+and name variants.
+
+Checks before the swap (any failure → exit 2, live DB kept, rejected file kept as
+`cricstat.sqlite.failed`): `quick_check`; matches = raw active matches; deliveries = deliveries in
+the raw files (full); innings totals = Σ runs + penalties; every delivery's runs add up; no
+unresolved player names; no unmapped format / dismissal kind / outcome; no FK violations; two
+`team_results` per match with play; atoms agree with deliveries (runs, runs conceded, legal
+balls, credited wickets). Warnings only: unmapped venues, atoms for players missing from the team
+sheet.
+
+Run it **after** the ingest, never alongside: SQLite in DELETE-journal mode lets a long reader
+(the build reads raw for minutes) block the ingest's write.
+
 ## Output and exit codes
 
 stdout is one JSON line, e.g.
@@ -75,7 +109,7 @@ stdout is one JSON line, e.g.
 |---|---|
 | 0 | success (committed) |
 | 1 | runtime error: download, missing/corrupt zip, SQLite error (rolled back) |
-| 2 | a data-quality gate failed (rolled back) |
+| 2 | a data-quality gate failed (rolled back; for `build`, the live DB is kept) |
 
 ## Environment
 
@@ -88,6 +122,11 @@ See `.env.example`.
 | `CRICSTAT_DATA_DIR` | `data` |
 | `CRICSTAT_RAW_ZIP_DIR` | `data/raw` |
 | `CRICSTAT_RAW_DB` | `data/db/raw.sqlite` |
+| `CRICSTAT_SERVING_DB` | `data/db/cricstat.sqlite` |
+| `CRICSTAT_SQL_DIR` / `CRICSTAT_VENUE_MAP` | `sql` / `sql/venue_map.csv` |
+| `CRICSTAT_PEOPLE_URL` / `CRICSTAT_NAMES_URL` | `https://cricsheet.org/register/people.csv` / `names.csv` |
+| `CRICSTAT_KEEP_REGISTER_CSVS` | `4` |
+| `CRICSTAT_MAX_REGISTER_DROP_FRAC` | `0.02` |
 | `CRICSTAT_LOG_DIR` | `logs` |
 | `CRICSTAT_LOG_LEVEL` | `INFO` |
 | `CRICSTAT_FULL_URL` | `https://cricsheet.org/downloads/all_json.zip` |
@@ -120,8 +159,9 @@ python3 -m ruff check .
 python3 -m pytest -q          # tiny synthetic zips in tmp dirs; no network
 ```
 
-The Dockerfile (`docker/Dockerfile`, python:3.12-slim, non-root `appuser`) has not been
-built yet. It expects `cricstat/data` and `cricstat/logs` mounted at `/cricstat/data` and `/cricstat/logs`.
+The Dockerfile (`docker/Dockerfile`, python:3.12-slim, non-root) builds from context `cricstat/`
+so `cricstat/sql/` is copied to `/cricstat/sql`. CI builds and publishes it; the NAS never builds it.
+It expects `cricstat/data` and `cricstat/logs` mounted at `/cricstat/data` and `/cricstat/logs`.
 
 ## Data notes (first load, 2026-10-05)
 

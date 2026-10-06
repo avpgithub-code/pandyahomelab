@@ -1,5 +1,6 @@
-"""Download a Cricsheet zip: descriptive User-Agent, timeouts, retry with backoff,
-write to a .part file, verify it is a zip, then rename to a dated copy in data/raw/.
+"""Download a Cricsheet file: descriptive User-Agent, timeouts, retry with backoff,
+write to a .part file, validate it (a zip by default; the Register CSVs pass their own check),
+then rename to a dated copy in data/raw/.
 """
 import os
 import time
@@ -22,7 +23,7 @@ def dated_name(url: str, stamp: Optional[str] = None) -> str:
     return "%s-%s%s" % (stem, stamp or time.strftime("%Y%m%d", time.gmtime()), ext or ".zip")
 
 
-def _fetch_once(url, dest_part, user_agent, timeout, opener):
+def _fetch_once(url, dest_part, user_agent, timeout, opener, validate):
     req = urllib.request.Request(url, headers={"User-Agent": user_agent})
     with opener(req, timeout=timeout) as resp:
         expected = resp.headers.get("Content-Length") if getattr(resp, "headers", None) else None
@@ -38,8 +39,9 @@ def _fetch_once(url, dest_part, user_agent, timeout, opener):
             os.fsync(out.fileno())
     if expected is not None and int(expected) != written:
         raise DownloadError("short read: %d of %s bytes" % (written, expected))
-    if not zipfile.is_zipfile(dest_part):
-        raise DownloadError("downloaded file is not a zip")
+    if not validate(dest_part):
+        raise DownloadError("downloaded file failed validation (%s)"
+                            % getattr(validate, "__name__", "check"))
     return written
 
 
@@ -47,8 +49,9 @@ def download(url: str, dest_dir: str, user_agent: str, timeout: float = 60,
              retries: int = 4, backoff: float = 5,
              opener: Callable = urllib.request.urlopen,
              sleep: Callable[[float], None] = time.sleep,
-             stamp: Optional[str] = None) -> str:
-    """Fetch url into dest_dir/<stem>-YYYYMMDD.zip and return that path.
+             stamp: Optional[str] = None,
+             validate: Callable[[str], bool] = zipfile.is_zipfile) -> str:
+    """Fetch url into dest_dir/<stem>-YYYYMMDD.<ext> and return that path.
 
     Retries `retries` times after the first attempt, sleeping backoff * 2**attempt.
     4xx responses other than 408/429 are not retried.
@@ -60,7 +63,7 @@ def download(url: str, dest_dir: str, user_agent: str, timeout: float = 60,
     for attempt in range(retries + 1):
         try:
             t0 = time.time()
-            size = _fetch_once(url, part, user_agent, timeout, opener)
+            size = _fetch_once(url, part, user_agent, timeout, opener, validate)
             os.replace(part, final)
             log.info("downloaded %s -> %s (%.1f MB in %.1fs)",
                      url, final, size / 1e6, time.time() - t0)
@@ -90,11 +93,12 @@ def _cleanup(path):
 
 def prune(dest_dir: str, url: str, keep: int) -> List[str]:
     """Keep the newest `keep` dated copies of this URL's file; return the paths removed."""
-    stem = os.path.splitext(os.path.basename(url.split("?", 1)[0]))[0]
+    stem, ext = os.path.splitext(os.path.basename(url.split("?", 1)[0]))
+    ext = ext or ".zip"
     prefix = stem + "-"
     copies = sorted(
         n for n in os.listdir(dest_dir)
-        if n.startswith(prefix) and n.endswith(".zip") and n[len(prefix):-4].isdigit())
+        if n.startswith(prefix) and n.endswith(ext) and n[len(prefix):-len(ext)].isdigit())
     removed = []
     for name in copies[:-keep] if keep > 0 else copies:
         path = os.path.join(dest_dir, name)

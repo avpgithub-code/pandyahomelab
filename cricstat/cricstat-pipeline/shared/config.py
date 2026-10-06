@@ -13,6 +13,8 @@ _DEFAULT_HOME = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 FULL_URL = "https://cricsheet.org/downloads/all_json.zip"
 RECENT_URL = "https://cricsheet.org/downloads/recently_added_7_json.zip"
 USER_AGENT = "cricstat/0.1 (+https://pandyahomelab.com/cricket/)"
+PEOPLE_URL = "https://cricsheet.org/register/people.csv"
+NAMES_URL = "https://cricsheet.org/register/names.csv"
 
 
 def _int(name, default):
@@ -31,23 +33,32 @@ class Config:
         self.DATA_DIR = self._path("CRICSTAT_DATA_DIR", "data")
         self.RAW_ZIP_DIR = self._path("CRICSTAT_RAW_ZIP_DIR", os.path.join(self.DATA_DIR, "raw"))
         self.RAW_DB = self._path("CRICSTAT_RAW_DB", os.path.join(self.DATA_DIR, "db", "raw.sqlite"))
+        self.SERVING_DB = self._path("CRICSTAT_SERVING_DB",
+                                     os.path.join(self.DATA_DIR, "db", "cricstat.sqlite"))
+        self.SQL_DIR = self._path("CRICSTAT_SQL_DIR", "sql")
+        self.VENUE_MAP = self._path("CRICSTAT_VENUE_MAP",
+                                    os.path.join(self.SQL_DIR, "venue_map.csv"))
         self.LOG_DIR = self._path("CRICSTAT_LOG_DIR", "logs")
         self.LOG_LEVEL = os.getenv("CRICSTAT_LOG_LEVEL", "INFO").upper()
 
         self.FULL_URL = os.getenv("CRICSTAT_FULL_URL", FULL_URL)
         self.RECENT_URL = os.getenv("CRICSTAT_RECENT_URL", RECENT_URL)
         self.USER_AGENT = os.getenv("CRICSTAT_USER_AGENT", USER_AGENT)
+        self.PEOPLE_URL = os.getenv("CRICSTAT_PEOPLE_URL", PEOPLE_URL)
+        self.NAMES_URL = os.getenv("CRICSTAT_NAMES_URL", NAMES_URL)
         self.HTTP_TIMEOUT = _float("CRICSTAT_HTTP_TIMEOUT", 60)
         self.HTTP_RETRIES = _int("CRICSTAT_HTTP_RETRIES", 4)
         self.HTTP_BACKOFF = _float("CRICSTAT_HTTP_BACKOFF", 5)
 
         self.KEEP_FULL_ZIPS = _int("CRICSTAT_KEEP_FULL_ZIPS", 3)
         self.KEEP_RECENT_ZIPS = _int("CRICSTAT_KEEP_RECENT_ZIPS", 7)
+        self.KEEP_REGISTER_CSVS = _int("CRICSTAT_KEEP_REGISTER_CSVS", 4)
 
         # Data-quality gates (see application-logic/quality/gates.py)
         self.MAX_FAILED_ABS = _int("CRICSTAT_MAX_FAILED_ABS", 5)
         self.MAX_FAILED_FRAC = _float("CRICSTAT_MAX_FAILED_FRAC", 0.005)
         self.MAX_ACTIVE_DROP_FRAC = _float("CRICSTAT_MAX_ACTIVE_DROP_FRAC", 0.02)
+        self.MAX_REGISTER_DROP_FRAC = _float("CRICSTAT_MAX_REGISTER_DROP_FRAC", 0.02)
 
     def _path(self, name, default):
         value = os.getenv(name, default)
