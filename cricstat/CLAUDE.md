@@ -122,10 +122,10 @@ Background: `docs/llm-strategy-research-2026-10-05.md`.
 | F4 | Metric dictionary + formula tests (`docs/F4-metric-dictionary.md`) | Done 2026-10-05 |
 | F5 | API contract (`docs/F5-api-contract.md`) | Done 2026-10-05 |
 | F6 | Engineering setup (`docs/F6-engineering-setup.md`) + ADR-022 (Accepted) + CI skeleton | Done 2026-10-05; pipeline deployed, DSM tasks live (daily 05:30, monthly day 1 04:00; verified) |
-| F7 | Roadmap + decision log | Ongoing in this file |
-| F8 | Compliance & trust (licences page, privacy update, disclaimers) | Not started |
-| F9 | CI/CD & automation (`docs/F9-cicd-automation.md`) | CD loop proven on the NAS 2026-10-05; DSM "cricstat CD pull" task after the merge to main |
-| P0 | Ingestion (in parallel with F-steps) → core → marts | Ingestion done 2026-10-05 (`cricstat-pipeline/`; raw.sqlite 168 MB, 22,983 matches); core/marts after F3 |
+| F7 | Roadmap + decision log | Ongoing in this file (current to 2026-10-05) |
+| F8 | Compliance & trust (licences page, privacy update, disclaimers) | Folded into P0 (decided 2026-10-05) |
+| F9 | CI/CD & automation (`docs/F9-cicd-automation.md`) | Done 2026-10-05: CI + approval gate + GHCR + NAS cd-pull.sh (DSM daily 05:15); merged to main |
+| P0 | Ingestion → serving-DB build → cricstat-api → first live pages (+F8) | Ingestion done and deployed with CI/CD; **build step is next** |
 | P1–P6 | Predictor + win prob → tools → test set → agent → public demo → extras | Later |
 
 Git: work on branch `feat/cricstat-foundation`, merge to `main` with `--no-ff` (platform workflow, ADR-018).
@@ -135,6 +135,7 @@ Both run as user **root**. Task Settings → Notification: tick "Send run detail
 "Send run details only when the script terminates abnormally". Pipeline exit codes: 0 = ok, 1 = error, 2 = data-quality gate.
 | Task name | Schedule | Run command |
 |---|---|---|
+| cricstat CD pull | Daily, 05:15 | `sh /volume1/pandya-homelab/deployment/cricstat/cd-pull.sh` |
 | cricstat daily refresh | Daily, 05:30 | `cd /volume1/pandya-homelab/deployment/cricstat && /usr/local/bin/docker compose run --rm cricstat-pipeline recent` |
 | cricstat monthly full | Monthly, day 1, 04:00 | `cd /volume1/pandya-homelab/deployment/cricstat && /usr/local/bin/docker compose run --rm cricstat-pipeline full` |
 The `build` step (P0) and model jobs (P1) are appended to these commands when they exist (F6 §4).
@@ -149,13 +150,22 @@ The `build` step (P0) and model jobs (P1) are appended to these commands when th
 - [ ] `deployment/cricstat/.env` is mode 600, and the API key is in a dedicated Console workspace with prepaid credits and no auto-reload.
 - [ ] Privacy page updated (Anthropic as a processor, retention, no cookies) before launch (F8).
 
-## Next up and open TODOs (as of 2026-10-05)
-- **Next:** F6 engineering setup + ADR-022. F5 is done: one GET-only API for pages, agent, MCP and evals; public ids only;
-  provenance envelope; agent over SSE; 20 questions/IP/day; 30-day log retention; API docs public at /cricket/api/docs.
-- Wireframe source is copied in `docs/wireframes/` (the canvas at the F2 link is the editable master).
-- Branch `feat/cricstat-foundation` is pushed to origin (2026-10-05), not merged.
-- F6 note: cricstat needs its own Docker network. 172.20–172.24 are taken (ml, dl, nlp, agentic-reserved, proxy), so check
-  `docs/NETWORK_CIDR_SUMMARY.md` before picking one, and write ADR-022.
-- Owner TODOs: (1) email Cricsheet to confirm the match-file licence and file the reply in `docs/`; (2) write the
-  "Why I built this" story (placeholder on the hub wireframe); (3) set up a Console API workspace with prepaid credits before P4.
-
+## Next up and open TODOs (as of 2026-10-05, end of the foundation sprint)
+- **Decided next step: P0.** F8's texts (Data & Licences page, privacy-page additions, disclaimers) are written inside P0,
+  because P0 is the first time pages go public. P0 scope, in order:
+  1. `cricstat-pipeline build`: raw → serving DB (`sql/serving_schema.sql` + `reference_data.sql` + `semantic_views.sql`),
+     full and incremental modes, F4 fixture tests, data-quality checks, atomic swap. Includes the Register download
+     (people.csv, names.csv) and the venue → country map draft (F3 decision 2).
+  2. `cricstat-api` (FastAPI, GET-only, F5 contract) for the Players and Countries endpoints first, plus its publish
+     workflow, NAS smoke test and health check in `cd-pull.sh`.
+  3. First live `/cricket/` pages: hub, players, countries, licences (static `cricstat/web/`, Nginx changes from F6 §2).
+  4. F8 texts + the golden-figure set (about 50 players and 10 teams incl. India; the user reviews them).
+- **State:** everything is merged to `main` (merge `2e5cddc`). The image is on GHCR (public). The NAS runs DSM tasks
+  05:15 CD pull, 05:30 daily refresh, and monthly full on day 1 at 04:00.
+  Publishing (`cricstat-publish.yml`) needs the user's approval and runs only when `cricstat/cricstat-pipeline/**` changes.
+- **Workflow:** feature branch per sub-phase (e.g. `feat/cricstat-p0-build`), `--no-ff` merge, push. Docker calls via
+  `sudo -n docker` (each one is gated by an ask rule). Never `docker compose build` on the NAS now that CD is live.
+- **Owner TODOs:** (1) email Cricsheet to confirm the match-file licence (and mention the `playeer_out` typo in match
+  1410291), and file the reply in `docs/`; (2) write the "Why I built this" story (placeholder on the hub wireframe);
+  (3) set up a Console API workspace with prepaid credits before P4.
+- Wireframe source is copied in `docs/wireframes/`. The canvas at the F2 link is the editable master.
