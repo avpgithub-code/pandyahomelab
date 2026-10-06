@@ -47,3 +47,39 @@ jobs:
         run: docker run --rm -u 1026:100 cricstat-pipeline:ci --help
       - name: Smoke test the build step's SQL is in the image and readable
         run: docker run --rm -u 1026:100 --entrypoint python3 cricstat-pipeline:ci -c "import os; [open(os.path.join('/cricstat/sql', n)).read() for n in ('serving_schema.sql', 'reference_data.sql', 'semantic_views.sql', 'semantic_catalog.sql', 'venue_map.csv')]"
+
+  api-tests:
+    # The API tests build their fixture DB with cricstat-pipeline (stdlib) in subprocesses.
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.8", "3.12"]
+    defaults:
+      run:
+        working-directory: cricstat/cricstat-api
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install -r requirements-dev.txt
+      - run: ruff check .
+      - run: python -m pytest -q
+
+  api-image:
+    runs-on: ubuntu-22.04
+    needs: api-tests
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build cricstat-api image (no push)
+        run: docker build -f cricstat/cricstat-api/docker/Dockerfile -t cricstat-api:ci cricstat/cricstat-api
+      - name: Smoke test as the operator UID, read-only root, no DB → expect 503 no_db
+        run: |
+          docker run -d --name api -u 1026:100 --read-only --tmpfs /tmp -p 127.0.0.1:8049:8000 cricstat-api:ci
+          for i in $(seq 1 30); do
+            code=$(curl -s -o body.json -w '%{http_code}' http://127.0.0.1:8049/v1/health || true)
+            [ "$code" = 503 ] && grep -q no_db body.json && { echo "ok: $(cat body.json)"; exit 0; }
+            sleep 1
+          done
+          docker logs api; exit 1

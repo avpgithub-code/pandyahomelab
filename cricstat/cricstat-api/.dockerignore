@@ -1,0 +1,12 @@
+# Only the code and requirements go into the image.
+tests/
+**/__pycache__/
+.pytest_cache/
+.ruff_cache/
+**/*.pyc
+.venv/
+*.md
+.env
+.env.*
+!.env.example
+*.sqlite*

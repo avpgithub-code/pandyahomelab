@@ -1,0 +1,24 @@
+[project]
+name = "cricstat-api"
+version = "0.1.0"
+description = "GET-only cricket statistics API over the cricstat serving database (F5)"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [{name = "Archit Pandya", email = "archit@pandyahomelab.com"}]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py38"
+line-length = 100
+extend-exclude = ["application_logic", "db_logic", "presentation_logic"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+# UP: keep 3.8-compatible typing (typing.List etc.) and %-formatting as written.
+# B008: FastAPI's Query(...) defaults are the documented pattern.
+ignore = ["UP006", "UP007", "UP031", "UP035", "UP045", "B008"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["shared", "db_logic", "application_logic", "presentation_logic"]
