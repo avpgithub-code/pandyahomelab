@@ -58,8 +58,11 @@ location /cricket/api/  { limit_req zone=cricstat_api burst=20 nodelay; proxy_pa
 location /cricket/ask/api/ { proxy_buffering off; proxy_read_timeout 120s; proxy_pass http://cricstat_agent/; }
 ```
 Plus a `limit_req_zone $http_cf_connecting_ip zone=cricstat_api:1m rate=10r/s;`, a pandya-nginx leg on
-cricstat-network at .20, and the bind mount `cricstat/web → /var/www/html/cricket:ro`. Nginx is rebuilt with `--no-cache`
-(nginx.conf is baked into the image).
+cricstat-network at .20, and the bind mount `cricstat/web → /var/www/cricket:ro` (not inside `/var/www/html`, which is
+itself a read-only bind mount). Nginx is rebuilt with `--no-cache` (nginx.conf is baked into the image).
+**As built (P0.4):** the upstream uses the container name (`cricstat-api:8000`); `/cricket/api/v1/admin/` returns 404
+(internal admin endpoints); `/cricket/api/` is GET/HEAD only and logged to the plain access log only (not visitor
+analytics); player and team pages use a regex location that serves the one page file.
 
 ## 3. Data, permissions and the database swap
 - **Bind mounts:** `cricstat/data` and `cricstat/logs`.

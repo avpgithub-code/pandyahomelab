@@ -39,8 +39,11 @@ class IngestResult(dict):
 
 def ingest_zip(db_path: str, zip_path: str, mode: str, source: Optional[str] = None,
                max_failed_abs: int = 5, max_failed_frac: float = 0.005,
-               max_active_drop_frac: float = 0.02) -> IngestResult:
-    """Ingest zip_path. Raises DataQualityError (rolled back) or other errors (rolled back)."""
+               max_active_drop_frac: float = 0.02,
+               source_last_modified: Optional[str] = None) -> IngestResult:
+    """Ingest zip_path. Raises DataQualityError (rolled back) or other errors (rolled back).
+    source_last_modified: when the source last changed the downloaded file (HTTP Last-Modified),
+    kept in the run's notes so "Cricsheet hasn't published" is visible, not inferred."""
     if mode not in MODES:
         raise ValueError("mode must be one of %s" % (MODES,))
     t0 = time.time()
@@ -54,8 +57,10 @@ def ingest_zip(db_path: str, zip_path: str, mode: str, source: Optional[str] = N
         counts = {"added": 0, "updated": 0, "unchanged": 0, "failed": 0,
                   "removed": 0, "restored": 0, "skipped": 0}
         notes: Dict[str, object] = {}
+        if source_last_modified:
+            notes["source_last_modified"] = source_last_modified
         summary = IngestResult(run_id=run_id, mode=mode, source=source, status="running",
-                               started_at=started)
+                               started_at=started, source_last_modified=source_last_modified)
         try:
             zf = CricsheetZip(zip_path)
             src_sha = file_sha256(zip_path)

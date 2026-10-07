@@ -10,7 +10,7 @@ import os
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Tuple
 
-from application_logic.services import golden
+from application_logic.services import golden, meta_service
 from application_logic.services.common import team_slugs
 from application_logic.services.metrics import win_pct
 from db_logic.repository import meta_repo, ops_repo, players_repo, teams_repo
@@ -105,7 +105,8 @@ def jobs(db: ServingDB, raw_db: str, log_dir: str, offset_hours: float,
                         last_run=last_run, overdue=overdue, healthy=healthy,
                         next_run=next_run(job, now, offset_hours).strftime("%Y-%m-%dT%H:%M:%SZ")))
     data = {"jobs": out, "builds": builds, "ingest_runs": runs[:20], "cd_pull_runs": cd[:10],
-            "nas_utc_offset_hours": offset_hours}
+            "nas_utc_offset_hours": offset_hours,
+            "source": meta_service.source_freshness(runs, now)}
     return data, {"jobs": "Schedules are DSM Task Scheduler tasks in NAS local time; 'overdue' ="
                           " no run within the period plus a grace margin."}
 

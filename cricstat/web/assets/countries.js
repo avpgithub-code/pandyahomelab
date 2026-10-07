@@ -1,0 +1,170 @@
+/* cricstat countries page (P0.4): format records, recent results, results by year, head to head,
+   home/away and top performers. Team pages live at /cricket/countries/<team-slug>/ (e.g. india-women). */
+(function () {
+  "use strict";
+  const C = window.cricstat, h = C.h;
+  const GENDER = { male: "Men", female: "Women" };
+  const FORMATS = [["TEST", "Test"], ["ODI", "ODI"], ["T20I", "T20I"]];
+  let chart = null, team = null, teams = [];
+  if (window.Chart) { window.Chart.defaults.color = "#94a3b8"; window.Chart.defaults.borderColor = "#252a38"; }
+
+  function slugFor(name, gender) { const t = teams.find((x) => x.name === name && x.gender === gender); return t ? t.slug : null; }
+
+  function header() {
+    const label = team.name + " " + GENDER[team.gender].toLowerCase();
+    document.getElementById("c-name").textContent = label;
+    document.title = label + " — team records | cricstat";
+    C.fill("c-badge", C.teamBadge(team.name, "lg"));
+    const select = document.getElementById("c-team");
+    const same = teams.filter((t) => t.gender === team.gender && t.matches >= 20).sort((a, b) => a.name.localeCompare(b.name));
+    C.fill(select, same.map((t) => h("option", { value: t.slug }, t.name)));
+    select.value = team.slug;
+    select.onchange = () => { location.href = "/cricket/countries/" + select.value + "/"; };
+    C.fill("c-gender", ["male", "female"].map((g) => {
+      const slug = slugFor(team.name, g);
+      return slug ? h("a", { class: "tab", href: "/cricket/countries/" + slug + "/", "aria-pressed": String(g === team.gender) }, GENDER[g])
+                  : h("span", { class: "tab", "aria-disabled": "true", style: "opacity:.4" }, GENDER[g]);
+    }));
+  }
+
+  let period = "ytd", asOf = null;
+  async function formCards() {
+    const out = C.fill("c-formats", [h("div", { class: "skeleton" }), h("div", { class: "skeleton" }), h("div", { class: "skeleton" })]);
+    C.fill("c-period", C.periodControl(period, (k) => { period = k; formCards(); }));
+    try {
+      C.fill(out, await Promise.all(["ODI", "T20I", "TEST"].map((k) => C.formatCard(team, k, period, asOf))));   // same order as the hub
+    } catch (e) { C.showError(out, e, "records"); }
+  }
+
+  // Recent results, one format at a time like the hub's Latest results (ODI first).
+  let recentFmt = "ODI", source = null;
+  async function recent() {
+    document.querySelectorAll("[data-rfmt]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.rfmt === recentFmt)));
+    const out = C.fill("c-recent", [h("div", { class: "skeleton" }), h("div", { class: "skeleton" }), h("div", { class: "skeleton" })]);
+    try {
+      const { data } = await C.api("/v1/matches?team=" + team.slug + "&scope=" + recentFmt + "&limit=16");
+      C.fill(out, data.length ? data.map(C.matchCard) : h("p", { class: "muted" }, "No " + (recentFmt === "ALL" ? "" : C.fmtName(recentFmt) + " ") + "matches."));
+      out.scrollLeft = 0;
+      const span = data.length ? " · " + C.date(data[data.length - 1].date) + " – " + C.date(data[0].end_date || data[0].date) : "";
+      document.getElementById("c-recent-note").textContent = data.length + " " + (recentFmt === "ALL" ? "" : C.fmtName(recentFmt) + " ") +
+        (data.length === 1 ? "match" : "matches") + span + ", newest first.";
+      C.freshness(document.getElementById("c-recent-fresh"), source, asOf);
+    } catch (e) { C.showError(out, e, "recent results"); }
+  }
+
+  async function yearsChart(scope) {
+    document.querySelectorAll("[data-yfmt]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.yfmt === scope)));
+    const target = document.getElementById("years-chart");
+    try {
+      const { data } = await C.api("/v1/teams/" + team.slug + "/years" + (scope ? "?scope=" + scope : ""));
+      if (chart) { chart.destroy(); chart = null; }
+      if (!data.length || !window.Chart) { C.fill(target, h("p", { class: "muted" }, "No matches.")); return; }
+      C.fill(target, h("canvas", { id: "years-canvas", role: "img", "aria-label": "Results by year" }));
+      chart = new window.Chart(document.getElementById("years-canvas"), { type: "bar",
+        data: { labels: data.map((y) => y.year), datasets: [
+          { label: "Won", data: data.map((y) => y.won), backgroundColor: "#22c55e", borderRadius: 4 },
+          { label: "Lost", data: data.map((y) => y.lost), backgroundColor: "#ef4444", borderRadius: 4 },
+          { label: "Tied / drawn / no result", data: data.map((y) => y.tied + y.drawn + y.no_result), backgroundColor: "#475569", borderRadius: 4 }] },
+        options: { responsive: true, maintainAspectRatio: false,
+          scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, grid: { color: "#1c2130" } } } } });
+    } catch (e) { C.showError(target, e, "results by year"); }
+  }
+
+  // What's planned for this format and gender. Only the men's ODI World Cup 2027 predictor is
+  // committed (P1); everything else is said to come later, without promising a date.
+  function ratingsCard(scope) {
+    const men = team.gender === "male", name = C.fmtName(scope);
+    const [title, badge, text] = men && scope === "ODI"
+      ? ["Ratings & ODI World Cup 2027", "Next", "Team ratings and title chances arrive with the ODI World Cup 2027 predictor in the next phase."]
+      : men && scope === "T20I"
+        ? ["T20I ratings & T20 World Cup 2028", "Later", "T20I team ratings come after the ODI World Cup 2027 predictor. A T20 World Cup 2028 forecast is planned once the ODI World Cup 2027 is over."]
+        : [name + " ratings", "Later", (men ? "" : "Women's ") + name + " team ratings come after the men's ODI World Cup 2027 predictor."];
+    C.fill("f-ratings", [h("div", { class: "card-head" }, [h("h2", {}, title), h("span", { class: "badge " + (badge === "Next" ? "saff" : "soon") }, badge)]),
+      h("p", { class: "dim small" }, text)]);
+  }
+
+  async function byFormat(scope) {
+    document.querySelectorAll("[data-format]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.format === scope)));
+    ratingsCard(scope);
+    document.querySelectorAll(".fmt-name").forEach((el) => { el.textContent = C.fmtName(scope); });
+    const [h2h, ha, runs, wkts] = ["head-to-head", "home-away", "runs", "wickets"].map((id) => C.fill("f-" + id, h("div", { class: "skeleton", style: "height:80px" })));
+    const base = "/v1/teams/" + team.slug;
+    const load = async (target, path, render, what) => {
+      try { const { data } = await C.api(base + path); C.fill(target, data.length ? render(data) : h("p", { class: "muted", style: "padding:1rem" }, "No matches."));
+      } catch (e) { C.showError(target, e, what); }
+    };
+    const leader = (p, val, sub) => h("li", {}, [C.who(p.name, p.matches + " matches", team.name, "/cricket/players/" + p.slug + "/"),
+      h("span", { class: "val" }, [val, h("small", {}, sub)])]);
+    await Promise.all([
+      load(h2h, "/head-to-head?scope=" + scope, (rows) => C.table(["Opponent", "Mat", "Won", "Lost", "Win %", "Last"],
+        rows.slice(0, 15).map((r) => [h("div", { class: "who" }, [C.teamBadge(r.opponent.name, "sm"),
+          r.opponent.slug ? h("a", { href: "/cricket/countries/" + r.opponent.slug + "/", class: "name" }, r.opponent.name) : r.opponent.name]),
+          r.matches, r.won, r.lost, C.ratio(r.win_pct), h("span", { class: "row", style: "justify-content:flex-end;gap:.4rem" },
+            [h("span", { class: "tiny dim" }, C.date(r.last_played)), C.formDots([r.last_outcome])])]), { textCols: [0] }), "head to head"),
+      load(ha, "/home-away?scope=" + scope, (rows) => h("div", { class: "kpis", style: "padding:.4rem 1.3rem 1.2rem" },
+        rows.filter((r) => r.where_played !== "unknown").map((r) => h("div", { class: "kpi" }, [
+          h("b", {}, C.ratio(r.win_pct) + "%"),
+          h("span", {}, { home: "Home", away: "Away", neutral: "Neutral" }[r.where_played] + " · " + r.matches + " mat")]))),
+        "home and away"),
+      load(runs, "/top-players?metric=runs&limit=8&scope=" + scope, (rows) => h("ol", { class: "rank" }, rows.map((p) => leader(p, C.num(p.runs), "avg " + C.ratio(p.average)))), "most runs"),
+      load(wkts, "/top-players?metric=wickets&limit=8&scope=" + scope, (rows) => h("ol", { class: "rank" }, rows.map((p) => leader(p, p.wickets, "avg " + C.ratio(p.average)))), "most wickets"),
+    ]);
+  }
+
+  async function render() {
+    header();
+    const body = C.fill("c-body", [
+      h("section", { class: "section panel" }, h("div", { class: "wrap" }, [
+        h("div", { class: "section-head", style: "margin-bottom:.8rem" }, [h("div", { class: "section-label", style: "margin:0" }, "Record by format"), h("div", { id: "c-period" })]),
+        h("div", { class: "grid", id: "c-formats" }, [h("div", { class: "skeleton" }), h("div", { class: "skeleton" })])])),
+      h("section", { class: "section panel" }, h("div", { class: "wrap" }, [
+        h("div", { class: "section-head" }, [h("div", {}, [h("div", { class: "section-label" }, "Scorecards"), h("h2", { class: "section-title" }, "Recent results")]),
+          h("div", { class: "tabs", role: "group", "aria-label": "Format" }, [["ALL", "All"], ["TEST", "Test"], ["ODI", "ODI"], ["T20I", "T20I"]].map(([k, n]) =>
+            h("button", { class: "tab", type: "button", "data-rfmt": k, "aria-pressed": String(k === recentFmt), onclick: () => { recentFmt = k; recent(); } }, n)))]),
+        C.carousel(h("div", { class: "strip", id: "c-recent", "aria-live": "polite" }, [h("div", { class: "skeleton" }), h("div", { class: "skeleton" }), h("div", { class: "skeleton" })]), "results"),
+        h("div", { class: "row", style: "justify-content:space-between;gap:.6rem" }, [
+          h("p", { class: "tiny muted", id: "c-recent-note" }, "Newest first."), h("p", { class: "tiny", id: "c-recent-fresh", hidden: true })])])),
+      h("section", { class: "section panel" }, h("div", { class: "wrap stack" }, [
+        h("div", { class: "card" }, [h("div", { class: "card-head" }, [h("h2", {}, "Results by year"),
+          h("div", { class: "tabs", role: "group", "aria-label": "Results by year format" }, [["", "All"]].concat(FORMATS).map(([k, n]) =>
+            h("button", { type: "button", class: "tab", "data-yfmt": k, "aria-pressed": String(k === ""), onclick: () => yearsChart(k) }, n)))]),
+          h("div", { class: "chart", id: "years-chart" })]),
+        h("div", { class: "section-head", style: "margin:1rem 0 0" }, [h("div", {}, [h("div", { class: "section-label" }, "By format"), h("h2", { class: "section-title", style: "margin:0" }, ["Head to head & top performers · ", h("span", { class: "fmt-name" }, "ODI")])]),
+          h("div", { class: "tabs", role: "group", "aria-label": "Format" }, FORMATS.map(([k, n]) =>
+            h("button", { type: "button", class: "tab", "data-format": k, "aria-pressed": "false", onclick: () => byFormat(k) }, n)))]),
+        h("div", { class: "grid" }, [
+          h("div", { class: "card accent", id: "f-ratings" }),
+          h("div", { class: "card tablecard" }, [h("div", { class: "card-head" }, h("h2", {}, ["Home vs away · ", h("span", { class: "fmt-name" }, "ODI")])), h("div", { id: "f-home-away" })])]),
+        h("div", { class: "card tablecard" }, [h("div", { class: "card-head" }, h("h2", {}, ["Head to head · ", h("span", { class: "fmt-name" }, "ODI")])), h("div", { id: "f-head-to-head" })]),
+        h("div", { class: "grid" }, [
+          h("div", { class: "card" }, [h("h2", {}, ["Most runs · ", h("span", { class: "fmt-name" }, "ODI")]), h("div", { id: "f-runs" })]),
+          h("div", { class: "card" }, [h("h2", {}, ["Most wickets · ", h("span", { class: "fmt-name" }, "ODI")]), h("div", { id: "f-wickets" })])]),
+        h("p", { class: "tiny muted" }, ["Matches with play only; ties and draws count in win % (no results don't). Top performers count only matches for this team. Data as of ",
+          h("span", { id: "data-note" }, "…"), ". ", h("a", { href: "/cricket/licences/" }, "What the data covers")])]))]);
+    try {
+      const { data: record, meta } = await C.api("/v1/teams/" + team.slug + "/record");
+      C.dataNote(meta);
+      asOf = meta.data_as_of;
+      await formCards();
+      const formats = record.map((r) => r.format);
+      // ODI first, as everywhere; a team with no ODIs starts on the format it plays most.
+      if (!formats.includes("ODI")) recentFmt = (record.slice().sort((a, b) => b.matches - a.matches)[0] || {}).format || "ALL";
+      try { source = (await C.api("/v1/status")).data.source || null; } catch (e) { source = null; }
+      recent();
+      yearsChart("");
+      byFormat(["ODI", "T20I", "TEST"].find((f) => formats.includes(f)) || "ODI");
+    } catch (e) { C.showError(body, e, "this team"); }
+  }
+
+  async function init() {
+    try {
+      const { data } = await C.api("/v1/teams?type=international");
+      teams = data;
+      const slug = C.pathTail("countries") || C.getFollow();
+      team = teams.find((t) => t.slug === slug) || teams.find((t) => t.slug === "india-men");
+      if (!team) throw new Error("unknown team");
+      render();
+    } catch (e) { C.showError("c-body", e, "teams"); }
+  }
+  init();
+})();

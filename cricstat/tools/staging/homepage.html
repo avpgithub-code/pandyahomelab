@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pandyaHomeLab — Live AI/ML Demos by Archit Pandya</title>
+  <meta name="description" content="Live, self-hosted machine learning, deep learning and NLP demos by Archit Pandya, AI/ML engineer: PyTorch, scikit-learn, MLflow, FastAPI and Docker, built and deployed end to end." />
+  <meta name="author" content="Archit Pandya" />
+  <link rel="canonical" href="https://pandyahomelab.com/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="pandyaHomeLab" />
+  <meta property="og:title" content="pandyaHomeLab — Live AI/ML Demos by Archit Pandya" />
+  <meta property="og:description" content="Nine live ML, deep learning and NLP demos, trained, tracked in MLflow and deployed end to end on a self-hosted platform." />
+  <meta property="og:url" content="https://pandyahomelab.com/" />
+  <meta property="og:image" content="https://pandyahomelab.com/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Person",
+        "@id": "https://pandyahomelab.com/#archit",
+        "name": "Archit Pandya",
+        "jobTitle": "AI/ML Engineer",
+        "description": "Builds and deploys ML, DL and NLP systems end to end (PyTorch, scikit-learn, MLflow, Docker).",
+        "url": "https://pandyahomelab.com/",
+        "sameAs": ["https://www.linkedin.com/in/architpandya/", "https://github.com/avpgithub-code"],
+        "knowsAbout": ["Machine Learning", "Deep Learning", "Natural Language Processing", "PyTorch", "scikit-learn", "MLflow", "MLOps", "Docker", "FastAPI"]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://pandyahomelab.com/#site",
+        "name": "pandyaHomeLab",
+        "url": "https://pandyahomelab.com/",
+        "author": {"@id": "https://pandyahomelab.com/#archit"}
+      }
+    ]
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0f14;
+      --surface:   #13161e;
+      --surface2:  #1a1e2a;
+      --border:    #252a38;
+      --accent-ml: #4f8ef7;
+      --accent-dl: #f97316;
+      --accent-nlp: #22c55e;
+      --accent-ag: #a855f7;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --radius:    12px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* — NAV — */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem;
+      height: 80px;
+      background: rgba(13,15,20,.85);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-brand { display: flex; align-items: center; text-decoration: none; color: var(--text); }
+    .nav-brand span { font-weight: 800; font-size: 1.1rem; }
+    .nav-brand em { font-style: normal; color: var(--accent-ml); }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      color: var(--muted); text-decoration: none; font-size: .875rem;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* — HERO — */
+    .hero {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 7rem 2rem 5rem;
+      text-align: center;
+      background:
+        radial-gradient(ellipse 70% 50% at 20% 40%, rgba(79,142,247,.07) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 60%, rgba(249,115,22,.06) 0%, transparent 60%),
+        var(--bg);
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 99px; padding: .35rem 1rem;
+      font-size: .75rem; color: #cbd5e1; letter-spacing: .08em; text-transform: uppercase;
+      margin-bottom: 1.75rem;
+    }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-ml);
+           box-shadow: 0 0 6px var(--accent-ml); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    .hero h1 {
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      font-weight: 800; letter-spacing: -.03em; line-height: 1.1;
+      margin-bottom: 1.25rem;
+    }
+    .hero h1 em { font-style: normal; color: var(--accent-ml); }
+    .hero p.subtitle {
+      max-width: 780px; color: #cbd5e1; font-size: 1.05rem; margin-bottom: 2.5rem;
+    }
+    .cta-row { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+    .btn {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .7rem 1.6rem; border-radius: var(--radius);
+      font-size: .9rem; font-weight: 600; cursor: pointer;
+      text-decoration: none; border: none; transition: transform .15s, box-shadow .15s;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-ml  { background: var(--accent-ml);  color: #fff; box-shadow: 0 4px 20px rgba(79,142,247,.35); }
+    .btn-ml:hover  { box-shadow: 0 6px 28px rgba(79,142,247,.55); }
+    .btn-dl  { background: var(--accent-dl);  color: #fff; box-shadow: 0 4px 20px rgba(249,115,22,.35); }
+    .btn-dl:hover  { box-shadow: 0 6px 28px rgba(249,115,22,.55); }
+    .btn-nlp { background: var(--accent-nlp); color: #fff; box-shadow: 0 4px 20px rgba(34,197,94,.35); }
+    .btn-nlp:hover { box-shadow: 0 6px 28px rgba(34,197,94,.55); }
+    .btn-ag  { background: var(--accent-ag);  color: #fff; box-shadow: 0 4px 20px rgba(168,85,247,.35); }
+    .btn-ag:hover  { box-shadow: 0 6px 28px rgba(168,85,247,.55); }
+
+    .builder { color: #cbd5e1; font-size: .95rem; margin: -1.25rem 0 2rem; }
+    .builder strong { color: var(--text); }
+    .builder a { color: var(--accent-ml); text-decoration: none; font-weight: 600; }
+    .builder a:hover { text-decoration: underline; }
+
+    /* — SECTION — */
+    section { padding: 0 2rem 5rem; max-width: 1200px; margin: 0 auto; }
+    .section-label {
+      font-size: .7rem; letter-spacing: .15em; text-transform: uppercase;
+      color: #cbd5e1; margin-bottom: .75rem;
+    }
+    .section-title {
+      font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 700;
+      letter-spacing: -.02em; margin-bottom: 1rem;
+    }
+    .section-desc { color: #cbd5e1; max-width: 580px; margin-bottom: 3rem; }
+
+    /* — PROJECTS — */
+    .projects-section { padding-top: 0; }
+    .projects-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+    .proj-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.5rem;
+      transition: transform .2s, border-color .2s;
+      display: flex; flex-direction: column;
+    }
+    .proj-card:hover { transform: translateY(-4px); }
+    .proj-card.ml  { border-top: 3px solid var(--accent-ml); }
+    .proj-card.ml:hover  { border-color: var(--accent-ml); }
+    .proj-card.dl  { border-top: 3px solid var(--accent-dl); }
+    .proj-card.dl:hover  { border-color: var(--accent-dl); }
+    .proj-card.nlp { border-top: 3px solid var(--accent-nlp); }
+    .proj-card.nlp:hover { border-color: var(--accent-nlp); }
+    .proj-card.ag  { border-top: 3px solid var(--accent-ag); }
+    .proj-card.ag:hover  { border-color: var(--accent-ag); }
+
+    .proj-icon {
+      width: 48px; height: 48px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; margin-bottom: 1rem;
+    }
+    .ml  .proj-icon { background: rgba(79,142,247,.12); }
+    .dl  .proj-icon { background: rgba(249,115,22,.12); }
+    .nlp .proj-icon { background: rgba(34,197,94,.12); }
+    .ag  .proj-icon { background: rgba(168,85,247,.12); }
+
+    .proj-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: .5rem; }
+    .proj-card p  { color: #cbd5e1; font-size: .9rem; flex: 1; margin-bottom: 1rem; }
+    .proj-status {
+      display: inline-block; padding: .25rem .75rem;
+      border-radius: 99px; font-size: .7rem; font-weight: 600; letter-spacing: .05em;
+      margin-bottom: 1rem;
+    }
+    .status-live    { background: rgba(34,197,94,.15);  color: var(--accent-nlp); }
+    .status-wip     { background: rgba(250,204,21,.1);  color: #facc15; }
+    .status-planned { background: rgba(100,116,139,.1); color: var(--muted); }
+
+    .proj-route {
+      font-family: 'Courier New', monospace;
+      font-size: .75rem; color: var(--muted);
+      display: block; margin-bottom: .8rem;
+    }
+    .proj-link {
+      display: inline-flex; align-items: center; gap: .35rem;
+      font-size: .85rem; font-weight: 600; text-decoration: none;
+      padding: .4rem 1rem; border-radius: 8px;
+      transition: all .2s; border: 1px solid;
+    }
+    .ml-link  { color: var(--accent-ml);  border-color: rgba(79,142,247,.35);  background: rgba(79,142,247,.08); }
+    .ml-link:hover  { background: rgba(79,142,247,.2);  border-color: var(--accent-ml); }
+    .dl-link  { color: var(--accent-dl);  border-color: rgba(249,115,22,.35);  background: rgba(249,115,22,.08); }
+    .dl-link:hover  { background: rgba(249,115,22,.2);  border-color: var(--accent-dl); }
+    .nlp-link { color: var(--accent-nlp); border-color: rgba(34,197,94,.35);   background: rgba(34,197,94,.08); }
+    .nlp-link:hover { background: rgba(34,197,94,.2);   border-color: var(--accent-nlp); }
+    .ag-link  { color: var(--accent-ag);  border-color: rgba(168,85,247,.35);  background: rgba(168,85,247,.08); }
+    .ag-link:hover  { background: rgba(168,85,247,.2);  border-color: var(--accent-ag); }
+    .proj-link-disabled {
+      color: var(--muted); border-color: var(--border);
+      background: transparent; cursor: not-allowed; opacity: .5;
+    }
+
+    /* — DOMAIN SECTIONS — */
+    .domain-section { margin-bottom: 4rem; }
+    .domain-header {
+      display: flex; align-items: center; gap: .8rem;
+      margin-bottom: 2rem; padding-bottom: 1rem;
+      border-bottom: 2px solid var(--border);
+    }
+    .domain-header.ml  { border-color: var(--accent-ml); }
+    .domain-header.dl  { border-color: var(--accent-dl); }
+    .domain-header.nlp { border-color: var(--accent-nlp); }
+    .domain-header.ag  { border-color: var(--accent-ag); }
+    .domain-icon  { font-size: 1.6rem; }
+    .domain-title { font-size: 1.3rem; font-weight: 700; }
+    .domain-count { font-size: .75rem; color: var(--muted); margin-left: auto; }
+
+    /* — STACK — */
+    .stack-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 1rem;
+    }
+    .stack-chip {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: .9rem 1rem;
+      display: flex; flex-direction: column; align-items: center; gap: .4rem;
+      font-size: .8rem; font-weight: 500; text-align: center; color: var(--muted);
+      transition: border-color .2s;
+    }
+    .stack-chip:hover { border-color: var(--accent-ml); color: var(--text); }
+    .stack-chip .chip-icon { font-size: 1.5rem; }
+
+    /* — PLATFORM TOOLS — */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1.25rem;
+    }
+    .tool-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: .75rem;
+      transition: border-color .2s;
+    }
+    .tool-card:hover { border-color: var(--accent-ml); }
+    .tool-card-top {
+      display: flex; align-items: center; gap: .75rem;
+    }
+    .tool-icon-wrap {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; flex-shrink: 0;
+    }
+    .tool-icon-wrap.mlflow   { background: rgba(79,142,247,.12); }
+    .tool-icon-wrap.minio    { background: rgba(249,115,22,.12); }
+    .tool-icon-wrap.postgres { background: rgba(34,197,94,.12); }
+    .tool-icon-wrap.redis    { background: rgba(168,85,247,.12); }
+    .tool-name { font-size: 1rem; font-weight: 700; }
+    .tool-badge {
+      display: inline-block; padding: .2rem .6rem;
+      border-radius: 99px; font-size: .65rem; font-weight: 600;
+      letter-spacing: .05em;
+    }
+    .tool-badge.live     { background: rgba(34,197,94,.15); color: var(--accent-nlp); }
+    .tool-badge.internal { background: rgba(100,116,139,.1); color: var(--muted); }
+    .tool-desc {
+      font-size: .82rem; color: #94a3b8; line-height: 1.5; flex: 1;
+    }
+    .tool-link-btn {
+      display: inline-flex; align-items: center; gap: .35rem;
+      font-size: .8rem; font-weight: 600; text-decoration: none;
+      padding: .4rem 1rem; border-radius: 8px;
+      border: 1px solid rgba(79,142,247,.35);
+      color: var(--accent-ml); background: rgba(79,142,247,.08);
+      transition: all .2s; align-self: flex-start;
+    }
+    .tool-link-btn:hover { background: rgba(79,142,247,.2); border-color: var(--accent-ml); }
+    .tool-link-internal {
+      font-size: .75rem; color: var(--muted);
+      font-family: 'Courier New', monospace;
+    }
+
+    /* — FOOTER — */
+    footer {
+      border-top: 1px solid var(--border);
+      text-align: center; padding: 2rem;
+      font-size: .8rem; color: var(--muted);
+    }
+    footer a { color: var(--accent-ml); text-decoration: none; }
+
+    @media (max-width: 560px) { .nav-links { display: none; } }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    .proj-card { animation: fadeUp .4s ease both; }
+    .proj-card:nth-child(1){animation-delay:.05s}
+    .proj-card:nth-child(2){animation-delay:.10s}
+    .proj-card:nth-child(3){animation-delay:.15s}
+    .proj-card:nth-child(4){animation-delay:.20s}
+
+    /* — Nav right group + About trigger — */
+    .nav-right { display: flex; align-items: center; gap: 1.5rem; }
+    .about-trigger {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .45rem 1rem; border-radius: 99px;
+      border: 1px solid rgba(79,142,247,.35);
+      background: rgba(79,142,247,.1); color: var(--accent-ml);
+      font-size: .82rem; font-weight: 600; cursor: pointer;
+      transition: all .2s;
+      font-family: inherit;
+    }
+    .about-trigger:hover { background: rgba(79,142,247,.22); border-color: var(--accent-ml); transform: translateY(-1px); }
+
+    /* — About drawer (platform) — */
+    .about-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,.7);
+      opacity: 0; pointer-events: none; transition: opacity .25s ease; z-index: 1000;
+    }
+    .about-backdrop.visible { opacity: 1; pointer-events: auto; }
+    .about-drawer {
+      position: fixed; top: 0; right: 0; bottom: 0;
+      width: 100%; max-width: 620px;
+      background: var(--surface); border-left: 1px solid var(--border);
+      box-shadow: -8px 0 24px rgba(0,0,0,.4);
+      transform: translateX(100%); transition: transform .3s ease;
+      z-index: 1001; overflow-y: auto;
+      padding: 1.5rem 1.75rem 3rem;
+    }
+    .about-drawer.visible { transform: translateX(0); }
+    .about-header {
+      position: sticky; top: 0; z-index: 1;
+      background: var(--surface); padding: .25rem 0 1rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;
+    }
+    .about-title { font-size: 1.35rem; font-weight: 800; letter-spacing: -.01em; color: var(--text); }
+    .about-tagline { font-size: .85rem; color: var(--muted); margin-top: .35rem; line-height: 1.5; }
+    .about-close {
+      flex-shrink: 0; width: 32px; height: 32px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--surface2);
+      color: var(--muted); cursor: pointer; font-size: 1.1rem; line-height: 1;
+      transition: all .15s;
+    }
+    .about-close:hover { color: var(--text); border-color: var(--accent-ml); }
+    .about-section { margin-bottom: 2rem; }
+    .about-section h3 {
+      display: flex; align-items: center; gap: .5rem;
+      font-size: .98rem; font-weight: 700; color: var(--text);
+      margin-bottom: .8rem;
+    }
+    .about-section h3 .icon { font-size: 1.15rem; }
+    .about-section p { font-size: .85rem; color: #cbd5e1; line-height: 1.65; margin-bottom: .7rem; }
+    .about-section p:last-child { margin-bottom: 0; }
+    .about-section em { font-style: italic; color: var(--text); }
+    .about-section strong { color: var(--text); }
+    .about-section code {
+      font-family: 'SF Mono', Consolas, monospace;
+      background: var(--surface2); padding: .1rem .4rem;
+      border-radius: 4px; font-size: .8em; color: var(--accent-ml);
+    }
+    .about-bullets { list-style: none; padding: 0; margin: .5rem 0 0; }
+    .about-bullets li {
+      padding: .65rem .9rem; margin-bottom: .5rem;
+      background: var(--surface2); border-left: 2px solid var(--accent-ml);
+      border-radius: 4px; font-size: .83rem; line-height: 1.6; color: #cbd5e1;
+    }
+    .about-bullets li b { color: var(--accent-ml); font-weight: 700; }
+    .about-facts { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin-top: .85rem; }
+    .about-fact { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: .55rem .7rem; }
+    .about-fact-label { font-size: .65rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+    .about-fact-value { font-size: .85rem; font-weight: 700; color: var(--text); font-family: 'SF Mono', Consolas, monospace; margin-top: .15rem; }
+    .about-stack { display: flex; flex-direction: column; gap: .5rem; }
+    .about-stack-item { display: flex; flex-direction: column; padding: .65rem .85rem; background: var(--surface2); border-radius: 6px; border-left: 2px solid var(--accent-ml); }
+    .about-stack-name { font-size: .85rem; font-weight: 700; color: var(--text); }
+    .about-stack-purpose { font-size: .75rem; color: var(--muted); margin-top: .15rem; }
+    .about-links { display: flex; flex-direction: column; gap: .45rem; }
+    .about-link {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .55rem .9rem; border-radius: 6px;
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--accent-ml); font-size: .83rem; font-weight: 600;
+      text-decoration: none; transition: all .15s;
+    }
+    .about-link:hover { background: rgba(79,142,247,.1); border-color: var(--accent-ml); }
+    .about-diagram {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 1rem; margin-top: .85rem; overflow-x: auto;
+    }
+    .about-diagram svg { max-width: 100%; height: auto; }
+
+    /* cricstat flagship (added with cricstat P0.4) */
+    :root { --accent-cric: #FF9933; --cric-blue: #4F7FD6; }
+    .nav-new { font-size: .62rem; font-weight: 800; letter-spacing: .06em; color: #0d0f14; background: var(--accent-cric);
+               border-radius: 99px; padding: .05rem .4rem; margin-left: .3rem; vertical-align: middle; }
+    .btn-cric { background: var(--accent-cric); color: #0d0f14; box-shadow: 0 4px 20px rgba(255,153,51,.35); }
+    .btn-cric:hover { box-shadow: 0 6px 28px rgba(255,153,51,.55); }
+    .btn-ghost-cric { border: 1px solid rgba(255,153,51,.45); background: rgba(255,153,51,.08); color: #fff; }
+    .btn-ghost-cric:hover { background: rgba(255,153,51,.18); border-color: var(--accent-cric); }
+    .flagship { max-width: 1100px; margin: 0 auto 1rem; padding: 0 1.5rem; }
+    .flagship-card { background: linear-gradient(135deg, rgba(19,71,163,.35), rgba(255,153,51,.10)); border: 1px solid var(--border);
+                     border-top: 3px solid var(--accent-cric); border-radius: var(--radius); padding: 1.8rem; }
+    .flagship-eyebrow { font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent-cric); }
+    .flagship-card h2 { font-size: 1.5rem; margin: .4rem 0 .6rem; }
+    .flagship-card > p { color: #cbd5e1; max-width: 760px; }
+    .flagship-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: .9rem; margin: 1.2rem 0; }
+    .flagship-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; }
+    .flagship-item strong { display: block; margin-bottom: .25rem; }
+    .flagship-item span { color: #94a3b8; font-size: .88rem; }
+    .flagship-item .proj-status { margin: .5rem 0 0; }
+    .proj-card.cric { border-top: 3px solid var(--accent-cric); }
+    .proj-card.cric:hover { border-color: var(--accent-cric); }
+    .cric-link { color: var(--accent-cric); }
+    .cs { color: #fff; white-space: nowrap; } .cs b { color: var(--accent-cric); font-weight: inherit; }
+    .part-of b { color: var(--accent-cric); }
+    .part-of { font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: .3rem; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="#home"><span>pandya<em>HomeLab</em></span></a>
+  <div class="nav-right">
+    <ul class="nav-links">
+      <li><a href="#ml">ML</a></li>
+      <li><a href="#dl">DL</a></li>
+      <li><a href="#nlp">NLP</a></li>
+      <li><a href="#agentic">Agentic</a></li>
+      <li><a href="/cricket/">Cricket<span class="nav-new">NEW</span></a></li>
+      <li><a href="#stack">Stack</a></li>
+      <li><a href="#tools">Tools</a></li>
+    </ul>
+    <button class="about-trigger" id="about-trigger" type="button">
+      <span>ⓘ</span> About pandyaHomeLab
+    </button>
+  </div>
+</nav>
+
+<!-- About platform drawer -->
+<div class="about-backdrop" id="about-backdrop"></div>
+<aside class="about-drawer" id="about-drawer" aria-hidden="true" role="dialog" aria-labelledby="about-title">
+  <div class="about-header">
+    <div>
+      <div class="about-title" id="about-title">Loading…</div>
+      <div class="about-tagline" id="about-tagline"></div>
+    </div>
+    <button class="about-close" id="about-close" type="button" aria-label="Close">✕</button>
+  </div>
+  <div id="about-body"></div>
+</aside>
+
+<div class="hero" id="home">
+  <div class="hero-eyebrow"><div class="dot"></div>End-to-End AI Platform</div>
+  <h1>pandya<em>HomeLab</em></h1>
+  <p class="subtitle">
+    A professional AI learning platform showcasing Machine Learning, Deep Learning, NLP, and Agentic AI.<br>
+    From theory to production — built on Synology NAS, deployed to AWS.
+  </p>
+  <p class="builder">
+    Built by <strong>Archit Pandya</strong> · AI/ML Engineer ·
+    <a href="https://www.linkedin.com/in/architpandya/" rel="me noopener" target="_blank">LinkedIn</a> ·
+    <a href="https://github.com/avpgithub-code" rel="me noopener" target="_blank">GitHub</a>
+  </p>
+  <div class="cta-row">
+    <a href="#ml"      class="btn btn-ml">📊 ML Projects</a>
+    <a href="#dl"      class="btn btn-dl">🧠 DL Projects</a>
+    <a href="#nlp"     class="btn btn-nlp">💬 NLP Projects</a>
+    <a href="#agentic" class="btn btn-ag">🤖 Agentic AI</a>
+  </div>
+</div>
+
+<!-- cricstat flagship banner -->
+<section class="flagship" aria-labelledby="flagship-title">
+  <div class="flagship-card">
+    <div class="flagship-eyebrow">Flagship project · New</div>
+    <h2 id="flagship-title"><span class="cs">cric<b>stat</b></span> — end-to-end cricket analytics &amp; LLM project</h2>
+    <p>One product across the whole stack: a daily data pipeline over 22,000+ men's and women's matches and a statistics API are live now; ML forecasting and an LLM analyst with published accuracy scores come next.</p>
+    <div class="flagship-grid">
+      <div class="flagship-item"><strong>Players &amp; Countries</strong><span>Men's and women's, all formats and major leagues</span><div class="proj-status status-live">✓ Live</div></div>
+      <div class="flagship-item"><strong>ODI WC 2027 Predictor</strong><span>Title chances, updated as matches are played</span><div class="proj-status status-planned">Next</div></div>
+      <div class="flagship-item"><strong>Ask the Analyst</strong><span>Plain-English stats questions, every answer sourced</span><div class="proj-status status-planned">Planned</div></div>
+    </div>
+    <a href="/cricket/" class="btn btn-ghost-cric">Explore <span class="cs">cric<b>stat</b></span> →</a>
+  </div>
+</section>
+
+<section id="projects" class="projects-section">
+  <div class="section-label">Live Deployments</div>
+  <h2 class="section-title">Featured Projects</h2>
+  <p class="section-desc">Each project is a containerized microservice — built and tested on NAS, deployed to AWS.</p>
+
+  <!-- ML -->
+  <div class="domain-section" id="ml">
+    <div class="domain-header ml">
+      <span class="domain-icon">📊</span>
+      <span class="domain-title">Machine Learning</span>
+      <span class="domain-count">3 live</span>
+    </div>
+    <div class="projects-grid">
+      <div class="proj-card ml">
+        <div class="proj-icon">🎯</div>
+        <h3>Iris KNN Classifier</h3>
+        <span class="proj-status status-live">✓ Live</span>
+        <p>K-Nearest Neighbors classifier on the classic Iris dataset. Submit features, get classification with confidence scores.</p>
+        <span class="proj-route">/ml/iris-knn/</span>
+        <a href="/ml/iris-knn/" class="proj-link ml-link">Try it →</a>
+      </div>
+      <div class="proj-card ml">
+        <div class="proj-icon">📈</div>
+        <h3>Housing Linear Regression</h3>
+        <span class="proj-status status-live">✓ Live</span>
+        <p>Linear Regression on the California Housing dataset. Predict median house values from 8 features with an interactive slider UI.</p>
+        <span class="proj-route">/ml/housing-linear/</span>
+        <a href="/ml/housing-linear/" class="proj-link ml-link">Try it →</a>
+      </div>
+      <div class="proj-card ml">
+        <div class="proj-icon">🚢</div>
+        <h3>Titanic AutoML Classifier</h3>
+        <span class="proj-status status-live">✓ Live</span>
+        <p>PyCaret AutoML pipeline that benchmarks 7 algorithms on the Titanic survival dataset and serves the best model with AUC/F1/Accuracy metrics.</p>
+        <span class="proj-route">/ml/titanic-automl/</span>
+        <a href="/ml/titanic-automl/" class="proj-link ml-link">Try it →</a>
+      </div>
+      <div class="proj-card cric">
+        <div class="part-of">Part of <span class="cs">cric<b>stat</b></span></div>
+        <h3>ODI WC 2027 Predictor</h3>
+        <span class="proj-status status-planned">Planned</span>
+        <p>Elo baseline vs ML and DL challengers, backtested on the 2019 and 2023 ODI World Cups.</p>
+        <span class="proj-route">/cricket/</span>
+        <a href="/cricket/" class="proj-link cric-link">About <span class="cs">cric<b>stat</b></span> →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- DL -->
+  <div class="domain-section" id="dl">
+    <div class="domain-header dl">
+      <span class="domain-icon">🧠</span>
+      <span class="domain-title">Deep Learning</span>
+      <span class="domain-count">2 live · 1 planned</span>
+    </div>
+    <div class="projects-grid">
+      <div class="proj-card dl">
+        <div class="proj-icon">✍️</div>
+        <h3>MNIST CNN — Draw a Digit</h3>
+        <span class="proj-status status-live">✓ Live</span>
+        <p>PyTorch CNN classifier on MNIST. Draw a digit on the HTML5 canvas, get the prediction with per-class confidence bars. ≥98% test accuracy.</p>
+        <span class="proj-route">/dl/mnist-cnn/</span>
+        <a href="/dl/mnist-cnn/" class="proj-link dl-link">Try it →</a>
+      </div>
+      <div class="proj-card dl">
+        <div class="proj-icon">📉</div>
+        <h3>LSTM Time-Series Forecast</h3>
+        <span class="proj-status status-live">✓ Live</span>
+        <p>PyTorch LSTM trained on 2.5 years of NYC CitiBike daily ride counts. Pick a date, get a 14-day forecast with an MC-Dropout confidence band and a compare-to-actuals overlay.</p>
+        <span class="proj-route">/dl/lstm-forecast/</span>
+        <a href="/dl/lstm-forecast/" class="proj-link dl-link">Try it →</a>
+      </div>
+      <div class="proj-card dl">
+        <div class="proj-icon">🔍</div>
+        <h3>Object Detection (YOLO)</h3>
+        <span class="proj-status status-planned">Planned</span>
+        <p>Real-time object detection — bounding boxes and class labels via API.</p>
+        <span class="proj-route">/dl/object-detection</span>
+        <span class="proj-link proj-link-disabled">Planned</span>
+      </div>
+      <div class="proj-card cric">
+        <div class="part-of">Part of <span class="cs">cric<b>stat</b></span></div>
+        <h3>Ball-by-ball Sequence Model</h3>
+        <span class="proj-status status-planned">Planned</span>
+        <p>Live win probability and player-strength ratings for the predictor, learned from 11.6M deliveries.</p>
+        <span class="proj-route">/cricket/</span>
+        <a href="/cricket/" class="proj-link cric-link">About <span class="cs">cric<b>stat</b></span> →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- NLP -->
+  <div class="domain-section" id="nlp">
+    <div class="domain-header nlp">
+      <span class="domain-icon">💬</span>
+      <span class="domain-title">Natural Language Processing</span>
+      <span class="domain-count">4 live</span>
+    </div>
+    <div class="projects-grid">
+      <div class="proj-card nlp">
+        <div class="proj-icon">🔁</div>
+        <h3>Duplicate Question Pairs</h3>
+        <span class="proj-status status-live">✓ Live</span>
+        <p>Are two Quora questions asking the same thing? Bag-of-words + 22 engineered features (token, length, fuzzy) → Random Forest, with a probability slider and a “why” panel.</p>
+        <span class="proj-route">/nlp/quora-randomforest/</span>
+        <a href="/nlp/quora-randomforest/" class="proj-link nlp-link">Try it →</a>
+      </div>
+      <div class="proj-card nlp">
+        <div class="proj-icon">🧹</div>
+        <h3>Text Preprocessing &amp; Representation Lab</h3>
+        <span class="proj-status status-live">✓ Live</span>
+        <p>Paste any text and watch every step — cleaning, tokenization, stemming vs. lemmatization — then compare one-hot, Bag of Words, n-grams and TF-IDF vectors side by side, each scored by the same classifier on 25,000 IMDB reviews.</p>
+        <span class="proj-route">/nlp/imdb-textrep/</span>
+        <a href="/nlp/imdb-textrep/" class="proj-link nlp-link">Try it →</a>
+      </div>
+      <div class="proj-card nlp">
+        <div class="proj-icon">🧭</div>
+        <h3>Word2Vec Explorer</h3>
+        <span class="proj-status status-live">✓ Live</span>
+        <p>CBOW vs skip-gram vs fastText trained on 17M words of Wikipedia, next to GloVe 6B: nearest words, king − man + woman analogies, similarity and a 2-D PCA map.</p>
+        <span class="proj-route">/nlp/text8-word2vec/</span>
+        <a href="/nlp/text8-word2vec/" class="proj-link nlp-link">Try it →</a>
+      </div>
+      <div class="proj-card nlp">
+        <div class="proj-icon">🏷️</div>
+        <h3>POS Tagger: HMM + Viterbi</h3>
+        <span class="proj-status status-live">✓ Live</span>
+        <p>Tags each word with a hidden Markov model counted by hand from 200k words of web English, drawing the Viterbi trellis and best path — side by side with spaCy's neural tagger (94.4% vs 95.1%).</p>
+        <span class="proj-route">/nlp/ewt-hmm/</span>
+        <a href="/nlp/ewt-hmm/" class="proj-link nlp-link">Try it →</a>
+      </div>
+      <div class="proj-card cric">
+        <div class="part-of">Part of <span class="cs">cric<b>stat</b></span></div>
+        <h3>Fact-checked Match Reports</h3>
+        <span class="proj-status status-planned">Planned</span>
+        <p>Data-to-text match summaries with every claim verified against the statistics.</p>
+        <span class="proj-route">/cricket/</span>
+        <a href="/cricket/" class="proj-link cric-link">About <span class="cs">cric<b>stat</b></span> →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- AGENTIC -->
+  <div class="domain-section" id="agentic">
+    <div class="domain-header ag">
+      <span class="domain-icon">🤖</span>
+      <span class="domain-title">Agentic AI</span>
+      <span class="domain-count">0 live · 1 planned</span>
+    </div>
+    <div class="projects-grid">
+      <div class="proj-card ag">
+        <div class="proj-icon">🧩</div>
+        <h3>Claude AI Agent</h3>
+        <span class="proj-status status-planned">Planned</span>
+        <p>Autonomous AI agent powered by Claude API. Multi-step reasoning, tool use, and structured outputs.</p>
+        <span class="proj-route">/agentic/claude-agent</span>
+        <span class="proj-link proj-link-disabled">Planned</span>
+      </div>
+      <div class="proj-card cric">
+        <div class="part-of">Part of <span class="cs">cric<b>stat</b></span></div>
+        <h3>Ask the Analyst</h3>
+        <span class="proj-status status-planned">Planned</span>
+        <p>LangGraph agent with typed tools over the stats API and published evaluation scores.</p>
+        <span class="proj-route">/cricket/</span>
+        <a href="/cricket/" class="proj-link cric-link">About <span class="cs">cric<b>stat</b></span> →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="stack">
+  <div class="section-label">Technology Stack</div>
+  <h2 class="section-title">Built With</h2>
+  <p class="section-desc">Production-grade tools across all domains.</p>
+  <div class="stack-grid">
+    <div class="stack-chip"><span class="chip-icon">📊</span>scikit-learn</div>
+    <div class="stack-chip"><span class="chip-icon">🔥</span>PyTorch</div>
+    <div class="stack-chip"><span class="chip-icon">🧠</span>TensorFlow</div>
+    <div class="stack-chip"><span class="chip-icon">🤗</span>HuggingFace</div>
+    <div class="stack-chip"><span class="chip-icon">🤖</span>Claude API</div>
+    <div class="stack-chip"><span class="chip-icon">⚡</span>FastAPI</div>
+    <div class="stack-chip"><span class="chip-icon">🐳</span>Docker</div>
+    <div class="stack-chip"><span class="chip-icon">☁️</span>AWS EC2</div>
+    <div class="stack-chip"><span class="chip-icon">💾</span>MinIO</div>
+    <div class="stack-chip"><span class="chip-icon">📈</span>MLflow</div>
+    <div class="stack-chip"><span class="chip-icon">🏠</span>Synology NAS</div>
+    <div class="stack-chip"><span class="chip-icon">🔁</span>Nginx</div>
+  </div>
+</section>
+
+<section id="tools">
+  <div class="section-label">Platform Tools</div>
+  <h2 class="section-title">MLOps Infrastructure</h2>
+  <p class="section-desc">Shared services powering all ML experiments and model tracking.</p>
+  <div class="tools-grid">
+
+    <div class="tool-card">
+      <div class="tool-card-top">
+        <div class="tool-icon-wrap mlflow">📈</div>
+        <div>
+          <div class="tool-name">MLflow</div>
+          <span class="tool-badge live">✓ Live</span>
+        </div>
+      </div>
+      <p class="tool-desc">Experiment tracking, run history, parameters, metrics, and model artifact storage for all ML projects.</p>
+      <a href="/mlflow/" class="tool-link-btn" target="_blank">Open MLflow →</a>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-card-top">
+        <div class="tool-icon-wrap minio">💾</div>
+        <div>
+          <div class="tool-name">MinIO</div>
+          <span class="tool-badge live">✓ Live</span>
+        </div>
+      </div>
+      <p class="tool-desc">S3-compatible object storage for model artifacts, datasets, and MLflow experiment outputs.</p>
+      <span class="tool-link-internal">ml-minio:9000 · internal</span>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-card-top">
+        <div class="tool-icon-wrap postgres">🐘</div>
+        <div>
+          <div class="tool-name">PostgreSQL</div>
+          <span class="tool-badge live">✓ Live</span>
+        </div>
+      </div>
+      <p class="tool-desc">Shared relational database for prediction audit trails and structured ML project data.</p>
+      <span class="tool-link-internal">ml-postgres:5432 · internal</span>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-card-top">
+        <div class="tool-icon-wrap redis">⚡</div>
+        <div>
+          <div class="tool-name">Redis</div>
+          <span class="tool-badge live">✓ Live</span>
+        </div>
+      </div>
+      <p class="tool-desc">In-memory cache for inference results, rate limiting, and session state across ML services.</p>
+      <span class="tool-link-internal">ml-redis:6379 · internal</span>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <p>
+    © 2026 <strong>Archit Pandya</strong> · pandyaHomeLab —
+    Built on Synology NAS · Deploying to AWS · <a href="/health">Health Check</a> · <a href="/privacy/">Privacy</a>
+  </p>
+</footer>
+
+<script>
+  // ——— About platform drawer ———
+  let _aboutLoaded = false;
+  let _mermaidReady = false;
+
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function renderInline(text) {
+    let s = escapeHtml(text);
+    s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    s = s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+    s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+    s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" style="color:var(--accent-ml);">$1</a>');
+    return s;
+  }
+  function renderSection(s) {
+    let html = `<section class="about-section"><h3><span class="icon">${s.icon || ''}</span>${escapeHtml(s.title)}</h3>`;
+    if (s.body) s.body.forEach(p => html += `<p>${renderInline(p)}</p>`);
+    if (s.bullets) {
+      html += '<ul class="about-bullets">';
+      s.bullets.forEach(b => html += `<li><b>${escapeHtml(b.label)}:</b> ${renderInline(b.text)}</li>`);
+      html += '</ul>';
+    }
+    if (s.diagram && s.diagram.type === 'mermaid') html += `<div class="about-diagram"><div class="mermaid">${escapeHtml(s.diagram.code)}</div></div>`;
+    if (s.facts) { html += '<div class="about-facts">'; s.facts.forEach(f => html += `<div class="about-fact"><div class="about-fact-label">${escapeHtml(f.label)}</div><div class="about-fact-value">${escapeHtml(f.value)}</div></div>`); html += '</div>'; }
+    if (s.items) { html += '<div class="about-stack">'; s.items.forEach(it => html += `<div class="about-stack-item"><div class="about-stack-name">${escapeHtml(it.name)}</div><div class="about-stack-purpose">${escapeHtml(it.purpose)}</div></div>`); html += '</div>'; }
+    if (s.links) {
+      html += '<div class="about-links">';
+      s.links.forEach(l => { const target = l.external ? ' target="_blank" rel="noopener"' : ''; const arrow = l.external ? ' ↗' : ' →'; html += `<a class="about-link" href="${escapeHtml(l.url)}"${target}>${escapeHtml(l.label)}${arrow}</a>`; });
+      html += '</div>';
+    }
+    html += '</section>';
+    return html;
+  }
+  async function ensureMermaid() {
+    if (_mermaidReady) return;
+    await new Promise((res, rej) => { const s = document.createElement('script'); s.src = '/vendor/mermaid-10.9.8/mermaid.min.js'; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+    mermaid.initialize({ startOnLoad: false, theme: 'dark', themeVariables: { background: '#13161e', primaryColor: '#1a1e2a', primaryTextColor: '#e2e8f0', primaryBorderColor: '#4f8ef7', lineColor: '#64748b', secondaryColor: '#252a38', tertiaryColor: '#0d0f14' } });
+    _mermaidReady = true;
+  }
+  async function loadAbout() {
+    if (_aboutLoaded) return;
+    try {
+      const res = await fetch('/about-platform.json');
+      if (!res.ok) throw new Error('about fetch failed');
+      const data = await res.json();
+      document.getElementById('about-title').textContent = data.title || 'About';
+      document.getElementById('about-tagline').textContent = data.tagline || '';
+      document.getElementById('about-body').innerHTML = data.sections.map(renderSection).join('');
+      const hasDiagrams = data.sections.some(s => s.diagram && s.diagram.type === 'mermaid');
+      if (hasDiagrams) { await ensureMermaid(); await mermaid.run({ querySelector: '#about-drawer .mermaid' }); }
+      _aboutLoaded = true;
+    } catch (e) {
+      document.getElementById('about-body').innerHTML = '<p style="color:#f87171">Could not load About content. Please try again later.</p>';
+    }
+  }
+  function openAbout() {
+    document.getElementById('about-drawer').classList.add('visible');
+    document.getElementById('about-drawer').setAttribute('aria-hidden', 'false');
+    document.getElementById('about-backdrop').classList.add('visible');
+    document.body.style.overflow = 'hidden';
+    loadAbout();
+  }
+  function closeAbout() {
+    document.getElementById('about-drawer').classList.remove('visible');
+    document.getElementById('about-drawer').setAttribute('aria-hidden', 'true');
+    document.getElementById('about-backdrop').classList.remove('visible');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('about-trigger').addEventListener('click', openAbout);
+  document.getElementById('about-close').addEventListener('click', closeAbout);
+  document.getElementById('about-backdrop').addEventListener('click', closeAbout);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAbout(); });
+</script>
+
+<script src="/feedback-widget.js"></script>
+</body>
+</html>

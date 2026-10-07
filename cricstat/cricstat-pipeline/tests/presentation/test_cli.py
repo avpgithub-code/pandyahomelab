@@ -54,3 +54,26 @@ def test_download_path_is_mocked(cricstat_env, make_zip, monkeypatch, capsys):
     assert calls[0][0].endswith("recently_added_7_json.zip")
     assert "cricstat/0.1" in calls[0][1]
     assert s["source"] == calls[0][0] and s["added"] == 1
+
+
+def test_source_last_modified_is_kept_in_the_run_notes(cricstat_env, make_zip, monkeypatch,
+                                                       capsys):
+    import sqlite3
+
+    from db_logic.loaders import downloader
+    src = make_zip({"8": match_bytes("8")})
+
+    def fake_download(url, dest_dir, ua, meta=None, **kw):
+        os.makedirs(dest_dir, exist_ok=True)
+        dest = os.path.join(dest_dir, downloader.dated_name(url))
+        with open(src, "rb") as a, open(dest, "wb") as b:
+            b.write(a.read())
+        meta["last_modified"] = "2026-09-17T21:53:14Z"
+        return dest
+    monkeypatch.setattr(downloader, "download", fake_download)
+    assert main(["recent", "--quiet"]) == 0
+    assert _last_json(capsys)["source_last_modified"] == "2026-09-17T21:53:14Z"
+    conn = sqlite3.connect(str(cricstat_env / "data" / "db" / "raw.sqlite"))
+    notes = json.loads(conn.execute(
+        "SELECT notes FROM ingest_runs ORDER BY run_id DESC").fetchone()[0])
+    assert notes["source_last_modified"] == "2026-09-17T21:53:14Z"

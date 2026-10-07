@@ -3,19 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>pandyaHomeLab — Admin · Cricket</title>
+<title>pandyaHomeLab — Admin · cricstat</title>
 <script src="/vendor/chart.js-4.4.0/chart.umd.min.js"></script>
 {% include "cricket_base.css.html" %}
 </head>
 <body>
 <div class="container">
   <header>
-    <h1>pandya<em>HomeLab</em> · Cricket</h1>
+    <h1>pandya<em>HomeLab</em> · <span class="cs">cric<b>stat</b></span></h1>
     <div class="meta">Signed in as <strong>{{ admin }}</strong>
       <a href="/admin/">← Visitors dashboard</a> <a href="/admin/cricket/golden">Golden figures →</a></div>
   </header>
   {% if msg %}<div class="banner">{{ msg }}</div>{% endif %}
   {% if error %}<div class="banner err">cricstat-api is not reachable: <code>{{ error }}</code></div>{% endif %}
+
+  {% if jobs and jobs.source %}{% set src = jobs.source %}
+  <div class="banner" style="{{ 'border-color:var(--amber);color:#fde68a' if src.stale else '' }}">
+    📡 <strong>Source:</strong> {{ src.name }} last updated
+    <strong>{{ (src.last_updated or 'unknown — recorded from the next daily run')[:16]|replace('T', ' ') }}{{ ' UTC' if src.last_updated }}</strong>
+    {% if src.days_since_update is not none %}({{ src.days_since_update }} days ago){% endif %}
+    · we last checked <strong>{{ (src.last_checked or 'never')[:16]|replace('T', ' ') }}{{ ' UTC' if src.last_checked }}</strong>
+    {% if src.stale %}<br>⚠ No new data from {{ src.name }} for more than {{ src.stale_after_days }} days. Our pipeline is running; the source has gone quiet. Check cricsheet.org if this continues.{% endif %}
+  </div>
+  {% endif %}
 
   {% if jobs %}
   <h2>⏱ Scheduled jobs <span class="muted">(NAS time UTC{{ '%+g' % jobs.nas_utc_offset_hours }}; shown in UTC)</span></h2>

@@ -1,5 +1,6 @@
 """Health, status, scopes, competitions, metrics and search (F5 §3 "Meta and status")."""
 import json
+from datetime import datetime, timezone
 from typing import List, Optional, Tuple
 
 from application_logic.services.common import gender, team_slugs
@@ -22,16 +23,41 @@ def health(db: ServingDB) -> dict:
             "data_as_of": b["data_as_of"] if b else None}
 
 
+SOURCE_STALE_DAYS = 14
+
+
+def source_freshness(runs: list, now: Optional[datetime] = None) -> dict:
+    """When Cricsheet last changed its files (from the downloads' Last-Modified, recorded by each
+    ingest run) and when we last checked. Lets pages say "the source hasn't published" instead of
+    looking stale, and lets the admin page warn when the source goes quiet for long."""
+    now = now or datetime.now(timezone.utc)
+    ok = [r for r in runs if r["mode"] in ("recent", "full") and r["status"] == "success"]
+    checked = ok[0]["finished_at"] if ok else None
+    updated = max((r["source_last_modified"] for r in ok if r.get("source_last_modified")),
+                  default=None)
+    days = None
+    if updated:
+        then = datetime.strptime(updated, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+        days = (now - then).days
+    return {"name": "Cricsheet", "last_updated": updated, "last_checked": checked,
+            "days_since_update": days,
+            "stale": days is not None and days > SOURCE_STALE_DAYS,
+            "stale_after_days": SOURCE_STALE_DAYS}
+
+
 def status(db: ServingDB, raw_db: str) -> Tuple[dict, dict]:
     b = meta_repo.latest_build(db) or {}
     notes = json.loads(b.get("notes") or "{}")
+    runs = meta_repo.ingest_runs(raw_db, limit=20)
     data = {"build": {k: b.get(k) for k in ("build_id", "built_at", "mode", "matches",
                                             "deliveries", "data_as_of")},
             "warnings": notes.get("warnings", []),
+            "source": source_freshness(runs),
             "builds": meta_repo.recent_builds(db),
-            "ingest_runs": meta_repo.ingest_runs(raw_db),
+            "ingest_runs": runs[:5],
             "counts": meta_repo.counts(db)}
-    return data, {}
+    return data, {"source.last_updated": "When Cricsheet last changed its download files"
+                                         " (HTTP Last-Modified), recorded by our daily check."}
 
 
 def scopes(db: ServingDB) -> Tuple[List[dict], dict]:

@@ -2,12 +2,13 @@
 write to a .part file, validate it (a zip by default; the Register CSVs pass their own check),
 then rename to a dated copy in data/raw/.
 """
+import email.utils
 import os
 import time
 import urllib.error
 import urllib.request
 import zipfile
-from typing import Callable, List, Optional
+from typing import Callable, Dict, List, Optional
 
 from shared.exceptions import DownloadError
 from shared.logger import get_logger
@@ -26,7 +27,9 @@ def dated_name(url: str, stamp: Optional[str] = None) -> str:
 def _fetch_once(url, dest_part, user_agent, timeout, opener, validate):
     req = urllib.request.Request(url, headers={"User-Agent": user_agent})
     with opener(req, timeout=timeout) as resp:
-        expected = resp.headers.get("Content-Length") if getattr(resp, "headers", None) else None
+        headers = getattr(resp, "headers", None)
+        expected = headers.get("Content-Length") if headers else None
+        last_modified = headers.get("Last-Modified") if headers else None
         written = 0
         with open(dest_part, "wb") as out:
             while True:
@@ -42,7 +45,17 @@ def _fetch_once(url, dest_part, user_agent, timeout, opener, validate):
     if not validate(dest_part):
         raise DownloadError("downloaded file failed validation (%s)"
                             % getattr(validate, "__name__", "check"))
-    return written
+    return written, last_modified
+
+
+def http_date_to_iso(value: Optional[str]) -> Optional[str]:
+    """'Thu, 17 Sep 2026 21:51:41 GMT' → '2026-09-17T21:51:41Z' (None if absent/unparseable)."""
+    if not value:
+        return None
+    try:
+        return email.utils.parsedate_to_datetime(value).strftime("%Y-%m-%dT%H:%M:%SZ")
+    except (TypeError, ValueError):
+        return None
 
 
 def download(url: str, dest_dir: str, user_agent: str, timeout: float = 60,
@@ -50,10 +63,13 @@ def download(url: str, dest_dir: str, user_agent: str, timeout: float = 60,
              opener: Callable = urllib.request.urlopen,
              sleep: Callable[[float], None] = time.sleep,
              stamp: Optional[str] = None,
-             validate: Callable[[str], bool] = zipfile.is_zipfile) -> str:
+             validate: Callable[[str], bool] = zipfile.is_zipfile,
+             meta: Optional[Dict[str, object]] = None) -> str:
     """Fetch url into dest_dir/<stem>-YYYYMMDD.<ext> and return that path.
 
     Retries `retries` times after the first attempt, sleeping backoff * 2**attempt.
+    If `meta` is given, it receives "last_modified": when the SOURCE last changed the file
+    (its Last-Modified header, ISO UTC), so runs can tell a quiet source from a stuck pipeline.
     4xx responses other than 408/429 are not retried.
     """
     os.makedirs(dest_dir, exist_ok=True)
@@ -63,8 +79,10 @@ def download(url: str, dest_dir: str, user_agent: str, timeout: float = 60,
     for attempt in range(retries + 1):
         try:
             t0 = time.time()
-            size = _fetch_once(url, part, user_agent, timeout, opener, validate)
+            size, last_modified = _fetch_once(url, part, user_agent, timeout, opener, validate)
             os.replace(part, final)
+            if meta is not None:
+                meta["last_modified"] = http_date_to_iso(last_modified)
             log.info("downloaded %s -> %s (%.1f MB in %.1fs)",
                      url, final, size / 1e6, time.time() - t0)
             return final

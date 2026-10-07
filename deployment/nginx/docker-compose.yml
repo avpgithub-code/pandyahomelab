@@ -12,6 +12,7 @@ version: '3.8'
 #   Phase 2 (DL):      connects to dl_dl-network       ✅ active (Phase 2a)
 #   Phase 3 (NLP):     connects to nlp_nlp-network     ✅ active (Phase 3.0) → 172.22.0.20
 #   Phase 4 (Agentic): connects to agentic_agentic-network (add when Phase 4 starts)
+#   cricstat (ADR-022): connects to cricstat_cricstat-network → 172.25.0.20 (P0.4)
 
 networks:
   pandya-proxy-network:
@@ -28,6 +29,8 @@ networks:
   dl_dl-network:
     external: true
   nlp_nlp-network:
+    external: true
+  cricstat_cricstat-network:
     external: true
 
 services:
@@ -51,6 +54,8 @@ services:
     volumes:
       - /volume1/pandya-homelab/website:/var/www/html:ro
       - /volume1/pandya-homelab/logs/nginx:/var/log/nginx
+      # cricstat pages (static; ADR-022) — served at /cricket/ via `root /var/www`
+      - /volume1/pandya-homelab/cricstat/web:/var/www/cricket:ro
     networks:
       pandya-proxy-network:
         ipv4_address: 172.24.0.2
@@ -60,6 +65,8 @@ services:
         ipv4_address: 172.21.0.20
       nlp_nlp-network:
         ipv4_address: 172.22.0.20
+      cricstat_cricstat-network:
+        ipv4_address: 172.25.0.20
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]

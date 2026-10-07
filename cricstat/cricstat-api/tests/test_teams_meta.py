@@ -25,6 +25,14 @@ def test_record_and_win_pct(client):
     assert scoped["win_pct"] == 50.0 and scoped["matches"] == 3
 
 
+def test_record_in_a_date_window(client):
+    all_odi = data(client, "/v1/teams/india-men/record?scope=ODI")[0]
+    y2024 = data(client, "/v1/teams/india-men/record?scope=ODI&from=2024&to=2024")[0]
+    assert (all_odi["matches"], y2024["matches"]) == (3, 2) and y2024["win_pct"] == 50.0
+    assert data(client, "/v1/teams/india-men/record?scope=ODI&from=2030") == []
+    assert client.get("/v1/teams/india-men/record?from=2024").status_code == 400
+
+
 def test_results_head_to_head_home_away_years(client):
     res = data(client, "/v1/teams/india-men/results?scope=ODI")
     assert [r["match_id"] for r in res] == ["9007", "9002", "9001"]
@@ -77,3 +85,24 @@ def test_new_build_is_picked_up_without_restart(client, home):
     assert s["status"] == "success" and s["build_id"] == 2
     r = client.get("/v1/teams/india-men/record?scope=ODI")
     assert r.headers["etag"] == '"2"' and r.json()["data"][0]["matches"] == 4
+
+
+def test_source_freshness():
+    from datetime import datetime, timezone
+
+    from application_logic.services.meta_service import source_freshness
+    runs = [{"mode": "register", "status": "success", "finished_at": "2026-10-06T14:30:23Z",
+             "source_last_modified": None},
+            {"mode": "recent", "status": "success", "finished_at": "2026-10-06T10:30:11Z",
+             "source_last_modified": "2026-09-17T21:53:14Z"},
+            {"mode": "recent", "status": "success", "finished_at": "2026-10-05T10:30:00Z",
+             "source_last_modified": "2026-09-17T21:53:14Z"}]
+    s = source_freshness(runs, datetime(2026, 10, 6, 22, 0, tzinfo=timezone.utc))
+    assert s["last_updated"] == "2026-09-17T21:53:14Z"
+    assert s["last_checked"] == "2026-10-06T10:30:11Z"
+    assert s["days_since_update"] == 19 and s["stale"]
+    fresh = source_freshness(runs, datetime(2026, 9, 20, tzinfo=timezone.utc))
+    assert not fresh["stale"]
+    unknown = source_freshness([{"mode": "recent", "status": "success", "finished_at": "x",
+                                 "source_last_modified": None}])
+    assert unknown["last_updated"] is None and not unknown["stale"]

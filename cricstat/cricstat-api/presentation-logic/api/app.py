@@ -17,12 +17,18 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, Response
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from application_logic.services import admin_service, meta_service, players_service, teams_service
+from application_logic.services import (
+    admin_service,
+    matches_service,
+    meta_service,
+    players_service,
+    teams_service,
+)
 from application_logic.services.common import catalog_defs, team_slugs
 from db_logic.repository import meta_repo
 from db_logic.repository.db import QueryTimeout, ServingDB
 from shared.config import ATTRIBUTION, COVERAGE, Config
-from shared.exceptions import ApiError, NoData
+from shared.exceptions import ApiError, NoData, NotFound
 from shared.logger import get_logger, setup_logging
 
 log = get_logger("http")
@@ -175,8 +181,10 @@ def create_app(cfg: Optional[Config] = None) -> FastAPI:
         return envelope(request, *teams_service.team(db, slug))
 
     @app.get("/v1/teams/{slug}/record")
-    def team_record(request: Request, slug: str, scope: Optional[str] = None):
-        return envelope(request, *teams_service.record(db, slug, scope))
+    def team_record(request: Request, slug: str, scope: Optional[str] = None,
+                    date_from: Optional[str] = Query(None, alias="from"),
+                    date_to: Optional[str] = Query(None, alias="to")):
+        return envelope(request, *teams_service.record(db, slug, scope, date_from, date_to))
 
     @app.get("/v1/teams/{slug}/results")
     def team_results(request: Request, slug: str, scope: Optional[str] = None,
@@ -207,6 +215,29 @@ def create_app(cfg: Optional[Config] = None) -> FastAPI:
                     limit: Optional[int] = None):
         return envelope(request, *teams_service.top_players(db, slug, scope, metric, date_from,
                                                             date_to, limit))
+
+    # ── Matches and leaderboards ──
+    @app.get("/v1/matches")
+    def match_list(request: Request, scope: Optional[str] = None, gender: Optional[str] = None,
+                   team: Optional[str] = None,
+                   date_from: Optional[str] = Query(None, alias="from"),
+                   date_to: Optional[str] = Query(None, alias="to"),
+                   limit: Optional[int] = None, offset: Optional[int] = None):
+        data, defs, more = matches_service.list_matches(db, scope, gender, team, date_from,
+                                                        date_to, limit, offset)
+        return envelope(request, data, defs, more)
+
+    @app.get("/v1/leaderboards/{kind}")
+    def leaderboard(request: Request, kind: str, metric: Optional[str] = None,
+                    scope: Optional[str] = None, gender: Optional[str] = None,
+                    date_from: Optional[str] = Query(None, alias="from"),
+                    date_to: Optional[str] = Query(None, alias="to"),
+                    limit: Optional[int] = None):
+        if kind not in ("batting", "bowling"):
+            raise NotFound("leaderboards are batting or bowling")
+        metric = metric or ("runs" if kind == "batting" else "wickets")
+        return envelope(request, *matches_service.leaderboard(db, kind, metric, scope, gender,
+                                                              date_from, date_to, limit))
 
     # ── Internal admin views (P0.3b) — for the admin portal only; Nginx keeps them off the public
     #    site. Not cached: job status changes independently of the build id.

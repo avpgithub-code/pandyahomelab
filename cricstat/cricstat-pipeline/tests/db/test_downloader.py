@@ -101,3 +101,19 @@ def test_prune_keeps_newest(tmp_path):
     assert sorted(os.listdir(tmp_path)) == [
         "all_json-20260801.zip", "all_json-20260901.zip", "all_json-20261001.zip",
         "recently_added_7_json-20261001.zip"]
+
+
+def test_download_reports_source_last_modified(tmp_path, zip_bytes):
+    class Resp(FakeResponse):
+        def __init__(self, body):
+            super().__init__(body)
+            self.headers = {"Content-Length": str(len(body)),
+                            "Last-Modified": "Thu, 17 Sep 2026 21:51:41 GMT"}
+
+    meta = {}
+    downloader.download(URL, str(tmp_path / "raw"), "ua",
+                        opener=lambda req, timeout: Resp(zip_bytes),
+                        sleep=lambda s: None, stamp="20261006", meta=meta)
+    assert meta == {"last_modified": "2026-09-17T21:51:41Z"}
+    assert downloader.http_date_to_iso("garbage") is None
+    assert downloader.http_date_to_iso(None) is None

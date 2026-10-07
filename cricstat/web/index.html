@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>cricstat — cricket statistics, forecasts and an AI analyst | pandyaHomeLab</title>
+<meta name="description" content="Cricket statistics for men's and women's cricket across Tests, ODIs, T20Is and major leagues, built from open ball-by-ball data with every number traceable to its source.">
+<meta name="theme-color" content="#0d0f14">
+<link rel="canonical" href="https://pandyahomelab.com/cricket/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="pandyaHomeLab">
+<meta property="og:title" content="cricstat — cricket statistics, forecasts and an AI analyst | pandyaHomeLab">
+<meta property="og:description" content="Cricket statistics for men's and women's cricket across Tests, ODIs, T20Is and major leagues, built from open ball-by-ball data with every number traceable to its source.">
+<meta property="og:url" content="https://pandyahomelab.com/cricket/">
+<meta property="og:image" content="https://pandyahomelab.com/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/cricket/assets/cricstat.css?v=31">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<nav class="site-nav" aria-label="cricstat">
+  <a class="brand" href="/">pandya<em>HomeLab</em><span class="sep">/</span><span class="cs">cric<b>stat</b></span></a>
+  <ul class="nav-links">
+    <li><a href="/cricket/" aria-current="page">Overview</a></li>
+    <li><a href="/cricket/countries/">Countries</a></li>
+    <li><a href="/cricket/players/">Players</a></li>
+    <li><span class="soon" title="Coming in the next phase">ODI WC 2027 <span class="soon-tag">soon</span></span></li>
+    <li><span class="soon" title="Coming in a later phase">Ask <span class="soon-tag">soon</span></span></li>
+    <li><span class="soon" title="Coming in a later phase">Methodology <span class="soon-tag">soon</span></span></li>
+    <li><a href="/cricket/licences/">Licences</a></li>
+  </ul>
+</nav>
+<main id="main" class="page-top">
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow"><span class="dot"></span><span id="h-asof">Live cricket data</span></div>
+    <h1><span class="cs">cric<b>stat</b></span></h1>
+    <p class="subtitle">Cricket statistics, forecasts and an AI analyst — built from open ball-by-ball data for men's and women's cricket, with every number traceable to its source.</p>
+    <form class="search-bar" action="/cricket/players/" method="get" role="search">
+      <input name="q" type="search" placeholder="Search a player — Kohli, Mandhana, Bumrah…" aria-label="Search players" autocomplete="off" minlength="2" required>
+      <button class="btn pri" type="submit">Search</button>
+    </form>
+  </div>
+</header>
+
+<section class="section panel" aria-label="The data behind cricstat"><div class="wrap volume">
+    <div class="counters" aria-live="polite">
+      <div class="counter"><i class="c-icon saff" aria-hidden="true">🏟️</i><b id="k-matches">—</b><span>Matches</span><small class="c-note">Men's and women's, 2001 to today. Every result feeds the team ratings.</small></div>
+      <div class="counter"><i class="c-icon blue" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24"><defs><radialGradient id="ball" cx="35%" cy="32%" r="70%"><stop offset="0" stop-color="#e2544b"/><stop offset=".65" stop-color="#b3201c"/><stop offset="1" stop-color="#6e1210"/></radialGradient></defs><circle cx="12" cy="12" r="10" fill="url(#ball)"/><path d="M5.2 4.9c3.6 3.2 5 9.9 1.9 15.4M18.8 4.9c-3.6 3.2-5 9.9-1.9 15.4" fill="none" stroke="#f5efe6" stroke-width="1.1" stroke-linecap="round"/><path d="M6.6 7.4l1.1-.6M7.5 10l1.2-.3M7.8 12.7h1.2M7.4 15.4l1.2.3M18.6 7.4l-1.1-.6M17.6 10l-1.2-.3M17.3 12.7h-1.2M17.7 15.4l-1.2.3" stroke="#f5efe6" stroke-width=".8" stroke-linecap="round"/><ellipse cx="8.6" cy="7.6" rx="2.2" ry="1.2" fill="#fff" opacity=".18" transform="rotate(-30 8.6 7.6)"/></svg></i><b id="k-deliveries">—</b><span>Balls bowled</span><small class="c-note">Each one recorded: who bowled, who faced, what happened. Enough to train a ball-by-ball model.</small></div>
+      <div class="counter"><i class="c-icon saff" aria-hidden="true">🧢</i><b id="k-players">—</b><span>Players</span><small class="c-note">Careers followed across Tests, ODIs, T20Is and leagues, the basis for player-strength ratings.</small></div>
+      <div class="counter"><i class="c-icon blue" aria-hidden="true">🌍</i><b id="k-teams">—</b><span>Teams</span><small class="c-note">National sides and franchises, all rated by the same model.</small></div>
+    </div>
+    <p class="why-volume"><b>Why the volume matters:</b> about 2,600 men's ODIs are too few to teach a model who wins a match. 11.6 million deliveries are plenty, so the <a class="wc-hl" href="#wc2027">ODI World Cup 2027 predictor</a> will learn team and player strength from every ball, then simulate the tournament thousands of times.</p>
+    <a class="wc-tease" href="#wc2027">
+      <span class="wc-q"><svg class="wc-icon" viewBox="0 0 64 64" width="44" height="44" aria-hidden="true" focusable="false"><defs><linearGradient id="wcGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE38A"/><stop offset=".5" stop-color="#F5B82E"/><stop offset="1" stop-color="#B9800F"/></linearGradient></defs><path d="M33 22 C 36 14, 44 13, 47 6 C 50 11, 47 16, 52 19 C 46 21, 41 19, 37 25 Z" fill="#FF9933"/><path d="M33.6 23.6 C 37 17, 44.6 16.4, 48.2 10.6 C 50.6 14.6, 48.4 18.6, 53.4 21.6 C 47.4 23.4, 42.4 21.6, 38.4 27 Z" fill="#FFFFFF"/><path d="M34.4 25.4 C 38 20, 45 19.6, 49 15 C 51 18.4, 49.6 22, 54.6 24.4 C 48.6 26, 43.4 24.4, 39.6 29 Z" fill="#138808"/><path d="M18 20 H46 V24 C46 34, 40 41, 32 41 C24 41, 18 34, 18 24 Z" fill="url(#wcGold)"/><path d="M18 23 C11 23, 10 32, 19 34" fill="none" stroke="url(#wcGold)" stroke-width="3" stroke-linecap="round"/><path d="M46 23 C53 23, 54 32, 45 34" fill="none" stroke="url(#wcGold)" stroke-width="3" stroke-linecap="round"/><rect x="29.5" y="40" width="5" height="8" fill="url(#wcGold)"/><path d="M23 48 H41 L43 54 H21 Z" fill="url(#wcGold)"/><rect x="19" y="54" width="26" height="4" rx="1.5" fill="#8A5A0B"/><path d="M23 22 C23 30, 26 36, 30 38" fill="none" stroke="#FFF6CF" stroke-width="1.6" stroke-linecap="round" opacity=".7"/></svg> What are the chances of India lifting the 2027 ODI World Cup?</span>
+      <span class="wc-sub">Three models are about to compete to answer that <span aria-hidden="true">→</span></span>
+    </a>
+</div></section>
+
+<section class="section panel"><div class="wrap">
+  <div class="section-head">
+    <div><div class="section-label">Scorecards</div><h2 class="section-title">Latest results</h2></div>
+    <div class="row" style="gap:.8rem">
+      <div class="tabs" role="group" aria-label="Format">
+        <button class="tab" type="button" data-lfmt="ALL" aria-pressed="false">All</button>
+        <button class="tab" type="button" data-lfmt="TEST" aria-pressed="false">Test</button>
+        <button class="tab" type="button" data-lfmt="ODI" aria-pressed="true">ODI</button>
+        <button class="tab" type="button" data-lfmt="T20I" aria-pressed="false">T20I</button>
+      </div>
+      <div class="radio-pill" role="radiogroup" aria-label="Men's or women's cricket">
+        <label><input type="radio" name="lgender" value="male" checked><span>Men</span></label>
+        <label><input type="radio" name="lgender" value="female"><span>Women</span></label>
+      </div>
+    </div>
+  </div>
+  <div class="carousel">
+    <button class="car-btn prev" type="button" aria-label="Previous results" data-car="-1">‹</button>
+    <div class="strip" id="latest" aria-live="polite" tabindex="0"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+    <button class="car-btn next" type="button" aria-label="More results" data-car="1">›</button>
+  </div>
+  <div class="row" style="justify-content:space-between;gap:.6rem">
+    <p class="tiny muted" id="latest-note">Newest first.</p>
+    <p class="tiny" id="latest-fresh" hidden></p>
+  </div>
+</div></section>
+
+<section class="section panel" aria-labelledby="following-title"><div class="wrap">
+  <div class="section-head">
+    <div class="row"><span id="follow-badge"></span><div><div class="section-label">Following</div><h2 class="section-title" id="following-title" style="margin:0">India</h2></div></div>
+    <div class="field"><label for="follow">Follow a team</label><select id="follow"><option value="india-men">India (men)</option></select>
+      <span class="tiny muted">Remembered in this browser only — no cookies <a href="#" id="follow-reset" hidden>· Reset to India</a></span></div>
+  </div>
+  <div id="follow-period" style="margin-bottom:.9rem"></div>
+  <div class="grid" id="follow-cards" aria-live="polite"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+  <p class="tiny muted" style="margin-top:.8rem">Following a team changes what you see, never the numbers: every model treats all teams the same way.</p>
+</div></section>
+
+<section class="section panel"><div class="wrap">
+  <div class="section-head">
+    <div><div class="section-label">Leaders</div><h2 class="section-title" id="leaders-title">This year's leaders</h2></div>
+    <div class="tabs" role="group" aria-label="Leaders by format">
+      <button class="tab" type="button" data-leaders="ALL" aria-pressed="false">All</button>
+      <button class="tab" type="button" data-leaders="TEST" aria-pressed="false">Test</button>
+      <button class="tab" type="button" data-leaders="ODI" aria-pressed="true">ODI</button>
+      <button class="tab" type="button" data-leaders="T20I" aria-pressed="false">T20I</button>
+    </div>
+  </div>
+  <div class="grid" id="leaders"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+</div></section>
+
+<section class="section"><div class="wrap">
+  <a class="card accent wc-card" id="wc2027" href="#wc2027" aria-disabled="true" style="pointer-events:none;background:linear-gradient(135deg,rgba(19,71,163,.35),rgba(255,153,51,.08));padding:2rem">
+    <span class="badge saff">Coming next</span>
+    <h2 style="font-size:1.6rem;margin:.7rem 0 .2rem">ODI World Cup 2027 — who wins?</h2>
+    <p class="wc-hook">Three models. One trophy.</p>
+    <div class="row" style="gap:.5rem;margin:.2rem 0 .9rem">
+      <span class="badge fmt">Elo baseline</span><span class="badge fmt">Machine-learning challenger</span><span class="badge fmt">Deep-learning challenger</span>
+    </div>
+    <p class="dim" style="max-width:760px">Title chances for every team, re-simulated after each new ODI and live through the tournament: an Elo baseline against machine-learning and deep-learning challengers, all backtested on the 2019 and 2023 ODI World Cups. Afghanistan's matches aren't in the source data; the forecast will say how it handles that.</p>
+  </a>
+</div></section>
+
+<section class="section panel"><div class="wrap">
+  <div class="section-label">Leagues</div><h2 class="section-title">Featured leagues</h2>
+  <p class="section-desc">Ball-by-ball for every season in the data. League pages are coming; player pages already split stats by league.</p>
+  <div class="grid-4" id="leagues"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+</div></section>
+
+<section class="section panel"><div class="wrap">
+  <div class="section-label">Explore</div><h2 class="section-title">Dig into the numbers</h2>
+  <div class="grid">
+    <a class="card blue" href="/cricket/players/"><span class="badge live">Live</span><h3 style="margin:.7rem 0 .4rem">Players</h3><p class="dim small">Career, year-by-year, phase and opponent stats for men's and women's players.</p></a>
+    <a class="card blue" href="/cricket/countries/"><span class="badge live">Live</span><h3 style="margin:.7rem 0 .4rem">Countries</h3><p class="dim small">Records by format, head to head, home and away, and each team's top performers.</p></a>
+    <div class="card disabled"><span class="badge soon">Soon</span><h3 style="margin:.7rem 0 .4rem">Ask the Analyst</h3><p class="dim small">Ask in plain English and see exactly how each answer was computed.</p></div>
+    <div class="card disabled"><span class="badge soon">Soon</span><h3 style="margin:.7rem 0 .4rem">India at ODI World Cups</h3><p class="dim small">Every India match in the ODI World Cups 2003–2023 (earlier editions predate the data).</p></div>
+  </div>
+</div></section>
+
+<section class="section"><div class="wrap grid" style="align-items:start">
+  <div class="card accent">
+    <div class="section-label">Why I built this</div>
+    <p class="quote">I've followed Indian cricket for as long as I can remember. <span class="cs">cric<b>stat</b></span> brings that together with what I do professionally: data, machine-learning and LLM engineering, built end to end and measured honestly. It follows India by default, but the numbers don't take sides.</p>
+    <p class="dim small" style="margin-top:.8rem">— Archit Pandya</p>
+  </div>
+  <div class="card">
+    <div class="section-label">How it's built</div>
+    <div class="flow" style="margin-top:.6rem">
+      <div class="step"><b>Cricsheet</b>ball-by-ball</div><span class="arrow" aria-hidden="true">→</span>
+      <div class="step"><b>Pipeline</b>daily + checks</div><span class="arrow" aria-hidden="true">→</span>
+      <div class="step"><b>Stats API</b>every number</div><span class="arrow" aria-hidden="true">→</span>
+      <div class="step"><b>These pages</b>no cookies</div>
+    </div>
+    <p class="tiny muted" style="margin-top:.8rem">Models and the AI analyst plug into the same API next. <a href="/cricket/licences/">Sources &amp; licences</a></p>
+  </div>
+</div></section>
+</main>
+<footer class="site-foot">
+  <p>Match data from Cricsheet (cricsheet.org), used under the Open Data Commons Attribution License 1.0.</p>
+  <p>Not affiliated with or endorsed by Cricsheet, the ICC or any cricket board. Statistics are derived from the source data and may differ from official records.</p>
+  <p><a href="/cricket/licences/">Data &amp; licences</a> · <a href="/privacy/">Privacy</a> · <a href="/">pandyaHomeLab</a> · Built by Archit Pandya</p>
+</footer>
+<script src="/cricket/assets/flags.js?v=31"></script>
+<script src="/cricket/assets/cricstat.js?v=31"></script>
+<script src="/cricket/assets/hub.js?v=31"></script>
+<script src="/feedback-widget.js"></script>
+</body>
+</html>
