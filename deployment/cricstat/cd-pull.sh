@@ -3,7 +3,7 @@
 # Run by DSM Task Scheduler as root (non-zero exit → DSM email), or by hand:
 #   sh cd-pull.sh             deploy the newest published image of each service, if it changed
 #   sh cd-pull.sh rollback    put back the image that was live before the last deploy
-# Env: CRICSTAT_IMAGE_TAG (default: main), DOCKER (default: /usr/local/bin/docker; may include
+# Env: CRICSTAT_IMAGE_TAG (default: main), CRICSTAT_SERVICES (default: both), DOCKER (default: /usr/local/bin/docker; may include
 #      arguments, e.g. DOCKER="sudo -n docker" to test as the operator instead of root).
 #
 # Each new image must pass a smoke test ON THE NAS (its CPU has no AVX; CI runners do) before it is
@@ -16,7 +16,9 @@ set -eu
 DOCKER=${DOCKER:-/usr/local/bin/docker}
 REGISTRY=ghcr.io/avpgithub-code
 TAG=${CRICSTAT_IMAGE_TAG:-main}
-SERVICES="cricstat-pipeline cricstat-api"
+# CRICSTAT_SERVICES deploys a subset in order, e.g. the pipeline first when a schema change must
+# be built before the API that reads it can go live (P0.5).
+SERVICES=${CRICSTAT_SERVICES:-"cricstat-pipeline cricstat-api"}
 ALWAYS_ON="cricstat-api"
 HERE=$(cd "$(dirname "$0")" && pwd)
 COMPOSE="$DOCKER compose -f $HERE/docker-compose.yml"
