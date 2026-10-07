@@ -10,7 +10,12 @@
       const { data, meta } = await C.api("/v1/status");
       asOf = meta.data_as_of;
       source = data.source || null;
-      document.getElementById("h-asof").textContent = "Live data · updated daily · as of " + C.date(meta.data_as_of);
+      // One date everywhere: Cricsheet's own last update (the date the source published). It moves
+      // only when Cricsheet publishes; the daily job then syncs. Fallback: the newest match in the data.
+      const src = data.source || {};
+      const label = src.last_updated ? "Cricsheet " + C.date(src.last_updated.slice(0, 10)) : "as of " + C.date(meta.data_as_of);
+      document.getElementById("h-asof").textContent = "Live data · checked daily · " + label;
+      document.getElementById("mc-asof").textContent = " · " + label;
       C.countUp(document.getElementById("k-matches"), data.counts.matches);
       const d = document.getElementById("k-deliveries");
       if (d) C.scoreText(d, C.compact(data.build.deliveries));
@@ -201,5 +206,6 @@
 
   wireCarousel();
   document.querySelectorAll("[data-leaders]").forEach((b) => b.addEventListener("click", () => leaders(b.dataset.leaders)));
+  C.sectionTabs(document.querySelector(".sec-tabs"));
   counters().then((d) => { if (!d) asOf = new Date().toISOString().slice(0, 10); latest(); follow(); leaders("ODI"); leagues(); });
 })();

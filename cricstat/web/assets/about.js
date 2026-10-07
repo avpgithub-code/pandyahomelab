@@ -57,13 +57,15 @@
       C.fill(body, h("p", { class: "error" }, "Couldn't load this page's story. Please try again later."));
     }
   }
-  function open() {
+  function open(ev) {
+    if (ev && ev.preventDefault) ev.preventDefault();
     lastFocus = document.activeElement;
     const d = document.getElementById("about-drawer");
     d.classList.add("visible"); d.setAttribute("aria-hidden", "false");
     document.getElementById("about-backdrop").classList.add("visible");
     document.body.style.overflow = "hidden";
     document.getElementById("about-close").focus();
+    d.scrollTop = 0;   // always open at the top (the story first)
     load();
   }
   function close() {

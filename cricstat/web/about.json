@@ -26,7 +26,8 @@
     { "label": "Deep learning with transfer learning", "text": "About 2,600 men's ODIs are too few to learn from directly, but 11.6 million deliveries are plenty. A sequence model learns player strength ball by ball, and that learned knowledge is transferred to match and tournament forecasts. The same model gives live in-match win probability." }
    ],
    "after": [
-    "All three are backtested on the 2019 and 2023 World Cups. The best-calibrated one powers the live forecast: when it says 30%, it should be right about 30% of the time."
+    "All three are backtested on the 2019 and 2023 World Cups. The best-calibrated one powers the live forecast: when it says 30%, it should be right about 30% of the time.",
+    "Title chances for every team are re-simulated after each new ODI and live through the tournament. Afghanistan men's matches aren't in the source data; the forecast will say how it handles that."
    ]
   },
   {
@@ -74,7 +75,7 @@
    "icon": "🗺️",
    "bullets": [
     { "label": "Now", "text": "Player and team statistics for men's and women's cricket, every format and the major leagues." },
-    { "label": "Next", "text": "The ODI World Cup 2027 predictor and live win probability." },
+    { "label": "Next", "text": "The ODI World Cup 2027 predictor and live win probability, plus India at the ODI World Cups 2003–2023 (earlier editions predate the data)." },
     { "label": "Then", "text": "The AI analyst: tools, a public test set, the agent, then a public demo with published evals." },
     { "label": "After 2027", "text": "T20I team ratings and a T20 World Cup 2028 forecast, once the ODI World Cup 2027 is over." }
    ]

@@ -125,7 +125,7 @@ Background: `docs/llm-strategy-research-2026-10-05.md`.
 | F7 | Roadmap + decision log | Ongoing in this file (current to 2026-10-05) |
 | F8 | Compliance & trust (licences page, privacy update, disclaimers) | Folded into P0 (decided 2026-10-05) |
 | F9 | CI/CD & automation (`docs/F9-cicd-automation.md`) | Done 2026-10-05: CI + approval gate + GHCR + NAS cd-pull.sh (DSM daily 05:15); merged to main |
-| P0 | Ingestion → serving-DB build → cricstat-api → first live pages (+F8) | Ingestion deployed. **P0.1 build + register done 2026-10-06** (merged; full build 11m50s on the NAS, all checks pass). **P0.2 golden figures done 2026-10-06** (draft set; user fills references). **P0.3 cricstat-api done 2026-10-06** (deployed). **P0.3b `/admin/cricket` done 2026-10-06**. **P0.4 pages built on `feat/cricstat-p0-web`, in review (not public, nothing committed yet); hub, players and countries approved by the user 2026-10-06; licences, privacy, homepage, admin, player profile approved too; phone check left.** Then P0.4 deploy → P0.5 player photos |
+| P0 | Ingestion → serving-DB build → cricstat-api → first live pages (+F8) | Ingestion deployed. **P0.1 build + register done 2026-10-06** (merged; full build 11m50s on the NAS, all checks pass). **P0.2 golden figures done 2026-10-06** (draft set; user fills references). **P0.3 cricstat-api done 2026-10-06** (deployed). **P0.3b `/admin/cricket` done 2026-10-06**. **P0.4 pages built on `feat/cricstat-p0-web`, in review (not public, nothing committed yet); hub, players and countries approved by the user 2026-10-06; licences, privacy, homepage, admin, player profile, About drawer and the cricket look approved too; phone check left; photos = P0.5.** Then P0.4 deploy → P0.5 player photos |
 | P1–P6 | Predictor + win prob → tools → test set → agent → public demo → extras | Later |
 | Later | Men's T20 World Cup 2028 forecast + T20I team ratings (decided 2026-10-06; shown as "Later" on team pages) | **Not started until the ODI World Cup 2027 is finished** |
 
@@ -340,6 +340,20 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   capsule "2011 gave us the six. 2023 gave us the heartbreak. 2027 is the question. Read the story →". Teaser line 2:
   "Three models — Elo ratings (statistics), machine learning and deep learning — are about to compete to answer that →".
   "Popular players" → "Players to start with".
+- **Review round 3 (2026-10-06, approved):** cricket look = scoreboard digit tiles on the hub counters, a red ball as
+  the dot of the "i" in the hub wordmark (dotless ı + SVG; screen readers get "cricstat"), and "The data behind
+  cricstat" styled as a stadium board (green-black, metal frame, amber bulb header). Tried and dropped: a top-down
+  ground drawing behind the hero (distracting) and a scorebook/bat/ball emblem. Less scrolling: the separate WC 2027
+  card and the Explore panel were removed (their content moved into the About drawer: predictor section + roadmap);
+  spacing tightened ~25%; hub = hero + 2 boards. **Match centre** board: tabs Latest results (default) · Following ·
+  Leaders · Leagues (WAI-ARIA tabs, `cricstat.sectionTabs()`; no remembered tab, to avoid new browser storage).
+  One date everywhere = Cricsheet's own last update ("Live data · checked daily · Cricsheet 17 Sept 2026", header
+  "Match centre · Cricsheet …"), fallback = newest match. About drawer always opens at the top; the WC teaser and
+  highlight open it. **Team pages:** "Form guide · <team>" board with tabs Record by format · Recent results ·
+  Results by year (chart re-sizes when its tab opens); "Head to head & top performers" stays a normal panel below.
+  Team dropdown lists India first; the plain Countries page always starts on India men (a team's own URL keeps that
+  team); selects have autocomplete="off" so browsers don't restore a stale choice. Restore point for the look:
+  git tag `cricstat-p04-approved-look`.
 - **Open decisions before going public (superseded by the line above):** the "soon" nav items; the "Why I built this" text (placeholder); corrections
   contact (proposed: the existing privacy@ address); API calls kept out of visitor analytics (done in nginx.conf,
   needs OK); optional: "Popular players" → "Players to start with".

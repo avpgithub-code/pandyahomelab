@@ -148,6 +148,26 @@
       ? "⏱ Cricsheet's last update was " + date(when) + " (" + ago(when) + "); we check for new matches every day and add them as soon as they're published."
       : "⏱ Newest match in the data is " + ago(asOf) + " (" + date(asOf) + "); we check for new matches every day and add them as soon as they're published.";
   }
+  // Section tabs (WAI-ARIA tabs pattern): [role=tablist] > [role=tab][aria-controls] → [role=tabpanel].
+  function sectionTabs(list) {
+    if (!list) return;
+    const tabs = [...list.querySelectorAll('[role="tab"]')];
+    const select = (t, focus) => {
+      tabs.forEach((x) => { const on = x === t; x.setAttribute("aria-selected", String(on)); x.tabIndex = on ? 0 : -1;
+        const pane = document.getElementById(x.getAttribute("aria-controls")); if (pane) pane.hidden = !on; });
+      if (focus) t.focus();
+      window.dispatchEvent(new Event("resize"));   // strips/carousels re-measure once visible
+    };
+    tabs.forEach((t, i) => {
+      t.addEventListener("click", () => select(t));
+      t.addEventListener("keydown", (e) => {
+        const k = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+        if (k) { e.preventDefault(); select(tabs[(i + k + tabs.length) % tabs.length], true); }
+        else if (e.key === "Home") { e.preventDefault(); select(tabs[0], true); }
+        else if (e.key === "End") { e.preventDefault(); select(tabs[tabs.length - 1], true); }
+      });
+    });
+  }
   // Horizontal score-card strip with ‹ › buttons (same look as the hub's Latest results).
   function carousel(strip, what) {
     const btn = (dir, cls, label, sym) => h("button", { class: "car-btn " + cls, type: "button", "aria-label": label }, sym);
@@ -381,7 +401,7 @@
     return num(v);
   }
 
-  window.cricstat = { scoreText, freshness, carousel, teamLine, roleIcon, roleLabel, api, ratio, num, hs, bbi, overs, date, letter, h, fill, table, showError,
+  window.cricstat = { sectionTabs, scoreText, freshness, carousel, teamLine, roleIcon, roleLabel, api, ratio, num, hs, bbi, overs, date, letter, h, fill, table, showError,
                       getFollow, setFollow, pathTail, playerIdFromPath, dataNote, teamBadge, teamStyle,
                       avatar, who, formDots, fmtName, resultText, matchCard, countUp, compact, ago,
                       donut, donutLegend, periodControl, formatCard, periodRange };

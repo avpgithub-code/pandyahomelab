@@ -16,7 +16,9 @@
     document.title = label + " — team records | cricstat";
     C.fill("c-badge", C.teamBadge(team.name, "lg"));
     const select = document.getElementById("c-team");
-    const same = teams.filter((t) => t.gender === team.gender && t.matches >= 20).sort((a, b) => a.name.localeCompare(b.name));
+    const india = (t) => t.name === "India" ? 0 : 1;   // India first, as in the hub's "Follow a team"
+    const same = teams.filter((t) => t.gender === team.gender && t.matches >= 20)
+      .sort((a, b) => india(a) - india(b) || a.name.localeCompare(b.name));
     C.fill(select, same.map((t) => h("option", { value: t.slug }, t.name)));
     select.value = team.slug;
     select.onchange = () => { location.href = "/cricket/countries/" + select.value + "/"; };
@@ -114,21 +116,30 @@
   async function render() {
     header();
     const body = C.fill("c-body", [
-      h("section", { class: "section panel" }, h("div", { class: "wrap" }, [
-        h("div", { class: "section-head", style: "margin-bottom:.8rem" }, [h("div", { class: "section-label", style: "margin:0" }, "Record by format"), h("div", { id: "c-period" })]),
-        h("div", { class: "grid", id: "c-formats" }, [h("div", { class: "skeleton" }), h("div", { class: "skeleton" })])])),
-      h("section", { class: "section panel" }, h("div", { class: "wrap" }, [
-        h("div", { class: "section-head" }, [h("div", {}, [h("div", { class: "section-label" }, "Scorecards"), h("h2", { class: "section-title" }, "Recent results")]),
-          h("div", { class: "tabs", role: "group", "aria-label": "Format" }, [["ALL", "All"], ["TEST", "Test"], ["ODI", "ODI"], ["T20I", "T20I"]].map(([k, n]) =>
-            h("button", { class: "tab", type: "button", "data-rfmt": k, "aria-pressed": String(k === recentFmt), onclick: () => { recentFmt = k; recent(); } }, n)))]),
-        C.carousel(h("div", { class: "strip", id: "c-recent", "aria-live": "polite" }, [h("div", { class: "skeleton" }), h("div", { class: "skeleton" }), h("div", { class: "skeleton" })]), "results"),
-        h("div", { class: "row", style: "justify-content:space-between;gap:.6rem" }, [
-          h("p", { class: "tiny muted", id: "c-recent-note" }, "Newest first."), h("p", { class: "tiny", id: "c-recent-fresh", hidden: true })])])),
+      // Form guide: record, recent results and results by year as tabs on one board (like the hub's Match centre).
+      h("section", { class: "section panel", "aria-label": "Form guide" }, h("div", { class: "wrap scoreboard match-centre" }, [
+        h("div", { class: "sb-head board-head", "aria-hidden": "true" }, [h("span", { class: "bulb" }), "Form guide",
+          h("span", { class: "mc-asof" }, " · " + team.name + " " + GENDER[team.gender].toLowerCase()), h("span", { class: "bulb" })]),
+        h("div", { class: "sec-tabs", role: "tablist", "aria-label": "Form guide" }, [
+          ["record", "📊 Record by format"], ["recent", "📋 Recent results"], ["years", "📈 Results by year"]].map(([k, n], i) =>
+          h("button", { class: "sec-tab", type: "button", role: "tab", id: "tab-" + k, "aria-controls": "pane-" + k,
+                        "aria-selected": String(i === 0), tabindex: i === 0 ? null : "-1" }, n))),
+        h("div", { class: "sec-pane", role: "tabpanel", id: "pane-record", "aria-labelledby": "tab-record" }, [
+          h("div", { class: "section-head", style: "margin-bottom:.8rem" }, [h("div", { class: "section-label", style: "margin:0" }, "Record by format"), h("div", { id: "c-period" })]),
+          h("div", { class: "grid", id: "c-formats" }, [h("div", { class: "skeleton" }), h("div", { class: "skeleton" })])]),
+        h("div", { class: "sec-pane", role: "tabpanel", id: "pane-recent", "aria-labelledby": "tab-recent", hidden: true }, [
+          h("div", { class: "section-head" }, [h("div", {}, [h("div", { class: "section-label" }, "Scorecards"), h("h2", { class: "section-title" }, "Recent results")]),
+            h("div", { class: "tabs", role: "group", "aria-label": "Format" }, [["ALL", "All"], ["TEST", "Test"], ["ODI", "ODI"], ["T20I", "T20I"]].map(([k, n]) =>
+              h("button", { class: "tab", type: "button", "data-rfmt": k, "aria-pressed": String(k === recentFmt), onclick: () => { recentFmt = k; recent(); } }, n)))]),
+          C.carousel(h("div", { class: "strip", id: "c-recent", "aria-live": "polite" }, [h("div", { class: "skeleton" }), h("div", { class: "skeleton" }), h("div", { class: "skeleton" })]), "results"),
+          h("div", { class: "row", style: "justify-content:space-between;gap:.6rem" }, [
+            h("p", { class: "tiny muted", id: "c-recent-note" }, "Newest first."), h("p", { class: "tiny", id: "c-recent-fresh", hidden: true })])]),
+        h("div", { class: "sec-pane", role: "tabpanel", id: "pane-years", "aria-labelledby": "tab-years", hidden: true },
+          h("div", { class: "card" }, [h("div", { class: "card-head" }, [h("h2", {}, "Results by year"),
+            h("div", { class: "tabs", role: "group", "aria-label": "Results by year format" }, [["", "All"]].concat(FORMATS).map(([k, n]) =>
+              h("button", { type: "button", class: "tab", "data-yfmt": k, "aria-pressed": String(k === ""), onclick: () => yearsChart(k) }, n)))]),
+            h("div", { class: "chart", id: "years-chart" })]))])),
       h("section", { class: "section panel" }, h("div", { class: "wrap stack" }, [
-        h("div", { class: "card" }, [h("div", { class: "card-head" }, [h("h2", {}, "Results by year"),
-          h("div", { class: "tabs", role: "group", "aria-label": "Results by year format" }, [["", "All"]].concat(FORMATS).map(([k, n]) =>
-            h("button", { type: "button", class: "tab", "data-yfmt": k, "aria-pressed": String(k === ""), onclick: () => yearsChart(k) }, n)))]),
-          h("div", { class: "chart", id: "years-chart" })]),
         h("div", { class: "section-head", style: "margin:1rem 0 0" }, [h("div", {}, [h("div", { class: "section-label" }, "By format"), h("h2", { class: "section-title", style: "margin:0" }, ["Head to head & top performers · ", h("span", { class: "fmt-name" }, "ODI")])]),
           h("div", { class: "tabs", role: "group", "aria-label": "Format" }, FORMATS.map(([k, n]) =>
             h("button", { type: "button", class: "tab", "data-format": k, "aria-pressed": "false", onclick: () => byFormat(k) }, n)))]),
@@ -141,6 +152,10 @@
           h("div", { class: "card" }, [h("h2", {}, ["Most wickets · ", h("span", { class: "fmt-name" }, "ODI")]), h("div", { id: "f-wickets" })])]),
         h("p", { class: "tiny muted" }, ["Matches with play only; ties and draws count in win % (no results don't). Top performers count only matches for this team. Data as of ",
           h("span", { id: "data-note" }, "…"), ". ", h("a", { href: "/cricket/licences/" }, "What the data covers")])]))]);
+    C.sectionTabs(body.querySelector(".sec-tabs"));
+    window.addEventListener("resize", () => {   // the chart may be drawn while its tab is hidden
+      if (chart && chart.ctx) { try { chart.resize(); } catch (e) { /* not drawable yet */ } }
+    });
     try {
       const { data: record, meta } = await C.api("/v1/teams/" + team.slug + "/record");
       C.dataNote(meta);
@@ -160,7 +175,8 @@
     try {
       const { data } = await C.api("/v1/teams?type=international");
       teams = data;
-      const slug = C.pathTail("countries") || C.getFollow();
+      // A team's own address shows that team; the plain Countries page always starts on India.
+      const slug = C.pathTail("countries") || "india-men";
       team = teams.find((t) => t.slug === slug) || teams.find((t) => t.slug === "india-men");
       if (!team) throw new Error("unknown team");
       render();

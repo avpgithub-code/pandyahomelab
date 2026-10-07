@@ -44,11 +44,11 @@ h1, h2, h3, p { margin: 0; }
 
 /* ── layout ── */
 .wrap { width: 100%; max-width: 1440px; margin: 0 auto; padding: 0 clamp(1rem, 3vw, 3rem); }
-.section { padding: 2.5rem 0; }
+.section { padding: 1.8rem 0; }
 .section-label { font-size: .7rem; letter-spacing: .15em; text-transform: uppercase; color: var(--soft); margin-bottom: .5rem; }
 .section-title { font-size: clamp(1.35rem, 2.6vw, 1.9rem); font-weight: 700; letter-spacing: -.02em; margin-bottom: .4rem; }
-.section-desc { color: var(--dim); max-width: 640px; margin-bottom: 1.4rem; font-size: .95rem; }
-.section-head { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; justify-content: space-between; margin-bottom: 1.2rem; }
+.section-desc { color: var(--dim); max-width: 640px; margin-bottom: 1rem; font-size: .95rem; }
+.section-head { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; justify-content: space-between; margin-bottom: .9rem; }
 .grid { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
 .grid-4 { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
 .stack { display: flex; flex-direction: column; gap: 1rem; }
@@ -56,7 +56,7 @@ h1, h2, h3, p { margin: 0; }
 .muted { color: var(--muted); } .dim { color: var(--dim); } .small { font-size: .875rem; } .tiny { font-size: .78rem; }
 
 /* ── hero ── */
-.hero { padding: 4.5rem 0 3rem; text-align: center;
+.hero { padding: 3.4rem 0 2.4rem; text-align: center;
         background: radial-gradient(ellipse 70% 55% at 18% 35%, rgba(19,71,163,.28) 0%, transparent 60%),
                     radial-gradient(ellipse 60% 50% at 82% 60%, rgba(255,153,51,.12) 0%, transparent 60%), var(--bg); }
 .hero.left { text-align: left; padding: 3.5rem 0 2.2rem; }
@@ -307,8 +307,8 @@ ul.plain { margin: 0; padding-left: 1.2em; color: var(--soft); } ul.plain li { m
 @media (max-width: 560px) { .wc-tease { font-size: 1.05rem; padding: .65rem 1.2rem; } }
 
 /* section panels: each content section gets its own bordered surface */
-.section.panel { padding: .9rem 0; }
-.section.panel > .wrap { width: calc(100% - 2 * clamp(1rem, 3vw, 3rem)); max-width: calc(1440px - 6rem); padding: clamp(1.1rem, 2.4vw, 2rem);
+.section.panel { padding: .55rem 0; }
+.section.panel > .wrap { width: calc(100% - 2 * clamp(1rem, 3vw, 3rem)); max-width: calc(1440px - 6rem); padding: clamp(1rem, 2vw, 1.6rem);
                          border: 1px solid var(--border); border-radius: 16px;
                          background: linear-gradient(180deg, rgba(26,30,42,.55), rgba(19,22,30,.35)); box-shadow: 0 10px 30px rgba(0,0,0,.18); }
 .section.panel > .wrap > .section-head:first-child, .section.panel > .wrap > .section-label:first-child { margin-top: 0; }
@@ -321,7 +321,7 @@ ul.plain { margin: 0; padding-left: 1.2em; color: var(--soft); } ul.plain li { m
 /* data-volume panel (counters + why it matters + World Cup teaser) */
 .volume { text-align: center; }
 .volume .counters { margin-top: 0; max-width: none; }
-.hero { padding-bottom: 2rem; }
+.hero { padding-bottom: 1.4rem; }
 
 /* two-line World Cup teaser: question on top, models line centred beneath */
 .wc-tease { flex-direction: column; align-items: center; text-align: center; gap: .35rem; border-radius: 28px; padding: .9rem 2rem; }
@@ -407,7 +407,6 @@ tr.total td { border-top: 1px solid var(--border); background: var(--surface2); 
 /* 3. hub wordmark lockup: scorebook (stats) + bat + ball emblem, our own drawing */
 .hero h1.cs-lockup { display: flex; justify-content: center; align-items: center; gap: .18em; }
 .hero.left h1.cs-lockup { justify-content: flex-start; }
-.cs-emblem { width: 1.15em; height: 1.15em; flex: 0 0 auto; filter: drop-shadow(0 4px 14px rgba(255,153,51,.25)); }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 /* 4. ball as the dot of the "i" in the hub wordmark (dotless ı + our ball) */
 .i-ball { position: relative; display: inline-block; }
@@ -416,12 +415,24 @@ tr.total td { border-top: 1px solid var(--border); background: var(--surface2); 
 /* 5. "The data behind cricstat" panel as a stadium scoreboard */
 .section.panel > .wrap.scoreboard { background: linear-gradient(180deg, #0c1512, #0a110f); border: 3px solid #2a3330;
   box-shadow: inset 0 0 0 1px #3d4a45, inset 0 0 40px rgba(0,0,0,.6), 0 10px 40px rgba(0,0,0,.45); border-radius: 14px; }
-.scoreboard .sb-head { display: flex; align-items: center; justify-content: center; gap: .8rem; margin: -.2rem auto 1.4rem;
+.scoreboard .sb-head, .board-head { display: flex; align-items: center; justify-content: center; gap: .8rem; margin: -.2rem auto 1.4rem;
   font-family: var(--mono); font-size: .8rem; font-weight: 700; letter-spacing: .28em; text-transform: uppercase; color: #ffc46b;
   text-shadow: 0 0 8px rgba(255,170,60,.45); padding-bottom: .8rem; border-bottom: 1px dashed #2f3b37; }
-.scoreboard .bulb { width: 8px; height: 8px; border-radius: 50%; background: #ffc46b; box-shadow: 0 0 8px 2px rgba(255,170,60,.6); }
+.scoreboard .bulb, .board-head .bulb { width: 8px; height: 8px; border-radius: 50%; background: #ffc46b; box-shadow: 0 0 8px 2px rgba(255,170,60,.6); }
 .scoreboard .counter { background: rgba(0,0,0,.28); border: 1px solid #24302c; box-shadow: inset 0 2px 10px rgba(0,0,0,.5); }
 .scoreboard .counter > span { font-family: var(--mono); color: #e8f0ec; letter-spacing: .2em; font-weight: 700; }
 .scoreboard .c-note { border-top: 1px dashed #2f3b37; color: #9fb0a8; }
 .scoreboard .c-icon { background: rgba(255,255,255,.04); border: 1px solid #24302c; }
 .scoreboard .why-volume { color: #b8c6bf; }
+/* hub: Following / Leaders / Leagues as tabs in one panel */
+.sec-tabs { display: flex; gap: .3rem; border-bottom: 1px solid var(--border); margin: -.2rem 0 1.2rem; overflow-x: auto; scrollbar-width: none; }
+.sec-tab { background: none; border: 0; border-bottom: 3px solid transparent; color: var(--dim); font: inherit; font-size: 1rem;
+  font-weight: 700; padding: .7rem 1.1rem .8rem; cursor: pointer; white-space: nowrap; margin-bottom: -1px; transition: color .2s, border-color .2s; }
+.sec-tab:hover { color: var(--text); }
+.sec-tab[aria-selected="true"] { color: var(--saffron); border-bottom-color: var(--saffron); }
+.sec-tab:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; border-radius: 6px 6px 0 0; }
+.board-head { margin-bottom: .5rem; border-bottom: 0; padding-bottom: .2rem; } .board-head .mc-asof { margin-left: -.5rem; color: #c9a36b; letter-spacing: .18em; font-weight: 600; }
+/* Match centre uses the same board as "The data behind cricstat"; its cards sit slightly lifted on the board */
+.match-centre .sec-tabs { border-bottom-color: #2f3b37; }
+.match-centre .card { background: rgba(10,14,13,.75); border-color: #24302c; }
+.match-centre .sec-tab:not([aria-selected="true"]) { color: #9fb0a8; }
