@@ -9,6 +9,7 @@ Mirrors what Nginx will do, without touching the live site:
                                 on the branch with CRICSTAT_WEB_DIR=cricstat/tools/staging/web and
                                 point CRICSTAT_API at it
   /cricket/sitemap.xml        → the API's /pages/sitemap.xml
+  /cricket/photos/<hash>.jpg  → CRICSTAT_PHOTO_DIR (default cricstat/data/photos)
   /cricket/...                → cricstat/tools/staging/web/... (else cricstat/web/...)
   /, /privacy/, /sitemap.xml  → the STAGED copies in cricstat/tools/staging/ (not the live files)
   /admin-preview/cricket/     → a static snapshot of /admin/cricket rendered from local templates
@@ -34,6 +35,8 @@ API = os.environ.get("CRICSTAT_API", "http://127.0.0.1:8040")
 STAGED = {"/": "homepage.html", "/index.html": "homepage.html", "/privacy/": "privacy.html",
           "/sitemap.xml": "sitemap.xml", "/robots.txt": "robots.txt",
           "/admin-preview/cricket/": "admin-cricket.html"}   # static snapshot, not the live admin
+PHOTOS = os.environ.get("CRICSTAT_PHOTO_DIR", os.path.join(ROOT, "cricstat", "data", "photos"))
+PHOTO = re.compile(r"^/cricket/photos/([0-9a-f]{16}\.(?:jpg|png|webp))$")
 DYNAMIC = re.compile(r"^/cricket/(players|countries)/[a-z0-9-]+/$")
 
 
@@ -55,6 +58,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return self.page(path[len("/cricket"):], os.path.join(WEB, m.group(1), "index.html"))
         if path == "/cricket/sitemap.xml":
             return self.page("/sitemap.xml", "")
+        m = PHOTO.match(path)
+        if m:                                   # player photos (P0.5), like Nginx's regex location
+            return self.file(os.path.join(PHOTOS, m.group(1)))
         if path.startswith("/cricket/"):
             return self.file(self.safe(WEB, path[len("/cricket/"):]))
         return self.file(self.safe(SITE, path.lstrip("/")))

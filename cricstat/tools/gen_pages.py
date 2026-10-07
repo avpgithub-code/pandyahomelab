@@ -20,7 +20,7 @@ else:
     WEB = os.path.join(CRICSTAT, "tools", "staging", "web")
     if not os.path.isdir(WEB):
         shutil.copytree(os.path.join(CRICSTAT, "web"), WEB)
-V = "63"
+V = "64"
 SITE = "https://pandyahomelab.com"
 HEAD = '''<!DOCTYPE html>
 <html lang="en">
@@ -243,11 +243,13 @@ LIC = '''<header class="hero left"><div class="wrap">
       <tbody>
         <tr><td class="txt">Cricsheet match data</td><td class="txt">Ball-by-ball data for every match on these pages (men's and women's, 2001–present)</td><td class="txt">ODC-BY 1.0 · attribution required</td></tr>
         <tr><td class="txt">Cricsheet Register</td><td class="txt">Player identities and name variants used for search</td><td class="txt">ODC-BY 1.0 · attribution required</td></tr>
+        <tr><td class="txt">Wikidata</td><td class="txt">Players' full names, dates and places of birth, matched only by their ESPNcricinfo id (never by name)</td><td class="txt">CC0 · no attribution required, credited anyway</td></tr>
+        <tr><td class="txt">Wikimedia Commons</td><td class="txt">Player photos: a small copy of each image, served from this site, with its author, licence and file page shown next to it</td><td class="txt">Public domain, CC0, CC BY or CC BY-SA, per photo</td></tr>
         <tr><td class="txt">Wikimedia Commons</td><td class="txt">National flags, used unaltered at their official proportions and only to identify national teams (<a href="#flag-sources">source of each flag</a>)</td><td class="txt">Public domain (or CC0)</td></tr>
         <tr><td class="txt">Chart.js</td><td class="txt">Charts, served from this site (<a href="/vendor/chart.js-4.4.0/LICENSE">licence text</a>)</td><td class="txt">MIT</td></tr>
       </tbody>
     </table></div>
-    <p class="tiny muted" style="padding:0 1.3rem 1.1rem">Player birth details and photos from Wikidata and Wikimedia Commons will be added later, each credited with its own licence. Published figures from public records, including Wikipedia, are used privately to cross-check our numbers and are not reproduced here.</p>
+    <p class="tiny muted" style="padding:0 1.3rem 1.1rem">Photos are resized copies of the Commons originals and are not otherwise changed (the profile frame only crops what is shown). Players under 18 are shown without a photo or birth details. Published figures from public records, including Wikipedia, are used privately to cross-check our numbers and are not reproduced here.</p>
     <details class="flag-sources" id="flag-sources"><summary>Source of each flag (@@NFLAGS@@)</summary>
       <p class="tiny muted">Each flag is an unchanged copy of the Wikimedia Commons file linked here. Some countries also protect their flag by law (India, for example, by its Flag Code); flags here only identify the national team.</p>
       <ul>@@FLAGS@@</ul>
@@ -265,7 +267,7 @@ LIC = '''<header class="hero left"><div class="wrap">
   <div class="grid">
     <div class="card"><h2>Privacy</h2><p class="dim">No cookies, and nothing is loaded from third parties. The team you follow is remembered in your browser only (local storage) and never sent to the server. Visits are counted the same way as on the rest of this site.</p><p style="margin-top:.6rem"><a href="/privacy/">Full privacy page →</a></p></div>
     <div class="card"><h2>Disclaimers</h2><p class="dim">Statistics are derived from the source data and may differ from official records. When forecasts and the AI analyst arrive, forecasts will be for education and entertainment, not betting advice, and every AI answer will show how it was computed.</p></div>
-    <div class="card"><h2>Corrections</h2><p class="dim">Spotted an error, or want details about a player reviewed? Email <a href="mailto:privacy@pandyahomelab.com">privacy@pandyahomelab.com</a> with the page and what looks wrong.</p></div>
+    <div class="card"><h2>Corrections</h2><p class="dim">Spotted an error, or want details about a player reviewed or a photo removed? Email <a href="mailto:privacy@pandyahomelab.com">privacy@pandyahomelab.com</a> with the page and what looks wrong.</p></div>
   </div>
 </div></section>
 '''
