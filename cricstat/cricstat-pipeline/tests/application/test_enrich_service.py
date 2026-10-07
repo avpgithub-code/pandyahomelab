@@ -11,6 +11,7 @@ import pytest
 
 from application_logic.services import enrich_service
 from db_logic.loaders import wikimedia
+from db_logic.repository import bio_store
 from db_logic.repository.raw_store import RawStore, connect, migrate
 from shared.config import get_config
 from shared.exceptions import DownloadError
@@ -132,12 +133,12 @@ def test_thumbnail_checks_host_and_bytes():
 
 
 def test_is_minor():
-    assert enrich_service.is_minor("2010-01-01", TODAY)
-    assert not enrich_service.is_minor("2008-10-07", TODAY)          # 18 today
-    assert enrich_service.is_minor("2008-10-08", TODAY)
-    assert enrich_service.is_minor("2008", TODAY)                    # year only: latest birthday
-    assert not enrich_service.is_minor("2007", TODAY)
-    assert not enrich_service.is_minor(None, TODAY)
+    assert bio_store.is_minor("2010-01-01", TODAY)
+    assert not bio_store.is_minor("2008-10-07", TODAY)          # 18 today
+    assert bio_store.is_minor("2008-10-08", TODAY)
+    assert bio_store.is_minor("2008", TODAY)                    # year only: latest birthday
+    assert not bio_store.is_minor("2007", TODAY)
+    assert not bio_store.is_minor(None, TODAY)
 
 
 # ── service ─────────────────────────────────────────────────────────────────────────────

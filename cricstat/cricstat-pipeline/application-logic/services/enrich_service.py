@@ -18,6 +18,7 @@ import time
 from typing import Dict, List, Optional
 
 from db_logic.loaders import wikimedia
+from db_logic.repository.bio_store import is_minor
 from db_logic.repository.raw_store import RawStore, connect, migrate
 from shared.exceptions import DownloadError
 from shared.logger import get_logger
@@ -28,24 +29,6 @@ COMMONS_BATCH = 50
 
 def utcnow() -> str:
     return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-
-
-def is_minor(date_of_birth: Optional[str], on: datetime.date) -> bool:
-    """Under 18 on `on`. With only a year (or year-month) known, assume the latest possible
-    birthday, so anyone who might be under 18 counts as a minor."""
-    if not date_of_birth:
-        return False
-    parts = [int(x) for x in date_of_birth.split("-")]
-    y = parts[0]
-    m = parts[1] if len(parts) > 1 else 12
-    d = parts[2] if len(parts) > 2 else 31
-    try:
-        born = datetime.date(y, m, d)
-    except ValueError:                                  # e.g. 31 in a 30-day month
-        born = datetime.date(y, m, 28)
-    eighteenth = born.replace(year=born.year + 18) if not (born.month == 2 and born.day == 29) \
-        else datetime.date(born.year + 18, 3, 1)
-    return on < eighteenth
 
 
 def thumb_name(image_file: str, ext: str) -> str:

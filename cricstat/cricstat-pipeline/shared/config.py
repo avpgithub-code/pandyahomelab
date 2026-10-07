@@ -55,6 +55,8 @@ class Config:
         # Wikidata + Commons enrichment (P0.5). Wikimedia asks for a User-Agent with contact info.
         self.WIKIMEDIA_USER_AGENT = os.getenv("CRICSTAT_WIKIMEDIA_USER_AGENT", WIKIMEDIA_USER_AGENT)
         self.PHOTO_DIR = self._path("CRICSTAT_PHOTO_DIR", os.path.join(self.DATA_DIR, "photos"))
+        self.PHOTO_BLOCKLIST = self._path("CRICSTAT_PHOTO_BLOCKLIST",
+                                          os.path.join(self.SQL_DIR, "photo_blocklist.csv"))
         self.ENRICH_BATCH = _int("CRICSTAT_ENRICH_BATCH", 200)          # cricinfo ids per query
         self.ENRICH_REFRESH_DAYS = _int("CRICSTAT_ENRICH_REFRESH_DAYS", 28)
         self.ENRICH_PAUSE = _float("CRICSTAT_ENRICH_PAUSE", 1.0)        # seconds between requests

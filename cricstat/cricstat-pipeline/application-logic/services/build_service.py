@@ -23,7 +23,7 @@ from datetime import datetime, timezone
 from typing import Dict, List, Optional
 
 from application_logic.quality import build_checks
-from db_logic.repository import serving_store
+from db_logic.repository import bio_store, serving_store
 from db_logic.repository.raw_store import RawStore
 from db_logic.transforms import match_facts
 from shared.exceptions import DataQualityError, PipelineError
@@ -107,7 +107,8 @@ class _Job:
 
 
 def build(raw_db: str, serving_db: str, sql_dir: str, mode: str = "incremental",
-          venue_map_path: Optional[str] = None) -> Dict[str, object]:
+          venue_map_path: Optional[str] = None, photo_dir: Optional[str] = None,
+          blocklist_path: Optional[str] = None) -> Dict[str, object]:
     """Build and swap. Returns the summary; raises DataQualityError (exit 2) or PipelineError."""
     if mode not in MODES:
         raise ValueError("mode must be one of %s" % (MODES,))
@@ -125,6 +126,7 @@ def build(raw_db: str, serving_db: str, sql_dir: str, mode: str = "incremental",
             used, escalated = "full", "rules or transform code changed"
     job = _Job(t0=time.time(), sql_dir=sql_dir, serving_db=serving_db, tmp=serving_db + ".new",
                used=used, prev=prev, venue_rows=venue_rows, rules_sha=rules_sha,
+               photo_dir=photo_dir, blocklist=bio_store.read_blocklist(blocklist_path),
                summary={"mode": "build-" + used, "requested": mode, "escalated": escalated,
                         "started_at": utcnow(), "status": "running", "rules_sha": rules_sha},
                tally={"unresolved": set(), "problems": [], "raw_deliveries": 0})
@@ -137,10 +139,16 @@ def build(raw_db: str, serving_db: str, sql_dir: str, mode: str = "incremental",
         job.names = job.store.register_names()
         job.last_run = job.store.latest_run() or {}
         job.reg_run = job.store.latest_run(("register",)) or {}
+        job.wiki, job.images = bio_store.read_enrichment(raw)
+        enrich_run = (job.store.latest_run(("enrich",)) or {}) if job.wiki else {}
         job.inputs_sha = _sha([os.path.join(sql_dir, n) for n in _INPUT_FILES]
-                              + [serving_store.MARTS_SQL, os.path.abspath(__file__)]
-                              + ([venue_map_path] if venue_rows else []),
-                              "register-%s" % job.reg_run.get("run_id"))
+                              + [serving_store.MARTS_SQL, os.path.abspath(__file__),
+                                 bio_store.__file__]
+                              + ([venue_map_path] if venue_rows else [])
+                              + ([blocklist_path] if blocklist_path
+                                 and os.path.exists(blocklist_path) else []),
+                              "register-%s enrich-%s" % (job.reg_run.get("run_id"),
+                                                         enrich_run.get("run_id")))
         if os.path.exists(job.tmp):
             os.remove(job.tmp)
         os.makedirs(os.path.dirname(os.path.abspath(serving_db)), exist_ok=True)
@@ -202,6 +210,9 @@ def _fill(job: _Job) -> None:
         t = time.time()
         conn.execute("BEGIN")
         serving_store.load_players(conn, job.people, job.names)
+        bio, s["bio"] = bio_store.bio_rows(job.people, job.wiki, job.images, job.photo_dir,
+                                           job.blocklist, datetime.now(timezone.utc).date())
+        bio_store.apply_bio(conn, bio)
         venues = serving_store.apply_venue_map(conn, job.venue_rows)
         conn.execute("COMMIT")
         for stmt in deferred:
@@ -320,4 +331,5 @@ def _fsync(path: str) -> None:
 def run(cfg, mode: str) -> Dict[str, object]:
     """CLI entry: paths from config."""
     return build(cfg.RAW_DB, cfg.SERVING_DB, cfg.SQL_DIR, mode=mode,
-                 venue_map_path=cfg.VENUE_MAP)
+                 venue_map_path=cfg.VENUE_MAP, photo_dir=cfg.PHOTO_DIR,
+                 blocklist_path=cfg.PHOTO_BLOCKLIST)
