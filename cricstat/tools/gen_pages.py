@@ -5,7 +5,7 @@ import html as H
 import json
 import os
 WEB = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "web")
-V = "43"
+V = "44"
 HEAD = '''<!DOCTYPE html>
 <html lang="en">
 <head>

@@ -36,8 +36,8 @@ h1, h2, h3, p { margin: 0; }
 .nav-links a:hover { color: var(--text); background: var(--surface2); text-decoration: none; }
 .nav-links a[aria-current="page"] { color: var(--saffron); background: rgba(255,153,51,.1); }
 .nav-links span.soon { color: var(--muted); cursor: default; }
-.soon-tag { font-size: .6rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
-            border: 1px solid currentColor; border-radius: 99px; padding: 0 .4rem; line-height: 1.4; }
+.soon-tag, .nav-links span.soon-tag { font-size: .6rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+            border: 1px solid currentColor; border-radius: 99px; padding: 0 .4rem; line-height: 1.4; min-height: 0; }
 @media (max-width: 720px) { .site-nav { height: auto; flex-wrap: wrap; padding: .6rem 1rem; gap: .25rem; }
                             .nav-links { width: 100%; } }
 .page-top { padding-top: 72px; } @media (max-width: 720px) { .page-top { padding-top: 104px; } }
