@@ -3,8 +3,9 @@ from typing import List, Optional, Tuple
 
 from application_logic.services import metrics
 from application_logic.services.common import catalog_defs, dates, gender, page, team_slugs
+from application_logic.services.matches_service import score_line
 from application_logic.services.slugs import GENDER, player_slug
-from db_logic.repository import teams_repo
+from db_logic.repository import matches_repo, teams_repo
 from db_logic.repository.db import ServingDB
 from shared.exceptions import BadFilter, NotFound
 
@@ -57,10 +58,15 @@ def team(db: ServingDB, slug: str) -> Tuple[dict, dict]:
     return data, {}
 
 
-def record(db: ServingDB, slug: str, scope: Optional[str]) -> Tuple[List[dict], dict]:
+def record(db: ServingDB, slug: str, scope: Optional[str], date_from: Optional[str] = None,
+           date_to: Optional[str] = None) -> Tuple[List[dict], dict]:
+    """By format (all time, from the F4 view), or for one scope and/or a date window."""
     t = _team(db, slug)
     scope = _scope(db, scope)
-    rows = teams_repo.record(db, t["team_key"], scope)
+    d_from, d_to = dates(date_from, date_to)
+    if (d_from or d_to) and not scope:
+        raise BadFilter("a date window needs a scope (e.g. scope=ODI)")
+    rows = teams_repo.record(db, t["team_key"], scope, d_from, d_to)
     if scope:
         rows = [_with_pct(dict(r, format=scope)) for r in rows if r["matches"]]
     else:
@@ -79,6 +85,7 @@ def results(db: ServingDB, slug: str, scope: Optional[str], date_from: Optional[
     limit, offset = page(limit, offset)
     rows = teams_repo.results(db, t["team_key"], scope, d_from, d_to, limit + 1, offset)
     slugs = team_slugs(db)
+    scores = matches_repo.innings_scores(db, [r["match_id"] for r in rows[:limit]])
     out = [{"match_id": r["match_id"], "date": r["start_date"], "format": r["format_key"],
             "competition": r["competition"],
             "opponent": {"name": r["opponent"],
@@ -86,7 +93,10 @@ def results(db: ServingDB, slug: str, scope: Optional[str], date_from: Optional[
             "outcome": r["outcome"], "margin_runs": r["margin_runs"],
             "margin_wickets": r["margin_wickets"], "margin_innings": r["win_by_innings"],
             "method": r["method"], "decided_by": r["decided_by"], "winner": r["winner"],
-            "venue": r["venue"], "city": r["city"], "home_away": r["home_away"]}
+            "venue": r["venue"], "city": r["city"], "home_away": r["home_away"],
+            "scores": [{"team": slugs.slug(i["team_key"]), "score": score_line(i),
+                        "super_over": bool(i["is_super_over"])}
+                       for i in scores.get(r["match_id"], [])]}
            for r in rows[:limit]]
     return out, {}, len(rows) > limit
 

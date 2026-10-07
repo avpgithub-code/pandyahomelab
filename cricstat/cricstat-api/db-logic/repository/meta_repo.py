@@ -27,8 +27,9 @@ def ingest_runs(raw_db: str, limit: int = 5) -> List[dict]:
     try:
         return [dict(r) for r in conn.execute(
             "SELECT run_id, mode, status, started_at, finished_at, added, updated, unchanged,"
-            " failed, removed, active_after FROM ingest_runs ORDER BY run_id DESC LIMIT ?",
-            (limit,)).fetchall()]
+            " failed, removed, active_after,"
+            " json_extract(notes, '$.source_last_modified') AS source_last_modified"
+            " FROM ingest_runs ORDER BY run_id DESC LIMIT ?", (limit,)).fetchall()]
     except sqlite3.Error:
         return []
     finally:

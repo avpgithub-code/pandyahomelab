@@ -110,6 +110,14 @@ def report_lines() -> list:
         jobs = api_client.get("/v1/admin/jobs")
     except api_client.CricstatUnavailable as exc:
         return out + ["  cricstat-api unreachable: %s" % exc]
+    src = jobs.get("source") or {}
+    if src:
+        days = src.get("days_since_update")
+        out.append("  %s source: %s last updated %s%s · we last checked %s" % (
+            "STALE" if src.get("stale") else "ok   ", src.get("name", "Cricsheet"),
+            (src.get("last_updated") or "unknown")[:10],
+            " (%s days ago)" % days if days is not None else "",
+            (src.get("last_checked") or "never")[:16].replace("T", " ")))
     for j in jobs["jobs"]:
         lr = j["last_run"] or {}
         flag = "ok " if j["healthy"] else ("OVERDUE" if j["overdue"] else "FAILED")

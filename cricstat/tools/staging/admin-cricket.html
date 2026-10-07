@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>pandyaHomeLab — Admin · cricstat</title>
+<script src="/vendor/chart.js-4.4.0/chart.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --bg:#0d0f14; --surface:#13161e; --surface2:#1a1e2a; --border:#252a38; --accent:#4f8ef7;
+          --green:#22c55e; --amber:#facc15; --red:#ef4444; --purple:#a855f7; --saffron:#FF9933;
+          --text:#e2e8f0; --muted:#64748b; --radius:8px; }
+  body { font-family:'Segoe UI', system-ui, sans-serif; background:var(--bg); color:var(--text);
+         padding:2rem 1rem; line-height:1.5; min-height:100vh; }
+  .container { max-width:1100px; margin:0 auto; }
+  header { display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:1rem;
+           margin-bottom:1.5rem; padding-bottom:1rem; border-bottom:1px solid var(--border); }
+  h1 { font-size:1.5rem; font-weight:800; } h1 em { font-style:normal; color:var(--accent); }
+  .cs { color:#fff; white-space:nowrap; } .cs b { color:var(--saffron); font-weight:inherit; }
+  .meta { color:var(--muted); font-size:.85rem; display:flex; gap:.8rem; flex-wrap:wrap; align-items:center; }
+  .meta a, a { color:var(--accent); text-decoration:none; }
+  h2 { font-size:.75rem; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); font-weight:700;
+       margin:2rem 0 .8rem; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:.75rem; }
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:.9rem 1rem; }
+  .card-label { color:var(--muted); font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; }
+  .card-value { font-size:1.5rem; font-weight:800; margin-top:.2rem; }
+  .card-sub { color:var(--muted); font-size:.75rem; }
+  .table-scroll { overflow-x:auto; border:1px solid var(--border); border-radius:var(--radius); }
+  table { width:100%; border-collapse:collapse; font-size:.85rem; background:var(--surface); }
+  th, td { padding:.5rem .7rem; text-align:left; border-bottom:1px solid var(--border); vertical-align:top; }
+  th { color:var(--muted); font-size:.7rem; text-transform:uppercase; letter-spacing:.06em; background:var(--surface2); }
+  td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+  tr:last-child td { border-bottom:none; }
+  .pill { display:inline-block; padding:.05rem .55rem; border-radius:99px; font-size:.72rem; font-weight:700;
+          border:1px solid currentColor; white-space:nowrap; }
+  .ok, .match { color:var(--green); } .bad, .DIFF { color:var(--red); } .warn, .stale { color:var(--amber); }
+  .explained { color:var(--purple); } .muted { color:var(--muted); }
+  .banner { padding:.7rem 1rem; border-radius:var(--radius); margin:1rem 0; border:1px solid var(--border);
+            background:var(--surface2); font-size:.9rem; }
+  .banner.err { border-color:var(--red); color:#fecaca; }
+  .chart-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1rem; }
+  .chart-wrap { position:relative; height:240px; }
+  .grid2 { display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:.75rem; }
+  button, .btn { background:var(--surface2); color:var(--text); border:1px solid var(--border); border-radius:6px;
+                 padding:.4rem .9rem; font-size:.85rem; font-weight:600; cursor:pointer; }
+  button.primary { border-color:var(--accent); color:var(--accent); }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  input[type=text], select { background:var(--bg); color:var(--text); border:1px solid var(--border);
+                             border-radius:5px; padding:.25rem .45rem; font-size:.82rem; width:100%; }
+  code, .mono { font-family:ui-monospace, Consolas, monospace; font-size:.8rem; }
+  .row { display:flex; gap:.6rem; flex-wrap:wrap; align-items:center; }
+  footer { margin-top:2.5rem; color:var(--muted); font-size:.75rem; text-align:center; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>pandya<em>HomeLab</em> · <span class="cs">cric<b>stat</b></span></h1>
+    <div class="meta">Signed in as <strong>archit (preview snapshot)</strong>
+      <a href="/admin/">← Visitors dashboard</a> <a href="/admin/cricket/golden">Golden figures →</a></div>
+  </header>
+  
+  
+
+  
+  <div class="banner" style="border-color:var(--amber);color:#fde68a">
+    📡 <strong>Source:</strong> Cricsheet last updated
+    <strong>2026-09-17 21:53 UTC</strong>
+    (19 days ago)
+    · we last checked <strong>2026-10-06 22:26 UTC</strong>
+    <br>⚠ No new data from Cricsheet for more than 14 days. Our pipeline is running; the source has gone quiet. Check cricsheet.org if this continues.
+  </div>
+  
+
+  
+  <h2>⏱ Scheduled jobs <span class="muted">(NAS time UTC-5; shown in UTC)</span></h2>
+  <div class="table-scroll"><table>
+    <thead><tr><th>Job</th><th>Schedule</th><th>Last run (UTC)</th><th>Status</th><th>Result</th><th>Next run (UTC)</th></tr></thead>
+    <tbody>
+    
+      <tr>
+        <td><strong>CD pull</strong><br><span class="muted mono">sh deployment/cricstat/cd-pull.sh</span></td>
+        <td>Daily 05:15</td>
+        <td>2026-10-06 18:20</td>
+        <td><span class="pill ok">ok</span></td>
+        <td class="mono">
+          deployed cricstat-api 39d76eaae791 from ghcr.io/avpgithub-code/cricstat-api:main (previous db396d56d5f0)<br>
+          
+        </td>
+        <td>2026-10-07 10:15</td>
+      </tr>
+    
+      <tr>
+        <td><strong>Daily refresh</strong><br><span class="muted mono">pipeline recent &amp;&amp; build</span></td>
+        <td>Daily 05:30</td>
+        <td>2026-10-06 22:26</td>
+        <td><span class="pill ok">ok</span></td>
+        <td class="mono">
+          +0 added · 0 updated · 22983 active
+            
+        </td>
+        <td>2026-10-07 10:30</td>
+      </tr>
+    
+      <tr>
+        <td><strong>Weekly register</strong><br><span class="muted mono">pipeline register &amp;&amp; build</span></td>
+        <td>Sunday 06:00</td>
+        <td>2026-10-06 14:30</td>
+        <td><span class="pill ok">ok</span></td>
+        <td class="mono">
+          +18554 added · 0 updated · 18554 active
+            <br>→ build 1 (full, success)
+        </td>
+        <td>2026-10-11 11:00</td>
+      </tr>
+    
+      <tr>
+        <td><strong>Monthly full</strong><br><span class="muted mono">pipeline full &amp;&amp; build --full</span></td>
+        <td>Day 1, 04:00</td>
+        <td>2026-10-05 16:39</td>
+        <td><span class="pill ok">ok</span></td>
+        <td class="mono">
+          +0 added · 0 updated · 22983 active
+            
+        </td>
+        <td>2026-11-01 09:00</td>
+      </tr>
+    
+    </tbody></table></div>
+
+  <h2>🏗 Recent serving-DB builds</h2>
+  <div class="table-scroll"><table>
+    <thead><tr><th class="num">Build</th><th>Built (UTC)</th><th>Mode</th><th>Status</th><th class="num">Matches</th><th>Data as of</th><th>Changed</th><th>Warnings / failures</th></tr></thead>
+    <tbody>
+    
+      <tr>
+        <td class="num">3</td><td>2026-10-06 15:23</td>
+        <td>incremental</td>
+        <td><span class="pill ok">success</span></td>
+        <td class="num">22,983</td><td>2026-09-17</td>
+        <td>0</td>
+        <td><div class="warn">10 player ids appear in both men&#39;s and women&#39;s matches (Register merges; report to Cricsheet): 0420f51f, 26a8b2fe, 3a54c25b, 5597338d, 764f35d8, c160db98, cf33e1ce, cfece11f, f5e8e3d2, f6ba97c6</div></td>
+      </tr>
+    
+      <tr>
+        <td class="num">2</td><td>2026-10-06 15:04</td>
+        <td>incremental</td>
+        <td><span class="pill ok">success</span></td>
+        <td class="num">22,983</td><td>2026-09-17</td>
+        <td>0</td>
+        <td><div class="warn">10 player ids appear in both men&#39;s and women&#39;s matches (Register merges; report to Cricsheet): 0420f51f, 26a8b2fe, 3a54c25b, 5597338d, 764f35d8, c160db98, cf33e1ce, cfece11f, f5e8e3d2, f6ba97c6</div></td>
+      </tr>
+    
+      <tr>
+        <td class="num">1</td><td>2026-10-06 15:02</td>
+        <td>full</td>
+        <td><span class="pill ok">success</span></td>
+        <td class="num">22,983</td><td>2026-09-17</td>
+        <td>22983</td>
+        <td><div class="warn">1 venues have no country yet (sql/venue_map.csv)</div><div class="warn">10 player ids appear in both men&#39;s and women&#39;s matches (Register merges; report to Cricsheet): 0420f51f, 26a8b2fe, 3a54c25b, 5597338d, 764f35d8, c160db98, cf33e1ce, cfece11f, f5e8e3d2, f6ba97c6</div></td>
+      </tr>
+    
+    </tbody></table></div>
+  
+
+  
+  <h2>📊 Data at a glance <span class="muted">(build 3, data as of 2026-09-17)</span></h2>
+  <div class="cards">
+    <div class="card"><div class="card-label">Matches</div><div class="card-value">22,983</div></div>
+    <div class="card"><div class="card-label">Deliveries</div><div class="card-value">11,615,100</div></div>
+    <div class="card"><div class="card-label">Players</div><div class="card-value">13,705</div></div>
+    <div class="card"><div class="card-label">Teams · venues</div><div class="card-value">533 · 970</div></div>
+    <div class="card"><div class="card-label">Serving DB</div><div class="card-value">1.13 GB</div><div class="card-sub">raw store 171 MB</div></div>
+  </div>
+  <div class="banner">⚠ 10 player ids appear in both men&#39;s and women&#39;s matches (Register merges; report to Cricsheet): 0420f51f, 26a8b2fe, 3a54c25b, 5597338d, 764f35d8, c160db98, cf33e1ce, cfece11f, f5e8e3d2, f6ba97c6</div>
+  <div class="grid2" style="margin-top:.75rem">
+    <div class="chart-card"><div class="card-label">Men's matches per year</div><div class="chart-wrap"><canvas id="male"></canvas></div></div>
+    <div class="chart-card"><div class="card-label">Women's matches per year</div><div class="chart-wrap"><canvas id="female"></canvas></div></div>
+  </div>
+  
+
+  <h2>🎯 Golden figures <span class="muted">(teams 2016-01-01 → 2026-09-17; players whole careers)</span></h2>
+  
+  <div class="cards">
+    <div class="card"><div class="card-label">Rows</div><div class="card-value">1012</div><div class="card-sub">0 with a reference</div></div>
+    <div class="card"><div class="card-label match">Match</div><div class="card-value match">0</div></div>
+    <div class="card"><div class="card-label explained">Explained</div><div class="card-value explained">0</div></div>
+    <div class="card"><div class="card-label stale">Stale</div><div class="card-value stale">0</div><div class="card-sub">played more since checked</div></div>
+    <div class="card"><div class="card-label DIFF">DIFF</div><div class="card-value DIFF">0</div><div class="card-sub">unexplained</div></div>
+    <div class="card"><div class="card-label">Suggestions</div><div class="card-value">0</div><div class="card-sub">0 equal ours</div></div>
+  </div>
+  
+  <div class="row" style="margin-top:.75rem">
+    <a class="btn" href="/admin/cricket/golden">Review golden figures →</a>
+    <form method="post" action="/admin/cricket/golden/check"><button type="submit">Run golden check now</button></form>
+    <span class="muted">Runs by itself weekly; results go into the weekly report email.</span>
+  </div>
+  
+  <footer>Match data from Cricsheet (cricsheet.org), ODC-BY 1.0 · suggestions from Wikipedia (CC BY-SA), checked by hand</footer>
+</div>
+<script>
+const data = {"male": {"years": ["2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026"], "series": {"Test": [1, 2, 20, 17, 24, 39, 30, 43, 41, 43, 39, 42, 44, 41, 43, 47, 47, 47, 36, 22, 42, 43, 33, 50, 40, 19], "ODI": [0, 3, 119, 79, 67, 119, 151, 99, 116, 105, 137, 84, 124, 104, 127, 85, 107, 105, 127, 44, 65, 148, 195, 89, 108, 69], "T20I": [0, 0, 0, 0, 3, 8, 36, 15, 48, 56, 21, 72, 42, 58, 45, 82, 53, 74, 206, 72, 289, 444, 345, 611, 531, 447], "Other": [0, 0, 0, 0, 0, 1, 2, 0, 1, 20, 4, 39, 83, 288, 311, 296, 308, 411, 263, 88, 274, 327, 284, 396, 446, 325], "Leagues": [0, 0, 0, 0, 0, 0, 0, 58, 57, 60, 85, 155, 181, 305, 304, 420, 364, 431, 726, 348, 626, 554, 593, 644, 661, 548]}}, "female": {"years": ["2003", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026"], "series": {"Test": [1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 2, 2, 3, 3, 1, 2], "ODI": [0, 0, 0, 3, 5, 3, 0, 3, 7, 24, 14, 11, 27, 62, 31, 40, 6, 45, 77, 50, 70, 94, 39], "T20I": [0, 0, 0, 0, 0, 4, 4, 2, 32, 18, 41, 18, 36, 10, 113, 141, 49, 101, 211, 258, 348, 415, 370], "Other": [0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 11, 17, 4, 60, 0, 0, 23, 39, 34, 52, 58, 56, 73], "Leagues": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 35, 63, 98, 112, 76, 157, 172, 196, 172, 194, 144]}}};
+const colors = {"Test": "#1347A3", "ODI": "#4f8ef7", "T20I": "#FF9933", "Leagues": "#a855f7", "Other": "#475569"};
+for (const g of ["male", "female"]) {
+  const el = document.getElementById(g);
+  if (!el || !window.Chart || !data[g]) continue;
+  new Chart(el, {type: "bar", data: {labels: data[g].years, datasets: Object.entries(data[g].series)
+      .map(([k, v]) => ({label: k, data: v, backgroundColor: colors[k] || "#475569"}))},
+    options: {responsive: true, maintainAspectRatio: false, plugins: {legend: {labels: {color: "#94a3b8"}}},
+      scales: {x: {stacked: true, ticks: {color: "#64748b"}, grid: {display: false}},
+               y: {stacked: true, ticks: {color: "#64748b"}, grid: {color: "#1e2330"}}}}});
+}
+</script>
+</body>
+</html>
