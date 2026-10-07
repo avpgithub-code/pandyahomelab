@@ -60,7 +60,7 @@
 
 <main>
   <h1>Privacy</h1>
-  <p class="updated">Last updated: 28 September 2026</p>
+  <p class="updated">Last updated: 6 October 2026</p>
 
   <div class="summary">
     <strong>In short:</strong> no cookies, no advertising, no third-party trackers, and nothing is sold or shared.
@@ -70,7 +70,8 @@
 
   <h2>Who runs this site</h2>
   <p>
-    pandyaHomeLab is a personal, non-commercial portfolio of machine-learning demos run by Archit Pandya.
+    pandyaHomeLab is a personal, non-commercial portfolio of machine-learning demos run by Archit Pandya,
+    including <a href="/cricket/">cricstat</a>, a cricket-statistics project.
     For anything about your data, email <a href="mailto:privacy@pandyahomelab.com">privacy@pandyahomelab.com</a>.
   </p>
 
@@ -108,13 +109,16 @@
     <li>No cookies of any kind.</li>
     <li>No advertising, analytics or social-media scripts from other companies.</li>
     <li>No accounts, no email sign-ups, no payment details.</li>
-    <li>Nothing you type into a demo is stored, apart from counting that the demo was run.</li>
+    <li>Nothing you type into a demo is stored, apart from counting that the demo was run.
+        One exception: a player search on the cricstat pages is part of the page address, so the words you
+        search for appear in the server log and visit statistics like any other address.</li>
   </ul>
 
   <h2>Storage in your browser</h2>
   <ul>
     <li><code>phl:visit</code> in session storage: a random ID that groups the pages of one visit. Your browser deletes it when you close the tab.</li>
     <li><code>phl:liked:…</code> in local storage: remembers that you liked a page, so the button stays "Liked". Clear your browser's site data to remove it.</li>
+    <li><code>cricstat:follow</code> in local storage: the team you chose to follow on the cricstat pages. It is never sent to the server. Clear your browser's site data to remove it.</li>
   </ul>
 
   <h2>Who else handles the data</h2>
