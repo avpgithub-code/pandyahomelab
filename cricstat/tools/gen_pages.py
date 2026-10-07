@@ -5,7 +5,7 @@ import html as H
 import json
 import os
 WEB = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "web")
-V = "38"
+V = "43"
 HEAD = '''<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,6 +37,7 @@ HEAD = '''<!DOCTYPE html>
     <li><span class="soon" title="Coming in a later phase">Methodology <span class="soon-tag">soon</span></span></li>
     <li><a href="/cricket/licences/"{c_licences}>Licences</a></li>
   </ul>
+  <button class="about-trigger" type="button" data-about><span aria-hidden="true">ⓘ</span> About cricstat</button>
 </nav>
 <main id="main" class="page-top">
 '''
@@ -48,6 +49,7 @@ FOOT = '''</main>
 </footer>
 <script src="/cricket/assets/flags.js?v={v}"></script>
 <script src="/cricket/assets/cricstat.js?v={v}"></script>
+<script src="/cricket/assets/about.js?v={v}"></script>
 {scripts}
 <script src="/feedback-widget.js"></script>
 </body>
@@ -66,6 +68,7 @@ HUB = '''<header class="hero">
     <div class="eyebrow"><span class="dot"></span><span id="h-asof">Live cricket data</span></div>
     <h1><span class="cs">cric<b>stat</b></span></h1>
     <p class="subtitle">Cricket statistics, forecasts and an AI analyst — built from open ball-by-ball data for men's and women's cricket, with every number traceable to its source.</p>
+    <p class="hero-hook">2011 gave us the six. 2023 gave us the heartbreak. 2027 is the question. <button class="link-btn" type="button" data-about>Read the story →</button></p>
     <form class="search-bar" action="/cricket/players/" method="get" role="search">
       <input name="q" type="search" placeholder="Search a player — Kohli, Mandhana, Bumrah…" aria-label="Search players" autocomplete="off" minlength="2" required>
       <button class="btn pri" type="submit">Search</button>
@@ -83,7 +86,7 @@ HUB = '''<header class="hero">
     <p class="why-volume"><b>Why the volume matters:</b> about 2,600 men's ODIs are too few to teach a model who wins a match. 11.6 million deliveries are plenty, so the <a class="wc-hl" href="#wc2027">ODI World Cup 2027 predictor</a> will learn team and player strength from every ball, then simulate the tournament thousands of times.</p>
     <a class="wc-tease" href="#wc2027">
       <span class="wc-q"><svg class="wc-icon" viewBox="0 0 64 64" width="44" height="44" aria-hidden="true" focusable="false"><defs><linearGradient id="wcGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE38A"/><stop offset=".5" stop-color="#F5B82E"/><stop offset="1" stop-color="#B9800F"/></linearGradient></defs><path d="M33 22 C 36 14, 44 13, 47 6 C 50 11, 47 16, 52 19 C 46 21, 41 19, 37 25 Z" fill="#FF9933"/><path d="M33.6 23.6 C 37 17, 44.6 16.4, 48.2 10.6 C 50.6 14.6, 48.4 18.6, 53.4 21.6 C 47.4 23.4, 42.4 21.6, 38.4 27 Z" fill="#FFFFFF"/><path d="M34.4 25.4 C 38 20, 45 19.6, 49 15 C 51 18.4, 49.6 22, 54.6 24.4 C 48.6 26, 43.4 24.4, 39.6 29 Z" fill="#138808"/><path d="M18 20 H46 V24 C46 34, 40 41, 32 41 C24 41, 18 34, 18 24 Z" fill="url(#wcGold)"/><path d="M18 23 C11 23, 10 32, 19 34" fill="none" stroke="url(#wcGold)" stroke-width="3" stroke-linecap="round"/><path d="M46 23 C53 23, 54 32, 45 34" fill="none" stroke="url(#wcGold)" stroke-width="3" stroke-linecap="round"/><rect x="29.5" y="40" width="5" height="8" fill="url(#wcGold)"/><path d="M23 48 H41 L43 54 H21 Z" fill="url(#wcGold)"/><rect x="19" y="54" width="26" height="4" rx="1.5" fill="#8A5A0B"/><path d="M23 22 C23 30, 26 36, 30 38" fill="none" stroke="#FFF6CF" stroke-width="1.6" stroke-linecap="round" opacity=".7"/></svg> What are the chances of India lifting the 2027 ODI World Cup?</span>
-      <span class="wc-sub">Three models are about to compete to answer that <span aria-hidden="true">→</span></span>
+      <span class="wc-sub">Three models — Elo ratings (statistics), machine learning and deep learning — are about to compete to answer that <span aria-hidden="true">→</span></span>
     </a>
 </div></section>
 
@@ -166,23 +169,6 @@ HUB = '''<header class="hero">
   </div>
 </div></section>
 
-<section class="section"><div class="wrap grid" style="align-items:start">
-  <div class="card accent">
-    <div class="section-label">Why I built this</div>
-    <p class="quote">I've followed Indian cricket for as long as I can remember. <span class="cs">cric<b>stat</b></span> brings that together with what I do professionally: data, machine-learning and LLM engineering, built end to end and measured honestly. It follows India by default, but the numbers don't take sides.</p>
-    <p class="dim small" style="margin-top:.8rem">— Archit Pandya</p>
-  </div>
-  <div class="card">
-    <div class="section-label">How it's built</div>
-    <div class="flow" style="margin-top:.6rem">
-      <div class="step"><b>Cricsheet</b>ball-by-ball</div><span class="arrow" aria-hidden="true">→</span>
-      <div class="step"><b>Pipeline</b>daily + checks</div><span class="arrow" aria-hidden="true">→</span>
-      <div class="step"><b>Stats API</b>every number</div><span class="arrow" aria-hidden="true">→</span>
-      <div class="step"><b>These pages</b>no cookies</div>
-    </div>
-    <p class="tiny muted" style="margin-top:.8rem">Models and the AI analyst plug into the same API next. <a href="/cricket/licences/">Sources &amp; licences</a></p>
-  </div>
-</div></section>
 '''
 page("index.html", "/cricket/", "cricstat — cricket statistics, forecasts and an AI analyst | pandyaHomeLab",
      "Cricket statistics for men's and women's cricket across Tests, ODIs, T20Is and major leagues, built from open ball-by-ball data with every number traceable to its source.",

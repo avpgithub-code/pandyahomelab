@@ -38,7 +38,7 @@
       ["JE Root", "je-root-a343262c", "England"], ["EA Perry", "ea-perry-be150fc8", "Australia"],
       ["Babar Azam", "babar-azam-8a75e999", "Pakistan"], ["L Wolvaardt", "l-wolvaardt-e60f81c9", "South Africa"]];
     C.fill("p-profile", h("section", { class: "section panel", style: "padding-top:0" }, h("div", { class: "wrap" }, [
-      h("div", { class: "section-label" }, "Start here"), h("h2", { class: "section-title" }, "Popular players"),
+      h("div", { class: "section-label" }, "Start here"), h("h2", { class: "section-title" }, "Players to start with"),
       h("p", { class: "section-desc" }, "A hand-picked starting point, not a ranking: four India stars and four from other leading" +
         " sides, men and women alike. Use the search above for any of the players in the data."),
       h("div", { class: "grid-4 pop-grid" }, names.map(([n, s, t]) => h("a", { class: "card", href: "/cricket/players/" + s + "/", style: "padding:1rem", "data-id": s.slice(-8) },

@@ -1,0 +1,95 @@
+{
+ "title": "About cricstat",
+ "tagline": "A cricket fan's question, answered with open data, measured models and an honest AI analyst. Part of pandyaHomeLab.",
+ "sections": [
+  {
+   "id": "story",
+   "title": "The story",
+   "icon": "🏏",
+   "body": [
+    "**2 April 2011, the Wankhede.** Dhoni finished it with a six, and India were world champions again, 28 years after Kapil Dev's team lifted the trophy at Lord's in 1983. Then came the picture that stayed with me: the team carrying Sachin Tendulkar around the ground on their shoulders, and a 22-year-old Virat Kohli saying Sachin had carried the nation for 21 years, so it was time they carried him.",
+    "**19 November 2023, Ahmedabad.** Ten wins in a row, a billion people expecting the trophy, and Australia won the final by six wickets. That night still hurts. It left me, and the whole country, waiting.",
+    "**2027, South Africa, Zimbabwe and Namibia.** It may well be Kohli's last ODI World Cup. My hope is simple: that this time Shubman Gill and his team, after winning the World Cup, lift Kohli onto their shoulders, the way Kohli once lifted Sachin after winning the World Cup.",
+    "*That hope is why I built cricstat — and exactly why the model must not share it.* The forecast is identical for every team. Following India changes what you see first, never the numbers."
+   ]
+  },
+  {
+   "id": "predictor",
+   "title": "The headline: ODI World Cup 2027 predictor",
+   "icon": "🏆",
+   "body": [
+    "What are the chances of India lifting the 2027 ODI World Cup? Three models compete to answer it, and the comparison is published:"
+   ],
+   "bullets": [
+    { "label": "Elo + Monte Carlo", "text": "A rating for every team, updated after each match, then the tournament simulated thousands of times. The honest baseline; it ships first." },
+    { "label": "Machine-learning challenger", "text": "Gradient boosting with squad features: who is actually playing, in form, at home or away." },
+    { "label": "Deep learning with transfer learning", "text": "About 2,600 men's ODIs are too few to learn from directly, but 11.6 million deliveries are plenty. A sequence model learns player strength ball by ball, and that learned knowledge is transferred to match and tournament forecasts. The same model gives live in-match win probability." }
+   ],
+   "after": [
+    "All three are backtested on the 2019 and 2023 World Cups. The best-calibrated one powers the live forecast: when it says 30%, it should be right about 30% of the time."
+   ]
+  },
+  {
+   "id": "analyst",
+   "title": "The AI analyst",
+   "icon": "🤖",
+   "body": [
+    "**Ask the Analyst** will answer questions in plain words: \"How does Kohli score in chases?\", \"Why did India's chances drop?\". It is an LLM agent that calls typed tools over the same stats API, so every number comes from the data, not from the model's memory.",
+    "Published research found LLMs answer cricket-statistics questions correctly less than 30% of the time. That is why every answer shows how it was computed, and the analyst's accuracy is measured on a public test set and published.",
+    "It explains the forecasts; it does not make them."
+   ]
+  },
+  {
+   "id": "architecture",
+   "title": "How it's built",
+   "icon": "🏗️",
+   "body": [
+    "Open ball-by-ball data flows through a checked pipeline into one serving database. A small read-only API serves every number on these pages, and the models and the analyst plug into the same API."
+   ],
+   "diagram": {
+    "type": "mermaid",
+    "code": "graph LR\n  CS[Cricsheet<br/>ball-by-ball, open data] --> PL[Pipeline<br/>daily refresh + checks]\n  PL --> DB[(Serving DB<br/>23k matches · 11.6M balls)]\n  DB --> API[Stats API<br/>read-only, every number]\n  API --> WEB[These pages<br/>no cookies]\n  API -.-> PRED[ODI WC 2027 predictor<br/>Elo · ML · DL]\n  API -.-> AGENT[AI analyst<br/>LLM + typed tools]\n  PRED -.-> WEB\n  AGENT -.-> WEB"
+   },
+   "facts": [
+    { "label": "Data", "value": "2001 → today" },
+    { "label": "Refresh", "value": "Daily" },
+    { "label": "Hosting", "value": "Home NAS · Docker" },
+    { "label": "Deploys", "value": "GitHub → pull-based CD" }
+   ]
+  },
+  {
+   "id": "honesty",
+   "title": "Honest by design",
+   "icon": "✅",
+   "bullets": [
+    { "label": "Checked figures", "text": "Our numbers for 53 players and 10 teams are cross-checked against published records, and every difference is explained." },
+    { "label": "Gaps disclosed", "text": "The data starts in late 2001 (so no 1983), early years are thin, and Afghanistan men's matches are withheld by the source." },
+    { "label": "No sides taken", "text": "One model for every team. Forecasts are for education and entertainment, not betting advice." },
+    { "label": "Privacy", "text": "No cookies, nothing loaded from third parties, and the team you follow stays in your browser." }
+   ]
+  },
+  {
+   "id": "roadmap",
+   "title": "Roadmap",
+   "icon": "🗺️",
+   "bullets": [
+    { "label": "Now", "text": "Player and team statistics for men's and women's cricket, every format and the major leagues." },
+    { "label": "Next", "text": "The ODI World Cup 2027 predictor and live win probability." },
+    { "label": "Then", "text": "The AI analyst: tools, a public test set, the agent, then a public demo with published evals." },
+    { "label": "After 2027", "text": "T20I team ratings and a T20 World Cup 2028 forecast, once the ODI World Cup 2027 is over." }
+   ]
+  },
+  {
+   "id": "built-with",
+   "title": "Built with an AI pair-programmer",
+   "icon": "🤝",
+   "body": [
+    "Like the rest of pandyaHomeLab, cricstat is built by pair-programming with Claude Code. The questions, the architecture and the judgement are mine; the agent does most of the typing, and every change is reviewed before it ships."
+   ],
+   "links": [
+    { "label": "Data & licences", "href": "/cricket/licences/" },
+    { "label": "About pandyaHomeLab", "href": "/" }
+   ]
+  }
+ ]
+}

@@ -328,7 +328,19 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   Delhi Capitals, RPS, St Lucia Kings, TKR, 2026 Hundred renames; Barbados left out) in "Played for" and in opponent
   splits (averages recomputed from summed runs/outs). **venue_map.csv:** 3 punctuation duplicates mapped (M.Chinnaswamy,
   ACA VDCA, Gahanga ". Rwanda") → needs the pipeline publish + one full rebuild (rules_sha changes) at deploy.
-- **Open decisions before going public:** the "soon" nav items; the "Why I built this" text (placeholder); corrections
+- **Decisions (user, 2026-10-06):** keep the "soon" nav items; corrections contact = privacy@pandyahomelab.com; API
+  calls stay out of visitor analytics (nginx plain access log); "Popular players" → "Players to start with";
+  "Why I built this" drafted by Claude, user to verify (hub, `gen_pages.py`).
+- **About drawer (approved 2026-10-06):** "ⓘ About cricstat" in the nav on every page opens a drawer like the
+  homepage's (content `web/about.json`, script `assets/about.js`, Mermaid loaded on first open). Sections: the story
+  (2011 Wankhede + Sachin carried — Kohli's words as reported speech; 2023 Ahmedabad final; 2027 hope: Gill's team
+  lifting Kohli — a hope, not a claim), the ODI WC 2027 predictor (Elo / ML / DL with transfer learning, backtests,
+  calibration), the AI analyst (explains, doesn't predict), how it's built (diagram), honest by design, roadmap, built
+  with Claude Code. The hub's bottom "Why I built this"/"How it's built" cards were removed; the hero has a saffron
+  capsule "2011 gave us the six. 2023 gave us the heartbreak. 2027 is the question. Read the story →". Teaser line 2:
+  "Three models — Elo ratings (statistics), machine learning and deep learning — are about to compete to answer that →".
+  "Popular players" → "Players to start with".
+- **Open decisions before going public (superseded by the line above):** the "soon" nav items; the "Why I built this" text (placeholder); corrections
   contact (proposed: the existing privacy@ address); API calls kept out of visitor analytics (done in nginx.conf,
   needs OK); optional: "Popular players" → "Players to start with".
 - **Deploy order once approved:** commit + `--no-ff` merge + push → user approves the API, pipeline and admin-portal
