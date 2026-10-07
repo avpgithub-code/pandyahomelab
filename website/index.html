@@ -409,6 +409,32 @@
       border-radius: 6px; padding: 1rem; margin-top: .85rem; overflow-x: auto;
     }
     .about-diagram svg { max-width: 100%; height: auto; }
+
+    /* cricstat flagship (added with cricstat P0.4) */
+    :root { --accent-cric: #FF9933; --cric-blue: #4F7FD6; }
+    .nav-new { font-size: .62rem; font-weight: 800; letter-spacing: .06em; color: #0d0f14; background: var(--accent-cric);
+               border-radius: 99px; padding: .05rem .4rem; margin-left: .3rem; vertical-align: middle; }
+    .btn-cric { background: var(--accent-cric); color: #0d0f14; box-shadow: 0 4px 20px rgba(255,153,51,.35); }
+    .btn-cric:hover { box-shadow: 0 6px 28px rgba(255,153,51,.55); }
+    .btn-ghost-cric { border: 1px solid rgba(255,153,51,.45); background: rgba(255,153,51,.08); color: #fff; }
+    .btn-ghost-cric:hover { background: rgba(255,153,51,.18); border-color: var(--accent-cric); }
+    .flagship { max-width: 1100px; margin: 0 auto 1rem; padding: 0 1.5rem; }
+    .flagship-card { background: linear-gradient(135deg, rgba(19,71,163,.35), rgba(255,153,51,.10)); border: 1px solid var(--border);
+                     border-top: 3px solid var(--accent-cric); border-radius: var(--radius); padding: 1.8rem; }
+    .flagship-eyebrow { font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent-cric); }
+    .flagship-card h2 { font-size: 1.5rem; margin: .4rem 0 .6rem; }
+    .flagship-card > p { color: #cbd5e1; max-width: 760px; }
+    .flagship-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: .9rem; margin: 1.2rem 0; }
+    .flagship-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; }
+    .flagship-item strong { display: block; margin-bottom: .25rem; }
+    .flagship-item span { color: #94a3b8; font-size: .88rem; }
+    .flagship-item .proj-status { margin: .5rem 0 0; }
+    .proj-card.cric { border-top: 3px solid var(--accent-cric); }
+    .proj-card.cric:hover { border-color: var(--accent-cric); }
+    .cric-link { color: var(--accent-cric); }
+    .cs { color: #fff; white-space: nowrap; } .cs b { color: var(--accent-cric); font-weight: inherit; }
+    .part-of b { color: var(--accent-cric); }
+    .part-of { font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: .3rem; }
   </style>
 </head>
 <body>
@@ -421,6 +447,7 @@
       <li><a href="#dl">DL</a></li>
       <li><a href="#nlp">NLP</a></li>
       <li><a href="#agentic">Agentic</a></li>
+      <li><a href="/cricket/">Cricket<span class="nav-new">NEW</span></a></li>
       <li><a href="#stack">Stack</a></li>
       <li><a href="#tools">Tools</a></li>
     </ul>
@@ -463,6 +490,21 @@
   </div>
 </div>
 
+<!-- cricstat flagship banner -->
+<section class="flagship" aria-labelledby="flagship-title">
+  <div class="flagship-card">
+    <div class="flagship-eyebrow">Flagship project · New</div>
+    <h2 id="flagship-title"><span class="cs">cric<b>stat</b></span> — end-to-end cricket analytics &amp; LLM project</h2>
+    <p>One product across the whole stack: a daily data pipeline over 22,000+ men's and women's matches and a statistics API are live now; ML forecasting and an LLM analyst with published accuracy scores come next.</p>
+    <div class="flagship-grid">
+      <div class="flagship-item"><strong>Players &amp; Countries</strong><span>Men's and women's, all formats and major leagues</span><div class="proj-status status-live">✓ Live</div></div>
+      <div class="flagship-item"><strong>ODI WC 2027 Predictor</strong><span>Title chances, updated as matches are played</span><div class="proj-status status-planned">Next</div></div>
+      <div class="flagship-item"><strong>Ask the Analyst</strong><span>Plain-English stats questions, every answer sourced</span><div class="proj-status status-planned">Planned</div></div>
+    </div>
+    <a href="/cricket/" class="btn btn-ghost-cric">Explore <span class="cs">cric<b>stat</b></span> →</a>
+  </div>
+</section>
+
 <section id="projects" class="projects-section">
   <div class="section-label">Live Deployments</div>
   <h2 class="section-title">Featured Projects</h2>
@@ -500,6 +542,14 @@
         <span class="proj-route">/ml/titanic-automl/</span>
         <a href="/ml/titanic-automl/" class="proj-link ml-link">Try it →</a>
       </div>
+      <div class="proj-card cric">
+        <div class="part-of">Part of <span class="cs">cric<b>stat</b></span></div>
+        <h3>ODI WC 2027 Predictor</h3>
+        <span class="proj-status status-planned">Planned</span>
+        <p>Elo baseline vs ML and DL challengers, backtested on the 2019 and 2023 ODI World Cups.</p>
+        <span class="proj-route">/cricket/</span>
+        <a href="/cricket/" class="proj-link cric-link">About <span class="cs">cric<b>stat</b></span> →</a>
+      </div>
     </div>
   </div>
 
@@ -534,6 +584,14 @@
         <p>Real-time object detection — bounding boxes and class labels via API.</p>
         <span class="proj-route">/dl/object-detection</span>
         <span class="proj-link proj-link-disabled">Planned</span>
+      </div>
+      <div class="proj-card cric">
+        <div class="part-of">Part of <span class="cs">cric<b>stat</b></span></div>
+        <h3>Ball-by-ball Sequence Model</h3>
+        <span class="proj-status status-planned">Planned</span>
+        <p>Live win probability and player-strength ratings for the predictor, learned from 11.6M deliveries.</p>
+        <span class="proj-route">/cricket/</span>
+        <a href="/cricket/" class="proj-link cric-link">About <span class="cs">cric<b>stat</b></span> →</a>
       </div>
     </div>
   </div>
@@ -578,6 +636,14 @@
         <span class="proj-route">/nlp/ewt-hmm/</span>
         <a href="/nlp/ewt-hmm/" class="proj-link nlp-link">Try it →</a>
       </div>
+      <div class="proj-card cric">
+        <div class="part-of">Part of <span class="cs">cric<b>stat</b></span></div>
+        <h3>Fact-checked Match Reports</h3>
+        <span class="proj-status status-planned">Planned</span>
+        <p>Data-to-text match summaries with every claim verified against the statistics.</p>
+        <span class="proj-route">/cricket/</span>
+        <a href="/cricket/" class="proj-link cric-link">About <span class="cs">cric<b>stat</b></span> →</a>
+      </div>
     </div>
   </div>
 
@@ -596,6 +662,14 @@
         <p>Autonomous AI agent powered by Claude API. Multi-step reasoning, tool use, and structured outputs.</p>
         <span class="proj-route">/agentic/claude-agent</span>
         <span class="proj-link proj-link-disabled">Planned</span>
+      </div>
+      <div class="proj-card cric">
+        <div class="part-of">Part of <span class="cs">cric<b>stat</b></span></div>
+        <h3>Ask the Analyst</h3>
+        <span class="proj-status status-planned">Planned</span>
+        <p>LangGraph agent with typed tools over the stats API and published evaluation scores.</p>
+        <span class="proj-route">/cricket/</span>
+        <a href="/cricket/" class="proj-link cric-link">About <span class="cs">cric<b>stat</b></span> →</a>
       </div>
     </div>
   </div>

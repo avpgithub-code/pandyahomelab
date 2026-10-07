@@ -327,7 +327,8 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   Leagues = the main league; renamed franchises merged for display only (`RENAMED` in players.js: RCB, Punjab Kings,
   Delhi Capitals, RPS, St Lucia Kings, TKR, 2026 Hundred renames; Barbados left out) in "Played for" and in opponent
   splits (averages recomputed from summed runs/outs). **venue_map.csv:** 3 punctuation duplicates mapped (M.Chinnaswamy,
-  ACA VDCA, Gahanga ". Rwanda") → needs the pipeline publish + one full rebuild (rules_sha changes) at deploy.
+  ACA VDCA, Gahanga ". Rwanda"). venue_map.csv is applied on EVERY build (incremental too) and is not part of
+  rules_sha, so no full rebuild is needed — verified on deploy 2026-10-07 (build 4, incremental 76 s).
 - **Decisions (user, 2026-10-06):** keep the "soon" nav items; corrections contact = privacy@pandyahomelab.com; API
   calls stay out of visitor analytics (nginx plain access log); "Popular players" → "Players to start with";
   "Why I built this" drafted by Claude, user to verify (hub, `gen_pages.py`).
@@ -360,6 +361,12 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
 - **Deploy order once approved:** commit + `--no-ff` merge + push → user approves the API, pipeline and admin-portal
   publishes → cd-pull → safe nginx deploy (network connect → docker cp + `nginx -t` → rebuild `--no-cache` + recreate)
   → copy staged homepage/privacy/sitemap into `website/` (this is what makes it public).
+- **Deploy 2026-10-07 (done except the last step):** publishes approved (api 8d1fade0ffba, pipeline c24d9519b6d4,
+  via cd-pull by hand); build 4; nginx joined cricstat-network at .20, config tested in place, rebuilt + recreated —
+  /cricket/, players, countries, licences, flags, /cricket/api/ live; /cricket/api/v1/admin/ → 404; admin portal
+  rebuilt (`-f docker-compose.yml -f docker-compose.dev.yml` in deployment/ml — the dev file alone is invalid).
+  Pages are reachable but unlinked until the staged homepage/privacy/sitemap are copied into `website/`.
+  Gotcha: publish workflows use `concurrency` without cancel-in-progress, so an unapproved old run blocks newer ones.
 - **P0.5 player photos** (own branch, after the deploy): Wikidata P18 → Commons thumbnails fetched by the pipeline,
   self-hosted, per-image licence + author credit (CC BY-SA needs attribution) on the profile and the licences page.
 
