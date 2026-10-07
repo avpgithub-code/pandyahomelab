@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How I built cricstat: cricket analytics & an ODI World Cup 2027 predictor | Archit Pandya</title>
+<meta name="description" content="Why and how Archit Pandya built cricstat: a cricket analytics project with an ODI World Cup 2027 predictor (Elo vs machine learning vs deep learning, backtested on 2019 and 2023), an AI analyst with published evals, and a daily data pipeline over 11.6 million deliveries.">
+<meta name="theme-color" content="#0d0f14">
+<link rel="canonical" href="https://pandyahomelab.com/cricket/about/">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="pandyaHomeLab">
+<meta property="og:title" content="How I built cricstat: cricket analytics & an ODI World Cup 2027 predictor | Archit Pandya">
+<meta property="og:description" content="Why and how Archit Pandya built cricstat: a cricket analytics project with an ODI World Cup 2027 predictor (Elo vs machine learning vs deep learning, backtested on 2019 and 2023), an AI analyst with published evals, and a daily data pipeline over 11.6 million deliveries.">
+<meta property="og:url" content="https://pandyahomelab.com/cricket/about/">
+<meta property="og:image" content="https://pandyahomelab.com/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/cricket/assets/cricstat.css?v=62">
+<script type="application/ld+json">{
+ "@context": "https://schema.org",
+ "@type": "Article",
+ "headline": "How I built cricstat",
+ "description": "Why and how Archit Pandya built cricstat: a cricket analytics project with an ODI World Cup 2027 predictor (Elo vs machine learning vs deep learning, backtested on 2019 and 2023), an AI analyst with published evals, and a daily data pipeline over 11.6 million deliveries.",
+ "url": "https://pandyahomelab.com/cricket/about/",
+ "mainEntityOfPage": "https://pandyahomelab.com/cricket/about/",
+ "image": "https://pandyahomelab.com/og-image.png",
+ "datePublished": "2026-10-07",
+ "dateModified": "2026-10-07",
+ "inLanguage": "en",
+ "author": {
+  "@type": "Person",
+  "@id": "https://pandyahomelab.com/#archit",
+  "name": "Archit Pandya",
+  "url": "https://pandyahomelab.com/"
+ },
+ "publisher": {
+  "@type": "Person",
+  "@id": "https://pandyahomelab.com/#archit",
+  "name": "Archit Pandya",
+  "url": "https://pandyahomelab.com/"
+ },
+ "isPartOf": {
+  "@id": "https://pandyahomelab.com/#site"
+ },
+ "about": [
+  {
+   "@id": "https://pandyahomelab.com/cricket/#app"
+  },
+  "ODI World Cup 2027",
+  "Cricket analytics",
+  "Machine learning"
+ ]
+}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<nav class="site-nav" aria-label="cricstat">
+  <a class="brand" href="/">pandya<em>HomeLab</em><span class="sep">/</span><span class="cs">cric<b>stat</b></span></a>
+  <ul class="nav-links">
+    <li><a href="/cricket/">Overview</a></li>
+    <li><a href="/cricket/countries/">Countries</a></li>
+    <li><a href="/cricket/players/">Players</a></li>
+    <li><span class="soon" title="Coming in the next phase">ODI WC 2027 <span class="soon-tag">soon</span></span></li>
+    <li><span class="soon" title="Coming in a later phase">Ask <span class="soon-tag">soon</span></span></li>
+    <li><span class="soon" title="Coming in a later phase">Methodology <span class="soon-tag">soon</span></span></li>
+    <li><a href="/cricket/licences/">Licences</a></li>
+  </ul>
+  <a class="about-trigger" href="/cricket/about/" data-about aria-current="page"><span aria-hidden="true">ⓘ</span> About cricstat</a>
+</nav>
+<main id="main" class="page-top">
+<header class="hero left"><div class="wrap">
+  <div class="eyebrow"><span class="dot"></span>About cricstat</div>
+  <h1 style="font-size:clamp(2rem,5vw,3rem)">How I built <span class="cs">cric<b>stat</b></span></h1>
+  <p class="subtitle">A cricket fan&#x27;s question, answered with open data, measured models and an honest AI analyst. Part of pandyaHomeLab.</p>
+  <p class="byline">By <a href="/">Archit Pandya</a> · Updated <time datetime="2026-10-07">7 October 2026</time></p>
+  <nav class="about-toc" aria-label="On this page"><a href="#story">The story</a> · <a href="#predictor">The headline: ODI World Cup 2027 predictor</a> · <a href="#analyst">The AI analyst</a> · <a href="#architecture">How it&#x27;s built</a> · <a href="#honesty">Honest by design</a> · <a href="#roadmap">Roadmap</a> · <a href="#built-with">Built with an AI pair-programmer</a></nav>
+</div></header>
+<section class="section about-page" style="padding-top:0"><div class="wrap stack" style="max-width:860px">
+<section class="about-section card" id="story">
+<h2><span class="icon" aria-hidden="true">🏏</span>The story</h2>
+<p><strong>2 April 2011, the Wankhede.</strong> Dhoni finished it with a six, and India were world champions again, 28 years after Kapil Dev&#x27;s team lifted the trophy at Lord&#x27;s in 1983. Then came the picture that stayed with me: the team carrying Sachin Tendulkar around the ground on their shoulders, and a 22-year-old Virat Kohli saying Sachin had carried the nation for 21 years, so it was time they carried him.</p>
+<p><strong>19 November 2023, Ahmedabad.</strong> Ten wins in a row, a billion people expecting the trophy, and Australia won the final by six wickets. That night still hurts. It left me, and the whole country, waiting.</p>
+<p><strong>2027, South Africa, Zimbabwe and Namibia.</strong> It may well be Kohli&#x27;s last ODI World Cup. My hope is simple: that this time Shubman Gill and his team, after winning the World Cup, lift Kohli onto their shoulders, the way Kohli once lifted Sachin after winning the World Cup.</p>
+<p><em>That hope is why I built cricstat — and exactly why the model must not share it.</em> The forecast is identical for every team. Following India changes what you see first, never the numbers.</p>
+</section>
+<section class="about-section card" id="predictor">
+<h2><span class="icon" aria-hidden="true">🏆</span>The headline: ODI World Cup 2027 predictor</h2>
+<p>What are the chances of India lifting the 2027 ODI World Cup? Three models compete to answer it, and the comparison is published:</p>
+<ul class="about-bullets"><li><b>Elo + Monte Carlo</b> — A rating for every team, updated after each match, then the tournament simulated thousands of times. The honest baseline; it ships first.</li><li><b>Machine-learning challenger</b> — Gradient boosting with squad features: who is actually playing, in form, at home or away.</li><li><b>Deep learning with transfer learning</b> — About 2,600 men&#x27;s ODIs are too few to learn from directly, but 11.6 million deliveries are plenty. A sequence model learns player strength ball by ball, and that learned knowledge is transferred to match and tournament forecasts. The same model gives live in-match win probability.</li></ul>
+<p>All three are backtested on the 2019 and 2023 World Cups. The best-calibrated one powers the live forecast: when it says 30%, it should be right about 30% of the time.</p>
+<p>Title chances for every team are re-simulated after each new ODI and live through the tournament. Afghanistan men&#x27;s matches aren&#x27;t in the source data; the forecast will say how it handles that.</p>
+</section>
+<section class="about-section card" id="analyst">
+<h2><span class="icon" aria-hidden="true">🤖</span>The AI analyst</h2>
+<p><strong>Ask the Analyst</strong> will answer questions in plain words: &quot;How does Kohli score in chases?&quot;, &quot;Why did India&#x27;s chances drop?&quot;. It is an LLM agent that calls typed tools over the same stats API, so every number comes from the data, not from the model&#x27;s memory.</p>
+<p>Published research found LLMs answer cricket-statistics questions correctly less than 30% of the time. That is why every answer shows how it was computed, and the analyst&#x27;s accuracy is measured on a public test set and published.</p>
+<p>It explains the forecasts; it does not make them.</p>
+</section>
+<section class="about-section card" id="architecture">
+<h2><span class="icon" aria-hidden="true">🏗️</span>How it&#x27;s built</h2>
+<p>Open ball-by-ball data flows through a checked pipeline into one serving database. A small read-only API serves every number on these pages, and the models and the analyst plug into the same API.</p>
+<div class="about-diagram"><pre class="mermaid">graph LR
+  CS[Cricsheet&lt;br/&gt;ball-by-ball, open data] --&gt; PL[Pipeline&lt;br/&gt;daily refresh + checks]
+  PL --&gt; DB[(Serving DB&lt;br/&gt;23k matches · 11.6M balls)]
+  DB --&gt; API[Stats API&lt;br/&gt;read-only, every number]
+  API --&gt; WEB[These pages&lt;br/&gt;no cookies]
+  API -.-&gt; PRED[ODI WC 2027 predictor&lt;br/&gt;Elo · ML · DL]
+  API -.-&gt; AGENT[AI analyst&lt;br/&gt;LLM + typed tools]
+  PRED -.-&gt; WEB
+  AGENT -.-&gt; WEB</pre></div>
+<div class="about-facts"><div class="about-fact"><div class="about-fact-label">Data</div><div class="about-fact-value">2001 → today</div></div><div class="about-fact"><div class="about-fact-label">Refresh</div><div class="about-fact-value">Daily</div></div><div class="about-fact"><div class="about-fact-label">Hosting</div><div class="about-fact-value">Home NAS · Docker</div></div><div class="about-fact"><div class="about-fact-label">Deploys</div><div class="about-fact-value">GitHub → pull-based CD</div></div></div>
+</section>
+<section class="about-section card" id="honesty">
+<h2><span class="icon" aria-hidden="true">✅</span>Honest by design</h2>
+<ul class="about-bullets"><li><b>Checked figures</b> — Our numbers for 53 players and 10 teams are cross-checked against published records, and every difference is explained.</li><li><b>Gaps disclosed</b> — The data starts in late 2001 (so no 1983), early years are thin, and Afghanistan men&#x27;s matches are withheld by the source.</li><li><b>No sides taken</b> — One model for every team. Forecasts are for education and entertainment, not betting advice.</li><li><b>Privacy</b> — No cookies, nothing loaded from third parties, and the team you follow stays in your browser.</li></ul>
+</section>
+<section class="about-section card" id="roadmap">
+<h2><span class="icon" aria-hidden="true">🗺️</span>Roadmap</h2>
+<ul class="about-bullets"><li><b>Now</b> — Player and team statistics for men&#x27;s and women&#x27;s cricket, every format and the major leagues.</li><li><b>Next</b> — The ODI World Cup 2027 predictor and live win probability, plus India at the ODI World Cups 2003–2023 (earlier editions predate the data).</li><li><b>Then</b> — The AI analyst: tools, a public test set, the agent, then a public demo with published evals.</li><li><b>After 2027</b> — T20I team ratings and a T20 World Cup 2028 forecast, once the ODI World Cup 2027 is over.</li></ul>
+</section>
+<section class="about-section card" id="built-with">
+<h2><span class="icon" aria-hidden="true">🤝</span>Built with an AI pair-programmer</h2>
+<p>Like the rest of pandyaHomeLab, cricstat is built by pair-programming with Claude Code. The questions, the architecture and the judgement are mine; the agent does most of the typing, and every change is reviewed before it ships.</p>
+<div class="about-links"><a class="about-link" href="/cricket/licences/">Data &amp; licences →</a><a class="about-link" href="/">About pandyaHomeLab →</a></div>
+</section>
+<p><a class="btn pri" href="/cricket/">Explore the stats →</a></p>
+</div></section>
+</main>
+<footer class="site-foot">
+  <p>Match data from Cricsheet (cricsheet.org), used under the Open Data Commons Attribution License 1.0.</p>
+  <p>Not affiliated with or endorsed by Cricsheet, the ICC or any cricket board. Statistics are derived from the source data and may differ from official records.</p>
+  <p><a href="/cricket/licences/">Data &amp; licences</a> · <a href="/privacy/">Privacy</a> · <a href="/cricket/about/">How cricstat was built</a> · <a href="/">pandyaHomeLab</a> · Built by <a href="/">Archit Pandya</a></p>
+</footer>
+<script src="/cricket/assets/flags.js?v=62"></script>
+<script src="/cricket/assets/cricstat.js?v=62"></script>
+<script src="/cricket/assets/about.js?v=62"></script>
+
+<script src="/feedback-widget.js"></script>
+</body>
+</html>

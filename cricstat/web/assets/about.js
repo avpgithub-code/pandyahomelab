@@ -1,5 +1,6 @@
 /* cricstat "About" drawer (same pattern as the homepage's About pandyaHomeLab drawer).
-   Content: /cricket/about.json. Opened by any [data-about] button. Text is set with textContent
+   Content: /cricket/about.json. Opened by any [data-about] link or button (the links point at
+   /cricket/about/, the same story as a page, so crawlers and no-JS visitors still reach it). Text is set with textContent
    only; **bold** and *italic* in the JSON become <strong>/<em>. Mermaid (self-hosted) loads on
    first open, and only if a section has a diagram. */
 (function () {
@@ -84,6 +85,13 @@
       h("div", {}, [h("div", { class: "about-title", id: "about-title" }, "About cricstat"), h("div", { class: "about-tagline", id: "about-tagline" })]),
       h("button", { class: "about-close", id: "about-close", type: "button", "aria-label": "Close", onclick: close }, "✕")]),
     h("div", { id: "about-body" }, h("p", { class: "loading" }, "Loading…"))]));
+  // On /cricket/about/ the story is the page itself: links stay plain links, and only its diagram needs Mermaid.
+  if (location.pathname === "/cricket/about/") {
+    if (document.querySelector("main .mermaid")) {
+      ensureMermaid().then(() => window.mermaid.run({ querySelector: "main .mermaid" })).catch(() => {});
+    }
+    return;
+  }
   document.querySelectorAll("[data-about]").forEach((b) => b.addEventListener("click", open));
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
   if (location.hash === "#about") open();

@@ -193,3 +193,6 @@ log/
 local.*
 override.*
 docker-compose.override.yml
+
+# cricstat page review copy (cricstat/web is live) — see cricstat/tools/gen_pages.py
+cricstat/tools/staging/web/
