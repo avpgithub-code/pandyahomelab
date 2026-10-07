@@ -15,6 +15,8 @@ RECENT_URL = "https://cricsheet.org/downloads/recently_added_7_json.zip"
 USER_AGENT = "cricstat/0.1 (+https://pandyahomelab.com/cricket/)"
 PEOPLE_URL = "https://cricsheet.org/register/people.csv"
 NAMES_URL = "https://cricsheet.org/register/names.csv"
+WIKIMEDIA_USER_AGENT = ("cricstat/0.1 (https://pandyahomelab.com/cricket/;"
+                        " privacy@pandyahomelab.com) python-urllib")
 
 
 def _int(name, default):
@@ -49,6 +51,14 @@ class Config:
         self.HTTP_TIMEOUT = _float("CRICSTAT_HTTP_TIMEOUT", 60)
         self.HTTP_RETRIES = _int("CRICSTAT_HTTP_RETRIES", 4)
         self.HTTP_BACKOFF = _float("CRICSTAT_HTTP_BACKOFF", 5)
+
+        # Wikidata + Commons enrichment (P0.5). Wikimedia asks for a User-Agent with contact info.
+        self.WIKIMEDIA_USER_AGENT = os.getenv("CRICSTAT_WIKIMEDIA_USER_AGENT", WIKIMEDIA_USER_AGENT)
+        self.PHOTO_DIR = self._path("CRICSTAT_PHOTO_DIR", os.path.join(self.DATA_DIR, "photos"))
+        self.ENRICH_BATCH = _int("CRICSTAT_ENRICH_BATCH", 200)          # cricinfo ids per query
+        self.ENRICH_REFRESH_DAYS = _int("CRICSTAT_ENRICH_REFRESH_DAYS", 28)
+        self.ENRICH_PAUSE = _float("CRICSTAT_ENRICH_PAUSE", 1.0)        # seconds between requests
+        self.ENRICH_MAX_PHOTOS = _int("CRICSTAT_ENRICH_MAX_PHOTOS", 1500)   # per run (≈ 25 min)
 
         self.KEEP_FULL_ZIPS = _int("CRICSTAT_KEEP_FULL_ZIPS", 3)
         self.KEEP_RECENT_ZIPS = _int("CRICSTAT_KEEP_RECENT_ZIPS", 7)

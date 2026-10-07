@@ -150,6 +150,42 @@ class RawStore:
         self.conn.executemany("INSERT OR IGNORE INTO register_names VALUES (?,?)", names)
         return counts
 
+    # -- Wikidata / Commons enrichment (P0.5) -----------------------------------------
+    def wikidata_people(self) -> Dict[str, dict]:
+        cur = self.conn.execute("SELECT * FROM wikidata_people")
+        cols = [d[0] for d in cur.description]
+        return {r[0]: dict(zip(cols, r)) for r in cur.fetchall()}
+
+    def upsert_wikidata(self, rows: List[dict], now: str):
+        self.conn.executemany(
+            "INSERT INTO wikidata_people (cricinfo_id, qid, label_en, date_of_birth, birthplace,"
+            " country_for_sport, image_file, fetched_at) VALUES (?,?,?,?,?,?,?,?)"
+            " ON CONFLICT(cricinfo_id) DO UPDATE SET qid=excluded.qid, label_en=excluded.label_en,"
+            " date_of_birth=excluded.date_of_birth, birthplace=excluded.birthplace,"
+            " country_for_sport=excluded.country_for_sport, image_file=excluded.image_file,"
+            " fetched_at=excluded.fetched_at",
+            [(r["cricinfo_id"], r.get("qid"), r.get("label_en"), r.get("date_of_birth"),
+              r.get("birthplace"), r.get("country_for_sport"), r.get("image_file"), now)
+             for r in rows])
+
+    def commons_images(self) -> Dict[str, dict]:
+        cur = self.conn.execute("SELECT * FROM commons_images")
+        cols = [d[0] for d in cur.description]
+        return {r[0]: dict(zip(cols, r)) for r in cur.fetchall()}
+
+    def upsert_image(self, name: str, rec: dict, now: str):
+        self.conn.execute(
+            "INSERT INTO commons_images (image_file, status, licence, licence_url, author,"
+            " description_url, thumb_path, width, height, note, fetched_at)"
+            " VALUES (?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(image_file) DO UPDATE SET"
+            " status=excluded.status, licence=excluded.licence, licence_url=excluded.licence_url,"
+            " author=excluded.author, description_url=excluded.description_url,"
+            " thumb_path=excluded.thumb_path, width=excluded.width, height=excluded.height,"
+            " note=excluded.note, fetched_at=excluded.fetched_at",
+            (name, rec["status"], rec.get("licence"), rec.get("licence_url"), rec.get("author"),
+             rec.get("description_url"), rec.get("thumb_path"), rec.get("width"),
+             rec.get("height"), rec.get("note"), now))
+
     # -- writes ---------------------------------------------------------------------
     def insert_match(self, rec: dict, now: str, run_id: int):
         self.conn.execute(
