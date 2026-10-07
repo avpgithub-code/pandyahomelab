@@ -318,7 +318,7 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
 - **Source freshness:** the daily check records Cricsheet's Last-Modified (`ingest_runs.notes.source_last_modified`);
   `/v1/status` + `/v1/admin/jobs` carry a `source` block (stale after 14 days); pages show "⏱ Cricsheet's last update
   was …" when it is over 7 days old. Cricsheet's own last update was 2026-09-17 (the pipeline is not stuck).
-- **Asset versions:** `V` in `cricstat/tools/gen_pages.py` (now "31") is the `?v=` on every asset; bump it and rerun
+- **Asset versions:** `V` in `cricstat/tools/gen_pages.py` (now "62") is the `?v=` on every asset; bump it and rerun
   `python3 cricstat/tools/gen_pages.py` after any CSS/JS change. Never edit `web/**/index.html` by hand.
 - **Review round 2 (2026-10-06, approved):** licences page adds a Chart.js (MIT) row, "used unaltered … only to
   identify national teams", and a generated per-flag Commons source list (`gen_pages.py` reads flags.js). Admin
@@ -367,6 +367,20 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   rebuilt (`-f docker-compose.yml -f docker-compose.dev.yml` in deployment/ml — the dev file alone is invalid).
   Pages are reachable but unlinked until the staged homepage/privacy/sitemap are copied into `website/`.
   Gotcha: publish workflows use `concurrency` without cancel-in-progress, so an unapproved old run blocks newer ones.
+- **P0.4 public 2026-10-07** (merge 1898a69): staged homepage/privacy/sitemap copied into `website/`.
+- **SEO round (2026-10-07, approved, branch `feat/cricstat-seo-about`):** `/cricket/about/` = the About drawer's story as
+  a static page, rendered by gen_pages.py from the same about.json (Article JSON-LD, author = homepage Person
+  `#archit`; section ids are anchors #story #predictor #analyst #architecture …); hub title "cricstat — cricket stats,
+  ODI World Cup 2027 predictor & AI analyst" + WebApplication JSON-LD; nav "About cricstat" and "Read the story" are
+  now `<a href="/cricket/about/" data-about>` (JS opens the drawer, crawlers follow the link; on the about page
+  itself no drawer); footer links "How cricstat was built" + Archit → /. Homepage: descriptive banner button, "How I
+  built it" link, domain cross-link cards → /cricket/about/#predictor|#analyst; knowsAbout + LLMs, Cricket analytics.
+  Sitemap + /cricket/about/. Owner: request indexing for /cricket/about/ in Search Console.
+  Known SEO gap (next, P0.6): player/team pages share one title and a canonical pointing to the list page → not
+  indexable; fix = per-page static shells with own title/canonical/summary/JSON-LD, sitemap for meaningful players.
+- **`cricstat/web/` is LIVE** (bind mount). `gen_pages.py` writes to `cricstat/tools/staging/web/` by default
+  (gitignored, created from cricstat/web; web_preview.py serves it). Edit CSS/JS there too. Go live after approval:
+  `rsync -a cricstat/tools/staging/web/ cricstat/web/` (assets first), then delete the staging copy.
 - **P0.5 player photos** (own branch, after the deploy): Wikidata P18 → Commons thumbnails fetched by the pipeline,
   self-hosted, per-image licence + author credit (CC BY-SA needs attribution) on the profile and the licences page.
 

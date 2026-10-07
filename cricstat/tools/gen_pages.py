@@ -1,11 +1,27 @@
 """Generate the cricstat page shells (cricstat/web/**/index.html) from one template, so the nav,
 footer and head stay identical on every page. Edit here, then run:  python3 cricstat/tools/gen_pages.py
-Bump V when CSS/JS change (cache busting)."""
+Bump V when CSS/JS change (cache busting).
+
+cricstat/web is bind-mounted LIVE into nginx (since the P0.4 deploy). So by default this writes into the review
+copy cricstat/tools/staging/web (created from cricstat/web on first use; edit CSS/JS there too, and preview with
+web_preview.py). After approval:  rsync -a cricstat/tools/staging/web/ cricstat/web/  (or run with --live),
+then remove the staging copy."""
+import datetime
 import html as H
 import json
 import os
-WEB = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "web")
-V = "61"
+import re
+import shutil
+import sys
+CRICSTAT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if "--live" in sys.argv:
+    WEB = os.path.join(CRICSTAT, "web")
+else:
+    WEB = os.path.join(CRICSTAT, "tools", "staging", "web")
+    if not os.path.isdir(WEB):
+        shutil.copytree(os.path.join(CRICSTAT, "web"), WEB)
+V = "62"
+SITE = "https://pandyahomelab.com"
 HEAD = '''<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,7 +31,7 @@ HEAD = '''<!DOCTYPE html>
 <meta name="description" content="{desc}">
 <meta name="theme-color" content="#0d0f14">
 <link rel="canonical" href="https://pandyahomelab.com{path}">
-<meta property="og:type" content="website">
+<meta property="og:type" content="{og_type}">
 <meta property="og:site_name" content="pandyaHomeLab">
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{desc}">
@@ -23,7 +39,7 @@ HEAD = '''<!DOCTYPE html>
 <meta property="og:image" content="https://pandyahomelab.com/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/cricket/assets/cricstat.css?v={v}">
-</head>
+{extra_head}</head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <nav class="site-nav" aria-label="cricstat">
@@ -37,7 +53,7 @@ HEAD = '''<!DOCTYPE html>
     <li><span class="soon" title="Coming in a later phase">Methodology <span class="soon-tag">soon</span></span></li>
     <li><a href="/cricket/licences/"{c_licences}>Licences</a></li>
   </ul>
-  <button class="about-trigger" type="button" data-about><span aria-hidden="true">ⓘ</span> About cricstat</button>
+  <a class="about-trigger" href="/cricket/about/" data-about{c_about}><span aria-hidden="true">ⓘ</span> About cricstat</a>
 </nav>
 <main id="main" class="page-top">
 '''
@@ -45,7 +61,7 @@ FOOT = '''</main>
 <footer class="site-foot">
   <p>Match data from Cricsheet (cricsheet.org), used under the Open Data Commons Attribution License 1.0.</p>
   <p>Not affiliated with or endorsed by Cricsheet, the ICC or any cricket board. Statistics are derived from the source data and may differ from official records.</p>
-  <p><a href="/cricket/licences/">Data &amp; licences</a> · <a href="/privacy/">Privacy</a> · <a href="/">pandyaHomeLab</a> · Built by Archit Pandya</p>
+  <p><a href="/cricket/licences/">Data &amp; licences</a> · <a href="/privacy/">Privacy</a> · <a href="/cricket/about/">How cricstat was built</a> · <a href="/">pandyaHomeLab</a> · Built by <a href="/">Archit Pandya</a></p>
 </footer>
 <script src="/cricket/assets/flags.js?v={v}"></script>
 <script src="/cricket/assets/cricstat.js?v={v}"></script>
@@ -55,10 +71,10 @@ FOOT = '''</main>
 </body>
 </html>
 '''
-def page(rel, path, title, desc, cur, body, scripts):
-    c = {k: "" for k in ("c_hub", "c_countries", "c_players", "c_licences")}
+def page(rel, path, title, desc, cur, body, scripts, og_type="website", extra_head=""):
+    c = {k: "" for k in ("c_hub", "c_countries", "c_players", "c_licences", "c_about")}
     c["c_" + cur] = ' aria-current="page"'
-    html = HEAD.format(title=title, desc=desc, path=path, v=V, **c) + body + FOOT.format(
+    html = HEAD.format(title=title, desc=desc, path=path, v=V, og_type=og_type, extra_head=extra_head, **c) + body + FOOT.format(
         v=V, scripts="\n".join('<script src="%s"></script>' % s for s in scripts))
     os.makedirs(os.path.dirname(os.path.join(WEB, rel)) or WEB, exist_ok=True)
     open(os.path.join(WEB, rel), "w").write(html)
@@ -68,7 +84,7 @@ HUB = '''<header class="hero">
     <div class="eyebrow"><span class="dot"></span><span id="h-asof">Live cricket data</span></div>
     <h1 class="cs-lockup"><span class="sr-only">cricstat</span><span class="cs" aria-hidden="true">cr<span class="i-ball">ı<svg class="i-dot" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><defs><radialGradient id="emBall" cx="35%" cy="32%" r="70%"><stop offset="0" stop-color="#e2544b"/><stop offset=".65" stop-color="#b3201c"/><stop offset="1" stop-color="#6e1210"/></radialGradient></defs><circle cx="10" cy="10" r="9" fill="url(#emBall)"/><path d="M5.5 3.2c2.6 2.4 3.4 8.4 1.3 13.6M14.5 3.2c-2.6 2.4-3.4 8.4-1.3 13.6" stroke="#f5efe6" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></span>c<b>stat</b></span></h1>
     <p class="subtitle">Cricket statistics, forecasts and an AI analyst — built from open ball-by-ball data for men's and women's cricket, with every number traceable to its source.</p>
-    <p class="hero-hook">2011 gave us the six. 2023 gave us the heartbreak. 2027 is the question. <button class="link-btn" type="button" data-about>Read the story →</button></p>
+    <p class="hero-hook">2011 gave us the six. 2023 gave us the heartbreak. 2027 is the question. <a class="link-btn" href="/cricket/about/" data-about>Read the story →</a></p>
     <form class="search-bar" action="/cricket/players/" method="get" role="search">
       <input name="q" type="search" placeholder="Search a player — Kohli, Mandhana, Bumrah…" aria-label="Search players" autocomplete="off" minlength="2" required>
       <button class="btn pri" type="submit">Search</button>
@@ -155,9 +171,26 @@ HUB = '''<header class="hero">
 </div></section>
 
 '''
-page("index.html", "/cricket/", "cricstat — cricket statistics, forecasts and an AI analyst | pandyaHomeLab",
-     "Cricket statistics for men's and women's cricket across Tests, ODIs, T20Is and major leagues, built from open ball-by-ball data with every number traceable to its source.",
-     "hub", HUB, ["/cricket/assets/hub.js?v=" + V])
+ARCHIT = {"@type": "Person", "@id": SITE + "/#archit", "name": "Archit Pandya", "url": SITE + "/"}
+
+
+def ld_json(obj):
+    """A JSON-LD block (data only, never executed); '</' is escaped so it can't close the tag."""
+    return ('<script type="application/ld+json">%s</script>\n'
+            % json.dumps(obj, ensure_ascii=False, indent=1).replace("</", "<\\/"))
+
+
+HUB_DESC = ("Cricket statistics for men's and women's cricket across Tests, ODIs, T20Is and major leagues, built from "
+            "open ball-by-ball data — and an ODI World Cup 2027 predictor that compares Elo, machine-learning and "
+            "deep-learning models.")
+page("index.html", "/cricket/", "cricstat — cricket stats, ODI World Cup 2027 predictor & AI analyst | pandyaHomeLab",
+     HUB_DESC, "hub", HUB, ["/cricket/assets/hub.js?v=" + V],
+     extra_head=ld_json({"@context": "https://schema.org", "@type": "WebApplication", "@id": SITE + "/cricket/#app",
+                         "name": "cricstat", "url": SITE + "/cricket/", "description": HUB_DESC,
+                         "applicationCategory": "SportsApplication", "operatingSystem": "Any",
+                         "isAccessibleForFree": True, "inLanguage": "en", "author": ARCHIT,
+                         "isPartOf": {"@id": SITE + "/#site"},
+                         "about": ["Cricket statistics", "ODI World Cup 2027", "Machine learning", "Deep learning"]}))
 
 PLAYERS = '''<header class="hero left">
   <div class="wrap">
@@ -248,4 +281,71 @@ def flag_sources():
 
 page("licences/index.html", "/cricket/licences/", "Data & licences — cricstat | pandyaHomeLab",
      "Where cricstat's data comes from, its licences, what it covers, privacy and disclaimers.", "licences", flag_sources(), [])
-print("pages written")
+
+# /cricket/about/ — the About drawer's story as a real page, rendered from the same about.json at build time,
+# so search engines (which never open the drawer) can read it. Section ids are anchors (#predictor, #analyst…).
+ABOUT_UPDATED = "2026-10-07"
+
+
+def rich(text):
+    """'**bold**' / '*italic*' → <strong>/<em>; everything else escaped (same rule as about.js)."""
+    out = []
+    for part in re.split(r"(\*\*[^*]+\*\*|\*[^*]+\*)", text):
+        if part.startswith("**") and part.endswith("**") and len(part) > 4:
+            out.append("<strong>%s</strong>" % H.escape(part[2:-2]))
+        elif part.startswith("*") and part.endswith("*") and len(part) > 2:
+            out.append("<em>%s</em>" % H.escape(part[1:-1]))
+        else:
+            out.append(H.escape(part))
+    return "".join(out)
+
+
+def about_page():
+    with open(os.path.join(WEB, "about.json"), encoding="utf-8") as f:
+        data = json.load(f)
+    toc, secs = [], []
+    for s in data["sections"]:
+        toc.append('<a href="#%s">%s</a>' % (H.escape(s["id"]), H.escape(s["title"])))
+        b = ['<section class="about-section card" id="%s">' % H.escape(s["id"]),
+             '<h2><span class="icon" aria-hidden="true">%s</span>%s</h2>' % (H.escape(s.get("icon", "")), H.escape(s["title"]))]
+        b += ["<p>%s</p>" % rich(p) for p in s.get("body", [])]
+        if s.get("bullets"):
+            b.append('<ul class="about-bullets">%s</ul>' % "".join(
+                "<li><b>%s</b> — %s</li>" % (H.escape(x["label"]), rich(x["text"])) for x in s["bullets"]))
+        b += ["<p>%s</p>" % rich(p) for p in s.get("after", [])]
+        if s.get("diagram", {}).get("type") == "mermaid":
+            b.append('<div class="about-diagram"><pre class="mermaid">%s</pre></div>' % H.escape(s["diagram"]["code"]))
+        if s.get("facts"):
+            b.append('<div class="about-facts">%s</div>' % "".join(
+                '<div class="about-fact"><div class="about-fact-label">%s</div><div class="about-fact-value">%s</div></div>'
+                % (H.escape(x["label"]), H.escape(x["value"])) for x in s["facts"]))
+        links = [l for l in s.get("links", []) if l["href"] != "/cricket/about/"]
+        if links:
+            b.append('<div class="about-links">%s</div>' % "".join(
+                '<a class="about-link" href="%s">%s →</a>' % (H.escape(l["href"]), H.escape(l["label"])) for l in links))
+        secs.append("\n".join(b) + "\n</section>")
+    when = datetime.date.fromisoformat(ABOUT_UPDATED)
+    body = ('<header class="hero left"><div class="wrap">\n'
+            '  <div class="eyebrow"><span class="dot"></span>About cricstat</div>\n'
+            '  <h1 style="font-size:clamp(2rem,5vw,3rem)">How I built <span class="cs">cric<b>stat</b></span></h1>\n'
+            '  <p class="subtitle">%s</p>\n'
+            '  <p class="byline">By <a href="/">Archit Pandya</a> · Updated <time datetime="%s">%d %s</time></p>\n'
+            '  <nav class="about-toc" aria-label="On this page">%s</nav>\n'
+            '</div></header>\n'
+            '<section class="section about-page" style="padding-top:0"><div class="wrap stack" style="max-width:860px">\n%s\n'
+            '<p><a class="btn pri" href="/cricket/">Explore the stats →</a></p>\n</div></section>\n'
+            % (H.escape(data["tagline"]), ABOUT_UPDATED, when.day, when.strftime("%B %Y"), " · ".join(toc), "\n".join(secs)))
+    title = "How I built cricstat: cricket analytics & an ODI World Cup 2027 predictor | Archit Pandya"
+    desc = ("Why and how Archit Pandya built cricstat: a cricket analytics project with an ODI World Cup 2027 predictor "
+            "(Elo vs machine learning vs deep learning, backtested on 2019 and 2023), an AI analyst with published "
+            "evals, and a daily data pipeline over 11.6 million deliveries.")
+    ld = {"@context": "https://schema.org", "@type": "Article", "headline": "How I built cricstat",
+          "description": desc, "url": SITE + "/cricket/about/", "mainEntityOfPage": SITE + "/cricket/about/",
+          "image": SITE + "/og-image.png", "datePublished": "2026-10-07", "dateModified": ABOUT_UPDATED,
+          "inLanguage": "en", "author": ARCHIT, "publisher": ARCHIT, "isPartOf": {"@id": SITE + "/#site"},
+          "about": [{"@id": SITE + "/cricket/#app"}, "ODI World Cup 2027", "Cricket analytics", "Machine learning"]}
+    page("about/index.html", "/cricket/about/", title, desc, "about", body, [], og_type="article", extra_head=ld_json(ld))
+
+
+about_page()
+print("pages written to", WEB)

@@ -28,7 +28,7 @@
         "description": "Builds and deploys ML, DL and NLP systems end to end (PyTorch, scikit-learn, MLflow, Docker).",
         "url": "https://pandyahomelab.com/",
         "sameAs": ["https://www.linkedin.com/in/architpandya/", "https://github.com/avpgithub-code"],
-        "knowsAbout": ["Machine Learning", "Deep Learning", "Natural Language Processing", "PyTorch", "scikit-learn", "MLflow", "MLOps", "Docker", "FastAPI"]
+        "knowsAbout": ["Machine Learning", "Deep Learning", "Natural Language Processing", "Large Language Models", "Cricket analytics", "PyTorch", "scikit-learn", "MLflow", "MLOps", "Docker", "FastAPI"]
       },
       {
         "@type": "WebSite",
@@ -429,6 +429,8 @@
     .flagship-item strong { display: block; margin-bottom: .25rem; }
     .flagship-item span { color: #94a3b8; font-size: .88rem; }
     .flagship-item .proj-status { margin: .5rem 0 0; }
+    .flagship-about { display: inline-block; margin: .6rem 0 0 1rem; color: var(--accent-cric); font-size: .92rem; font-weight: 600; }
+    @media (max-width: 640px) { .flagship-about { display: block; margin: .8rem 0 0; } }
     .proj-card.cric { border-top: 3px solid var(--accent-cric); }
     .proj-card.cric:hover { border-color: var(--accent-cric); }
     .cric-link { color: var(--accent-cric); }
@@ -501,7 +503,8 @@
       <div class="flagship-item"><strong>ODI WC 2027 Predictor</strong><span>Title chances, updated as matches are played</span><div class="proj-status status-planned">Next</div></div>
       <div class="flagship-item"><strong>Ask the Analyst</strong><span>Plain-English stats questions, every answer sourced</span><div class="proj-status status-planned">Planned</div></div>
     </div>
-    <a href="/cricket/" class="btn btn-ghost-cric">Explore <span class="cs">cric<b>stat</b></span> →</a>
+    <a href="/cricket/" class="btn btn-ghost-cric">Explore <span class="cs">cric<b>stat</b></span> — cricket stats &amp; ODI World Cup 2027 predictor →</a>
+    <a href="/cricket/about/" class="flagship-about">How I built it: the story, the three models and the architecture →</a>
   </div>
 </section>
 
@@ -548,7 +551,7 @@
         <span class="proj-status status-planned">Planned</span>
         <p>Elo baseline vs ML and DL challengers, backtested on the 2019 and 2023 ODI World Cups.</p>
         <span class="proj-route">/cricket/</span>
-        <a href="/cricket/" class="proj-link cric-link">About <span class="cs">cric<b>stat</b></span> →</a>
+        <a href="/cricket/about/#predictor" class="proj-link cric-link">How it works in <span class="cs">cric<b>stat</b></span> →</a>
       </div>
     </div>
   </div>
@@ -591,7 +594,7 @@
         <span class="proj-status status-planned">Planned</span>
         <p>Live win probability and player-strength ratings for the predictor, learned from 11.6M deliveries.</p>
         <span class="proj-route">/cricket/</span>
-        <a href="/cricket/" class="proj-link cric-link">About <span class="cs">cric<b>stat</b></span> →</a>
+        <a href="/cricket/about/#predictor" class="proj-link cric-link">How it works in <span class="cs">cric<b>stat</b></span> →</a>
       </div>
     </div>
   </div>
@@ -642,7 +645,7 @@
         <span class="proj-status status-planned">Planned</span>
         <p>Data-to-text match summaries with every claim verified against the statistics.</p>
         <span class="proj-route">/cricket/</span>
-        <a href="/cricket/" class="proj-link cric-link">About <span class="cs">cric<b>stat</b></span> →</a>
+        <a href="/cricket/about/#analyst" class="proj-link cric-link">How it works in <span class="cs">cric<b>stat</b></span> →</a>
       </div>
     </div>
   </div>
@@ -669,7 +672,7 @@
         <span class="proj-status status-planned">Planned</span>
         <p>LangGraph agent with typed tools over the stats API and published evaluation scores.</p>
         <span class="proj-route">/cricket/</span>
-        <a href="/cricket/" class="proj-link cric-link">About <span class="cs">cric<b>stat</b></span> →</a>
+        <a href="/cricket/about/#analyst" class="proj-link cric-link">How it works in <span class="cs">cric<b>stat</b></span> →</a>
       </div>
     </div>
   </div>

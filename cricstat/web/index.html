@@ -3,18 +3,45 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>cricstat — cricket statistics, forecasts and an AI analyst | pandyaHomeLab</title>
-<meta name="description" content="Cricket statistics for men's and women's cricket across Tests, ODIs, T20Is and major leagues, built from open ball-by-ball data with every number traceable to its source.">
+<title>cricstat — cricket stats, ODI World Cup 2027 predictor & AI analyst | pandyaHomeLab</title>
+<meta name="description" content="Cricket statistics for men's and women's cricket across Tests, ODIs, T20Is and major leagues, built from open ball-by-ball data — and an ODI World Cup 2027 predictor that compares Elo, machine-learning and deep-learning models.">
 <meta name="theme-color" content="#0d0f14">
 <link rel="canonical" href="https://pandyahomelab.com/cricket/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="pandyaHomeLab">
-<meta property="og:title" content="cricstat — cricket statistics, forecasts and an AI analyst | pandyaHomeLab">
-<meta property="og:description" content="Cricket statistics for men's and women's cricket across Tests, ODIs, T20Is and major leagues, built from open ball-by-ball data with every number traceable to its source.">
+<meta property="og:title" content="cricstat — cricket stats, ODI World Cup 2027 predictor & AI analyst | pandyaHomeLab">
+<meta property="og:description" content="Cricket statistics for men's and women's cricket across Tests, ODIs, T20Is and major leagues, built from open ball-by-ball data — and an ODI World Cup 2027 predictor that compares Elo, machine-learning and deep-learning models.">
 <meta property="og:url" content="https://pandyahomelab.com/cricket/">
 <meta property="og:image" content="https://pandyahomelab.com/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="/cricket/assets/cricstat.css?v=61">
+<link rel="stylesheet" href="/cricket/assets/cricstat.css?v=62">
+<script type="application/ld+json">{
+ "@context": "https://schema.org",
+ "@type": "WebApplication",
+ "@id": "https://pandyahomelab.com/cricket/#app",
+ "name": "cricstat",
+ "url": "https://pandyahomelab.com/cricket/",
+ "description": "Cricket statistics for men's and women's cricket across Tests, ODIs, T20Is and major leagues, built from open ball-by-ball data — and an ODI World Cup 2027 predictor that compares Elo, machine-learning and deep-learning models.",
+ "applicationCategory": "SportsApplication",
+ "operatingSystem": "Any",
+ "isAccessibleForFree": true,
+ "inLanguage": "en",
+ "author": {
+  "@type": "Person",
+  "@id": "https://pandyahomelab.com/#archit",
+  "name": "Archit Pandya",
+  "url": "https://pandyahomelab.com/"
+ },
+ "isPartOf": {
+  "@id": "https://pandyahomelab.com/#site"
+ },
+ "about": [
+  "Cricket statistics",
+  "ODI World Cup 2027",
+  "Machine learning",
+  "Deep learning"
+ ]
+}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -29,7 +56,7 @@
     <li><span class="soon" title="Coming in a later phase">Methodology <span class="soon-tag">soon</span></span></li>
     <li><a href="/cricket/licences/">Licences</a></li>
   </ul>
-  <button class="about-trigger" type="button" data-about><span aria-hidden="true">ⓘ</span> About cricstat</button>
+  <a class="about-trigger" href="/cricket/about/" data-about><span aria-hidden="true">ⓘ</span> About cricstat</a>
 </nav>
 <main id="main" class="page-top">
 <header class="hero">
@@ -37,7 +64,7 @@
     <div class="eyebrow"><span class="dot"></span><span id="h-asof">Live cricket data</span></div>
     <h1 class="cs-lockup"><span class="sr-only">cricstat</span><span class="cs" aria-hidden="true">cr<span class="i-ball">ı<svg class="i-dot" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><defs><radialGradient id="emBall" cx="35%" cy="32%" r="70%"><stop offset="0" stop-color="#e2544b"/><stop offset=".65" stop-color="#b3201c"/><stop offset="1" stop-color="#6e1210"/></radialGradient></defs><circle cx="10" cy="10" r="9" fill="url(#emBall)"/><path d="M5.5 3.2c2.6 2.4 3.4 8.4 1.3 13.6M14.5 3.2c-2.6 2.4-3.4 8.4-1.3 13.6" stroke="#f5efe6" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></span>c<b>stat</b></span></h1>
     <p class="subtitle">Cricket statistics, forecasts and an AI analyst — built from open ball-by-ball data for men's and women's cricket, with every number traceable to its source.</p>
-    <p class="hero-hook">2011 gave us the six. 2023 gave us the heartbreak. 2027 is the question. <button class="link-btn" type="button" data-about>Read the story →</button></p>
+    <p class="hero-hook">2011 gave us the six. 2023 gave us the heartbreak. 2027 is the question. <a class="link-btn" href="/cricket/about/" data-about>Read the story →</a></p>
     <form class="search-bar" action="/cricket/players/" method="get" role="search">
       <input name="q" type="search" placeholder="Search a player — Kohli, Mandhana, Bumrah…" aria-label="Search players" autocomplete="off" minlength="2" required>
       <button class="btn pri" type="submit">Search</button>
@@ -127,12 +154,12 @@
 <footer class="site-foot">
   <p>Match data from Cricsheet (cricsheet.org), used under the Open Data Commons Attribution License 1.0.</p>
   <p>Not affiliated with or endorsed by Cricsheet, the ICC or any cricket board. Statistics are derived from the source data and may differ from official records.</p>
-  <p><a href="/cricket/licences/">Data &amp; licences</a> · <a href="/privacy/">Privacy</a> · <a href="/">pandyaHomeLab</a> · Built by Archit Pandya</p>
+  <p><a href="/cricket/licences/">Data &amp; licences</a> · <a href="/privacy/">Privacy</a> · <a href="/cricket/about/">How cricstat was built</a> · <a href="/">pandyaHomeLab</a> · Built by <a href="/">Archit Pandya</a></p>
 </footer>
-<script src="/cricket/assets/flags.js?v=61"></script>
-<script src="/cricket/assets/cricstat.js?v=61"></script>
-<script src="/cricket/assets/about.js?v=61"></script>
-<script src="/cricket/assets/hub.js?v=61"></script>
+<script src="/cricket/assets/flags.js?v=62"></script>
+<script src="/cricket/assets/cricstat.js?v=62"></script>
+<script src="/cricket/assets/about.js?v=62"></script>
+<script src="/cricket/assets/hub.js?v=62"></script>
 <script src="/feedback-widget.js"></script>
 </body>
 </html>

@@ -5,7 +5,7 @@
 Mirrors what Nginx will do, without touching the live site:
   /cricket/api/...            → the running cricstat-api on 127.0.0.1:8040 (prefix stripped)
   /cricket/players/<slug>/    → cricstat/web/players/index.html (same for countries)
-  /cricket/...                → cricstat/web/...
+  /cricket/...                → cricstat/tools/staging/web/... (else cricstat/web/...)
   /, /privacy/, /sitemap.xml  → the STAGED copies in cricstat/tools/staging/ (not the live files)
   /admin-preview/cricket/     → a static snapshot of /admin/cricket rendered from local templates
   /feedback/...               → 204 (the widget's endpoints are not needed for a preview)
@@ -21,8 +21,10 @@ import urllib.error
 import urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-WEB = os.path.join(ROOT, "cricstat", "web")
 STAGING = os.path.join(ROOT, "cricstat", "tools", "staging")
+# cricstat/web is bind-mounted LIVE into nginx, so work in review is generated into staging/web
+# (gen_pages.py default); the preview serves that copy when it exists.
+WEB = os.path.join(STAGING, "web") if os.path.isdir(os.path.join(STAGING, "web")) else os.path.join(ROOT, "cricstat", "web")
 SITE = os.path.join(ROOT, "website")
 API = os.environ.get("CRICSTAT_API", "http://127.0.0.1:8040")
 STAGED = {"/": "homepage.html", "/index.html": "homepage.html", "/privacy/": "privacy.html",
