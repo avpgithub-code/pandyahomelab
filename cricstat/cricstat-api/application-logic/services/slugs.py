@@ -43,3 +43,18 @@ class TeamSlugs:
 
     def find(self, name: str, gender: str, team_type: str) -> Optional[str]:
         return self.by_identity.get((name, gender, team_type))
+
+
+def full_name(name: str, variants: List[str]) -> str:
+    """The name people search for. Cricsheet names are scorecard style ('V Kohli'); the Register
+    also lists variants ('Virat Kohli'). Take the shortest variant with the same surname whose
+    other words are real names, not initials ('MS Dhoni' no, 'Mahendra Singh Dhoni' yes)."""
+    surname = name.split()[-1].lower() if name.split() else ""
+
+    def is_full(v: str) -> bool:
+        words = v.split()
+        return (len(words) >= 2 and words[-1].lower() == surname
+                and all(len(w) > 1 and not (w.isupper() and len(w) <= 3) and "." not in w
+                        for w in words[:-1]))
+    full = [v for v in [name] + variants if is_full(v)]
+    return min(full, key=lambda v: (len(v), v)) if full else name

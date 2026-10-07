@@ -401,7 +401,10 @@
     return num(v);
   }
 
-  window.cricstat = { sectionTabs, scoreText, freshness, carousel, teamLine, roleIcon, roleLabel, api, ratio, num, hs, bbi, overs, date, letter, h, fill, table, showError,
+  // Player and team pages get their head (title, description, canonical, robots) from the server
+  // since P0.6; scripts then leave document.title alone. Static shells have no robots meta.
+  const serverHead = !!document.querySelector('meta[name="robots"]');
+  window.cricstat = { serverHead, sectionTabs, scoreText, freshness, carousel, teamLine, roleIcon, roleLabel, api, ratio, num, hs, bbi, overs, date, letter, h, fill, table, showError,
                       getFollow, setFollow, pathTail, playerIdFromPath, dataNote, teamBadge, teamStyle,
                       avatar, who, formDots, fmtName, resultText, matchCard, countUp, compact, ago,
                       donut, donutLegend, periodControl, formatCard, periodRange };

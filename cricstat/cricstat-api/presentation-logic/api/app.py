@@ -27,6 +27,7 @@ from application_logic.services import (
 from application_logic.services.common import catalog_defs, team_slugs
 from db_logic.repository import meta_repo
 from db_logic.repository.db import QueryTimeout, ServingDB
+from presentation_logic.api import pages
 from shared.config import ATTRIBUTION, COVERAGE, Config
 from shared.exceptions import ApiError, NoData, NotFound
 from shared.logger import get_logger, setup_logging
@@ -106,6 +107,8 @@ def create_app(cfg: Optional[Config] = None) -> FastAPI:
         response = await call_next(request)
         response.headers["X-Response-Time-ms"] = "%.0f" % ((time.monotonic() - t0) * 1000)
         return response
+
+    pages.register(app, cfg)               # /pages/...: server-rendered player/team heads (P0.6)
 
     # ── Meta and status ──
     @app.get("/v1/health")

@@ -13,7 +13,7 @@
   function header() {
     const label = team.name + " " + GENDER[team.gender].toLowerCase();
     document.getElementById("c-name").textContent = label;
-    document.title = label + " — team records | cricstat";
+    if (!C.serverHead) document.title = label + " — team records | cricstat";
     C.fill("c-badge", C.teamBadge(team.name, "lg"));
     const select = document.getElementById("c-team");
     const india = (t) => t.name === "India" ? 0 : 1;   // India first, as in the hub's "Follow a team"

@@ -3,8 +3,8 @@ from typing import Dict, List, Optional, Tuple
 
 from application_logic.services import metrics
 from application_logic.services.common import catalog_defs, dates, page, team_slugs
-from application_logic.services.slugs import GENDER, player_slug
-from db_logic.repository import players_repo
+from application_logic.services.slugs import GENDER, full_name, player_slug
+from db_logic.repository import pages_repo, players_repo
 from db_logic.repository.db import ServingDB
 from shared.exceptions import BadFilter, Incompatible, NotFound
 
@@ -55,7 +55,9 @@ def profile(db: ServingDB, player_id: str) -> Tuple[dict, dict]:
     role = derive_role(players_repo.career(db, p["player_key"], basis)) if basis else None
     main = next((t for t in teams if t["team_type"] == "international"),
                 teams[0] if teams else None)
-    data = dict(_ref(p), unique_name=p["unique_name"], gender=gender,
+    variants = pages_repo.name_variants(db, p["player_key"])
+    data = dict(_ref(p), full_name=full_name(p["name"], variants),
+                unique_name=p["unique_name"], gender=gender,
                 gender_label=GENDER.get(gender), main_team=main, role=role,
                 bio={"wikidata_qid": p["wikidata_qid"], "date_of_birth": p["date_of_birth"],
                      "birthplace": p["birthplace"], "country_for_sport": p["country_for_sport"]},

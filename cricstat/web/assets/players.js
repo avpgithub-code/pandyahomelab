@@ -240,7 +240,7 @@
       const [{ data: p, meta }, scopesRes] = await Promise.all([C.api("/v1/players/" + id), C.api("/v1/meta/scopes")]);
       scopesRes.data.forEach((s) => { labels[s.scope] = s.label; });
       labels.ALL = "All"; labels.LEAGUES = "Leagues";
-      document.title = p.name + " — career statistics | cricstat";
+      if (!C.serverHead) document.title = (p.full_name || p.name) + " — career statistics | cricstat";
       document.getElementById("p-search").placeholder = "Search another player";
       const played = new Map(p.scopes.map((s) => [s.scope, s.matches]));
       const leagues = p.scopes.filter((s) => scopesRes.data.some((x) => x.scope === s.scope && x.kind === "league"));
@@ -256,7 +256,7 @@
         h("section", { class: "section", style: "padding-top:0" }, h("div", { class: "wrap" }, h("div", { class: "card accent", style: "padding:1.8rem;background:linear-gradient(135deg,rgba(19,71,163,.28),rgba(19,22,30,1) 55%)" }, [
           h("div", { class: "row", style: "gap:1.5rem;align-items:center" }, [C.avatar(p.name, teamName, "lg"),
             h("div", { class: "stack", style: "gap:.5rem;flex:1 1 280px" }, [
-              h("h1", { style: "font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800;letter-spacing:-.02em" }, p.name),
+              h("h1", { style: "font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800;letter-spacing:-.02em" }, p.full_name || p.name),
               h("div", { class: "row", style: "gap:.4rem" }, chips),
               playedFor(p.teams),
               p.bio && p.bio.date_of_birth ? h("p", { class: "tiny dim" }, "Born " + C.date(p.bio.date_of_birth) + (p.bio.birthplace ? ", " + p.bio.birthplace : "") + " · via Wikidata") : null]),
