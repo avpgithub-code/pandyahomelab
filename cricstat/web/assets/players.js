@@ -254,12 +254,12 @@
         h("span", { class: "badge soon" }, (p.first_date || "").slice(0, 4) + "–" + (p.last_date || "").slice(0, 4))];
       C.fill(out, [
         h("section", { class: "section", style: "padding-top:0" }, h("div", { class: "wrap" }, h("div", { class: "card accent", style: "padding:1.8rem;background:linear-gradient(135deg,rgba(19,71,163,.28),rgba(19,22,30,1) 55%)" }, [
-          h("div", { class: "row", style: "gap:1.5rem;align-items:center" }, [C.avatar(p.name, teamName, "lg"),
+          h("div", { class: "row", style: "gap:1.5rem;align-items:center" }, [p.photo ? photoImg(p) : C.avatar(p.name, teamName, "lg"),
             h("div", { class: "stack", style: "gap:.5rem;flex:1 1 280px" }, [
               h("h1", { style: "font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800;letter-spacing:-.02em" }, p.full_name || p.name),
               h("div", { class: "row", style: "gap:.4rem" }, chips),
               playedFor(p.teams),
-              p.bio && p.bio.date_of_birth ? h("p", { class: "tiny dim" }, "Born " + C.date(p.bio.date_of_birth) + (p.bio.birthplace ? ", " + p.bio.birthplace : "") + " · via Wikidata") : null]),
+              bornLine(p), photoCredit(p)]),
             team && team.team_type === "international" && team.slug ? h("a", { class: "btn ghost", href: "/cricket/countries/" + team.slug + "/" }, [C.teamBadge(team.name, "sm"), team.name + " team page"]) : null]),
           h("div", { class: "kpis", id: "p-kpis", style: "margin-top:1.6rem;padding-top:1.2rem;border-top:1px solid var(--border)" })]))),
         h("section", { class: "section panel" }, h("div", { class: "wrap stack" }, [
@@ -277,6 +277,31 @@
       if (e.status === 404) C.fill(out, h("div", { class: "wrap" }, h("div", { class: "notice" }, "There's no player at this address. Search for a player above.")));
       else C.showError(out, e, "this player");
     }
+  }
+
+  // Wikidata birth details and the Commons photo (P0.5). The photo is a self-hosted thumbnail;
+  // its credit (author, licence, file page) is shown wherever the photo is, as CC BY(-SA) asks.
+  const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  function birthDate(iso) {
+    const [y, m, d] = String(iso).split("-");
+    return d ? Number(d) + " " + MONTHS[Number(m) - 1] + " " + y : m ? MONTHS[Number(m) - 1] + " " + y : y;
+  }
+  function bornLine(p) {
+    const b = p.bio || {};
+    const text = [b.date_of_birth ? birthDate(b.date_of_birth) : null, b.birthplace].filter(Boolean).join(", ");
+    if (!text) return null;
+    return h("p", { class: "tiny dim" }, ["Born " + text + " · via ",
+      b.wikidata_qid ? h("a", { href: "https://www.wikidata.org/wiki/" + b.wikidata_qid }, "Wikidata") : "Wikidata"]);
+  }
+  function photoImg(p) {
+    return h("img", { class: "avatar-photo", src: p.photo.url, width: p.photo.width, height: p.photo.height, alt: p.full_name || p.name });
+  }
+  function photoCredit(p) {
+    const ph = p.photo;
+    if (!ph) return null;
+    return h("p", { class: "tiny muted photo-credit" }, ["Photo: " + (ph.author || "unknown author") + ", ",
+      h("a", { href: ph.licence_url || ph.source_url }, ph.licence || "see file page"), ", via ",
+      h("a", { href: ph.source_url }, "Wikimedia Commons")]);
   }
 
   const params = new URLSearchParams(location.search);
