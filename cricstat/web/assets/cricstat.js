@@ -359,12 +359,20 @@
                 : h("p", { class: "tiny dim last" }, " ")]);
   }
 
+  // Scoreboard digits: an element with class "sb" shows each character on its own tile.
+  function scoreText(el, text) {
+    if (!el) return;
+    if (!el.classList.contains("sb")) { el.textContent = text; return; }
+    el.setAttribute("aria-label", text);
+    el.replaceChildren(...String(text).split("").map((ch) =>
+      h("span", { class: /[0-9]/.test(ch) ? "sb-d" : "sb-s", "aria-hidden": "true" }, ch)));
+  }
   function countUp(el, value, ms) {
     if (!el) return;
     const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce || !value) { el.textContent = num(value); return; }
+    if (reduce || !value) { scoreText(el, num(value)); return; }
     const t0 = performance.now(); ms = ms || 900;
-    const step = (t) => { const k = Math.min(1, (t - t0) / ms); el.textContent = num(Math.round(value * (1 - Math.pow(1 - k, 3))));
+    const step = (t) => { const k = Math.min(1, (t - t0) / ms); scoreText(el, num(Math.round(value * (1 - Math.pow(1 - k, 3)))));
                           if (k < 1) requestAnimationFrame(step); };
     requestAnimationFrame(step);
   }
@@ -373,7 +381,7 @@
     return num(v);
   }
 
-  window.cricstat = { freshness, carousel, teamLine, roleIcon, roleLabel, api, ratio, num, hs, bbi, overs, date, letter, h, fill, table, showError,
+  window.cricstat = { scoreText, freshness, carousel, teamLine, roleIcon, roleLabel, api, ratio, num, hs, bbi, overs, date, letter, h, fill, table, showError,
                       getFollow, setFollow, pathTail, playerIdFromPath, dataNote, teamBadge, teamStyle,
                       avatar, who, formDots, fmtName, resultText, matchCard, countUp, compact, ago,
                       donut, donutLegend, periodControl, formatCard, periodRange };

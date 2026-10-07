@@ -14,7 +14,7 @@
 <meta property="og:url" content="https://pandyahomelab.com/cricket/">
 <meta property="og:image" content="https://pandyahomelab.com/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="/cricket/assets/cricstat.css?v=44">
+<link rel="stylesheet" href="/cricket/assets/cricstat.css?v=48">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -35,7 +35,16 @@
 <header class="hero">
   <div class="wrap">
     <div class="eyebrow"><span class="dot"></span><span id="h-asof">Live cricket data</span></div>
-    <h1><span class="cs">cric<b>stat</b></span></h1>
+    <h1 class="cs-lockup"><svg class="cs-emblem" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+      <defs><linearGradient id="emWillow" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f3dca8"/><stop offset="1" stop-color="#c99a52"/></linearGradient>
+        <radialGradient id="emBall" cx="35%" cy="32%" r="70%"><stop offset="0" stop-color="#e2544b"/><stop offset=".65" stop-color="#b3201c"/><stop offset="1" stop-color="#6e1210"/></radialGradient></defs>
+      <path d="M6 16c8-3 17-3 26 1v38c-9-4-18-4-26-1z" fill="#1a2234" stroke="#4F7FD6" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M58 16c-8-3-17-3-26 1v38c9-4 18-4 26-1z" fill="#1a2234" stroke="#4F7FD6" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M11 24c5-1.5 11-1.5 16 .5M11 30c5-1.5 11-1.5 16 .5M11 36c5-1.5 11-1.5 16 .5M11 42c5-1.5 8-1.5 11 0" stroke="#94a3b8" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+      <rect x="38" y="35" width="4.5" height="12" rx="1" fill="#4F7FD6"/><rect x="44.5" y="28" width="4.5" height="19" rx="1" fill="#FF9933"/><rect x="51" y="23" width="4.5" height="24" rx="1" fill="#ffc46b"/>
+      <g transform="rotate(-38 22 40)"><rect x="19.2" y="10" width="5.6" height="13" rx="2" fill="#4F7FD6"/><rect x="16.5" y="22" width="11" height="34" rx="3.5" fill="url(#emWillow)" stroke="#8a6431" stroke-width="1"/><path d="M22 25v28" stroke="#8a6431" stroke-opacity=".6" stroke-width="1"/></g>
+      <circle cx="49" cy="53" r="7" fill="url(#emBall)"/><path d="M45.2 47.6c2.6 2.4 3.3 7.4 1.2 11.2M52.8 47.6c-2.6 2.4-3.3 7.4-1.2 11.2" stroke="#f5efe6" stroke-width="1" fill="none" stroke-linecap="round"/>
+    </svg><span class="sr-only">cricstat</span><span class="cs" aria-hidden="true">cr<span class="i-ball">ı<svg class="i-dot" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="9" fill="url(#emBall)"/><path d="M5.5 3.2c2.6 2.4 3.4 8.4 1.3 13.6M14.5 3.2c-2.6 2.4-3.4 8.4-1.3 13.6" stroke="#f5efe6" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></span>c<b>stat</b></span></h1>
     <p class="subtitle">Cricket statistics, forecasts and an AI analyst — built from open ball-by-ball data for men's and women's cricket, with every number traceable to its source.</p>
     <p class="hero-hook">2011 gave us the six. 2023 gave us the heartbreak. 2027 is the question. <button class="link-btn" type="button" data-about>Read the story →</button></p>
     <form class="search-bar" action="/cricket/players/" method="get" role="search">
@@ -45,12 +54,13 @@
   </div>
 </header>
 
-<section class="section panel" aria-label="The data behind cricstat"><div class="wrap volume">
+<section class="section panel" aria-label="The data behind cricstat"><div class="wrap volume scoreboard">
+  <div class="sb-head" aria-hidden="true"><span class="bulb"></span>The data behind cricstat<span class="bulb"></span></div>
     <div class="counters" aria-live="polite">
-      <div class="counter"><i class="c-icon saff" aria-hidden="true">🏟️</i><b id="k-matches">—</b><span>Matches</span><small class="c-note">Men's and women's, 2001 to today. Every result feeds the team ratings.</small></div>
-      <div class="counter"><i class="c-icon blue" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24"><defs><radialGradient id="ball" cx="35%" cy="32%" r="70%"><stop offset="0" stop-color="#e2544b"/><stop offset=".65" stop-color="#b3201c"/><stop offset="1" stop-color="#6e1210"/></radialGradient></defs><circle cx="12" cy="12" r="10" fill="url(#ball)"/><path d="M5.2 4.9c3.6 3.2 5 9.9 1.9 15.4M18.8 4.9c-3.6 3.2-5 9.9-1.9 15.4" fill="none" stroke="#f5efe6" stroke-width="1.1" stroke-linecap="round"/><path d="M6.6 7.4l1.1-.6M7.5 10l1.2-.3M7.8 12.7h1.2M7.4 15.4l1.2.3M18.6 7.4l-1.1-.6M17.6 10l-1.2-.3M17.3 12.7h-1.2M17.7 15.4l-1.2.3" stroke="#f5efe6" stroke-width=".8" stroke-linecap="round"/><ellipse cx="8.6" cy="7.6" rx="2.2" ry="1.2" fill="#fff" opacity=".18" transform="rotate(-30 8.6 7.6)"/></svg></i><b id="k-deliveries">—</b><span>Balls bowled</span><small class="c-note">Each one recorded: who bowled, who faced, what happened. Enough to train a ball-by-ball model.</small></div>
-      <div class="counter"><i class="c-icon saff" aria-hidden="true">🧢</i><b id="k-players">—</b><span>Players</span><small class="c-note">Careers followed across Tests, ODIs, T20Is and leagues, the basis for player-strength ratings.</small></div>
-      <div class="counter"><i class="c-icon blue" aria-hidden="true">🌍</i><b id="k-teams">—</b><span>Teams</span><small class="c-note">National sides and franchises, all rated by the same model.</small></div>
+      <div class="counter"><i class="c-icon saff" aria-hidden="true">🏟️</i><b id="k-matches" class="sb">—</b><span>Matches</span><small class="c-note">Men's and women's, 2001 to today. Every result feeds the team ratings.</small></div>
+      <div class="counter"><i class="c-icon blue" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24"><defs><radialGradient id="ball" cx="35%" cy="32%" r="70%"><stop offset="0" stop-color="#e2544b"/><stop offset=".65" stop-color="#b3201c"/><stop offset="1" stop-color="#6e1210"/></radialGradient></defs><circle cx="12" cy="12" r="10" fill="url(#ball)"/><path d="M5.2 4.9c3.6 3.2 5 9.9 1.9 15.4M18.8 4.9c-3.6 3.2-5 9.9-1.9 15.4" fill="none" stroke="#f5efe6" stroke-width="1.1" stroke-linecap="round"/><path d="M6.6 7.4l1.1-.6M7.5 10l1.2-.3M7.8 12.7h1.2M7.4 15.4l1.2.3M18.6 7.4l-1.1-.6M17.6 10l-1.2-.3M17.3 12.7h-1.2M17.7 15.4l-1.2.3" stroke="#f5efe6" stroke-width=".8" stroke-linecap="round"/><ellipse cx="8.6" cy="7.6" rx="2.2" ry="1.2" fill="#fff" opacity=".18" transform="rotate(-30 8.6 7.6)"/></svg></i><b id="k-deliveries" class="sb">—</b><span>Balls bowled</span><small class="c-note">Each one recorded: who bowled, who faced, what happened. Enough to train a ball-by-ball model.</small></div>
+      <div class="counter"><i class="c-icon saff" aria-hidden="true">🧢</i><b id="k-players" class="sb">—</b><span>Players</span><small class="c-note">Careers followed across Tests, ODIs, T20Is and leagues, the basis for player-strength ratings.</small></div>
+      <div class="counter"><i class="c-icon blue" aria-hidden="true">🌍</i><b id="k-teams" class="sb">—</b><span>Teams</span><small class="c-note">National sides and franchises, all rated by the same model.</small></div>
     </div>
     <p class="why-volume"><b>Why the volume matters:</b> about 2,600 men's ODIs are too few to teach a model who wins a match. 11.6 million deliveries are plenty, so the <a class="wc-hl" href="#wc2027">ODI World Cup 2027 predictor</a> will learn team and player strength from every ball, then simulate the tournament thousands of times.</p>
     <a class="wc-tease" href="#wc2027">
@@ -144,10 +154,10 @@
   <p>Not affiliated with or endorsed by Cricsheet, the ICC or any cricket board. Statistics are derived from the source data and may differ from official records.</p>
   <p><a href="/cricket/licences/">Data &amp; licences</a> · <a href="/privacy/">Privacy</a> · <a href="/">pandyaHomeLab</a> · Built by Archit Pandya</p>
 </footer>
-<script src="/cricket/assets/flags.js?v=44"></script>
-<script src="/cricket/assets/cricstat.js?v=44"></script>
-<script src="/cricket/assets/about.js?v=44"></script>
-<script src="/cricket/assets/hub.js?v=44"></script>
+<script src="/cricket/assets/flags.js?v=48"></script>
+<script src="/cricket/assets/cricstat.js?v=48"></script>
+<script src="/cricket/assets/about.js?v=48"></script>
+<script src="/cricket/assets/hub.js?v=48"></script>
 <script src="/feedback-widget.js"></script>
 </body>
 </html>

@@ -13,7 +13,7 @@
       document.getElementById("h-asof").textContent = "Live data · updated daily · as of " + C.date(meta.data_as_of);
       C.countUp(document.getElementById("k-matches"), data.counts.matches);
       const d = document.getElementById("k-deliveries");
-      if (d) d.textContent = C.compact(data.build.deliveries);
+      if (d) C.scoreText(d, C.compact(data.build.deliveries));
       C.countUp(document.getElementById("k-players"), data.counts.players);
       C.countUp(document.getElementById("k-teams"), data.counts.teams);
     } catch (e) { /* the hero still reads fine without numbers */ }
