@@ -12,6 +12,7 @@ ROLE_RULE = ("Derived from the ALL scope (or the most-played one): wicketkeeper 
              " ≥ 1 per 20 matches; all-rounder when bowling in ≥ half the matches and averaging"
              " ≥ 20 with the bat; bowler when bowling in ≥ half the matches; otherwise batter.")
 SPLITS = ("opponent", "venue", "season")
+PHOTO_PATH = "/cricket/photos/"      # served by Nginx from data/photos (read-only)
 
 
 def _player(db: ServingDB, player_id: str) -> dict:
@@ -19,6 +20,16 @@ def _player(db: ServingDB, player_id: str) -> dict:
     if p is None:
         raise NotFound("no player with id %r" % player_id)
     return p
+
+
+def photo(p: dict) -> Optional[dict]:
+    """The self-hosted Commons thumbnail and the credit its licence needs (P0.5), or None."""
+    if not p.get("photo_file"):
+        return None
+    return {"url": PHOTO_PATH + p["photo_file"], "width": p["photo_width"],
+            "height": p["photo_height"], "licence": p["photo_licence"],
+            "licence_url": p["photo_licence_url"], "author": p["photo_author"],
+            "source_url": p["photo_source_url"], "source": "Wikimedia Commons"}
 
 
 def _ref(p: dict) -> dict:
@@ -56,11 +67,13 @@ def profile(db: ServingDB, player_id: str) -> Tuple[dict, dict]:
     main = next((t for t in teams if t["team_type"] == "international"),
                 teams[0] if teams else None)
     variants = pages_repo.name_variants(db, p["player_key"])
-    data = dict(_ref(p), full_name=full_name(p["name"], variants),
+    data = dict(_ref(p), full_name=full_name(p["name"], variants, p["wd_name"]),
                 unique_name=p["unique_name"], gender=gender,
                 gender_label=GENDER.get(gender), main_team=main, role=role,
                 bio={"wikidata_qid": p["wikidata_qid"], "date_of_birth": p["date_of_birth"],
-                     "birthplace": p["birthplace"], "country_for_sport": p["country_for_sport"]},
+                     "birthplace": p["birthplace"], "country_for_sport": p["country_for_sport"],
+                     "source": "Wikidata (CC0)" if p["wikidata_qid"] else None},
+                photo=photo(p),
                 teams=teams,
                 scopes=[{"scope": s["scope"], "matches": s["matches"],
                          "first_date": s["first_date"], "last_date": s["last_date"]}

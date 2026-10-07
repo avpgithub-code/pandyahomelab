@@ -10,7 +10,7 @@ from typing import Dict, List, Optional
 from application_logic.services.common import team_slugs
 from application_logic.services.golden import trunc2
 from application_logic.services.meta_service import SCOPE_LABELS
-from application_logic.services.players_service import derive_role
+from application_logic.services.players_service import derive_role, photo
 from application_logic.services.slugs import GENDER, full_name, player_slug
 from db_logic.repository import pages_repo, players_repo, teams_repo
 from db_logic.repository.db import ServingDB
@@ -44,6 +44,24 @@ def _years(first: Optional[str], last: Optional[str]) -> str:
     return a if a == b else "%s–%s" % (a, b)
 
 
+MONTHS = ("January", "February", "March", "April", "May", "June", "July", "August",
+          "September", "October", "November", "December")
+
+
+def born(date_of_birth: Optional[str], place: Optional[str]) -> Optional[str]:
+    """'1996-07-18', 'Sangli' → 'Born 18 July 1996, Sangli' (Wikidata's precision kept)."""
+    parts = (date_of_birth or "").split("-")
+    when = ""
+    if len(parts) == 3:
+        when = "%d %s %s" % (int(parts[2]), MONTHS[int(parts[1]) - 1], parts[0])
+    elif len(parts) == 2:
+        when = "%s %s" % (MONTHS[int(parts[1]) - 1], parts[0])
+    elif parts[0]:
+        when = parts[0]
+    text = ", ".join(x for x in (when, place) if x)
+    return "Born " + text if text else None
+
+
 def indexable(scopes: List[dict], min_intl: int, min_league: int) -> bool:
     by = {s["scope"]: s["matches"] or 0 for s in scopes}
     return (sum(by.get(k, 0) for k in pages_repo.INTL) >= min_intl
@@ -60,7 +78,7 @@ def player_page(db: ServingDB, slug: str, min_intl: int, min_league: int) -> dic
     if slug != canonical:
         return {"status": 301, "slug": canonical}
     key = p["player_key"]
-    name = full_name(p["name"], pages_repo.name_variants(db, key))
+    name = full_name(p["name"], pages_repo.name_variants(db, key), p["wd_name"])
     scopes = players_repo.scopes_played(db, key)
     by_scope = {s["scope"]: s for s in scopes}
     gender = scopes[0]["gender"] if scopes else None
@@ -116,6 +134,8 @@ def player_page(db: ServingDB, slug: str, min_intl: int, min_league: int) -> dic
     return {"status": 200, "slug": canonical, "name": name, "scorecard_name": p["name"],
             "gender": gender, "role": role, "team": team, "span": span, "rows": rows,
             "title": title, "description": desc, "wikidata_qid": p["wikidata_qid"],
+            "born": born(p["date_of_birth"], p["birthplace"]), "date_of_birth": p["date_of_birth"],
+            "birthplace": p["birthplace"], "photo": photo(p),
             "indexable": indexable(scopes, min_intl, min_league)}
 
 

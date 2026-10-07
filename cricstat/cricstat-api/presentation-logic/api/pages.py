@@ -59,7 +59,7 @@ def ld_json(obj: dict) -> str:
 
 
 def set_head(shell: str, title: str, desc: str, url: Optional[str], robots: str,
-             extra: str = "", og_type: Optional[str] = None) -> str:
+             extra: str = "", og_type: Optional[str] = None, image: Optional[str] = None) -> str:
     def attr(pattern: str, value: str, text: str) -> str:
         return re.sub(pattern, lambda m: m.group(1) + esc(value) + m.group(2), text, count=1)
     out = re.sub(r"<title>.*?</title>", lambda m: "<title>%s</title>" % esc(title), shell,
@@ -69,6 +69,9 @@ def set_head(shell: str, title: str, desc: str, url: Optional[str], robots: str,
     out = attr(r'(<meta property="og:description" content=")[^"]*(")', desc, out)
     if og_type:
         out = attr(r'(<meta property="og:type" content=")[^"]*(")', og_type, out)
+    if image:                                  # a player's photo: a small portrait card
+        out = attr(r'(<meta property="og:image" content=")[^"]*(")', image, out)
+        out = attr(r'(<meta name="twitter:card" content=")[^"]*(")', "summary", out)
     if url:
         out = attr(r'(<link rel="canonical" href=")[^"]*(")', url, out)
         out = attr(r'(<meta property="og:url" content=")[^"]*(")', url, out)
@@ -114,6 +117,15 @@ def player_summary(p: dict, data_as_of: Optional[str]) -> str:
                      if team["slug"] and team["team_type"] == "international" else name)
     facts = " · ".join(x for x in (team_html, esc(p["role"]) if p["role"] else "",
                                    esc(p["span"])) if x)
+    born = '<p class="dim">%s</p>' % esc(p["born"]) if p.get("born") else ""
+    ph = p.get("photo")
+    figure = "" if not ph else (
+        '<figure class="ssr-photo"><img src="%s" width="%s" height="%s" alt="%s">'
+        '<figcaption class="tiny muted">Photo: %s, <a href="%s">%s</a>, via '
+        '<a href="%s">Wikimedia Commons</a></figcaption></figure>'
+        % (esc(ph["url"]), esc(ph["width"]), esc(ph["height"]), esc(p["name"]),
+           esc(ph["author"] or "unknown author"), esc(ph["licence_url"] or ph["source_url"]),
+           esc(ph["licence"]), esc(ph["source_url"])))
     aka = (' <span class="muted">(%s on scorecards)</span>' % esc(p["scorecard_name"])
            if p["scorecard_name"] != p["name"] else "")
     rows = "".join(
@@ -131,10 +143,10 @@ def player_summary(p: dict, data_as_of: Optional[str]) -> str:
              '<th scope="col">Econ</th></tr></thead><tbody>%s</tbody></table></div></div>' % rows)
     return ('<section class="section ssr-summary" aria-label="Career summary">'
             '<div class="wrap stack">'
-            '<div class="card accent"><h1>%s%s</h1><p class="dim">%s</p></div>%s'
+            '<div class="card accent">%s<h1>%s%s</h1><p class="dim">%s</p>%s</div>%s'
             '<p class="tiny muted">%s%s Averages and rates are cut to two decimals.</p>'
             '</div></section>'
-            % (esc(p["name"]), aka, facts, table, esc(ATTRIBUTION),
+            % (figure, esc(p["name"]), aka, facts, born, table, esc(ATTRIBUTION),
                " Data as of %s." % esc(data_as_of) if data_as_of else ""))
 
 
@@ -207,10 +219,16 @@ def register(app: FastAPI, cfg: Config) -> None:
                       **({"memberOf": {"@type": "SportsTeam", "name": page["team"]["name"],
                                        "sport": "Cricket"}} if page["team"] else {}),
                       **({"sameAs": ["https://www.wikidata.org/wiki/" + page["wikidata_qid"]]}
-                         if page["wikidata_qid"] else {}))}
+                         if page["wikidata_qid"] else {}),
+                      **({"birthDate": page["date_of_birth"]}
+                         if len(page["date_of_birth"] or "") == 10 else {}),
+                      **({"birthPlace": {"@type": "Place", "name": page["birthplace"]}}
+                         if page["birthplace"] else {}),
+                      **({"image": site + page["photo"]["url"]} if page["photo"] else {}))}
             out = set_head(shell, page["title"], page["description"], url,
                            "index,follow" if page["indexable"] else "noindex,follow",
-                           ld_json(ld), og_type="profile")
+                           ld_json(ld), og_type="profile",
+                           image=site + page["photo"]["url"] if page["photo"] else None)
             return fill(out, '<div id="p-profile" aria-live="polite">',
                         player_summary(page, as_of))
         return respond(request, "players", page, render)
