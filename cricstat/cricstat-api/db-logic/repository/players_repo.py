@@ -7,7 +7,9 @@ from db_logic.repository.db import ServingDB
 
 def identity(db: ServingDB, player_id: str) -> Optional[dict]:
     return db.one("SELECT p.player_key, p.player_id, p.name, p.unique_name, b.wikidata_qid,"
-                  " b.date_of_birth, b.birthplace, b.country_for_sport"
+                  " b.date_of_birth, b.birthplace, b.country_for_sport, b.full_name AS wd_name,"
+                  " b.photo_file, b.photo_width, b.photo_height, b.photo_licence,"
+                  " b.photo_licence_url, b.photo_author, b.photo_source_url"
                   " FROM players p LEFT JOIN player_bio b USING (player_key)"
                   " WHERE p.player_id = ?", (player_id,))
 

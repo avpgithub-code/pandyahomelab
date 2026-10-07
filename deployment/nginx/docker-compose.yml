@@ -56,6 +56,8 @@ services:
       - /volume1/pandya-homelab/logs/nginx:/var/log/nginx
       # cricstat pages (static; ADR-022) — served at /cricket/ via `root /var/www`
       - /volume1/pandya-homelab/cricstat/web:/var/www/cricket:ro
+      # cricstat player photos (P0.5; written by the pipeline's `enrich` step)
+      - /volume1/pandya-homelab/cricstat/data/photos:/var/www/cricket-photos:ro
     networks:
       pandya-proxy-network:
         ipv4_address: 172.24.0.2

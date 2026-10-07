@@ -6,11 +6,11 @@ from db_logic.repository.raw_store import RawStore, connect, list_migrations, mi
 
 def test_migrations_are_versioned_and_idempotent(db_path):
     conn = connect(db_path)
-    assert migrate(conn, "2026-10-05T00:00:00Z") == [1, 2]
+    assert migrate(conn, "2026-10-05T00:00:00Z") == [1, 2, 3]
     assert migrate(conn, "2026-10-05T00:00:01Z") == []
     rows = conn.execute("SELECT version, name FROM schema_version").fetchall()
-    assert rows == [(1, "0001_init.sql"), (2, "0002_register.sql")]
-    assert [v for v, _ in list_migrations()] == [1, 2]
+    assert rows == [(1, "0001_init.sql"), (2, "0002_register.sql"), (3, "0003_wikidata.sql")]
+    assert [v for v, _ in list_migrations()] == [1, 2, 3]
 
 
 def test_journal_mode_is_delete_not_wal(db_path):

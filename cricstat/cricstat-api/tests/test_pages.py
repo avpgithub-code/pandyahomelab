@@ -127,3 +127,56 @@ def test_etag_and_missing_shell(lenient, home, monkeypatch):
     assert lenient.get(url, headers={"If-None-Match": tag}).status_code == 304
     with make_client(home, monkeypatch, CRICSTAT_WEB_DIR=os.path.join(str(home), "no-web")) as c:
         assert c.get(url).status_code == 503                     # Nginx then serves the shell
+
+
+# ── P0.5: Wikidata name, birth details and Commons photo ──────────────────────────────────
+@pytest.fixture()
+def with_bio(home, tmp_path, monkeypatch):
+    """A copy of the fixture DB where Kohli has a player_bio row, as a build after `enrich`
+    leaves it."""
+    import shutil
+    import sqlite3
+
+    h = tmp_path / "home"
+    (h / "data" / "db").mkdir(parents=True)
+    shutil.copy(str(home / "data" / "db" / "cricstat.sqlite"), str(h / "data" / "db"))
+    c = sqlite3.connect(str(h / "data" / "db" / "cricstat.sqlite"))
+    key = c.execute("SELECT player_key FROM players WHERE player_id = ?", (KOHLI,)).fetchone()[0]
+    c.execute("INSERT INTO player_bio (player_key, wikidata_qid, date_of_birth, birthplace,"
+              " country_for_sport, full_name, photo_file, photo_width, photo_height,"
+              " photo_licence, photo_licence_url, photo_author, photo_source_url)"
+              " VALUES (?, 'Q213854', '1988-11-05', 'Delhi', 'India', 'Virat Kohli', 'ab12.jpg',"
+              " 320, 400, 'CC BY-SA 4.0', 'https://creativecommons.org/licenses/by-sa/4.0',"
+              " 'Jane <Doe>', 'https://commons.wikimedia.org/wiki/File:K.jpg')", (key,))
+    c.commit()
+    c.close()
+    with make_client(h, monkeypatch, CRICSTAT_INDEX_MIN_INTL="3") as client:
+        yield client
+
+
+def test_full_name_prefers_wikidata():
+    assert full_name("S Mandhana", [], "Smriti Mandhana") == "Smriti Mandhana"
+    assert full_name("V Kohli", ["Virat Kohli"], "Wrong Person") == "Virat Kohli"   # surname
+    assert full_name("MS Dhoni", ["Mahendra Singh Dhoni"], "MS Dhoni") == "Mahendra Singh Dhoni"
+
+
+def test_profile_has_bio_and_photo(with_bio):
+    p = with_bio.get("/v1/players/%s" % KOHLI).json()["data"]
+    assert p["full_name"] == "Virat Kohli"
+    assert p["bio"]["date_of_birth"] == "1988-11-05" and p["bio"]["source"] == "Wikidata (CC0)"
+    assert p["photo"]["url"] == "/cricket/photos/ab12.jpg" and p["photo"]["author"] == "Jane <Doe>"
+    assert with_bio.get("/v1/players/%s" % pid("AusM 2")).json()["data"].get("photo") is None
+
+
+def test_page_uses_name_birth_and_photo(with_bio):
+    h = with_bio.get("/pages/players/v-kohli-%s/" % KOHLI).text
+    assert head(h, r"<title>(.*?)</title>").startswith("Virat Kohli — ")
+    assert head(h, r'<meta property="og:image" content="([^"]*)"') == \
+        "https://pandyahomelab.com/cricket/photos/ab12.jpg"
+    assert head(h, r'<meta name="twitter:card" content="([^"]*)"') == "summary"
+    assert "Born 5 November 1988, Delhi" in h
+    assert "Photo: Jane &lt;Doe&gt;, " in h and "Jane <Doe>" not in h          # escaped
+    person = ld(h)["mainEntity"]
+    assert person["birthDate"] == "1988-11-05" and person["birthPlace"]["name"] == "Delhi"
+    assert person["image"] == "https://pandyahomelab.com/cricket/photos/ab12.jpg"
+    assert person["sameAs"] == ["https://www.wikidata.org/wiki/Q213854"]

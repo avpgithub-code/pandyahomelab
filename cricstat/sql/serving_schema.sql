@@ -53,7 +53,11 @@ CREATE TABLE player_names (                     -- names.csv variants + derived 
 CREATE INDEX ix_player_names_name ON player_names(name COLLATE NOCASE);
 CREATE TABLE player_bio (                       -- Wikidata enrichment; every column nullable (coverage is patchy)
   player_key INTEGER PRIMARY KEY REFERENCES players(player_key), wikidata_qid TEXT, date_of_birth TEXT,
-  birthplace TEXT, country_for_sport TEXT, fetched_at TEXT);
+  birthplace TEXT, country_for_sport TEXT, fetched_at TEXT,
+  full_name TEXT,                                 -- Wikidata English label (CC0), e.g. "Smriti Mandhana"
+  photo_file TEXT, photo_width INTEGER, photo_height INTEGER,   -- self-hosted thumbnail (data/photos/)
+  photo_licence TEXT, photo_licence_url TEXT, photo_author TEXT, photo_source_url TEXT);
+  -- Under-18s (on the build date) get no date_of_birth, birthplace or photo; sql/photo_blocklist.csv removes photos.
 
 -- ───────────── Core facts (one row per real-world thing) ─────────────
 CREATE TABLE matches (

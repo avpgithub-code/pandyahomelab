@@ -45,10 +45,11 @@ class TeamSlugs:
         return self.by_identity.get((name, gender, team_type))
 
 
-def full_name(name: str, variants: List[str]) -> str:
-    """The name people search for. Cricsheet names are scorecard style ('V Kohli'); the Register
-    also lists variants ('Virat Kohli'). Take the shortest variant with the same surname whose
-    other words are real names, not initials ('MS Dhoni' no, 'Mahendra Singh Dhoni' yes)."""
+def full_name(name: str, variants: List[str], preferred: Optional[str] = None) -> str:
+    """The name people search for. Cricsheet names are scorecard style ('V Kohli'). Wikidata's
+    English label (`preferred`, P0.5) wins when it is a full name with the same surname; else the
+    shortest Register variant with the same surname whose other words are real names, not
+    initials ('MS Dhoni' no, 'Mahendra Singh Dhoni' yes); else the scorecard name."""
     surname = name.split()[-1].lower() if name.split() else ""
 
     def is_full(v: str) -> bool:
@@ -56,5 +57,7 @@ def full_name(name: str, variants: List[str]) -> str:
         return (len(words) >= 2 and words[-1].lower() == surname
                 and all(len(w) > 1 and not (w.isupper() and len(w) <= 3) and "." not in w
                         for w in words[:-1]))
+    if preferred and is_full(preferred.strip()):
+        return preferred.strip()
     full = [v for v in [name] + variants if is_full(v)]
     return min(full, key=lambda v: (len(v), v)) if full else name

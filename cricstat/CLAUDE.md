@@ -318,7 +318,7 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
 - **Source freshness:** the daily check records Cricsheet's Last-Modified (`ingest_runs.notes.source_last_modified`);
   `/v1/status` + `/v1/admin/jobs` carry a `source` block (stale after 14 days); pages show "⏱ Cricsheet's last update
   was …" when it is over 7 days old. Cricsheet's own last update was 2026-09-17 (the pipeline is not stuck).
-- **Asset versions:** `V` in `cricstat/tools/gen_pages.py` (now "63") is the `?v=` on every asset; bump it and rerun
+- **Asset versions:** `V` in `cricstat/tools/gen_pages.py` (now "64") is the `?v=` on every asset; bump it and rerun
   `python3 cricstat/tools/gen_pages.py` after any CSS/JS change. Never edit `web/**/index.html` by hand.
 - **Review round 2 (2026-10-06, approved):** licences page adds a Chart.js (MIT) row, "used unaltered … only to
   identify national teams", and a generated per-flag Commons source list (`gen_pages.py` reads flags.js). Admin
@@ -389,6 +389,18 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   players (55%; ~72% of women, e.g. "S Mandhana") have no full-name variant → fix with Wikidata labels in P0.5.
   Dev: run the branch API on 8048 with CRICSTAT_WEB_DIR=cricstat/tools/staging/web and the preview with
   CRICSTAT_API=http://127.0.0.1:8048.
+- **P0.5 Wikidata enrichment (2026-10-07, approved, branch `feat/cricstat-p05-wikidata`):** pipeline `enrich`
+  (weekly after register: `register && enrich && build`) looks up every player's ESPNcricinfo id on Wikidata (P2697;
+  never by name; 200 ids/query, 1 req/s, UA with privacy@ contact) → raw `wikidata_people` (label, birth date by
+  precision, birthplace, country for sport, P18 file); Commons API → `commons_images` (licence, author, file page) +
+  one ~330 px thumbnail in data/photos/<sha1[:16]>.<ext>. Licences: PD, CC0, CC BY, CC BY-SA only (NC/ND/GFDL-only
+  rejected). Under-18 (year-only → latest birthday): no photo download; build drops birth details + photo.
+  Failed photos retry next run; others refresh after 28 days; ≤1,500 photos per run. Build: `bio_store.py` (NOT in
+  rules_sha) refills player_bio every build; enrich run id + blocklist are in inputs_sha. `sql/photo_blocklist.csv`
+  (qid or image_file) for removal requests (needs a pipeline publish). API: full_name = Wikidata label (same surname)
+  → Register variant → scorecard; profile `bio` + `photo`; pages: Born line, photo + credit, og:image, JSON-LD.
+  Web: photo replaces the initials avatar, credit line, licences rows. nginx `/cricket/photos/` (hash names only,
+  no-script CSP) from data/photos mounted ro. Trial: 7,192/13,754 on Wikidata; indexed full names 45% → 74%.
 - **`cricstat/web/` is LIVE** (bind mount). `gen_pages.py` writes to `cricstat/tools/staging/web/` by default
   (gitignored, created from cricstat/web; web_preview.py serves it). Edit CSS/JS there too. Go live after approval:
   `rsync -a cricstat/tools/staging/web/ cricstat/web/` (assets first), then delete the staging copy.

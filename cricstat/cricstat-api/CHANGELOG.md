@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Added (2026-10-07, P0.5)
+- Player profile: `full_name` now prefers the Wikidata English label (same surname required),
+  then the Register variant; `bio` carries date of birth, birthplace and country for sport from
+  Wikidata (`source`); `photo` (self-hosted Commons thumbnail URL, size, licence, licence URL,
+  author, file page) or null. Under-18s have no birth details or photo (applied by the build).
+- Player pages: "Born …" line, the photo with its credit in the summary, the photo as og:image
+  (twitter:card summary) and in the Person JSON-LD with birthDate, birthPlace and sameAs Wikidata.
+
 ### Added (2026-10-07, P0.6)
 - Server-rendered page heads for search engines and link previews: `/pages/players/{slug}/` and
   `/pages/countries/{slug}/` return the static page shell (cricstat/web, mounted read-only) with

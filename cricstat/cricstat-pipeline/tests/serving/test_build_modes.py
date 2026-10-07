@@ -141,3 +141,56 @@ def test_one_id_in_both_genders_gets_one_career_row_and_a_warning(build_env):
                       " WHERE p.player_id = '41000000' AND c.scope = 'ODI'") == 1
     assert _one(conn, "SELECT gender FROM player_career c JOIN players p USING (player_key)"
                       " WHERE p.player_id = '41000000' AND c.scope = 'ODI'") == "male"
+
+
+def test_enrichment_reaches_player_bio(build_env, tmp_path):
+    """An `enrich` run alone makes the next incremental build re-apply player_bio (P0.5)."""
+    raw = tmp_path / "db" / "raw.sqlite"
+    build_env({"1": case_doc(C1)})
+    adult, teen = _one_pair(build_env, raw)
+    c = connect(str(raw))
+    store = RawStore(c)
+    store.begin()
+    store.upsert_wikidata([
+        {"cricinfo_id": "11", "qid": "Q1", "label_en": "Alpha Batter", "image_file": "a.jpg",
+         "date_of_birth": "1990-01-02", "birthplace": "Delhi", "country_for_sport": "India"},
+        {"cricinfo_id": "22", "qid": "Q2", "label_en": "Young Teen", "image_file": "t.jpg",
+         "date_of_birth": "2015-05-05", "birthplace": "Pune"}], "2026-10-07T00:00:00Z")
+    for name in ("a.jpg", "t.jpg"):
+        store.upsert_image(name, {"status": "ok", "licence": "CC BY-SA 4.0", "author": "Jane Doe",
+                                  "thumb_path": name, "width": 320, "height": 400,
+                                  "description_url": "https://commons.wikimedia.org/wiki/F"},
+                           "2026-10-07T00:00:00Z")
+    store.commit()
+    store.start_run("enrich", "test", "2026-10-07T00:00:00Z")
+    c.execute("UPDATE ingest_runs SET status = 'success' WHERE mode = 'enrich'")
+    c.close()
+    conn, s = build_env({}, mode="incremental", add=True)
+    assert s["status"] == "success"              # enrich run changed inputs_sha → not a no-op
+    assert s["bio"]["bio"] == 2 and s["bio"]["photos"] == 1 and s["bio"]["minors"] == 1
+    row = conn.execute("SELECT b.full_name, b.date_of_birth, b.birthplace, b.photo_file,"
+                       " b.photo_author FROM player_bio b JOIN players p USING (player_key)"
+                       " WHERE p.player_id = ?", (adult,)).fetchone()
+    assert row == ("Alpha Batter", "1990-01-02", "Delhi", "a.jpg", "Jane Doe")
+    row = conn.execute("SELECT b.full_name, b.date_of_birth, b.birthplace, b.photo_file"
+                       " FROM player_bio b JOIN players p USING (player_key)"
+                       " WHERE p.player_id = ?", (teen,)).fetchone()
+    assert row == ("Young Teen", None, None, None)          # under 18: no birth details, no photo
+
+
+def _one_pair(build_env, raw):
+    """Register two players of fixture match 1 with cricinfo ids 11 and 22."""
+    conn = sqlite3.connect("file:%s?mode=ro" % str(raw).replace("raw.sqlite", "cricstat.sqlite"),
+                           uri=True)
+    ids = [r[0] for r in conn.execute("SELECT player_id, name FROM players ORDER BY player_id"
+                                      " LIMIT 2")]
+    names = dict(conn.execute("SELECT player_id, name FROM players"))
+    conn.close()
+    c = connect(str(raw))
+    store = RawStore(c)
+    store.begin()
+    store.replace_register([(ids[0], names[ids[0]], names[ids[0]], '{"cricinfo": ["11"]}'),
+                            (ids[1], names[ids[1]], names[ids[1]], '{"cricinfo": ["22"]}')], [])
+    store.commit()
+    c.close()
+    return ids

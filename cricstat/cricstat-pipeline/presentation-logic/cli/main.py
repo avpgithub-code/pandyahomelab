@@ -6,10 +6,11 @@
     python3 -m presentation_logic.cli build                # raw → serving DB (incremental)
     python3 -m presentation_logic.cli build --full         # rebuild the serving DB from scratch
     python3 -m presentation_logic.cli register             # Cricsheet Register → raw store
+    python3 -m presentation_logic.cli enrich               # Wikidata names/birth + Commons photos
     python3 -m presentation_logic.cli golden               # golden figures (host only: docs/)
 
 stdout gets exactly one JSON line (the run summary); the human log goes to
-CRICSTAT_LOG_DIR/<ingest|build|register>-YYYYMMDD.log and stderr.
+CRICSTAT_LOG_DIR/<ingest|build|register|enrich>-YYYYMMDD.log and stderr.
 Exit codes: 0 success, 1 runtime error, 2 data-quality gate failed (rolled back / old DB kept).
 """
 import argparse
@@ -20,6 +21,7 @@ import time
 
 from application_logic.services import (
     build_service,
+    enrich_service,
     golden_service,
     refresh_service,
     register_service,
@@ -34,9 +36,10 @@ EXIT_OK, EXIT_ERROR, EXIT_DQ = 0, 1, 2
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="cricstat-pipeline",
                                 description="Ingest Cricsheet data and build the serving DB.")
-    p.add_argument("mode", choices=("full", "recent", "build", "register", "golden"),
+    p.add_argument("mode", choices=("full", "recent", "build", "register", "enrich", "golden"),
                    help="full: all_json.zip with removal detection; recent: last-7-days upsert; "
                         "build: raw store → serving DB; register: people.csv + names.csv; "
+                        "enrich: Wikidata names/birth details + Commons photos; "
                         "golden: compare with hand-checked figures (docs/validation)")
     p.add_argument("--zip-path", help="ingest this local zip instead of downloading")
     kind = p.add_mutually_exclusive_group()
@@ -57,7 +60,8 @@ def main(argv=None) -> int:
     cfg = get_config(reload=True)
     t0 = time.time()
     try:
-        prefix = args.mode if args.mode in ("build", "register", "golden") else "ingest"
+        prefix = args.mode if args.mode in ("build", "register", "enrich", "golden") \
+            else "ingest"
         log_path = setup_logging(cfg.LOG_DIR, cfg.LOG_LEVEL, args.quiet, prefix)
     except OSError as exc:
         print(json.dumps({"mode": args.mode, "status": "error",
@@ -71,6 +75,8 @@ def main(argv=None) -> int:
         elif args.mode == "golden":
             summary = golden_service.run(cfg.SERVING_DB, args.validation_dir or os.path.join(
                 cfg.HOME, "docs", "validation"))
+        elif args.mode == "enrich":
+            summary = enrich_service.run(cfg)
         elif args.mode == "register":
             summary = register_service.run(cfg, args.people_csv, args.names_csv)
         else:
