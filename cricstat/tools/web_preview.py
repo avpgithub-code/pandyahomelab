@@ -4,7 +4,11 @@
 
 Mirrors what Nginx will do, without touching the live site:
   /cricket/api/...            → the running cricstat-api on 127.0.0.1:8040 (prefix stripped)
-  /cricket/players/<slug>/    → cricstat/web/players/index.html (same for countries)
+  /cricket/players/<slug>/    → the API's /pages/players/<slug>/ (server-rendered head, P0.6), or the
+                                plain shell if the API is down (same for countries); run a dev API
+                                on the branch with CRICSTAT_WEB_DIR=cricstat/tools/staging/web and
+                                point CRICSTAT_API at it
+  /cricket/sitemap.xml        → the API's /pages/sitemap.xml
   /cricket/...                → cricstat/tools/staging/web/... (else cricstat/web/...)
   /, /privacy/, /sitemap.xml  → the STAGED copies in cricstat/tools/staging/ (not the live files)
   /admin-preview/cricket/     → a static snapshot of /admin/cricket rendered from local templates
@@ -28,7 +32,7 @@ WEB = os.path.join(STAGING, "web") if os.path.isdir(os.path.join(STAGING, "web")
 SITE = os.path.join(ROOT, "website")
 API = os.environ.get("CRICSTAT_API", "http://127.0.0.1:8040")
 STAGED = {"/": "homepage.html", "/index.html": "homepage.html", "/privacy/": "privacy.html",
-          "/sitemap.xml": "sitemap.xml",
+          "/sitemap.xml": "sitemap.xml", "/robots.txt": "robots.txt",
           "/admin-preview/cricket/": "admin-cricket.html"}   # static snapshot, not the live admin
 DYNAMIC = re.compile(r"^/cricket/(players|countries)/[a-z0-9-]+/$")
 
@@ -47,8 +51,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if path in STAGED:
             return self.file(os.path.join(STAGING, STAGED[path]))
         m = DYNAMIC.match(path)
-        if m:
-            return self.file(os.path.join(WEB, m.group(1), "index.html"))
+        if m:                                   # like Nginx since P0.6: the API renders the head
+            return self.page(path[len("/cricket"):], os.path.join(WEB, m.group(1), "index.html"))
+        if path == "/cricket/sitemap.xml":
+            return self.page("/sitemap.xml", "")
         if path.startswith("/cricket/"):
             return self.file(self.safe(WEB, path[len("/cricket/"):]))
         return self.file(self.safe(SITE, path.lstrip("/")))
@@ -84,6 +90,30 @@ class Handler(http.server.BaseHTTPRequestHandler):
             status, body, ctype = 502, str(e).encode(), "text/plain"
         self.send_response(status)
         self.send_header("Content-Type", ctype or "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def page(self, rest, shell):
+        """/pages<rest> from the API, passing 301s and 404s through; the plain shell if the API
+        is down (Nginx's error_page fallback)."""
+        class NoRedirect(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self, *args, **kwargs):
+                return None
+        try:
+            with urllib.request.build_opener(NoRedirect).open(API + "/pages" + rest, timeout=30) as r:
+                status, body, headers = r.status, r.read(), r.headers
+        except urllib.error.HTTPError as e:
+            status, body, headers = e.code, e.read(), e.headers
+        except OSError:
+            status, body, headers = 502, b"", {}
+        if status in (502, 503, 504):
+            return self.file(shell)
+        if status in (301, 302):
+            return self.redirect(headers.get("Location"))
+        self.send_response(status)
+        self.send_header("Content-Type", headers.get("Content-Type") or "text/html")
+        self.send_header("Cache-Control", "no-store")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)

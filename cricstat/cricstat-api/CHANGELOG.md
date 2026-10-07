@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### Added (2026-10-07, P0.6)
+- Server-rendered page heads for search engines and link previews: `/pages/players/{slug}/` and
+  `/pages/countries/{slug}/` return the static page shell (cricstat/web, mounted read-only) with
+  the page's own title, description, canonical URL, robots rule, JSON-LD (ProfilePage/Person,
+  SportsTeam) and a summary table inside the box the page's JavaScript fills. A wrong name in a
+  player slug gets a 301 to the canonical one; an unknown id or team a real 404 (noindex).
+- Pages below the index bar (10 official internationals or 20 featured-league matches; settings
+  `CRICSTAT_INDEX_MIN_INTL` / `_LEAGUE`) get `noindex,follow`; club pages are noindex for now.
+- `/pages/sitemap.xml`: every indexable player and international team, with last-match dates.
+- `full_name` on the player profile: the Register's full-name variant ("Virat Kohli" for
+  "V Kohli"), else the scorecard name.
+
 ### Added (2026-10-06)
 - GET-only FastAPI service over the serving DB (F5): health, status, meta (scopes, competitions,
   metrics), search, players (profile, career, years, phases, splits, innings) and teams (list,

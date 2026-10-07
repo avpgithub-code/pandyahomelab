@@ -52,6 +52,8 @@ services:
       # The DIRECTORY, read-only: a file mount would keep showing the old build after each swap.
       - /volume1/pandya-homelab/cricstat/data/db:/cricstat/data/db:ro
       - /volume1/pandya-homelab/cricstat/logs:/cricstat/logs:ro   # CD-pull log for /v1/admin/jobs
+      # Page shells for the server-rendered player/team heads (P0.6); the same files Nginx serves.
+      - /volume1/pandya-homelab/cricstat/web:/cricstat/web:ro
     ports:
       - "127.0.0.1:8040:8000"
     networks:

@@ -25,6 +25,14 @@ class Config:
         self.LOG_LEVEL = os.getenv("CRICSTAT_LOG_LEVEL", "INFO").upper()
         self.CACHE_MAX_AGE = int(os.getenv("CRICSTAT_API_CACHE_MAX_AGE", "300"))
         self.CACHE_SWR = int(os.getenv("CRICSTAT_API_CACHE_SWR", "3600"))
+        # P0.6 server-rendered page heads: the static shells (cricstat/web, mounted read-only in
+        # the container), the public site and prefix for canonical URLs, and the bar a player or
+        # team page must clear to be indexed (thinner pages get noindex but stay usable).
+        self.WEB_DIR = self._path("CRICSTAT_WEB_DIR", "web")
+        self.SITE_URL = os.getenv("CRICSTAT_SITE_URL", "https://pandyahomelab.com")
+        self.PUBLIC_PREFIX = os.getenv("CRICSTAT_PUBLIC_PREFIX", "/cricket")
+        self.INDEX_MIN_INTL = int(os.getenv("CRICSTAT_INDEX_MIN_INTL", "10"))
+        self.INDEX_MIN_LEAGUE = int(os.getenv("CRICSTAT_INDEX_MIN_LEAGUE", "20"))
 
     def _path(self, name, default):
         value = os.getenv(name, default)

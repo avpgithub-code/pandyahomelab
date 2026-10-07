@@ -318,7 +318,7 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
 - **Source freshness:** the daily check records Cricsheet's Last-Modified (`ingest_runs.notes.source_last_modified`);
   `/v1/status` + `/v1/admin/jobs` carry a `source` block (stale after 14 days); pages show "⏱ Cricsheet's last update
   was …" when it is over 7 days old. Cricsheet's own last update was 2026-09-17 (the pipeline is not stuck).
-- **Asset versions:** `V` in `cricstat/tools/gen_pages.py` (now "62") is the `?v=` on every asset; bump it and rerun
+- **Asset versions:** `V` in `cricstat/tools/gen_pages.py` (now "63") is the `?v=` on every asset; bump it and rerun
   `python3 cricstat/tools/gen_pages.py` after any CSS/JS change. Never edit `web/**/index.html` by hand.
 - **Review round 2 (2026-10-06, approved):** licences page adds a Chart.js (MIT) row, "used unaltered … only to
   identify national teams", and a generated per-flag Commons source list (`gen_pages.py` reads flags.js). Admin
@@ -378,6 +378,17 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   Sitemap + /cricket/about/. Owner: request indexing for /cricket/about/ in Search Console.
   Known SEO gap (next, P0.6): player/team pages share one title and a canonical pointing to the list page → not
   indexable; fix = per-page static shells with own title/canonical/summary/JSON-LD, sitemap for meaningful players.
+- **P0.6 SEO pages (2026-10-07, approved, branch `feat/cricstat-p06-seo-pages`):** nginx sends
+  /cricket/players|countries/<slug>/ to cricstat-api `/pages/...`, which returns the static shell (cricstat/web
+  mounted read-only at /cricstat/web) with the page's own title/description/canonical/robots/JSON-LD and a summary
+  table inside #p-profile / #c-body (JS replaces it); 301 to the canonical player slug, real 404s; nginx falls back
+  to the plain shell on 502/503/504. Index bar: 10 official internationals or 20 featured-league matches
+  (`CRICSTAT_INDEX_MIN_INTL/_LEAGUE`) → 4,840 players + 176 international teams in `/cricket/sitemap.xml`
+  (API `/pages/sitemap.xml`, listed in robots.txt); clubs noindex for now. Profile API gains `full_name`
+  (Register variant). Scripts keep the server's title (`cricstat.serverHead`). **Gap:** 2,643 of 4,840 indexed
+  players (55%; ~72% of women, e.g. "S Mandhana") have no full-name variant → fix with Wikidata labels in P0.5.
+  Dev: run the branch API on 8048 with CRICSTAT_WEB_DIR=cricstat/tools/staging/web and the preview with
+  CRICSTAT_API=http://127.0.0.1:8048.
 - **`cricstat/web/` is LIVE** (bind mount). `gen_pages.py` writes to `cricstat/tools/staging/web/` by default
   (gitignored, created from cricstat/web; web_preview.py serves it). Edit CSS/JS there too. Go live after approval:
   `rsync -a cricstat/tools/staging/web/ cricstat/web/` (assets first), then delete the staging copy.

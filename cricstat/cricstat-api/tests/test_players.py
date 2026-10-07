@@ -25,6 +25,7 @@ def data(client, url):
 def test_profile(client):
     p = data(client, "/v1/players/%s" % KOHLI)
     assert p["name"] == "V Kohli" and p["slug"] == "v-kohli-%s" % KOHLI
+    assert p["full_name"] == "V Kohli"                     # no Register variants in the fixture
     assert p["gender"] == "male" and p["main_team"]["slug"] == "india-men"
     assert {t["slug"] for t in p["teams"]} == {"india-men", "mumbai-indians-men"}
     assert {s["scope"] for s in p["scopes"]} >= {"ALL", "ODI", "T20I", "TEST", "ipl", "LEAGUES"}
