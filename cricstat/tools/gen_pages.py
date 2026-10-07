@@ -1,9 +1,11 @@
 """Generate the cricstat page shells (cricstat/web/**/index.html) from one template, so the nav,
 footer and head stay identical on every page. Edit here, then run:  python3 cricstat/tools/gen_pages.py
 Bump V when CSS/JS change (cache busting)."""
+import html as H
+import json
 import os
 WEB = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "web")
-V = "31"
+V = "38"
 HEAD = '''<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -237,10 +239,15 @@ LIC = '''<header class="hero left"><div class="wrap">
       <tbody>
         <tr><td class="txt">Cricsheet match data</td><td class="txt">Ball-by-ball data for every match on these pages (men's and women's, 2001–present)</td><td class="txt">ODC-BY 1.0 · attribution required</td></tr>
         <tr><td class="txt">Cricsheet Register</td><td class="txt">Player identities and name variants used for search</td><td class="txt">ODC-BY 1.0 · attribution required</td></tr>
-        <tr><td class="txt">Wikimedia Commons</td><td class="txt">National flags, shown at their official proportions</td><td class="txt">Public domain (or CC0)</td></tr>
+        <tr><td class="txt">Wikimedia Commons</td><td class="txt">National flags, used unaltered at their official proportions and only to identify national teams (<a href="#flag-sources">source of each flag</a>)</td><td class="txt">Public domain (or CC0)</td></tr>
+        <tr><td class="txt">Chart.js</td><td class="txt">Charts, served from this site (<a href="/vendor/chart.js-4.4.0/LICENSE">licence text</a>)</td><td class="txt">MIT</td></tr>
       </tbody>
     </table></div>
     <p class="tiny muted" style="padding:0 1.3rem 1.1rem">Player birth details and photos from Wikidata and Wikimedia Commons will be added later, each credited with its own licence. Published figures from public records, including Wikipedia, are used privately to cross-check our numbers and are not reproduced here.</p>
+    <details class="flag-sources" id="flag-sources"><summary>Source of each flag (@@NFLAGS@@)</summary>
+      <p class="tiny muted">Each flag is an unchanged copy of the Wikimedia Commons file linked here. Some countries also protect their flag by law (India, for example, by its Flag Code); flags here only identify the national team.</p>
+      <ul>@@FLAGS@@</ul>
+    </details>
   </div>
   <div class="card">
     <h2>What the data covers</h2>
@@ -258,6 +265,16 @@ LIC = '''<header class="hero left"><div class="wrap">
   </div>
 </div></section>
 '''
+def flag_sources():
+    """The licences page lists each flag's Commons page (from flags.js, written by fetch_flags.py)."""
+    with open(os.path.join(WEB, "assets", "flags.js"), encoding="utf-8") as f:
+        src = f.read()
+    flags = json.loads(src[src.index("{"):src.rindex("}") + 1])
+    items = "".join('<li><a href="%s">%s</a> · %s</li>' % (H.escape(f["source"]), H.escape(n), H.escape(f["licence"]))
+                    for n, f in sorted(flags.items()))
+    return LIC.replace("@@NFLAGS@@", str(len(flags))).replace("@@FLAGS@@", items)
+
+
 page("licences/index.html", "/cricket/licences/", "Data & licences — cricstat | pandyaHomeLab",
-     "Where cricstat's data comes from, its licences, what it covers, privacy and disclaimers.", "licences", LIC, [])
+     "Where cricstat's data comes from, its licences, what it covers, privacy and disclaimers.", "licences", flag_sources(), [])
 print("pages written")

@@ -125,7 +125,7 @@ Background: `docs/llm-strategy-research-2026-10-05.md`.
 | F7 | Roadmap + decision log | Ongoing in this file (current to 2026-10-05) |
 | F8 | Compliance & trust (licences page, privacy update, disclaimers) | Folded into P0 (decided 2026-10-05) |
 | F9 | CI/CD & automation (`docs/F9-cicd-automation.md`) | Done 2026-10-05: CI + approval gate + GHCR + NAS cd-pull.sh (DSM daily 05:15); merged to main |
-| P0 | Ingestion → serving-DB build → cricstat-api → first live pages (+F8) | Ingestion deployed. **P0.1 build + register done 2026-10-06** (merged; full build 11m50s on the NAS, all checks pass). **P0.2 golden figures done 2026-10-06** (draft set; user fills references). **P0.3 cricstat-api done 2026-10-06** (deployed). **P0.3b `/admin/cricket` done 2026-10-06**. **P0.4 pages built on `feat/cricstat-p0-web`, in review (not public, nothing committed yet); hub, players and countries approved by the user 2026-10-06.** Then P0.4 deploy → P0.5 player photos |
+| P0 | Ingestion → serving-DB build → cricstat-api → first live pages (+F8) | Ingestion deployed. **P0.1 build + register done 2026-10-06** (merged; full build 11m50s on the NAS, all checks pass). **P0.2 golden figures done 2026-10-06** (draft set; user fills references). **P0.3 cricstat-api done 2026-10-06** (deployed). **P0.3b `/admin/cricket` done 2026-10-06**. **P0.4 pages built on `feat/cricstat-p0-web`, in review (not public, nothing committed yet); hub, players and countries approved by the user 2026-10-06; licences, privacy, homepage, admin, player profile approved too; phone check left.** Then P0.4 deploy → P0.5 player photos |
 | P1–P6 | Predictor + win prob → tools → test set → agent → public demo → extras | Later |
 | Later | Men's T20 World Cup 2028 forecast + T20I team ratings (decided 2026-10-06; shown as "Later" on team pages) | **Not started until the ODI World Cup 2027 is finished** |
 
@@ -320,6 +320,14 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   was …" when it is over 7 days old. Cricsheet's own last update was 2026-09-17 (the pipeline is not stuck).
 - **Asset versions:** `V` in `cricstat/tools/gen_pages.py` (now "31") is the `?v=` on every asset; bump it and rerun
   `python3 cricstat/tools/gen_pages.py` after any CSS/JS change. Never edit `web/**/index.html` by hand.
+- **Review round 2 (2026-10-06, approved):** licences page adds a Chart.js (MIT) row, "used unaltered … only to
+  identify national teams", and a generated per-flag Commons source list (`gen_pages.py` reads flags.js). Admin
+  snapshot, privacy and staged homepage approved. Player profile: team chip has the small flag; Leagues tab puts a
+  **League** first column in Batting/Bowling/Fielding (one row per league + "All leagues" total); Phase splits on
+  Leagues = the main league; renamed franchises merged for display only (`RENAMED` in players.js: RCB, Punjab Kings,
+  Delhi Capitals, RPS, St Lucia Kings, TKR, 2026 Hundred renames; Barbados left out) in "Played for" and in opponent
+  splits (averages recomputed from summed runs/outs). **venue_map.csv:** 3 punctuation duplicates mapped (M.Chinnaswamy,
+  ACA VDCA, Gahanga ". Rwanda") → needs the pipeline publish + one full rebuild (rules_sha changes) at deploy.
 - **Open decisions before going public:** the "soon" nav items; the "Why I built this" text (placeholder); corrections
   contact (proposed: the existing privacy@ address); API calls kept out of visitor analytics (done in nginx.conf,
   needs OK); optional: "Popular players" → "Players to start with".

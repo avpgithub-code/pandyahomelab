@@ -5,7 +5,7 @@
   const C = window.cricstat, h = C.h;
   const TABS = [["TEST", "Test"], ["ODI", "ODI"], ["T20I", "T20I"], ["LEAGUES", "Leagues"], ["ALL", "All"]];
   const GENDER = { male: "Men's", female: "Women's" };
-  let chart = null, labels = {}, teamName = null;
+  let chart = null, labels = {}, teamName = null, leagueScopes = [];
 
   if (window.Chart) {
     window.Chart.defaults.color = "#94a3b8";
@@ -50,6 +50,30 @@
     }).catch(() => {}));
   }
 
+  // Franchises that renamed (old → current; checked against the data: the old name's last match comes
+  // before the new name's first). Display only — the data keeps Cricsheet's names. Barbados is left out:
+  // the data shows Tridents → Royals → Tridents again, so it isn't a simple rename.
+  const RENAMED = {
+    "Royal Challengers Bangalore": "Royal Challengers Bengaluru", "Kings XI Punjab": "Punjab Kings",
+    "Delhi Daredevils": "Delhi Capitals", "Rising Pune Supergiants": "Rising Pune Supergiant",
+    "St Lucia Zouks": "St Lucia Kings", "St Lucia Stars": "St Lucia Kings",
+    "Trinidad & Tobago Red Steel": "Trinbago Knight Riders", "Oval Invincibles": "MI London",
+    "Northern Superchargers": "Sunrisers Leeds", "Manchester Originals": "Manchester Super Giants",
+  };
+  function playedFor(teams) {
+    const groups = new Map();
+    teams.forEach((t) => {
+      const now = RENAMED[t.name] || t.name;
+      if (!groups.has(now)) groups.set(now, { name: now, former: [], played: false });
+      const g = groups.get(now);
+      if (t.name === now) g.played = true; else if (!g.former.includes(t.name)) g.former.push(t.name);
+    });
+    const list = [...groups.values()].map((g) => g.former.length
+      ? (g.played ? g.name + " (formerly " + g.former.join(", ") + ")" : g.former.join(", ")) : g.name);
+    if (list.length < 2) return null;
+    return h("p", { class: "tiny dim" }, "Played for " + list.slice(0, 8).join(", ") + (list.length > 8 ? "…" : ""));
+  }
+
   function tableCard(title, headers, row, note) {
     return h("div", { class: "card tablecard" }, [h("div", { class: "card-head" }, h("h2", {}, title)),
       row ? C.table(headers, [row]) : h("p", { class: "muted", style: "padding:0 1.3rem 1.1rem" }, "—"),
@@ -79,6 +103,12 @@
 
   async function phases(id, scope) {
     const target = document.getElementById("phases");
+    // Leagues adds several leagues together, whose phases don't line up: show the main league's instead.
+    if (scope === "LEAGUES" && leagueScopes.length) {
+      const main = leagueScopes.slice().sort((a, b) => b.matches - a.matches)[0];
+      document.getElementById("phases-title").textContent = "Phase splits · " + (labels[main.scope] || main.scope);
+      scope = main.scope;
+    }
     if (["ALL", "LEAGUES", "TEST"].includes(scope)) {
       C.fill(target, h("p", { class: "muted small" }, "Phase splits are shown for one limited-overs format or league at a time — pick ODI, T20I or a league."));
       return;
@@ -90,13 +120,34 @@
     } catch (e) { C.fill(target, h("p", { class: "muted" }, e.status === 422 ? "No phases in this format." : "Phase splits unavailable.")); }
   }
 
+  // Opponent rows of a renamed franchise are combined under its current name, and the average is
+  // recomputed from the summed totals (batting: runs / outs; bowling: runs conceded / wickets).
+  function mergeRenamed(rows, bowler) {
+    const out = new Map();
+    rows.forEach((r) => {
+      const key = RENAMED[r.label] || r.label;
+      const g = out.get(key);
+      if (!g) { out.set(key, Object.assign({}, r, { label: key, slug: key === r.label ? r.slug : null, _names: [r.label] })); return; }
+      ["innings", "matches", "runs", "outs", "balls_faced", "legal_balls", "runs_conceded", "wickets"].forEach((k) => {
+        if (typeof r[k] === "number") g[k] = (g[k] || 0) + r[k]; });
+      if (key === r.label) g.slug = r.slug;
+      g._names.push(r.label);
+    });
+    return [...out.values()].map((g) => {
+      if (g._names.length > 1) g.average = bowler ? (g.wickets ? g.runs_conceded / g.wickets : null) : (g.outs ? g.runs / g.outs : null);
+      // Only an old name was played against: keep that name, as in "Played for".
+      if (!g._names.includes(g.label)) g.label = g._names.join(", ");
+      return g;
+    });
+  }
+
   async function opponents(id, scope, bowler) {
     const target = document.getElementById("opponents");
     try {
       const [opp, ven] = await Promise.all([C.api("/v1/players/" + id + "/splits?by=opponent&scope=" + scope),
         C.api("/v1/players/" + id + "/splits?by=venue&scope=" + scope)]);
       const kind = bowler ? "bowling" : "batting";
-      const rows = opp.data[kind].filter((r) => r.innings >= 3 && r.average !== null);
+      const rows = mergeRenamed(opp.data[kind], bowler).filter((r) => r.innings >= 3 && r.average !== null);
       const by = (a, b) => bowler ? a.average - b.average : b.average - a.average;
       const item = (r) => h("li", {}, [h("div", { class: "who" }, [C.teamBadge(r.label, "sm"),
         r.slug ? h("a", { href: "/cricket/countries/" + r.slug + "/", class: "name" }, r.label) : h("span", { class: "name" }, r.label)]),
@@ -119,17 +170,41 @@
     try {
       const { data: c, meta } = await C.api("/v1/players/" + p.player_id + "/career?scope=" + scope);
       C.dataNote(meta);
-      const name = labels[scope] || scope, b = c.batting, w = c.bowling, f = c.fielding;
+      const name = labels[scope] || scope;
       const bowler = p.role === "bowler";
+      // Leagues tab: a "League" first column with one row per league (most matches first), then the total.
+      const perLeague = scope === "LEAGUES" && leagueScopes.length;
+      let rows = [[null, c]];
+      if (perLeague) {
+        const each = await Promise.all(leagueScopes.map((s) => C.api("/v1/players/" + p.player_id + "/career?scope=" + s.scope).then(({ data }) => [s, data])));
+        each.sort((a, b) => b[1].matches - a[1].matches);
+        rows = each.concat(each.length > 1 ? [["total", c]] : []);
+      }
+      const DASH = "–";
+      const label = (s) => s === "total" ? h("b", {}, "All leagues")
+        : h("button", { type: "button", class: "link-btn", onclick: () => showScope(p, s.scope) }, labels[s.scope] || s.scope);
+      const batRow = (x) => { const b = x.batting; return b ? [C.num(x.matches), C.num(b.innings), C.num(b.not_outs), C.num(b.runs), C.hs(b.high_score, b.high_score_not_out),
+        C.ratio(b.average), C.ratio(b.strike_rate), b.hundreds, b.fifties, C.num(b.fours), C.num(b.sixes)] : [C.num(x.matches)].concat(Array(10).fill(DASH)); };
+      const bowlRow = (x) => { const w = x.bowling; return w ? [w.overs_display, C.num(w.wickets), C.ratio(w.average), C.ratio(w.economy), C.ratio(w.strike_rate),
+        w.wickets ? C.bbi(w.best) : DASH, w.five_wkt_hauls] : Array(7).fill(DASH); };
+      const fldRow = (x) => { const f = x.fielding; return f ? [f.catches, f.stumpings, f.run_out_involvements] : Array(3).fill(DASH); };
+      const card = (title, headers, make, note, need) => {
+        const data = rows.filter(([, x]) => !need || x[need] || perLeague);
+        if (!rows.some(([, x]) => x[need])) return tableCard(title, headers, null, null);
+        const t = C.table((perLeague ? ["League"] : []).concat(headers),
+          data.map(([s, x]) => (perLeague ? [label(s)] : []).concat(make(x))), { textCols: perLeague ? [0] : [] });
+        if (perLeague && rows.length > 1) t.querySelector("tbody tr:last-child").classList.add("total");
+        return h("div", { class: "card tablecard" }, [h("div", { class: "card-head" }, h("h2", {}, title)), t,
+          note ? h("p", { class: "tiny muted", style: "padding:0 1.3rem 1rem" }, note) : null]);
+      };
+      const fnote = c.fielding ? "* " + c.fielding.notes.run_out_involvements : null;
+      const batting = card("Batting · " + name, ["Mat", "Inns", "NO", "Runs", "HS", "Avg", "SR", "100s", "50s", "4s", "6s"], batRow, null, "batting");
+      const bowling = card("Bowling · " + name, ["Overs", "Wkts", "Avg", "Econ", "SR", "BBI", "5w"], bowlRow, null, "bowling");
+      const fielding = card("Fielding · " + name, ["Catches", "Stumpings", "Run-outs*"], fldRow, fnote, "fielding");
       C.fill(body, [
-        tableCard("Batting · " + name, ["Mat", "Inns", "NO", "Runs", "HS", "Avg", "SR", "100s", "50s", "4s", "6s"],
-          b ? [C.num(c.matches), C.num(b.innings), C.num(b.not_outs), C.num(b.runs), C.hs(b.high_score, b.high_score_not_out),
-               C.ratio(b.average), C.ratio(b.strike_rate), b.hundreds, b.fifties, C.num(b.fours), C.num(b.sixes)] : null),
-        h("div", { class: "grid" }, [
-          tableCard("Bowling · " + name, ["Overs", "Wkts", "Avg", "Econ", "SR", "BBI", "5w"],
-            w ? [w.overs_display, C.num(w.wickets), C.ratio(w.average), C.ratio(w.economy), C.ratio(w.strike_rate), C.bbi(w.best), w.five_wkt_hauls] : null),
-          tableCard("Fielding · " + name, ["Catches", "Stumpings", "Run-outs*"], f ? [f.catches, f.stumpings, f.run_out_involvements] : null,
-            f ? "* " + f.notes.run_out_involvements : null)]),
+        batting,
+        perLeague ? bowling : null,
+        perLeague ? fielding : h("div", { class: "grid" }, [bowling, fielding]),
         h("div", { class: "card" }, [
           h("div", { class: "card-head" }, [h("h2", {}, "Year by year"),
             h("div", { class: "tabs", role: "group", "aria-label": "Chart" }, ["batting", "bowling"].map((m) =>
@@ -138,7 +213,7 @@
                   yearChart(p.player_id, scope, m); } }, m === "batting" ? "Runs & average" : "Wickets & economy")))]),
           h("div", { class: "chart", id: "years-chart" })]),
         h("div", { class: "grid" }, [
-          h("div", { class: "card tablecard" }, [h("div", { class: "card-head" }, h("h2", {}, "Phase splits")), h("div", { id: "phases", style: "padding:0 1.3rem 1.1rem" }, h("p", { class: "loading" }, "Loading…"))]),
+          h("div", { class: "card tablecard" }, [h("div", { class: "card-head" }, h("h2", { id: "phases-title" }, "Phase splits")), h("div", { id: "phases", style: "padding:0 1.3rem 1.1rem" }, h("p", { class: "loading" }, "Loading…"))]),
           h("div", { class: "card" }, [h("h2", {}, "Opponents & venues"), h("div", { id: "opponents" }, h("p", { class: "loading" }, "Loading…"))])]),
       ]);
       yearChart(p.player_id, scope, bowler ? "bowling" : "batting");
@@ -169,11 +244,12 @@
       document.getElementById("p-search").placeholder = "Search another player";
       const played = new Map(p.scopes.map((s) => [s.scope, s.matches]));
       const leagues = p.scopes.filter((s) => scopesRes.data.some((x) => x.scope === s.scope && x.kind === "league"));
+      leagueScopes = leagues;
       const tabs = TABS.filter(([k]) => played.has(k));
       const start = ["TEST", "ODI", "T20I", "LEAGUES"].filter((k) => played.has(k)).sort((a, b) => played.get(b) - played.get(a))[0] || "ALL";
       const team = p.main_team;
       teamName = team ? team.name : null;
-      const chips = [team ? h("span", { class: "badge saff" }, team.name) : null, h("span", { class: "badge fmt" }, GENDER[p.gender] || ""),
+      const chips = [team ? h("span", { class: "badge saff team-badge" }, C.teamLine(team.name, team.name)) : null, h("span", { class: "badge fmt" }, GENDER[p.gender] || ""),
         p.role ? h("span", { class: "badge soon role-badge", title: "Derived from career figures" }, [C.roleIcon(p.role), C.roleLabel(p.role) || p.role]) : null,
         h("span", { class: "badge soon" }, (p.first_date || "").slice(0, 4) + "–" + (p.last_date || "").slice(0, 4))];
       C.fill(out, [
@@ -182,7 +258,7 @@
             h("div", { class: "stack", style: "gap:.5rem;flex:1 1 280px" }, [
               h("h1", { style: "font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800;letter-spacing:-.02em" }, p.name),
               h("div", { class: "row", style: "gap:.4rem" }, chips),
-              p.teams.length > 1 ? h("p", { class: "tiny dim" }, "Played for " + p.teams.slice(0, 8).map((t) => t.name).join(", ") + (p.teams.length > 8 ? "…" : "")) : null,
+              playedFor(p.teams),
               p.bio && p.bio.date_of_birth ? h("p", { class: "tiny dim" }, "Born " + C.date(p.bio.date_of_birth) + (p.bio.birthplace ? ", " + p.bio.birthplace : "") + " · via Wikidata") : null]),
             team && team.team_type === "international" && team.slug ? h("a", { class: "btn ghost", href: "/cricket/countries/" + team.slug + "/" }, [C.teamBadge(team.name, "sm"), team.name + " team page"]) : null]),
           h("div", { class: "kpis", id: "p-kpis", style: "margin-top:1.6rem;padding-top:1.2rem;border-top:1px solid var(--border)" })]))),
