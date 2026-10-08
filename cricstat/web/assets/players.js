@@ -27,7 +27,7 @@
         h("p", { class: "small dim", style: "margin-bottom:.8rem" },
           exact.length > 1 ? "Several players match “" + q + "” — did you mean:" : "Players matching “" + q + "”:"),
         h("div", { class: "grid-4" }, players.map((p) => h("a", { class: "card", href: "/cricket/players/" + p.slug + "/", style: "padding:1rem" },
-          C.who(p.name, C.teamLine(p.main_team, [p.main_team, GENDER[p.gender], p.years, C.num(p.matches) + " matches"].filter(Boolean).join(" · ")), p.main_team)))),
+          C.who(p.full_name || p.name, C.teamLine(p.main_team, [p.main_team, GENDER[p.gender], p.years, C.num(p.matches) + " matches"].filter(Boolean).join(" · ")), p.main_team, null, null, p.photo_url)))),
       ]);
     } catch (e) { C.showError(out, e, "search results"); }
   }
@@ -46,7 +46,9 @@
     // Roles arrive per player (derived from career figures by the API); cards show without them first.
     names.forEach(([n, s, t]) => C.api("/v1/players/" + s.slice(-8)).then(({ data }) => {
       const card = document.querySelector('#p-profile a[data-id="' + s.slice(-8) + '"]');
-      if (card && data.role) C.fill(card, C.who(n, C.teamLine(t, [t, C.roleLabel(data.role)].filter(Boolean).join(" · ")), t, null, C.roleIcon(data.role)));
+      // Full name (Wikidata/Register) and photo arrive with the profile too (P0.5).
+      if (card) C.fill(card, C.who(data.full_name || n, C.teamLine(t, [t, C.roleLabel(data.role)].filter(Boolean).join(" · ")), t, null,
+        data.role ? C.roleIcon(data.role) : null, data.photo ? data.photo.url : null));
     }).catch(() => {}));
   }
 

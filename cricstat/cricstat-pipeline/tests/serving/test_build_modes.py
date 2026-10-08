@@ -176,6 +176,8 @@ def test_enrichment_reaches_player_bio(build_env, tmp_path):
                        " FROM player_bio b JOIN players p USING (player_key)"
                        " WHERE p.player_id = ?", (teen,)).fetchone()
     assert row == ("Young Teen", None, None, None)          # under 18: no birth details, no photo
+    names = {r[0] for r in conn.execute("SELECT name FROM player_names WHERE source = 'wikidata'")}
+    assert names == {"Alpha Batter", "Young Teen"}            # Wikidata names are searchable
 
 
 def _one_pair(build_env, raw):

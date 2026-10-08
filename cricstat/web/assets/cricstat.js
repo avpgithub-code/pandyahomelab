@@ -195,15 +195,17 @@
     const first = parts[0].length <= 3 && parts[0] === parts[0].toUpperCase() ? parts[0][0] : parts[0][0];
     return (first + parts[parts.length - 1][0]).toUpperCase();
   }
-  function avatar(name, teamName, size) {
+  function avatar(name, teamName, size, photoUrl) {
+    // A player's self-hosted Commons photo (P0.5) when there is one, else coloured initials.
+    if (photoUrl) return h("img", { class: "avatar photo" + (size ? " " + size : ""), src: photoUrl, alt: "", loading: "lazy" });
     const [, c1, c2] = teamStyle(teamName || name || "?");
     return h("span", { class: "avatar" + (size ? " " + size : ""), "aria-hidden": "true",
                        style: "background:linear-gradient(135deg," + c1 + "," + c2 + ")" }, initials(name));
   }
-  function who(name, sub, teamName, href, extra) {
+  function who(name, sub, teamName, href, extra, photoUrl) {
     let label = href ? h("a", { href: href, class: "name" }, name) : h("span", { class: "name" }, name);
     if (extra) label = h("span", { class: "name-line" }, [label, extra]);
-    return h("div", { class: "who" }, [avatar(name, teamName), h("div", { style: "min-width:0" },
+    return h("div", { class: "who" }, [avatar(name, teamName, null, photoUrl), h("div", { style: "min-width:0" },
       [label, sub ? h("div", { class: "sub" }, sub) : null])]);
   }
   // Role icons (API role: batter | bowler | all-rounder | wicketkeeper), drawn as inline SVG.

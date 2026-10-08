@@ -151,6 +151,7 @@ a.card { color: var(--text); display: block; } a.card:hover { transform: transla
                 border-radius: 14px; border: 3px solid rgba(255,255,255,.12); box-shadow: 0 10px 40px rgba(0,0,0,.4);
                 background: var(--surface2); }
 .photo-credit a { color: inherit; text-decoration: underline; }
+.avatar.photo { object-fit: cover; object-position: 50% 15%; padding: 0; background: var(--surface2); }
 .ssr-photo { float: right; margin: 0 0 .6rem 1rem; max-width: 140px; }
 .ssr-photo img { width: 100%; height: auto; border-radius: 10px; }
 .who { display: flex; align-items: center; gap: .7rem; min-width: 0; }

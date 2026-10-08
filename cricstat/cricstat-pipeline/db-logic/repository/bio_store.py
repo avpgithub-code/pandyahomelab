@@ -109,3 +109,8 @@ def apply_bio(conn: sqlite3.Connection, rows: List[tuple]) -> None:
                  " b.photo_height, b.photo_licence, b.photo_licence_url, b.photo_author,"
                  " b.photo_source_url FROM _bio b JOIN players p USING (player_id)")
     conn.execute("DROP TABLE _bio")
+    # Wikidata names are searchable too ("Smriti Mandhana" finds S Mandhana). Re-added each build.
+    conn.execute("DELETE FROM player_names WHERE source = 'wikidata'")
+    conn.execute("INSERT OR IGNORE INTO player_names (player_key, name, source)"
+                 " SELECT player_key, full_name, 'wikidata' FROM player_bio"
+                 " WHERE full_name IS NOT NULL")

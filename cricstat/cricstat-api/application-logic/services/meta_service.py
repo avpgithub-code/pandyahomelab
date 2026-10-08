@@ -4,7 +4,8 @@ from datetime import datetime, timezone
 from typing import List, Optional, Tuple
 
 from application_logic.services.common import gender, team_slugs
-from application_logic.services.slugs import GENDER, player_slug
+from application_logic.services.players_service import PHOTO_PATH
+from application_logic.services.slugs import GENDER, full_name, player_slug
 from db_logic.repository import meta_repo
 from db_logic.repository.db import ServingDB
 from shared.exceptions import BadFilter
@@ -106,6 +107,8 @@ def search(db: ServingDB, q: Optional[str], kind: Optional[str], g: Optional[str
     if "player" in kinds:
         out["players"] = [
             {"player_id": r["player_id"], "name": r["name"],
+             "full_name": full_name(r["name"], (r["variants"] or "").split("|"), r["wd_name"]),
+             "photo_url": PHOTO_PATH + r["photo_file"] if r["photo_file"] else None,
              "slug": player_slug(r["name"], r["player_id"]),
              "match": ["exact", "starts with", "word starts with", "contains"][r["rank"]],
              "gender": r["gender"], "gender_label": GENDER.get(r["gender"]),
