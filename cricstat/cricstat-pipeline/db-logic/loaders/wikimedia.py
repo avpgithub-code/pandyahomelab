@@ -22,10 +22,13 @@ COMMONS_API = "https://commons.wikimedia.org/w/api.php"
 THUMB_WIDTH = 320              # Commons rounds up to its standard sizes (330 px today)
 THUMB_HOSTS = {"upload.wikimedia.org", "thumb.wikimedia.org"}
 IMAGE_TYPES = {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp"}
-# Public domain, CC0, CC BY and CC BY-SA (any version/port). Anything else is rejected.
+# Public domain (incl. the owner's Public Domain Mark), CC0, CC BY and CC BY-SA (any version/port),
+# and GODL-India (Government Open Data License – India: attribution, no implied endorsement; most
+# Press Information Bureau photos of Indian players). Anything else is rejected.
 # "CC BY-SA 3.0 de" and "CC BY 2.0" pass; "CC BY-NC…", "CC BY-ND…" and GFDL-only do not.
-ALLOWED_LICENCE = re.compile(r"^(public domain.*|pd\b.*|cc0\b.*"
+ALLOWED_LICENCE = re.compile(r"^(public domain.*|pd\b.*|pdm\b.*|cc0\b.*|godl-india"
                              r"|cc[ -]by(-sa)?(\s+\d(\.\d)?(\s+[a-z]{2,3})?)?)$", re.I)
+GODL_URL = "https://data.gov.in/government-open-data-license-india"
 _QID = re.compile(r"/entity/(Q\d+)$")
 _CID = re.compile(r"^\d{1,9}$")
 
@@ -178,7 +181,10 @@ def parse_imageinfo(doc: dict) -> Dict[str, dict]:
             continue
         meta = {k: (v or {}).get("value") for k, v in (info.get("extmetadata") or {}).items()}
         licence = plain(meta.get("LicenseShortName"), 80)
-        rec = {"licence": licence, "licence_url": meta.get("LicenseUrl"),
+        licence_url = meta.get("LicenseUrl")
+        if not licence_url and (licence or "").lower() == "godl-india":
+            licence_url = GODL_URL
+        rec = {"licence": licence, "licence_url": licence_url,
                "author": plain(meta.get("Artist")) or plain(meta.get("Credit")),
                "description_url": info.get("descriptionurl"), "thumb_url": info.get("thumburl"),
                "width": info.get("thumbwidth"), "height": info.get("thumbheight")}

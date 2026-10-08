@@ -404,7 +404,9 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
 - **P0.5 deployed 2026-10-08 (UTC):** pipeline 1a0aaf5848ce first (cd-pull `CRICSTAT_SERVICES=cricstat-pipeline`),
   enrich 36 min (7,192 on Wikidata; 1,315 photos ok, 47 rejected, 2 minors; 56 MB), full build 5 (10m42s; 7,186 bios,
   1,319 with photo, 7 minors), then API 59cd5470fea0, then nginx with the photos mount. Rejected licences: GODL-India
-  35 (most Indian stars' PIB photos: Kohli, Mandhana, Bumrah), PDM-owner 10, GFDL 1.2 2 — decision pending.
+  35 (most Indian stars' PIB photos: Kohli, Mandhana, Bumrah), PDM-owner 10, GFDL 1.2 2. Decided 2026-10-08: allow
+  GODL-India (credit adds "No endorsement by the Government of India is implied." + licence link) and PDM-owner; GFDL
+  stays out. enrich re-fetches previously rejected photos once their licence is allowed.
   DSM weekly register task needs `… register && … enrich && … build` (owner edits it).
 - **`cricstat/web/` is LIVE** (bind mount). `gen_pages.py` writes to `cricstat/tools/staging/web/` by default
   (gitignored, created from cricstat/web; web_preview.py serves it). Edit CSS/JS there too. Go live after approval:

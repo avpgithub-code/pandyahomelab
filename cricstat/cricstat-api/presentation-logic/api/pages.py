@@ -24,6 +24,7 @@ from shared.logger import get_logger
 
 log = get_logger("pages")
 GENDER_LD = {"male": "Male", "female": "Female"}
+GODL_NOTE = "No endorsement by the Government of India is implied."   # GODL-India condition
 
 
 class Shells:
@@ -122,10 +123,11 @@ def player_summary(p: dict, data_as_of: Optional[str]) -> str:
     figure = "" if not ph else (
         '<figure class="ssr-photo"><img src="%s" width="%s" height="%s" alt="%s">'
         '<figcaption class="tiny muted">Photo: %s, <a href="%s">%s</a>, via '
-        '<a href="%s">Wikimedia Commons</a></figcaption></figure>'
+        '<a href="%s">Wikimedia Commons</a>%s</figcaption></figure>'
         % (esc(ph["url"]), esc(ph["width"]), esc(ph["height"]), esc(p["name"]),
            esc(ph["author"] or "unknown author"), esc(ph["licence_url"] or ph["source_url"]),
-           esc(ph["licence"]), esc(ph["source_url"])))
+           esc(ph["licence"]), esc(ph["source_url"]),
+           ". " + GODL_NOTE if (ph["licence"] or "").lower() == "godl-india" else ""))
     aka = (' <span class="muted">(%s on scorecards)</span>' % esc(p["scorecard_name"])
            if p["scorecard_name"] != p["name"] else "")
     rows = "".join(

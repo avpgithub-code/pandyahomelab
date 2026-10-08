@@ -4,6 +4,7 @@ import datetime
 import io
 import json
 import os
+import re
 import urllib.error
 import urllib.parse
 
@@ -60,7 +61,8 @@ def test_sparql_inlines_only_digit_ids():
 
 @pytest.mark.parametrize("licence,ok", [
     ("Public domain", True), ("CC0", True), ("CC BY 2.0", True), ("CC BY-SA 4.0", True),
-    ("CC BY-SA 3.0 de", True), ("CC BY-NC 2.0", False), ("CC BY-ND 4.0", False),
+    ("CC BY-SA 3.0 de", True), ("GODL-India", True), ("PDM-owner", True),
+    ("CC BY-NC 2.0", False), ("CC BY-ND 4.0", False),
     ("CC BY-NC-SA 2.0", False), ("GFDL", False), (None, False)])
 def test_licence_allowed(licence, ok):
     assert wikimedia.licence_allowed(licence) is ok
@@ -227,6 +229,15 @@ def test_enrich_end_to_end(env):
     again = FakeWikimedia(*fake_world())                        # nothing is due a day later
     s = enrich_service.run(env, client(again), today=TODAY)
     assert (s["due"], s["photos_due"]) == (0, 0) and again.log == []
+
+
+def test_rejected_photo_is_refetched_once_its_licence_is_allowed(env, monkeypatch):
+    enrich_service.run(env, client(FakeWikimedia(*fake_world())), today=TODAY)
+    monkeypatch.setattr(wikimedia, "ALLOWED_LICENCE", re.compile(r"^cc by-nc 2\.0$", re.I))
+    people, images = fake_world()
+    images["Mandhana nc.jpg"] = imageinfo("Mandhana nc.jpg", licence="CC BY-NC 2.0")
+    s = enrich_service.run(env, client(FakeWikimedia(people, images)), today=TODAY)
+    assert s["photos_due"] == 1 and s["photos_ok"] == 1
 
 
 def test_enrich_failure_is_logged_and_keeps_finished_batches(env):

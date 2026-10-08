@@ -180,3 +180,15 @@ def test_page_uses_name_birth_and_photo(with_bio):
     assert person["birthDate"] == "1988-11-05" and person["birthPlace"]["name"] == "Delhi"
     assert person["image"] == "https://pandyahomelab.com/cricket/photos/ab12.jpg"
     assert person["sameAs"] == ["https://www.wikidata.org/wiki/Q213854"]
+
+
+def test_godl_photo_credit_says_no_endorsement(with_bio):
+    import sqlite3
+
+    from shared.config import Config
+    c = sqlite3.connect(Config().SERVING_DB)
+    c.execute("UPDATE player_bio SET photo_licence = 'GODL-India'")
+    c.commit()
+    c.close()
+    h = with_bio.get("/pages/players/v-kohli-%s/" % KOHLI).text
+    assert "GODL-India</a>, via" in h and "No endorsement by the Government of India" in h
