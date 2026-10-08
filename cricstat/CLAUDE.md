@@ -411,6 +411,11 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   stays out. enrich re-fetches previously rejected photos once their licence is allowed.
   DSM weekly register task now runs `register && enrich && build` (edited + verified 2026-10-08). After the licence
   change: 45 more photos (Kohli, Mandhana, Bumrah…), build 6 → 1,364 players with a photo.
+- **Hub wordmark on a pitch (2026-10-08, approved):** option C (dusty strip, mowing stripes, creases + stumps, green
+  square; inline SVG in gen_pages HUB). The "i" ball arrives on each load from a random end (hub.js sets
+  `data-ball` rb|rt|lb|lt; CSS §7 keyframes with custom props), bails + splinters burst on landing (CSS §8).
+  Sound only on click (browsers block autoplay): synthesised Web Audio "tock" + bail clicks; hover hint on the ball.
+  Reduced motion → static ball, no burst.
 - **`cricstat/web/` is LIVE** (bind mount). `gen_pages.py` writes to `cricstat/tools/staging/web/` by default
   (gitignored, created from cricstat/web; web_preview.py serves it). Edit CSS/JS there too. Go live after approval:
   `rsync -a cricstat/tools/staging/web/ cricstat/web/` (assets first), then delete the staging copy.
