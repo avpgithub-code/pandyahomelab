@@ -368,7 +368,8 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   via cd-pull by hand); build 4; nginx joined cricstat-network at .20, config tested in place, rebuilt + recreated —
   /cricket/, players, countries, licences, flags, /cricket/api/ live; /cricket/api/v1/admin/ → 404; admin portal
   rebuilt (`-f docker-compose.yml -f docker-compose.dev.yml` in deployment/ml — the dev file alone is invalid).
-  Gotcha: publish workflows use `concurrency` without cancel-in-progress, so an unapproved old run blocks newer ones.
+  Publish workflows used to let an unapproved old run block newer ones; fixed 2026-10-08 (`cancel-in-progress: true`:
+  the newest run replaces any older waiting one, so only the newest needs approval).
 - **P0.4 public 2026-10-07** (merge 1898a69): staged homepage/privacy/sitemap copied into `website/`.
 - **SEO round (2026-10-07, approved, branch `feat/cricstat-seo-about`):** `/cricket/about/` = the About drawer's story as
   a static page, rendered by gen_pages.py from the same about.json (Article JSON-LD, author = homepage Person
@@ -431,8 +432,7 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   probability). The best-calibrated model powers the live forecast; the comparison is published. Model jobs run as
   `cricstat-models` (scheduled), MLflow experiments `cricstat-*`, promotion only when backtests don't regress (F9).
   The forecast is identical for every team; disclose withheld Afghanistan men's matches. Start with a plan for review.
-- **Small open items:** publish workflows: make a newer run cancel a stale waiting one (`cancel-in-progress` or a
-  pending-run check); Ecclestone T20I runs-conceded check (see Golden follow-up); 19 golden blocks with a few missing
+- **Small open items:** Ecclestone T20I runs-conceded check (see Golden follow-up); 19 golden blocks with a few missing
   matches to review.
 - **Workflow:** feature branch per sub-phase, `--no-ff` merge, push, user approves publishes on GitHub, then
   `cd-pull.sh` (schema changes: `CRICSTAT_SERVICES=cricstat-pipeline` first, build, then the API). Docker via
