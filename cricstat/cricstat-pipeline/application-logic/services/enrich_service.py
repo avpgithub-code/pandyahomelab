@@ -146,6 +146,8 @@ def _photos(cfg, client, store: RawStore, ids: set, today, now, counts: Dict[str
         if img is None or img["status"] == "error" \
                 or _stale(img["fetched_at"], cfg.ENRICH_REFRESH_DAYS, now):
             return True                         # failures retry on the next run
+        if img["status"] == "rejected" and wikimedia.licence_allowed(img["licence"]):
+            return True                         # the allowed licences grew since: fetch it now
         return img["status"] == "ok" and not os.path.exists(
             os.path.join(cfg.PHOTO_DIR, img["thumb_path"] or ""))
     todo = sorted(n for n in wanted if due(n))[:cfg.ENRICH_MAX_PHOTOS]

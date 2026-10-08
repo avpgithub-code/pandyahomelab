@@ -301,7 +301,8 @@
     if (!ph) return null;
     return h("p", { class: "tiny muted photo-credit" }, ["Photo: " + (ph.author || "unknown author") + ", ",
       h("a", { href: ph.licence_url || ph.source_url }, ph.licence || "see file page"), ", via ",
-      h("a", { href: ph.source_url }, "Wikimedia Commons")]);
+      h("a", { href: ph.source_url }, "Wikimedia Commons"),
+      String(ph.licence).toLowerCase() === "godl-india" ? ". No endorsement by the Government of India is implied." : null]);
   }
 
   const params = new URLSearchParams(location.search);
