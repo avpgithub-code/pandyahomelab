@@ -6,6 +6,7 @@ page, the methodology page, later the AI analyst) states the same limits.
 """
 import datetime
 import json
+import math
 from typing import Dict, Optional, Tuple
 
 from application_logic.services.common import team_slugs
@@ -38,6 +39,18 @@ DISCLOSURES = {
     "qualifier": "Until the Qualifier (Feb–Mar 2027) settles the last four places, those places "
                  "are drawn by simulating the candidates' chances.",
 }
+
+
+def json_safe(value):
+    """NaN/±inf → None, recursively: JSON has no NaN (e.g. a coin flip has no 'accuracy'), and the
+    model record stored by cricstat-models may contain it."""
+    if isinstance(value, float):
+        return value if math.isfinite(value) else None
+    if isinstance(value, dict):
+        return {k: json_safe(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [json_safe(v) for v in value]
+    return value
 
 
 def _tournament(tournament: str) -> str:

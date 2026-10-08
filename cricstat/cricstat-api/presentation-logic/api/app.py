@@ -252,8 +252,9 @@ def create_app(cfg: Optional[Config] = None) -> FastAPI:
                           "reviewed results list (Wikipedia), rated by the same rule")
 
     def fenvelope(request: Request, data_defs) -> Response:
-        return envelope(request, *data_defs, etag_extra=forecast_service.etag(fdb),
-                        coverage=PREDICTOR_COVERAGE)
+        data, defs = data_defs
+        return envelope(request, forecast_service.json_safe(data), defs,
+                        etag_extra=forecast_service.etag(fdb), coverage=PREDICTOR_COVERAGE)
 
     @app.get("/v1/forecasts/{tournament}/latest")
     def forecast_latest(request: Request, tournament: str):

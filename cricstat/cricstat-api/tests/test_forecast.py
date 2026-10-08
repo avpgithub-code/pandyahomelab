@@ -24,7 +24,8 @@ PARAMS = {"family": "elo", "elo": {"k": 20, "home": 75, "margin": True, "regress
           "metrics": {"test_a.log_loss": 0.605, "test_b.log_loss": 0.548,
                       "test_a.win_rate.log_loss": 0.662, "test_b.win_rate.log_loss": 0.659},
           "gates": {"test_a_passes": True},
-          "backtest": {"test_c": {"wc2019": {"champion": "England"}}}}
+          "backtest": {"test_c": {"wc2019": {"champion": "England"}},
+                       "test_a": {"coin": {"accuracy": float("nan")}}}}      # as in the real data
 
 
 def _run(fs, created, as_of):
@@ -140,5 +141,6 @@ def test_backtest_and_admin(fclient):
     assert d["comparison"][1]["test_b_log_loss"] == 0.659
     assert d["backtest"]["test_c"]["wc2019"]["champion"] == "England"
     assert d["reliability"][0]["bin"] == "0.5-0.6"
+    assert d["backtest"]["test_a"]["coin"]["accuracy"] is None   # NaN → null, not a 500
     jobs = fclient.get("/v1/admin/jobs").json()["data"]
     assert jobs["forecast"]["forecast_id"] == 2
