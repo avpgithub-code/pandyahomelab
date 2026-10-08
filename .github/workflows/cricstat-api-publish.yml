@@ -13,9 +13,14 @@ on:
 permissions:
   contents: read
 
+# A newer run replaces an older one in this group, including one still waiting at the
+# nas-production approval gate: every run builds the latest main, so the newest run is the only
+# one worth approving (an unapproved old run used to block newer ones). A run already pushing
+# when a newer one starts is cancelled too; that is safe, because the newer run pushes again and
+# cd-pull.sh deploys only images that passed its NAS smoke test.
 concurrency:
   group: cricstat-api-publish-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   publish:
