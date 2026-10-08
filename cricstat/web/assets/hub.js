@@ -2,6 +2,72 @@
 (function () {
   "use strict";
   const C = window.cricstat, h = C.h;
+  // The "i" ball arrives from a random end of the pitch, above or below the wordmark (CSS: cricstat.css §7-8).
+  // On landing the bails fly and splinters burst; clicking the ball replays it with a wooden "tock"
+  // (Web Audio, synthesised; browsers allow sound only after a click, so page loads stay silent).
+  const pitch = document.querySelector(".hero .pitch");
+  const LAND_MS = 1800 * 0.76;                        // the landing keyframe of cs-ball-in
+  let audio = null, withSound = false;
+  function pick() { if (pitch) pitch.dataset.ball = ["rb", "rt", "lb", "lt"][Math.floor(Math.random() * 4)]; }
+  function tock() {
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      const t = audio.currentTime, out = audio.createGain();
+      out.gain.value = 0.5; out.connect(audio.destination);
+      const knock = (at, freq, len, vol) => {          // a short band-passed noise burst = wood
+        const n = audio.createBuffer(1, Math.ceil(audio.sampleRate * len), audio.sampleRate), d = n.getChannelData(0);
+        for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 4);
+        const src = audio.createBufferSource(), bp = audio.createBiquadFilter(), g = audio.createGain();
+        src.buffer = n; bp.type = "bandpass"; bp.frequency.value = freq; bp.Q.value = 6; g.gain.value = vol;
+        src.connect(bp).connect(g).connect(out); src.start(t + at);
+      };
+      const thump = audio.createOscillator(), tg = audio.createGain();   // body of the hit
+      thump.frequency.setValueAtTime(190, t); thump.frequency.exponentialRampToValueAtTime(90, t + 0.09);
+      tg.gain.setValueAtTime(0.9, t); tg.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+      thump.connect(tg).connect(out); thump.start(t); thump.stop(t + 0.13);
+      knock(0, 1700, 0.07, 1.4);                        // the stump
+      knock(0.09, 3200, 0.04, 0.6); knock(0.17, 2900, 0.03, 0.4);   // the bails landing
+    } catch (e) { /* no audio: the animation still plays */ }
+  }
+  function burst() {
+    const ball = pitch && pitch.querySelector(".i-ball");
+    if (!ball || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const chips = [];
+    const bail = (dx, rot) => ({ w: ".2em", h: ".045em", c: "#e6c48d", dx: dx, dy: "-.65em", rot: rot });
+    const parts = [bail("-.55em", "-320deg"), bail(".6em", "380deg")];
+    for (let i = 0; i < 6; i++) {
+      const a = Math.PI * (1.05 + i * 0.18), r = 0.35 + Math.random() * 0.3;
+      parts.push({ w: ".05em", h: ".03em", c: i % 2 ? "#c99a5b" : "#f0dcb4",
+                   dx: (Math.cos(a) * r).toFixed(2) + "em", dy: (Math.sin(a) * r).toFixed(2) + "em", rot: (Math.random() * 540 - 270) + "deg" });
+    }
+    parts.forEach((p) => {
+      const el = document.createElement("span");
+      el.className = "chip";
+      el.setAttribute("aria-hidden", "true");
+      el.style.cssText = "--w:" + p.w + ";--h:" + p.h + ";--c:" + p.c + ";--dx:" + p.dx + ";--dy:" + p.dy + ";--rot:" + p.rot;
+      ball.appendChild(el); chips.push(el);
+    });
+    const h1 = pitch.querySelector(".cs-lockup");
+    h1.classList.remove("jolt"); void h1.offsetWidth; h1.classList.add("jolt");
+    setTimeout(() => chips.forEach((el) => el.remove()), 1000);
+  }
+  if (pitch) {
+    pick();
+    const dot = pitch.querySelector(".i-dot");
+    const tip = document.createElementNS("http://www.w3.org/2000/svg", "title");   // hover hint
+    tip.textContent = "Click the ball to bowl it again 🔊";
+    dot.prepend(tip);
+    dot.addEventListener("animationstart", (e) => {
+      if (e.animationName !== "cs-ball-in") return;
+      setTimeout(() => { burst(); if (withSound) tock(); withSound = false; }, LAND_MS);
+    });
+    dot.addEventListener("click", () => {             // replay: a fresh delivery, with sound
+      pick(); withSound = true;
+      if (audio && audio.state === "suspended") audio.resume();
+      dot.style.animation = "none"; void dot.getBoundingClientRect(); dot.style.animation = "";
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { tock(); withSound = false; }
+    });
+  }
   const GENDER = { male: "men", female: "women" };
   let asOf = null, source = null, period = "ytd", followed = null, teamList = [];
 

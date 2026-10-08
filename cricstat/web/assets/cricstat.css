@@ -454,3 +454,47 @@ a.about-trigger[aria-current="page"] { background: rgba(255,153,51,.22); border-
 .about-page .about-section h2 { display: flex; align-items: center; gap: .5rem; font-size: 1.2rem; margin-bottom: .8rem; }
 .about-page .about-section p { font-size: .98rem; }
 .about-page #story p strong { color: var(--saffron); }
+
+/* 6. hub wordmark set on a cricket pitch (2026-10-08, option C: dusty strip, mowing stripes,
+   creases and stumps at both ends, soft green square). Proportions stylised to fit the wordmark. */
+.hero .pitch { position: relative; width: min(800px, 100%); aspect-ratio: 800 / 170; margin: .4rem auto 1.1rem;
+               display: flex; align-items: center; justify-content: center; }
+.hero .pitch-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.hero .pitch h1.cs-lockup { position: relative; margin: 0; font-size: clamp(2.4rem, 8.5vw, 5rem); }
+
+/* 7. the "i" ball arrives on each page load: in from one end of the pitch, rolling above or below the
+   wordmark (seam turning with the direction of travel), then onto the i with two settling bounces.
+   hub.js picks the start at random (data-ball = rb | rt | lb | lt: right/left end, below/above);
+   without it the right-below path plays. Final state = the static dot. Units are em of the wordmark.
+   Reduced-motion users get the static dot. */
+.hero .pitch .i-dot { --x0: 4.6em; --y0: .95em; --x1: .9em; --xh: .3em; --yh: -.7em; --dir: -1; }
+.hero .pitch[data-ball="rt"] .i-dot { --y0: -.45em; --yh: -.8em; }
+.hero .pitch[data-ball="lb"] .i-dot { --x0: -2.8em; --x1: -.6em; --xh: -.25em; --dir: 1; }
+.hero .pitch[data-ball="lt"] .i-dot { --x0: -2.8em; --x1: -.6em; --xh: -.25em; --y0: -.45em; --yh: -.8em; --dir: 1; }
+@keyframes cs-ball-in {
+  0%   { transform: translateX(-50%) translate(var(--x0), var(--y0)) rotate(0deg); opacity: 0; animation-timing-function: linear; }
+  8%   { opacity: 1; }
+  48%  { transform: translateX(-50%) translate(var(--x1), var(--y0)) rotate(calc(var(--dir) * 1080deg)); animation-timing-function: cubic-bezier(.2,.7,.4,1); }
+  64%  { transform: translateX(-50%) translate(var(--xh), var(--yh)) rotate(calc(var(--dir) * 1220deg)); animation-timing-function: cubic-bezier(.5,0,.8,.4); }
+  76%  { transform: translateX(-50%) translate(0, 0) rotate(calc(var(--dir) * 1300deg)); animation-timing-function: cubic-bezier(.2,.7,.4,1); }
+  85%  { transform: translateX(-50%) translate(0, -.22em) rotate(calc(var(--dir) * 1340deg)); animation-timing-function: cubic-bezier(.5,0,.8,.4); }
+  92%  { transform: translateX(-50%) translate(0, 0) rotate(calc(var(--dir) * 1360deg)); animation-timing-function: cubic-bezier(.2,.7,.4,1); }
+  96%  { transform: translateX(-50%) translate(0, -.06em) rotate(calc(var(--dir) * 1368deg)); animation-timing-function: cubic-bezier(.5,0,.8,.4); }
+  100% { transform: translateX(-50%) translate(0, 0) rotate(calc(var(--dir) * 1440deg)); opacity: 1; }
+}
+.hero .pitch .i-dot { animation: cs-ball-in 1.8s .35s both; transform-origin: 50% 50%; }
+@media (prefers-reduced-motion: reduce) { .hero .pitch .i-dot { animation: none; } }
+/* 8. on landing: the bails fly off and wood splinters burst from the i (hub.js adds them for ~1 s);
+   clicking the ball replays the delivery, with a synthesised "tock" (sound only after a click). */
+.hero .pitch .i-dot { cursor: pointer; pointer-events: auto; }
+.i-ball .chip { position: absolute; left: 50%; top: .17em; width: var(--w, .05em); height: var(--h, .05em);
+  border-radius: .02em; background: var(--c, #d9b27c); pointer-events: none;
+  animation: cs-chip .9s cubic-bezier(.2,.6,.4,1) forwards; }
+@keyframes cs-chip {
+  0%   { transform: translate(-50%, -50%) rotate(0deg); opacity: 1; }
+  70%  { opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--rot)); opacity: 0; }
+}
+.cs-lockup.jolt .i-ball { animation: cs-jolt .25s ease-out; }
+@keyframes cs-jolt { 30% { transform: translateY(.04em) rotate(-2deg); } 60% { transform: translateY(-.02em) rotate(1deg); } }
+@media (prefers-reduced-motion: reduce) { .i-ball .chip { display: none; } .cs-lockup.jolt .i-ball { animation: none; } }
