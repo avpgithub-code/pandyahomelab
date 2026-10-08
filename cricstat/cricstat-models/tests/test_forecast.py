@@ -110,6 +110,10 @@ def test_daily_forecast_writes_skips_and_forces(cfg, monkeypatch, tmp_path):
                     "super7": 7.0, "super_series": 3.0}
     assert c.execute("SELECT COUNT(*) FROM team_ratings").fetchone()[0] > 0
     assert c.execute("SELECT COUNT(*) FROM backtest_metrics").fetchone()[0] == 2
+    import json
+    summary = json.loads(c.execute("SELECT value FROM meta WHERE key = 'tournament:wc2027'"
+                                   ).fetchone()[0])
+    assert summary["groups"]["A"][0] == "India" and summary["matches"] == 57
 
 
 def test_forecast_refuses_bad_sums(cfg, monkeypatch, tmp_path):

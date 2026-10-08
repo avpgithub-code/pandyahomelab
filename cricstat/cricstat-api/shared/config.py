@@ -18,6 +18,8 @@ class Config:
         self.HOME = os.path.abspath(os.getenv("CRICSTAT_HOME", _DEFAULT_HOME))
         self.SERVING_DB = self._path("CRICSTAT_SERVING_DB", "data/db/cricstat.sqlite")
         self.RAW_DB = self._path("CRICSTAT_RAW_DB", "data/db/raw.sqlite")
+        # Written by cricstat-models (P1), next to the serving DB; same atomic-swap contract.
+        self.FORECAST_DB = self._path("CRICSTAT_FORECAST_DB", "data/db/forecast.sqlite")
         self.LOG_DIR = self._path("CRICSTAT_LOG_DIR", "logs")
         self.GOLDEN_SELECTION = self._path("CRICSTAT_GOLDEN_SELECTION",
                                            "docs/validation/golden-selection.csv")

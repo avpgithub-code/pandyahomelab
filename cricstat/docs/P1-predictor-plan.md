@@ -312,7 +312,7 @@ weekly/manual: cricstat-models train   → tuning + backtests A/B/C → MLflow c
 | P1.2 ✅ built 2026-10-08, in review | Elo engine + tuning + backtest A, logged to MLflow (run on the NAS host or in a dev container) | Parameters, calibration, baselines |
 | P1.3 ✅ built 2026-10-08, gate 5 pending | Tournament simulator + backtests B and C + the first 2027 forecast (offline) | Sanity sheet, publish bar |
 | P1.4 ✅ built 2026-10-08, in review | `cricstat-models` service, forecast.sqlite, registry + gate, CI/publish/cd-pull, DSM text | CI green, NAS smoke test |
-| P1.5 | API endpoints + tests | JSON on the dev API (8048) |
+| P1.5 ✅ built 2026-10-08, in review | API endpoints + tests | JSON on the dev API (8048) |
 | P1.6 | Predictor, Methodology, team card, hub teaser in `tools/staging/web` | Preview (8090), section by section |
 | Deploy | Merge `--no-ff`, publishes (models, API), cd-pull, DSM edit, rsync web, sitemap | Live check |
 

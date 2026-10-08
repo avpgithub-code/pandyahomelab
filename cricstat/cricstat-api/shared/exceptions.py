@@ -24,3 +24,7 @@ class Incompatible(ApiError):
 
 class NoData(ApiError):
     status, title = 503, "Serving database unavailable"
+
+
+class NoForecast(ApiError):
+    status, title = 503, "Forecast unavailable"
