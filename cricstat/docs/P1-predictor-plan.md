@@ -237,7 +237,7 @@ weekly/manual: cricstat-models train   → tuning + backtests A/B/C → MLflow c
 | Step | Deliverable | Review on |
 |---|---|---|
 | P1.0 | This plan | Decisions §10 |
-| P1.1 | Data layer: men's ODI extract, tournament configs (2019, 2023, 2027 + Qualifier) checked against the official fixtures, the Afghanistan supplement + crosswalks (`team_codes`, `supplement_venues`, `team_identities`) and its weekly check, data checks + tests | Configs, row counts, supplement source list |
+| P1.1 ✅ built 2026-10-08, in review | Data layer: men's ODI extract, tournament configs (2019, 2023, 2027 + Qualifier) checked against the official fixtures, the Afghanistan supplement + crosswalks (`team_codes`, `supplement_venues`, `team_identities`) and its weekly check, data checks + tests | Configs, row counts, supplement source list |
 | P1.2 | Elo engine + tuning + backtest A, logged to MLflow (run on the NAS host or in a dev container) | Parameters, calibration, baselines |
 | P1.3 | Tournament simulator + backtests B and C + the first 2027 forecast (offline) | Sanity sheet, publish bar |
 | P1.4 | `cricstat-models` service, forecast.sqlite, registry + gate, CI/publish/cd-pull, DSM text | CI green, NAS smoke test |

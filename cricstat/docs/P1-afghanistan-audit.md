@@ -105,3 +105,21 @@ Afghanistan's whole ODI history sits inside our window, so there is no span to e
 Since April 2009 the supplement adds about 10% to the men's ODI rows (188 on 1,904). To check in P1.1: whether the
 188 include matches abandoned without a ball (e.g. Ireland v Afghanistan, 5 Aug 2026). Cricsheet leaves those out,
 so the supplement keeps them as `no_result` with `has_play = 0`, and Elo skips them either way.
+
+## 8. As built in P1.1 (2026-10-08)
+- **Source of rows:** Wikipedia's "International cricket in <season>" pages (38 pages, 2008–09 to
+  2026–27), not one article per series: they list every ODI with its official number and scorecard id.
+  The parser was tested on every ODI they list: **1,982 of 1,985** overlapping Cricsheet matches agree on
+  date, teams, result and winner; the differences are Wikipedia rows linking the wrong scorecard.
+- **Second source:** each row is compared with the match box in its series/tournament article.
+  178 of 193 rows confirmed; 15 need a reviewer (2 one-day date differences in 2010; 9 rows with no
+  series article found; the 4 Asia Cup 2014 games, whose article has no match boxes).
+- **Checksum:** the team article's "ODI record versus other nations" table (current to 15 Aug 2026),
+  not the stale records page. Reconciled exactly per opponent and in total: 188 = 93 W, 88 L, 1 T, 6 NR,
+  plus 5 fixtures abandoned without a ball (kept as `has_play = 0`, not counted).
+- **Id hazards found:** the same ODI number on two matches (a season page mislabels three 2022 UAE
+  tri-series games as ODI 4631–4633, the real Asia Cup 2023 numbers), and one scorecard id on two
+  matches (England v Sri Lanka 2015 links Australia v Afghanistan's id). Rows are therefore keyed by
+  scorecard id + teams, and an Afghanistan row's id must not exist in Cricsheet.
+- **Restore path, implemented:** a Cricsheet match involving Afghanistan replaces the supplement copy
+  automatically; the checksum then counts both sources together.

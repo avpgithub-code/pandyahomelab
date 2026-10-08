@@ -1,0 +1,154 @@
+{
+  "id": "wc2027",
+  "name": "ICC Men's Cricket World Cup 2027",
+  "start": "2027-10-02",
+  "end": "2027-11-21",
+  "hosts": [
+    "South Africa",
+    "Zimbabwe",
+    "Namibia"
+  ],
+  "teams": [
+    "Afghanistan",
+    "Australia",
+    "Bangladesh",
+    "England",
+    "India",
+    "New Zealand",
+    "Pakistan",
+    "South Africa",
+    "Sri Lanka",
+    "Zimbabwe"
+  ],
+  "qualifier": {
+    "tournament": "wcq2027",
+    "slots": [
+      "Q1",
+      "Q2",
+      "Q3",
+      "Q4"
+    ],
+    "rule": "Q1 (Qualifier winner) goes straight into the group stage; Q2-Q4 play the Super Series and its winner (SSW) joins the group stage.",
+    "group_slots": {
+      "QA": "Group A",
+      "QB": "Group B"
+    },
+    "assignment": "TBC: which of Q1 and SSW is Qualifier A. Until confirmed, each simulation draws it 50/50."
+  },
+  "points": {
+    "win": 2,
+    "tie": 1,
+    "no_result": 1
+  },
+  "stages": [
+    {
+      "id": "super_series",
+      "kind": "round_robin",
+      "groups": {
+        "SS": [
+          "Q2",
+          "Q3",
+          "Q4"
+        ]
+      },
+      "advance": {
+        "top": 1,
+        "as": [
+          "SSW"
+        ]
+      },
+      "tie": "points_shared"
+    },
+    {
+      "id": "group",
+      "kind": "round_robin",
+      "groups": {
+        "A": [
+          "India",
+          "Australia",
+          "Pakistan",
+          "Afghanistan",
+          "Zimbabwe",
+          "QA"
+        ],
+        "B": [
+          "New Zealand",
+          "South Africa",
+          "Sri Lanka",
+          "England",
+          "Bangladesh",
+          "QB"
+        ]
+      },
+      "advance": {
+        "top": 3,
+        "as_prefix": "group letter + place (A1..A3, B1..B3)",
+        "best_of_rest": {
+          "place": 4,
+          "count": 1,
+          "as": "4TH"
+        }
+      },
+      "tie": "points_shared"
+    },
+    {
+      "id": "super7",
+      "kind": "round_robin",
+      "groups": {
+        "S7": [
+          "A1",
+          "A2",
+          "A3",
+          "B1",
+          "B2",
+          "B3",
+          "4TH"
+        ]
+      },
+      "carry_over": "none",
+      "advance": {
+        "top": 4,
+        "as": [
+          "S7-1",
+          "S7-2",
+          "S7-3",
+          "S7-4"
+        ]
+      },
+      "tie": "points_shared"
+    },
+    {
+      "id": "semi",
+      "kind": "knockout",
+      "washout": "higher_placed",
+      "tie": "super_over"
+    },
+    {
+      "id": "final",
+      "kind": "knockout",
+      "washout": "shared",
+      "tie": "super_over"
+    }
+  ],
+  "tiebreakers": [
+    "points",
+    "wins",
+    "nrr",
+    "head_to_head"
+  ],
+  "sources": [
+    "ICC media release 'ICC revamp formats for marquee men's events' (15 Jul 2026)",
+    "ICC media release 'ICC Men's Cricket World Cup 2027 schedule revealed' (1 Oct 2026)",
+    "Wikipedia: 2027 Cricket World Cup (revision 1379170381): 57 fixtures, venues, scorecard ids",
+    "Wikipedia: 2027 Cricket World Cup qualification (direct qualifiers by ODI ranking on 30 Sep 2026)"
+  ],
+  "assumptions": [
+    "TBC Qualifier A/B: whether the Qualifier winner or the Super Series winner joins Group A is not published; simulated 50/50.",
+    "TBC Super Series: 3 round-robin matches (ICC and Wikipedia); one report says two matches. Order of the 3 TBA fixtures is assumed Q2 v Q3, Q3 v Q4, Q2 v Q4 (order doesn't change the outcome).",
+    "TBC Best 4th-placed team: compared on points, then wins, then NRR (groups are the same size, so points compare fairly). Equal points and wins are split by a random draw.",
+    "TBC Super 7: no points carried over from the group stage (21 matches = every pair plays once; the release mentions no carry-over).",
+    "TBC Knockouts: a washed-out semi-final sends the higher-placed Super 7 team through; a washed-out final is shared; ties go to a super over (simulated 50/50). As in 2019 and 2023.",
+    "Home advantage applies only to a team playing in its own country: South Africa in South Africa, Zimbabwe in Zimbabwe, Namibia in Windhoek (if it qualifies). Same rule as every other match.",
+    "NRR is not simulated: equal points and wins are split by a random draw."
+  ]
+}

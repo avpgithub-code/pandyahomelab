@@ -1,0 +1,28 @@
+[project]
+name = "cricstat-models"
+version = "0.1.0"
+description = "ODI World Cup 2027 predictor: rating input, tournament configs, Elo + Monte Carlo (P1)"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [{name = "Archit Pandya", email = "archit@pandyahomelab.com"}]
+# P1.1 runtime is the Python standard library only (numpy arrives with the simulator in P1.3).
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py38"
+line-length = 100
+extend-exclude = ["application_logic", "db_logic", "presentation_logic"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+# UP: keep 3.8-compatible typing (typing.List etc.) and %-formatting as written.
+ignore = ["UP006", "UP007", "UP031", "UP035", "UP045"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["shared", "db_logic", "application_logic", "presentation_logic"]
+
+[tool.ruff.lint.per-file-ignores]
+# Test fixtures quote real wikitext rows verbatim; wrapping them would change what's parsed.
+"tests/*" = ["E501"]
