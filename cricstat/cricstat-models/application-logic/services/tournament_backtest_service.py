@@ -184,6 +184,7 @@ def run(cfg, log_to_mlflow: bool = True, out_root: Optional[str] = None,
     g["gates_1_to_4_pass"] = bool(g["test_a_passes"] and g["gate3_test_b_not_worse"] and
                                   g["gate4_replay_and_sums"])
     report["gates"] = g
+    report["candidate"] = candidate(report)
     out = _write(cfg, report, out_root)
     report["report_dir"] = out
     if log_to_mlflow:
@@ -277,7 +278,31 @@ def _write(cfg, report, out_root) -> str:
                         for k, v in r.items()})
     with open(os.path.join(out, "sanity_sheet.md"), "w", encoding="utf-8") as f:
         f.write(sanity_sheet(report))
+    with open(os.path.join(out, "candidate.json"), "w", encoding="utf-8") as f:
+        json.dump(report["candidate"], f, indent=1, sort_keys=True)
     return out
+
+
+def candidate(report) -> Dict[str, object]:
+    """Everything the daily forecast needs, frozen at training time (no Wikipedia at forecast
+    time): Elo parameters, rating-drift a, no-result/tie rates, simulation settings, and the
+    backtest metrics the next candidate must not regress against."""
+    fc = report["forecast"]
+    ta, tb_ = report["test_a"], report["test_b_pooled"]
+    return {"family": "elo", "elo": fc["params"], "sigma_a": fc["sigma_a"],
+            "conditions": {"by_country": fc["conditions"]["by_country"],
+                           "global": fc["conditions"]["global"], "tie": fc["conditions"]["tie"]},
+            "n_simulations": N_FORECAST, "seed": SEED,
+            "trained_at": report["generated_at"], "data_as_of": report["data"]["data_as_of"],
+            "metrics": {"test_a.log_loss": ta["elo"]["log_loss"],
+                        "test_a.brier": ta["elo"]["brier"],
+                        "test_a.calibration_slope": ta["elo"]["calibration_slope"],
+                        "test_b.log_loss": tb_["elo"]["log_loss"],
+                        "test_b.brier": tb_["elo"]["brier"],
+                        "test_a.win_rate.log_loss": ta["baselines"]["win_rate"]["log_loss"],
+                        "test_b.win_rate.log_loss": tb_["win_rate"]["log_loss"]},
+            "gates": {k: v for k, v in report["gates"].items() if isinstance(v, bool)},
+            "reliability_test_a": ta["elo"]["reliability"]}
 
 
 def _pct(x: float) -> str:
@@ -342,7 +367,7 @@ def _log(cfg, report, out) -> Dict[str, str]:
                    "wc2027.qualifier_field": ", ".join(fc["qualifier_field"])})
     client.log_batch(run["run_id"], params, m)
     for name in ("test_b_predictions.csv", "test_c_stage_probabilities.csv", "wc2027_forecast.csv",
-                 "sanity_sheet.md"):
+                 "sanity_sheet.md", "candidate.json"):
         client.log_artifact(run, os.path.join(out, name))
     client.end_run(run["run_id"])
     return {"run_id": run["run_id"], "experiment_id": run["experiment_id"]}

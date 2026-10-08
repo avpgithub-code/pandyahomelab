@@ -7,7 +7,8 @@ The ODI World Cup 2027 predictor (P1). Plan: `../docs/P1-predictor-plan.md`; Afg
 `backtest_service.py`, logged to MLflow `cricstat-elo-backtest` through a stdlib REST client).
 **P1.3: the tournament simulator** (`models/simulator.py`, drift `models/uncertainty.py`, rain
 `conditions_service.py`), backtests B/C, replay check, gates 1–4 and the first 2027 forecast
-(`tournament_backtest_service.py`). The scheduled job (P1.4) builds on them.
+(`tournament_backtest_service.py`). **P1.4: the scheduled job** (`forecast_service.py`, `forecast_store.py`, MLflow registry),
+Dockerfile, compose service `cricstat-models`, cd-pull smoke test, CI + `cricstat-models-publish.yml`.
 
 ## What's here
 | Path | What |
@@ -39,6 +40,9 @@ The ODI World Cup 2027 predictor (P1). Plan: `../docs/P1-predictor-plan.md`; Afg
 
 ## Commands
 ```
+python3 -m presentation_logic.cli forecast [--force]  # daily, after the build
+python3 -m presentation_logic.cli train [--owner-approved]   # backtests + promotion gate
+python3 -m presentation_logic.cli selftest            # cd-pull smoke test (no writes)
 python3 -m presentation_logic.cli data-check          # exit 2 if any check fails
 python3 -m presentation_logic.cli supplement-check    # weekly proposal (JSON)
 python3 -m presentation_logic.cli supplement-draft --out DIR

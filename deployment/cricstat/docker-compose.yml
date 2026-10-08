@@ -39,6 +39,34 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  cricstat-models:
+    # P1: Elo + World Cup simulation. Daily `forecast` after the build, weekly/manual `train`.
+    image: cricstat-models:latest     # from GHCR via cd-pull.sh; `build:` only for emergencies
+    build:
+      context: ../../cricstat                  # needs cricstat/sql/venue_map.csv
+      dockerfile: cricstat-models/docker/Dockerfile
+    container_name: cricstat-models
+    profiles: ["batch"]            # never started by `up`; only `run --rm`
+    user: "${HOST_UID:-1026}:${HOST_GID:-100}"
+    environment:
+      CRICSTAT_HOME: /cricstat
+      CRICSTAT_MLFLOW_URI: http://ml-mlflow:5000
+    volumes:
+      # Reads data/db/cricstat.sqlite; writes data/db/forecast.sqlite (atomic swap) and data/models/.
+      - /volume1/pandya-homelab/cricstat/data:/cricstat/data
+      - /volume1/pandya-homelab/cricstat/logs:/cricstat/logs
+    networks:
+      cricstat-network:
+        ipv4_address: 172.25.0.15
+      ml-network:                  # only to reach ml-mlflow (tracking + model registry)
+        ipv4_address: 172.20.0.40
+    mem_limit: 768m
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   cricstat-api:
     image: cricstat-api:latest       # from GHCR via cd-pull.sh; `build:` only for emergencies
     build:
@@ -80,6 +108,9 @@ services:
         max-file: "3"
 
 networks:
+  ml-network:
+    external: true
+    name: ml_ml-network            # created by deployment/ml (MLflow lives there)
   cricstat-network:
     driver: bridge
     ipam:

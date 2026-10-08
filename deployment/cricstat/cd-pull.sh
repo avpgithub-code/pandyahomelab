@@ -3,7 +3,7 @@
 # Run by DSM Task Scheduler as root (non-zero exit → DSM email), or by hand:
 #   sh cd-pull.sh             deploy the newest published image of each service, if it changed
 #   sh cd-pull.sh rollback    put back the image that was live before the last deploy
-# Env: CRICSTAT_IMAGE_TAG (default: main), CRICSTAT_SERVICES (default: both), DOCKER (default: /usr/local/bin/docker; may include
+# Env: CRICSTAT_IMAGE_TAG (default: main), CRICSTAT_SERVICES (default: all three), DOCKER (default: /usr/local/bin/docker; may include
 #      arguments, e.g. DOCKER="sudo -n docker" to test as the operator instead of root).
 #
 # Each new image must pass a smoke test ON THE NAS (its CPU has no AVX; CI runners do) before it is
@@ -18,7 +18,7 @@ REGISTRY=ghcr.io/avpgithub-code
 TAG=${CRICSTAT_IMAGE_TAG:-main}
 # CRICSTAT_SERVICES deploys a subset in order, e.g. the pipeline first when a schema change must
 # be built before the API that reads it can go live (P0.5).
-SERVICES=${CRICSTAT_SERVICES:-"cricstat-pipeline cricstat-api"}
+SERVICES=${CRICSTAT_SERVICES:-"cricstat-pipeline cricstat-models cricstat-api"}
 ALWAYS_ON="cricstat-api"
 HERE=$(cd "$(dirname "$0")" && pwd)
 COMPOSE="$DOCKER compose -f $HERE/docker-compose.yml"
@@ -35,6 +35,11 @@ smoke() {  # $1 = service, $2 = image; run as the operator UID like compose does
   case "$1" in
     cricstat-pipeline) $DOCKER run --rm -u 1026:100 "$2" --help >/dev/null 2>&1 ;;
     cricstat-api) smoke_api "$2" ;;
+    # Every data/config check against the real DB, read-only, no network (the champion comes from
+    # the forecast.sqlite cache when MLflow is unreachable), no writes.
+    cricstat-models) $DOCKER run --rm -u 1026:100 --read-only --tmpfs /tmp --network none \
+        -e CRICSTAT_LOG_DIR=/tmp/logs -e CRICSTAT_MLFLOW_URI=http://127.0.0.1:9 \
+        -v "$DATA_DB:/cricstat/data/db:ro" "$2" selftest --quiet >/dev/null 2>&1 ;;
     *) log "no smoke test defined for $1"; return 1 ;;
   esac
 }

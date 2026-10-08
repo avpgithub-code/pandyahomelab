@@ -185,6 +185,22 @@ The 2027 World Cup is played in South Africa (44 matches), Zimbabwe (10) and Nam
   2023 champion Australia had the second highest (16%; India 42% lost the final). Replays reproduce the
   real semi-finalists and champions. MLflow run eae84b75.
 
+### 2.8 As built in P1.4 (2026-10-08)
+- **Gate 5 passed** (owner, 2026-10-08) → first champion `cricstat-wc2027-predictor` version 1 (`elo-v1`,
+  MLflow run 79539be4), forecast #1 written to data/db/forecast.sqlite.
+- **Commands:** `forecast` (daily; fingerprint = rating input + champion + fixtures + Qualifier field, so it
+  skips in <1 s when nothing changed), `train [--owner-approved]` (backtests → promotion gate: gates 1–4
+  and no regression beyond +0.002 test-A / +0.005 test-B log loss), `selftest` (cd-pull smoke test,
+  no writes, no network), `supplement-check` (weekly proposal).
+- **The champion is frozen data** (candidate.json: Elo parameters, drift, no-result/tie rates, simulation
+  settings, backtest metrics), so the daily forecast needs no Wikipedia; if MLflow is down it uses the
+  copy cached in forecast.sqlite.
+- **During the tournament:** fixtures carry the 2027 scorecard ids, so played results are taken from
+  Cricsheet automatically (`overlay_results`) and the odds follow the event.
+- **forecast.sqlite tables:** team_identities, model_versions, team_ratings, forecast_runs, forecast_team,
+  forecast_inputs (matches new since the previous forecast: "why did the odds move?"), backtest_metrics,
+  reliability_bins. Stable ids only.
+
 ## 3. Backtests and "good enough to publish"
 ### 3.1 What is tested
 | Test | Sample | Why |
@@ -295,7 +311,7 @@ weekly/manual: cricstat-models train   → tuning + backtests A/B/C → MLflow c
 | P1.1 ✅ built 2026-10-08, in review | Data layer: men's ODI extract, tournament configs (2019, 2023, 2027 + Qualifier) checked against the official fixtures, the Afghanistan supplement + crosswalks (`team_codes`, `supplement_venues`, `team_identities`) and its weekly check, data checks + tests | Configs, row counts, supplement source list |
 | P1.2 ✅ built 2026-10-08, in review | Elo engine + tuning + backtest A, logged to MLflow (run on the NAS host or in a dev container) | Parameters, calibration, baselines |
 | P1.3 ✅ built 2026-10-08, gate 5 pending | Tournament simulator + backtests B and C + the first 2027 forecast (offline) | Sanity sheet, publish bar |
-| P1.4 | `cricstat-models` service, forecast.sqlite, registry + gate, CI/publish/cd-pull, DSM text | CI green, NAS smoke test |
+| P1.4 ✅ built 2026-10-08, in review | `cricstat-models` service, forecast.sqlite, registry + gate, CI/publish/cd-pull, DSM text | CI green, NAS smoke test |
 | P1.5 | API endpoints + tests | JSON on the dev API (8048) |
 | P1.6 | Predictor, Methodology, team card, hub teaser in `tools/staging/web` | Preview (8090), section by section |
 | Deploy | Merge `--no-ff`, publishes (models, API), cd-pull, DSM edit, rsync web, sitemap | Live check |

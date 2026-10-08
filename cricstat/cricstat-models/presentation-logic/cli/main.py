@@ -5,6 +5,9 @@
     python3 -m presentation_logic.cli supplement-draft --out DIR    # rebuild the draft (review)
     python3 -m presentation_logic.cli tournament-draft wc2027       # refresh the 2027 fixtures
     python3 -m presentation_logic.cli backtest [--no-mlflow]        # P1.2: tune Elo + backtest A
+    python3 -m presentation_logic.cli forecast [--force]     # daily: champion → forecast.sqlite
+    python3 -m presentation_logic.cli train [--owner-approved]   # weekly/manual: backtest + promote
+    python3 -m presentation_logic.cli selftest               # cd-pull smoke test: checks, no writes
     python3 -m presentation_logic.cli tournament-backtest [--no-mlflow] [--sims N]
                                          # P1.3: tests A, B, C, replay, gates 1-4, 2027 forecast
 
@@ -22,6 +25,7 @@ import time
 from application_logic.services import (
     backtest_service,
     data_service,
+    forecast_service,
     supplement_service,
     tournament_backtest_service,
     tournament_service,
@@ -33,7 +37,7 @@ from shared.logger import get_logger, setup_logging
 
 EXIT_OK, EXIT_ERROR, EXIT_CHECK = 0, 1, 2
 MODES = ("data-check", "supplement-check", "supplement-draft", "tournament-draft", "backtest",
-         "tournament-backtest")
+         "tournament-backtest", "train", "forecast", "selftest")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -46,6 +50,9 @@ def build_parser() -> argparse.ArgumentParser:
                                  " files)")
     p.add_argument("--sims", type=int, help="tournament-backtest: simulations for the 2027"
                                             " forecast (default 50,000)")
+    p.add_argument("--force", action="store_true", help="forecast: even if nothing changed")
+    p.add_argument("--owner-approved", action="store_true",
+                   help="train: the owner checked the sanity sheet (needed for the first champion)")
     p.add_argument("--no-mlflow", action="store_true", help="backtest: don't log to MLflow")
     p.add_argument("--quiet", action="store_true", help="only warnings and errors on stderr")
     return p
@@ -100,6 +107,12 @@ def main(argv=None) -> int:
             summary.update(test_a=_headline(rep), gates=rep["gates"], report_dir=rep["report_dir"],
                            mlflow=rep.get("mlflow"),
                            params={k: v["params"] for k, v in rep["windows"].items()})
+        elif args.mode == "forecast":
+            summary.update(forecast_service.forecast(cfg, force=args.force, n=args.sims))
+        elif args.mode == "train":
+            summary.update(forecast_service.train(cfg, owner_approved=args.owner_approved))
+        elif args.mode == "selftest":
+            summary.update(forecast_service.selftest(cfg))
         elif args.mode == "tournament-backtest":
             kw = {"n_forecast": args.sims} if args.sims else {}
             rep = tournament_backtest_service.run(cfg, log_to_mlflow=not args.no_mlflow, **kw)

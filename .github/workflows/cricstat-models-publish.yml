@@ -1,0 +1,67 @@
+# cricstat-models publish (P1.4). Builds, smoke-tests and publishes the models image to GHCR, behind the
+# `nas-production` approval gate. Runs ONLY when the image's inputs (models code + reviewed data, or the venue map) change on main (docs-only
+# changes no longer ask for approval), or when started by hand. The NAS pulls it via cd-pull.sh.
+# Lint/tests live in cricstat-ci.yml and run on every change.
+name: cricstat-models-publish
+
+on:
+  push:
+    branches: [main]
+    paths: ["cricstat/cricstat-models/**", "cricstat/sql/venue_map.csv"]   # image inputs; edits to this file: test with a manual run
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A newer run replaces an older one in this group, including one still waiting at the
+# nas-production approval gate: every run builds the latest main, so the newest run is the only
+# one worth approving (an unapproved old run used to block newer ones). A run already pushing
+# when a newer one starts is cancelled too; that is safe, because the newer run pushes again and
+# cd-pull.sh deploys only images that passed its NAS smoke test.
+concurrency:
+  group: cricstat-models-publish-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-22.04
+    environment: nas-production          # required reviewer = the approval gate
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - name: Build for smoke test
+        uses: docker/build-push-action@v7
+        with:
+          context: cricstat
+          file: cricstat/cricstat-models/docker/Dockerfile
+          load: true
+          tags: cricstat-models:smoke
+      - name: Smoke test as the operator UID (catches the Synology 700-bits trap)
+        run: docker run --rm -u 1026:100 --read-only --tmpfs /tmp -e CRICSTAT_LOG_DIR=/tmp/logs cricstat-models:smoke --help
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/avpgithub-code/cricstat-models
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix=sha-
+          labels: |
+            org.opencontainers.image.title=cricstat-models
+            org.opencontainers.image.description=ODI World Cup 2027 predictor job (Elo + Monte Carlo) for cricstat (pandyaHomeLab)
+      - name: Publish (same build, from cache)
+        uses: docker/build-push-action@v7
+        with:
+          context: cricstat
+          file: cricstat/cricstat-models/docker/Dockerfile
+          platforms: linux/amd64        # the NAS is x86_64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

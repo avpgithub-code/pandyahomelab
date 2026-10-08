@@ -90,9 +90,55 @@ class MlflowClient:
         except (urllib.error.URLError, OSError) as exc:
             raise MlflowError("artifact upload %s failed: %s" % (name, exc)) from exc
 
+    def download_artifact(self, experiment_id: str, run_id: str, name: str) -> bytes:
+        url = "%s/api/2.0/mlflow-artifacts/artifacts/%s/%s/artifacts/%s" % (
+            self.base, experiment_id, run_id, urllib.parse.quote(name))
+        try:
+            with urllib.request.urlopen(url, timeout=self.timeout) as resp:
+                return resp.read()
+        except (urllib.error.URLError, OSError) as exc:
+            raise MlflowError("artifact download %s failed: %s" % (name, exc)) from exc
+
+    def run_info(self, run_id: str) -> Dict[str, str]:
+        info = self._call("GET", "runs/get", query={"run_id": run_id})["run"]["info"]
+        return {"run_id": info["run_id"], "experiment_id": info["experiment_id"],
+                "artifact_uri": info["artifact_uri"]}
+
     def end_run(self, run_id: str, status: str = "FINISHED") -> None:
         self._call("POST", "runs/update", {"run_id": run_id, "status": status,
                                            "end_time": int(time.time() * 1000)})
+
+    # -- model registry (the "champion" alias is what the daily forecast uses) -------------------
+    def ensure_registered_model(self, name: str, description: str = "") -> None:
+        got = self._call("GET", "registered-models/get", query={"name": name})
+        if got.get("_missing"):
+            self._call("POST", "registered-models/create", {"name": name,
+                                                             "description": description})
+
+    def create_model_version(self, name: str, run: Dict[str, str], tags: Dict[str, str]) -> str:
+        mv = self._call("POST", "model-versions/create", {
+            "name": name, "source": run["artifact_uri"], "run_id": run["run_id"],
+            "tags": [{"key": k, "value": str(v)} for k, v in tags.items()]})["model_version"]
+        return str(mv["version"])
+
+    def set_alias(self, name: str, alias: str, version: str) -> None:
+        self._call("POST", "registered-models/alias", {"name": name, "alias": alias,
+                                                        "version": version})
+
+    def get_alias(self, name: str, alias: str) -> Optional[Dict[str, str]]:
+        got = self._call("GET", "registered-models/alias", query={"name": name, "alias": alias})
+        if got.get("_missing") or "model_version" not in got:
+            return None
+        mv = got["model_version"]
+        return {"version": str(mv["version"]), "run_id": mv.get("run_id", "")}
+
+    def run_params(self, run_id: str) -> Dict[str, str]:
+        run = self._call("GET", "runs/get", query={"run_id": run_id})["run"]
+        return {p["key"]: p["value"] for p in run.get("data", {}).get("params", [])}
+
+    def run_metrics(self, run_id: str) -> Dict[str, float]:
+        run = self._call("GET", "runs/get", query={"run_id": run_id})["run"]
+        return {m["key"]: float(m["value"]) for m in run.get("data", {}).get("metrics", [])}
 
     def search_runs(self, experiment: str, filter_string: str = "", max_results: int = 20
                     ) -> List[dict]:
