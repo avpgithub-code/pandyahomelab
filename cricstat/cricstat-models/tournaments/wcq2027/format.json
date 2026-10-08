@@ -23,6 +23,20 @@
     "Wikipedia: 2027 Cricket World Cup Qualifier"
   ],
   "assumptions": [
-    "Until the field and format are confirmed (Dec 2026), see P1.3 for how the four qualifier slots are filled."
+    "Owner decision 2026-10-08: until the field is known (Dec 2026), the four World Cup places are drawn by simulating the candidates' chances with Elo.",
+    "Simulated field: West Indies, Ireland and all eight CWC League 2 teams (the League 2 bottom four are assumed to come through the Qualifier Play-off; the Challenge League teams have no ODI history to rate).",
+    "Simulated format: one round robin of 10 teams at neutral venues, places 1-4 = Q1-Q4 (the real format is TBC; 2023 used two groups of 5 then a Super Six)."
+  ],
+  "simulation_field": [
+    "West Indies",
+    "Ireland",
+    "Canada",
+    "Namibia",
+    "Nepal",
+    "Netherlands",
+    "Oman",
+    "Scotland",
+    "United Arab Emirates",
+    "United States of America"
   ]
 }

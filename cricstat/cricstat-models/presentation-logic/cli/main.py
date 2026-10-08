@@ -5,6 +5,8 @@
     python3 -m presentation_logic.cli supplement-draft --out DIR    # rebuild the draft (review)
     python3 -m presentation_logic.cli tournament-draft wc2027       # refresh the 2027 fixtures
     python3 -m presentation_logic.cli backtest [--no-mlflow]        # P1.2: tune Elo + backtest A
+    python3 -m presentation_logic.cli tournament-backtest [--no-mlflow] [--sims N]
+                                         # P1.3: tests A, B, C, replay, gates 1-4, 2027 forecast
 
 stdout gets exactly one JSON line (the run summary); the human log goes to
 CRICSTAT_LOG_DIR/models-YYYYMMDD.log and stderr.
@@ -21,6 +23,7 @@ from application_logic.services import (
     backtest_service,
     data_service,
     supplement_service,
+    tournament_backtest_service,
     tournament_service,
 )
 from db_logic.repository import serving_reader, tournament_store
@@ -29,7 +32,8 @@ from shared.exceptions import DataCheckError
 from shared.logger import get_logger, setup_logging
 
 EXIT_OK, EXIT_ERROR, EXIT_CHECK = 0, 1, 2
-MODES = ("data-check", "supplement-check", "supplement-draft", "tournament-draft", "backtest")
+MODES = ("data-check", "supplement-check", "supplement-draft", "tournament-draft", "backtest",
+         "tournament-backtest")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -40,6 +44,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--out", help="supplement-draft: folder to write into (default: a review"
                                  " folder under CRICSTAT_DATA_DIR/models, never the committed"
                                  " files)")
+    p.add_argument("--sims", type=int, help="tournament-backtest: simulations for the 2027"
+                                            " forecast (default 50,000)")
     p.add_argument("--no-mlflow", action="store_true", help="backtest: don't log to MLflow")
     p.add_argument("--quiet", action="store_true", help="only warnings and errors on stderr")
     return p
@@ -94,6 +100,15 @@ def main(argv=None) -> int:
             summary.update(test_a=_headline(rep), gates=rep["gates"], report_dir=rep["report_dir"],
                            mlflow=rep.get("mlflow"),
                            params={k: v["params"] for k, v in rep["windows"].items()})
+        elif args.mode == "tournament-backtest":
+            kw = {"n_forecast": args.sims} if args.sims else {}
+            rep = tournament_backtest_service.run(cfg, log_to_mlflow=not args.no_mlflow, **kw)
+            summary.update(gates=rep["gates"], report_dir=rep["report_dir"],
+                           mlflow=rep.get("mlflow"),
+                           test_b={k: {m: round(v[m], 4) for m in ("n", "log_loss", "brier")}
+                                   for k, v in rep["test_b_pooled"].items()},
+                           wc2027_top=[(r["team"], round(r["p_champion"], 3))
+                                       for r in rep["forecast"]["table"][:10]])
         elif args.mode == "tournament-draft":
             if args.tournament != "wc2027":
                 raise ValueError("only wc2027 is drafted from its schedule; past World Cups"

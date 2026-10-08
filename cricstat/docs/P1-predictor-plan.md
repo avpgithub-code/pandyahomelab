@@ -169,6 +169,22 @@ The 2027 World Cup is played in South Africa (44 matches), Zimbabwe (10) and Nam
   Boland Bank Park vs Boland Park; De Beers Diamond Oval vs Diamond Oval). venue_map is applied on every
   build and isn't in rules_sha, so the fix needs no full rebuild.
 
+### 2.7 As built in P1.3 (2026-10-08)
+- **Simulator:** one engine driven by each tournament's format.json; 2,000 simulated 2027 tournaments
+  take about 3 s on the NAS (50,000 in about 80 s).
+- **Rating drift (sigma), measured not chosen:** SD of Full Members' rating change over a horizon, since
+  2007: 11 points over 30 days, 35 over a year, 42 over 18 months; a random walk fits
+  (sigma = sqrt(3.36 × days)). The 2027 forecast 360 days out uses sigma = 35; backtests on the eve use 0,
+  with ratings updated after each simulated match (K = 20).
+- **No-result rates (complete Wikipedia ODI list, shrunk toward 6.5% global):** South Africa 7.6%,
+  Zimbabwe 5.1%, Namibia 5.6% (October–November); ties 1.1%. Knockouts use the rate squared (reserve day).
+- **Qualifier (owner decision 2026-10-08):** until the field is known, one simulated round robin of West
+  Indies, Ireland and the eight CWC League 2 teams fills Q1–Q4 (wcq2027/format.json lists the assumptions).
+- **Results:** gates 1–4 pass. Test B (92 World Cup matches, eve ratings): Elo log loss 0.548 / Brier 0.177
+  vs win-rate 0.659 / 0.229. Test C: 2019 champion England had the highest pre-tournament chance (36%);
+  2023 champion Australia had the second highest (16%; India 42% lost the final). Replays reproduce the
+  real semi-finalists and champions. MLflow run eae84b75.
+
 ## 3. Backtests and "good enough to publish"
 ### 3.1 What is tested
 | Test | Sample | Why |
@@ -278,7 +294,7 @@ weekly/manual: cricstat-models train   → tuning + backtests A/B/C → MLflow c
 | P1.0 | This plan | Decisions §10 |
 | P1.1 ✅ built 2026-10-08, in review | Data layer: men's ODI extract, tournament configs (2019, 2023, 2027 + Qualifier) checked against the official fixtures, the Afghanistan supplement + crosswalks (`team_codes`, `supplement_venues`, `team_identities`) and its weekly check, data checks + tests | Configs, row counts, supplement source list |
 | P1.2 ✅ built 2026-10-08, in review | Elo engine + tuning + backtest A, logged to MLflow (run on the NAS host or in a dev container) | Parameters, calibration, baselines |
-| P1.3 | Tournament simulator + backtests B and C + the first 2027 forecast (offline) | Sanity sheet, publish bar |
+| P1.3 ✅ built 2026-10-08, gate 5 pending | Tournament simulator + backtests B and C + the first 2027 forecast (offline) | Sanity sheet, publish bar |
 | P1.4 | `cricstat-models` service, forecast.sqlite, registry + gate, CI/publish/cd-pull, DSM text | CI green, NAS smoke test |
 | P1.5 | API endpoints + tests | JSON on the dev API (8048) |
 | P1.6 | Predictor, Methodology, team card, hub teaser in `tools/staging/web` | Preview (8090), section by section |

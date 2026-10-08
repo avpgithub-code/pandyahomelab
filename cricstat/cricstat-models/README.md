@@ -5,7 +5,9 @@ The ODI World Cup 2027 predictor (P1). Plan: `../docs/P1-predictor-plan.md`; Afg
 
 **P1.1: the data layer. P1.2: Elo ratings, tuning and backtest A** (`application-logic/models/`,
 `backtest_service.py`, logged to MLflow `cricstat-elo-backtest` through a stdlib REST client).
-The tournament simulator (P1.3) and the scheduled job (P1.4) build on them.
+**P1.3: the tournament simulator** (`models/simulator.py`, drift `models/uncertainty.py`, rain
+`conditions_service.py`), backtests B/C, replay check, gates 1–4 and the first 2027 forecast
+(`tournament_backtest_service.py`). The scheduled job (P1.4) builds on them.
 
 ## What's here
 | Path | What |
@@ -42,6 +44,7 @@ python3 -m presentation_logic.cli supplement-check    # weekly proposal (JSON)
 python3 -m presentation_logic.cli supplement-draft --out DIR
 python3 -m presentation_logic.cli tournament-draft wc2027
 python3 -m presentation_logic.cli backtest [--no-mlflow]   # ~1 min on the NAS
+python3 -m presentation_logic.cli tournament-backtest [--no-mlflow] [--sims N]   # P1.3, ~3 min
 python3 -m pytest tests -q && python3 -m ruff check .
 ```
 Exit codes: 0 ok, 1 error, 2 data check failed (nothing downstream runs; the old forecast stays).
