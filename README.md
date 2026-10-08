@@ -14,7 +14,7 @@ pandyaHomeLab is the platform behind the live site. It hosts hands-on demos acro
 - `/dl/` — Deep Learning (CNN image classification, LSTM forecasting)
 - `/nlp/` — Natural Language Processing (classical NLP: engineered features, text representations, word embeddings, sequence labelling)
 - `/agentic/` — Agentic AI (planned)
-- `/cricket/` — **cricstat**, a cross-domain flagship project (in development): cricket statistics, a 2027 ODI World Cup predictor and an LLM analyst, built end to end on open Cricsheet data
+- `/cricket/` — **cricstat**, a cross-domain flagship project (live since Oct 2026): cricket statistics for men's and women's cricket, with a 2027 ODI World Cup predictor and an LLM analyst to come, built end to end on open Cricsheet data
 
 The platform itself — its network topology, service layout, deployment model, and operational discipline — is **the portfolio artifact**. The live site is what audiences interact with; this repository is the source of truth for how it works.
 
@@ -48,7 +48,7 @@ pandya-homelab/
 │   └── _templates/            # ML project template
 ├── dl/                        # Deep Learning demos: dl-mnist-cnn/  dl-lstm-forecast/
 ├── nlp/                       # NLP demos: nlp-quora-randomforest/  nlp-imdb-textrep/  nlp-text8-word2vec/  nlp-ewt-hmm/
-├── cricstat/                  # Flagship cross-domain project (in development): cricstat-pipeline/ + docs/ (brief, wireframes)
+├── cricstat/                  # Flagship cross-domain project (live): cricstat-pipeline/, cricstat-api/, web/, docs/
 │   └── _templates/            # NLP project template + new-nlp-project.sh scaffold script
 ├── deployment/                # Docker Compose per domain (ml/, dl/, nlp/), nginx/, cloudflared/
 ├── website/                   # Live landing page + platform About content (served by Nginx)
@@ -137,7 +137,7 @@ Demos are built in phases, one domain at a time:
 | 2 | Deep Learning | 2 of 3 live (May 2026); object detection not started |
 | 3 | Natural Language Processing | 4 of 4 live (September 2026); transformer demos deferred to v2 |
 | 4 | Agentic AI | Planned (the cricstat analyst agent is planned as its first demo) |
-| — | cricstat (flagship, cross-domain) | In development: foundation sprint done (Oct 2026); daily Cricsheet pipeline live on the NAS with CI/CD; next P0 (stats API + first pages) |
+| — | cricstat (flagship, cross-domain) | Live (Oct 2026): stats API, player/team pages (search-indexable), Wikidata names + Commons photos, daily pipeline with CI/CD; next P1 (ODI World Cup 2027 predictor) |
 | 6 | AWS mirror | Planned |
 
 Platform stages:

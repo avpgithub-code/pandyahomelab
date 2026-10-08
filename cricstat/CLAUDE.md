@@ -122,14 +122,17 @@ Background: `docs/llm-strategy-research-2026-10-05.md`.
 | F4 | Metric dictionary + formula tests (`docs/F4-metric-dictionary.md`) | Done 2026-10-05 |
 | F5 | API contract (`docs/F5-api-contract.md`) | Done 2026-10-05 |
 | F6 | Engineering setup (`docs/F6-engineering-setup.md`) + ADR-022 (Accepted) + CI skeleton | Done 2026-10-05; pipeline deployed, DSM tasks live (daily 05:30, monthly day 1 04:00; verified) |
-| F7 | Roadmap + decision log | Ongoing in this file (current to 2026-10-05) |
+| F7 | Roadmap + decision log | Ongoing in this file (current to 2026-10-08) |
 | F8 | Compliance & trust (licences page, privacy update, disclaimers) | Folded into P0 (decided 2026-10-05) |
 | F9 | CI/CD & automation (`docs/F9-cicd-automation.md`) | Done 2026-10-05: CI + approval gate + GHCR + NAS cd-pull.sh (DSM daily 05:15); merged to main |
-| P0 | Ingestion → serving-DB build → cricstat-api → first live pages (+F8) | Ingestion deployed. **P0.1 build + register done 2026-10-06** (merged; full build 11m50s on the NAS, all checks pass). **P0.2 golden figures done 2026-10-06** (draft set; user fills references). **P0.3 cricstat-api done 2026-10-06** (deployed). **P0.3b `/admin/cricket` done 2026-10-06**. **P0.4 pages built on `feat/cricstat-p0-web`, in review (not public, nothing committed yet); hub, players and countries approved by the user 2026-10-06; licences, privacy, homepage, admin, player profile, About drawer and the cricket look approved too; phone check left; photos = P0.5.** Then P0.4 deploy → P0.5 player photos |
-| P1–P6 | Predictor + win prob → tools → test set → agent → public demo → extras | Later |
+| P0 | Ingestion → serving-DB build → cricstat-api → first live pages (+F8) | **Done; public 2026-10-07.** P0.1 build + register, P0.2 golden figures, P0.3 cricstat-api, P0.3b `/admin/cricket` (2026-10-06); P0.4 pages + F8 texts live and linked from the homepage 2026-10-07 (+ `/cricket/about/` page) |
+| P0.6 | Search-engine pages: server-rendered player/team heads, real 404/301, `/cricket/sitemap.xml` | **Done 2026-10-07** (4,840 players + 176 teams indexable; submitted in Search Console) |
+| P0.5 | Wikidata enrichment: full names, birth details, Commons photos | **Done 2026-10-08** (7,192 on Wikidata; 1,364 credited photos incl. GODL-India/PDM-owner; weekly `enrich`; search + cards use names/photos) |
+| P1 | ODI World Cup 2027 predictor: Elo + Monte Carlo baseline first, then ML and DL challengers, backtests on WC 2019/2023, live win probability | **Next** (not started) |
+| P2–P6 | Tools → test set → agent → public demo → extras | Later |
 | Later | Men's T20 World Cup 2028 forecast + T20I team ratings (decided 2026-10-06; shown as "Later" on team pages) | **Not started until the ODI World Cup 2027 is finished** |
 
-Git: work on branch `feat/cricstat-foundation`, merge to `main` with `--no-ff` (platform workflow, ADR-018).
+Git: one feature branch per sub-phase (e.g. `feat/cricstat-p05-wikidata`), merge to `main` with `--no-ff`, push (ADR-018).
 
 ## DSM scheduled tasks (operator creates them in DSM → Control Panel → Task Scheduler → Create → Scheduled Task → User-defined script)
 Both run as user **root**. Task Settings → Notification: tick "Send run details by email" and
@@ -255,7 +258,7 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
 - 19 blocks with a few missing matches remain for review (many are India v Afghanistan; e.g. de Villiers Tests 106 v 114,
   Shakib ODIs 211 v 247 look like Cricsheet gaps).
 
-## P0.4 public pages (2026-10-06, branch `feat/cricstat-p0-web`, not public yet)
+## P0.4 public pages (built 2026-10-06 on `feat/cricstat-p0-web`; public 2026-10-07)
 - `cricstat/web/`: hub, players (search + profile), countries, licences (F8 texts). Plain HTML/CSS/JS, no inline scripts,
   system fonts, self-hosted Chart.js, DOM via textContent only, R23 cut-off ratios, `cricstat:follow` in localStorage.
 - Predictor, Ask and Methodology appear as "soon" (nav and tiles), not as empty boxes. Hub cards show win % and last 5
@@ -361,11 +364,10 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
 - **Deploy order once approved:** commit + `--no-ff` merge + push → user approves the API, pipeline and admin-portal
   publishes → cd-pull → safe nginx deploy (network connect → docker cp + `nginx -t` → rebuild `--no-cache` + recreate)
   → copy staged homepage/privacy/sitemap into `website/` (this is what makes it public).
-- **Deploy 2026-10-07 (done except the last step):** publishes approved (api 8d1fade0ffba, pipeline c24d9519b6d4,
+- **Deploy 2026-10-07 (done):** publishes approved (api 8d1fade0ffba, pipeline c24d9519b6d4,
   via cd-pull by hand); build 4; nginx joined cricstat-network at .20, config tested in place, rebuilt + recreated —
   /cricket/, players, countries, licences, flags, /cricket/api/ live; /cricket/api/v1/admin/ → 404; admin portal
   rebuilt (`-f docker-compose.yml -f docker-compose.dev.yml` in deployment/ml — the dev file alone is invalid).
-  Pages are reachable but unlinked until the staged homepage/privacy/sitemap are copied into `website/`.
   Gotcha: publish workflows use `concurrency` without cancel-in-progress, so an unapproved old run blocks newer ones.
 - **P0.4 public 2026-10-07** (merge 1898a69): staged homepage/privacy/sitemap copied into `website/`.
 - **SEO round (2026-10-07, approved, branch `feat/cricstat-seo-about`):** `/cricket/about/` = the About drawer's story as
@@ -415,22 +417,23 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
 - **P0.5 player photos** (own branch, after the deploy): Wikidata P18 → Commons thumbnails fetched by the pipeline,
   self-hosted, per-image licence + author credit (CC BY-SA needs attribution) on the profile and the licences page.
 
-## Next up and open TODOs (written 2026-10-05; current state is in the P0 sections above)
-- **Decided next step: P0.** F8's texts (Data & Licences page, privacy-page additions, disclaimers) are written inside P0,
-  because P0 is the first time pages go public. P0 scope, in order:
-  1. `cricstat-pipeline build`: raw → serving DB (`sql/serving_schema.sql` + `reference_data.sql` + `semantic_views.sql`),
-     full and incremental modes, F4 fixture tests, data-quality checks, atomic swap. Includes the Register download
-     (people.csv, names.csv) and the venue → country map draft (F3 decision 2).
-  2. `cricstat-api` (FastAPI, GET-only, F5 contract) for the Players and Countries endpoints first, plus its publish
-     workflow, NAS smoke test and health check in `cd-pull.sh`.
-  3. First live `/cricket/` pages: hub, players, countries, licences (static `cricstat/web/`, Nginx changes from F6 §2).
-  4. F8 texts + the golden-figure set (about 50 players and 10 teams incl. India; the user reviews them).
-- **State:** everything is merged to `main` (merge `2e5cddc`). The image is on GHCR (public). The NAS runs DSM tasks
-  05:15 CD pull, 05:30 daily refresh, and monthly full on day 1 at 04:00.
-  Publishing (`cricstat-publish.yml`) needs the user's approval and runs only when `cricstat/cricstat-pipeline/**` changes.
-- **Workflow:** feature branch per sub-phase (e.g. `feat/cricstat-p0-build`), `--no-ff` merge, push. Docker calls via
-  `sudo -n docker` (each one is gated by an ask rule). Never `docker compose build` on the NAS now that CD is live.
-- **Owner TODOs:** (1) email Cricsheet to confirm the match-file licence (and mention the `playeer_out` typo in match
-  1410291 and the 10 man/woman shared Register ids listed under P0.1), and file the reply in `docs/`; (2) write the "Why I built this" story (placeholder on the hub wireframe);
-  (3) set up a Console API workspace with prepaid credits before P4.
+## Next up and open TODOs (updated 2026-10-08)
+- **State:** P0, P0.5 and P0.6 are live at pandyahomelab.com/cricket/ and linked from the homepage. Everything is merged
+  to `main` and pushed; the NAS runs the latest pipeline and API images. LinkedIn follow-up post published 2026-10-08.
+- **Next: P1, the ODI World Cup 2027 predictor** (plan in "Plan" above): (1) Elo team ratings + Monte Carlo tournament
+  simulation as the baseline (ships first), backtested on WC 2019 and 2023 with calibration; (2) gradient-boosting
+  challenger with squad features; (3) DL player embeddings from a ball-by-ball sequence model (also live win
+  probability). The best-calibrated model powers the live forecast; the comparison is published. Model jobs run as
+  `cricstat-models` (scheduled), MLflow experiments `cricstat-*`, promotion only when backtests don't regress (F9).
+  The forecast is identical for every team; disclose withheld Afghanistan men's matches. Start with a plan for review.
+- **Small open items:** publish workflows: make a newer run cancel a stale waiting one (`cancel-in-progress` or a
+  pending-run check); Ecclestone T20I runs-conceded check (see Golden follow-up); 19 golden blocks with a few missing
+  matches to review.
+- **Workflow:** feature branch per sub-phase, `--no-ff` merge, push, user approves publishes on GitHub, then
+  `cd-pull.sh` (schema changes: `CRICSTAT_SERVICES=cricstat-pipeline` first, build, then the API). Docker via
+  `sudo -n docker`. Never `docker compose build` the cricstat images on the NAS. Page work goes in
+  `cricstat/tools/staging/web/` (cricstat/web is live) and `website/` changes are staged in `cricstat/tools/staging/`.
+- **Owner TODOs:** (1) email Cricsheet to confirm the match-file licence (mention the `playeer_out` typo in match
+  1410291 and the 10 man/woman shared Register ids under P0.1) and file the reply in `docs/`; (2) set up a Console
+  API workspace with prepaid credits and no auto-reload before P4; (3) watch Search Console (Pages, Sitemaps, Queries).
 - Wireframe source is copied in `docs/wireframes/`. The canvas at the F2 link is the editable master.
