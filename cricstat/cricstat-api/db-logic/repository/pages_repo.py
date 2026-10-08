@@ -23,3 +23,16 @@ def indexable_players(db: ServingDB, min_intl: int, min_league: int) -> List[dic
         " HAVING SUM(CASE WHEN c.scope = 'LEAGUES' THEN 0 ELSE c.matches END) >= ?"
         " OR SUM(CASE WHEN c.scope = 'LEAGUES' THEN c.matches ELSE 0 END) >= ?"
         " ORDER BY p.player_id", (min_intl, min_league))
+
+
+def display_names(db: ServingDB, player_ids: List[str]) -> List[dict]:
+    """For lists of players (leaders, top performers): scorecard name, Wikidata name, photo file
+    and Register full-name variants, in one query."""
+    if not player_ids:
+        return []
+    return db.all(
+        "SELECT p.player_id, p.name, b.full_name AS wd_name, b.photo_file,"
+        " (SELECT GROUP_CONCAT(v.name, '|') FROM player_names v WHERE v.player_key = p.player_key"
+        "  AND v.source = 'register_variant') AS variants"
+        " FROM players p LEFT JOIN player_bio b USING (player_key)"
+        " WHERE p.player_id IN (%s)" % ", ".join("?" * len(player_ids)), list(player_ids))

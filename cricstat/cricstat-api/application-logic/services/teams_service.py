@@ -4,6 +4,7 @@ from typing import List, Optional, Tuple
 from application_logic.services import metrics
 from application_logic.services.common import catalog_defs, dates, gender, page, team_slugs
 from application_logic.services.matches_service import score_line
+from application_logic.services.players_service import display
 from application_logic.services.slugs import GENDER, player_slug
 from db_logic.repository import matches_repo, teams_repo
 from db_logic.repository.db import ServingDB
@@ -153,6 +154,9 @@ def top_players(db: ServingDB, slug: str, scope: Optional[str], metric: str,
                        average=metrics.bowling_average(r["runs_conceded"], r["wickets"]),
                        economy=metrics.economy(r["runs_conceded"], r["legal_balls"]))
         out.append(row)
+    names = display(db, [r["player_id"] for r in out])
+    for row in out:
+        row.update(names.get(row["player_id"], {"full_name": row["name"], "photo_url": None}))
     defs = {"scope_note": "Counts only what each player did while playing for this team."}
     keys = ("average", "strike_rate") if metric == "runs" else ("bowling_average", "economy")
     defs.update({k: metrics.DEFINITIONS[k] for k in keys})

@@ -95,7 +95,7 @@
       try { const { data } = await C.api(base + path); C.fill(target, data.length ? render(data) : h("p", { class: "muted", style: "padding:1rem" }, "No matches."));
       } catch (e) { C.showError(target, e, what); }
     };
-    const leader = (p, val, sub) => h("li", {}, [C.who(p.name, p.matches + " matches", team.name, "/cricket/players/" + p.slug + "/"),
+    const leader = (p, val, sub) => h("li", {}, [C.who(p.full_name || p.name, p.matches + " matches", team.name, "/cricket/players/" + p.slug + "/", null, p.photo_url),
       h("span", { class: "val" }, [val, h("small", {}, sub)])]);
     await Promise.all([
       load(h2h, "/head-to-head?scope=" + scope, (rows) => C.table(["Opponent", "Mat", "Won", "Lost", "Win %", "Last"],
