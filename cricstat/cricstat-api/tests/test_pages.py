@@ -148,6 +148,7 @@ def with_bio(home, tmp_path, monkeypatch):
               " VALUES (?, 'Q213854', '1988-11-05', 'Delhi', 'India', 'Virat Kohli', 'ab12.jpg',"
               " 320, 400, 'CC BY-SA 4.0', 'https://creativecommons.org/licenses/by-sa/4.0',"
               " 'Jane <Doe>', 'https://commons.wikimedia.org/wiki/File:K.jpg')", (key,))
+    c.execute("INSERT INTO player_names VALUES (?, 'Virat Kohli', 'wikidata')", (key,))
     c.commit()
     c.close()
     with make_client(h, monkeypatch, CRICSTAT_INDEX_MIN_INTL="3") as client:
@@ -158,6 +159,8 @@ def test_full_name_prefers_wikidata():
     assert full_name("S Mandhana", [], "Smriti Mandhana") == "Smriti Mandhana"
     assert full_name("V Kohli", ["Virat Kohli"], "Wrong Person") == "Virat Kohli"   # surname
     assert full_name("MS Dhoni", ["Mahendra Singh Dhoni"], "MS Dhoni") == "Mahendra Singh Dhoni"
+    assert full_name("Babar Azam", [], "Mohammad Babar Azam") == "Babar Azam"   # already full
+    assert full_name("F du Plessis", [], "Faf du Plessis") == "Faf du Plessis"
 
 
 def test_profile_has_bio_and_photo(with_bio):
@@ -192,3 +195,13 @@ def test_godl_photo_credit_says_no_endorsement(with_bio):
     c.close()
     h = with_bio.get("/pages/players/v-kohli-%s/" % KOHLI).text
     assert "GODL-India</a>, via" in h and "No endorsement by the Government of India" in h
+
+
+def test_search_finds_wikidata_name_and_returns_photo(with_bio):
+    players = with_bio.get("/v1/search?type=player&q=Virat").json()["data"]["players"]
+    assert [p["name"] for p in players] == ["V Kohli"]
+    assert players[0]["full_name"] == "Virat Kohli"
+    assert players[0]["photo_url"] == "/cricket/photos/ab12.jpg"
+    other = with_bio.get("/v1/search", params={"type": "player", "q": "AusM"}).json()
+    other = other["data"]["players"][0]
+    assert other["full_name"] == other["name"] and other["photo_url"] is None

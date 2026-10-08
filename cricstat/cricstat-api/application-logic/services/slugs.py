@@ -46,8 +46,10 @@ class TeamSlugs:
 
 
 def full_name(name: str, variants: List[str], preferred: Optional[str] = None) -> str:
-    """The name people search for. Cricsheet names are scorecard style ('V Kohli'). Wikidata's
-    English label (`preferred`, P0.5) wins when it is a full name with the same surname; else the
+    """The name people search for. Cricsheet names are scorecard style ('V Kohli'). A scorecard
+    name that is already a full name stays ('Babar Azam', not Wikidata's 'Mohammad Babar Azam').
+    Otherwise Wikidata's English label (`preferred`, P0.5) wins when it is a full name with the
+    same surname; else the
     shortest Register variant with the same surname whose other words are real names, not
     initials ('MS Dhoni' no, 'Mahendra Singh Dhoni' yes); else the scorecard name."""
     surname = name.split()[-1].lower() if name.split() else ""
@@ -57,6 +59,8 @@ def full_name(name: str, variants: List[str], preferred: Optional[str] = None) -
         return (len(words) >= 2 and words[-1].lower() == surname
                 and all(len(w) > 1 and not (w.isupper() and len(w) <= 3) and "." not in w
                         for w in words[:-1]))
+    if is_full(name):
+        return name
     if preferred and is_full(preferred.strip()):
         return preferred.strip()
     full = [v for v in [name] + variants if is_full(v)]
