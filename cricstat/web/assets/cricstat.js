@@ -266,6 +266,23 @@
     if (days < 730) return Math.round(days / 30.4) + " months ago";
     return Math.round(days / 365) + " years ago";
   }
+  // The 12 grounds of the 2027 ODI World Cup (ICC schedule, 1 Oct 2026). Matched on name and city so a
+  // ground's older names count too (Goodyear Park, Chevrolet Park, OUTsurance Oval = Mangaung Oval;
+  // New Wanderers = Wanderers) and Windhoek's other "Wanderers" ground doesn't.
+  const WC2027_VENUES = [
+    [/Newlands/, /Cape Town/], [/SuperSport Park|Centurion Park/, /Centurion/], [/Wanderers/, /Johannesburg/],
+    [/Kingsmead/, /Durban/], [/St George's Park/, /Port Elizabeth|Gqeberha/], [/Buffalo Park/, /East London|KuGompo/],
+    [/Boland/, /Paarl/], [/Mangaung|Goodyear Park|Chevrolet Park|OUTsurance Oval|Springbok Park/, /Bloemfontein/],
+    [/Harare Sports Club/, /.*/], [/Queens Sports Club/, /.*/], [/Namibia Cricket Ground/, /.*/],
+    [/Mosi-oa-Tunya/, /.*/]];
+  function isWc2027Venue(venue, city) {
+    const text = (venue || "") + ", " + (city || "");
+    return WC2027_VENUES.some(([v, c]) => v.test(venue || "") && c.test(text));
+  }
+  function wc2027Mark(short) {
+    const label = "2027 ODI World Cup venue";
+    return h("span", { class: "wc27", title: label, "aria-label": label, role: "img" }, short ? "★" : "★ WC 2027");
+  }
   function matchCard(m) {
     return h("article", { class: "mcard" }, [
       h("div", { class: "top" }, [h("span", { class: "comp" }, m.competition || ""),
@@ -279,7 +296,8 @@
       ])),
       h("div", { class: "res" }, resultText(m)),
       h("div", { class: "where" }, [h("span", { class: "age" }, ago(m.end_date || m.date)), " "]),
-      h("div", { class: "where" }, date(m.date) + " · " + [m.venue, m.city].filter(Boolean).join(", ").replace(/, ([^,]+), \1$/, ", $1")),
+      h("div", { class: "where" }, [date(m.date) + " · " + [m.venue, m.city].filter(Boolean).join(", ").replace(/, ([^,]+), \1$/, ", $1"),
+        isWc2027Venue(m.venue, m.city) ? wc2027Mark() : null]),
     ]);
   }
   // Results donut (inline SVG, no chart library): won / lost / drawn+tied / no result, win % in
@@ -408,6 +426,6 @@
   const serverHead = !!document.querySelector('meta[name="robots"]');
   window.cricstat = { serverHead, sectionTabs, scoreText, freshness, carousel, teamLine, roleIcon, roleLabel, api, ratio, num, hs, bbi, overs, date, letter, h, fill, table, showError,
                       getFollow, setFollow, pathTail, playerIdFromPath, dataNote, teamBadge, teamStyle,
-                      avatar, who, formDots, fmtName, resultText, matchCard, countUp, compact, ago,
+                      avatar, who, formDots, fmtName, resultText, matchCard, countUp, compact, ago, isWc2027Venue, wc2027Mark,
                       donut, donutLegend, periodControl, formatCard, periodRange };
 })();
