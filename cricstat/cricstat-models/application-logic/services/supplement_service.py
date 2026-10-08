@@ -8,8 +8,10 @@
              the committed files: anyone can edit Wikipedia, so a change only goes live through a
              reviewed commit and a models-image publish (P1 plan §6, audit §6).
 
-Review decisions already in the committed CSV (check_status 'accepted' + note) are carried over to
-an unchanged row, so the weekly check proposes only what really changed.
+Reviewer decisions live in supplement/reviews.csv (match_key, field, value, wikipedia_value, note,
+reviewed_on) and every draft applies them, so a review is done once and survives any re-draft. A
+correction (field/value) applies only while Wikipedia still shows the value the reviewer overruled;
+if Wikipedia changes it again, the row is flagged for a fresh look.
 """
 import datetime
 import os
@@ -183,14 +185,30 @@ def _totals(client: WikipediaClient, codes: Dict[str, str]) -> List[dict]:
     return out
 
 
-def _carry_over(rows: List[dict], committed: List[Dict[str, str]]) -> None:
-    """Keep a reviewer's 'accepted' + note on rows whose content hasn't changed."""
-    old = {r["match_key"]: r for r in committed}
-    for r in rows:
-        o = old.get(r["match_key"])
-        if o and o["check_status"] == "accepted" and r["check_status"] != "confirmed" and \
-                all(str(r[k] or "") == o[k] for k in _CONTENT):
-            r["check_status"], r["note"] = "accepted", o["note"]
+def _apply_reviews(rows: List[dict], reviews: List[Dict[str, str]]) -> List[str]:
+    """Apply reviews.csv: accept the row with the reviewer's note, and apply a correction while
+    Wikipedia still shows the overruled value. Returns issues for reviews that no longer fit."""
+    issues = []
+    by_key = {str(r["match_key"]): r for r in rows}
+    for rv in reviews:
+        r = by_key.get(rv["match_key"])
+        if r is None:
+            issues.append("review for %s: no such row any more" % rv["match_key"])
+            continue
+        if rv["field"]:
+            if rv["field"] not in _CONTENT:
+                issues.append("review for %s: field %r can't be corrected" % (r["match_key"],
+                                                                               rv["field"]))
+                continue
+            current = str(r[rv["field"]] or "")
+            if current not in (rv["wikipedia_value"], rv["value"]):
+                issues.append("review for %s: Wikipedia now says %s=%r (reviewed against %r)"
+                              % (r["match_key"], rv["field"], current, rv["wikipedia_value"]))
+                r["check_status"] = "differs"
+                continue
+            r[rv["field"]] = rv["value"]
+        r["check_status"], r["note"] = "accepted", rv["note"]
+    return issues
 
 
 def draft(cfg, out_dir: Optional[str] = None, client: Optional[WikipediaClient] = None,
@@ -208,9 +226,7 @@ def draft(cfg, out_dir: Optional[str] = None, client: Optional[WikipediaClient] 
             serving_ids = serving_reader.all_match_ids(conn)
     rows, issues = _draft_rows(client, codes, cities, serving_ids, today)
     _second_source(client, rows, codes)
-    committed_path = os.path.join(cfg.SUPPLEMENT_DIR, store.RESULTS_FILE)
-    if os.path.exists(committed_path):
-        _carry_over(rows, store.read_results(cfg.SUPPLEMENT_DIR))
+    issues += _apply_reviews(rows, store.read_reviews(cfg.SUPPLEMENT_DIR))
     totals = _totals(client, codes)
     os.makedirs(out_dir, exist_ok=True)
     store.write_results(out_dir, rows)

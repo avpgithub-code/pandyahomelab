@@ -5,6 +5,7 @@
     supplement/team_codes.csv        crosswalk: Wikipedia team code/name → cricstat team name
     supplement/supplement_venues.csv crosswalk: city → venue country, where venue_map.csv has no
                                      unambiguous answer
+    supplement/reviews.csv           reviewer decisions: accept a row, or correct one field
 
 Rows are keyed by `match_key` = the ESPNcricinfo match_id (Cricsheet's own id space), or
 "odi-<number>" when the source has no scorecard link. Plain CSV, so every change is a reviewable
@@ -18,6 +19,7 @@ RESULTS_FILE = "afg_odi_results.csv"
 TOTALS_FILE = "afg_totals.csv"
 TEAM_CODES_FILE = "team_codes.csv"
 VENUES_FILE = "supplement_venues.csv"
+REVIEWS_FILE = "reviews.csv"
 
 RESULT_COLUMNS = (
     "match_key", "match_id", "odi_no", "start_date", "team1", "team2", "venue", "city",
@@ -68,6 +70,11 @@ def write_totals(directory: str, rows: List[Dict[str, object]]) -> None:
 def team_codes(directory: str) -> Dict[str, str]:
     """Token (code or name as Wikipedia writes it) → cricstat team name."""
     return {r["token"]: r["team_name"] for r in _read(os.path.join(directory, TEAM_CODES_FILE))}
+
+
+def read_reviews(directory: str) -> List[Dict[str, str]]:
+    path = os.path.join(directory, REVIEWS_FILE)
+    return _read(path) if os.path.exists(path) else []
 
 
 def venue_overrides(directory: str) -> Dict[str, str]:

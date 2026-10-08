@@ -21,6 +21,8 @@ TEAMS = ["India", "Australia", "Pakistan", "Ireland", "Scotland", "Asia XI", "Af
 
 def make_serving_db(path, matches):
     """matches: (match_id, date, team1, team2, venue_country, result, winner[, match_type])."""
+    if os.path.exists(path):
+        os.remove(path)
     conn = sqlite3.connect(path)
     with open(SCHEMA, encoding="utf-8") as f:
         conn.executescript(f.read())

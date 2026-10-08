@@ -128,7 +128,7 @@ Background: `docs/llm-strategy-research-2026-10-05.md`.
 | P0 | Ingestion → serving-DB build → cricstat-api → first live pages (+F8) | **Done; public 2026-10-07.** P0.1 build + register, P0.2 golden figures, P0.3 cricstat-api, P0.3b `/admin/cricket` (2026-10-06); P0.4 pages + F8 texts live and linked from the homepage 2026-10-07 (+ `/cricket/about/` page) |
 | P0.6 | Search-engine pages: server-rendered player/team heads, real 404/301, `/cricket/sitemap.xml` | **Done 2026-10-07** (4,840 players + 176 teams indexable; submitted in Search Console) |
 | P0.5 | Wikidata enrichment: full names, birth details, Commons photos | **Done 2026-10-08** (7,192 on Wikidata; 1,364 credited photos incl. GODL-India/PDM-owner; weekly `enrich`; search + cards use names/photos) |
-| P1 | ODI World Cup 2027 predictor: Elo + Monte Carlo baseline first, then ML and DL challengers, backtests on WC 2019/2023, live win probability | **In progress:** plan approved 2026-10-08; P1.1 data layer built (`cricstat-models/`), in review (15 Afghanistan rows need the owner's check) |
+| P1 | ODI World Cup 2027 predictor: Elo + Monte Carlo baseline first, then ML and DL challengers, backtests on WC 2019/2023, live win probability | **In progress:** plan approved 2026-10-08; P1.1 data layer built (`cricstat-models/`), in review (15 Afghanistan rows accepted by the owner 2026-10-08 via supplement/reviews.csv) |
 | P2–P6 | Tools → test set → agent → public demo → extras | Later |
 | Later | Men's T20 World Cup 2028 forecast + T20I team ratings (decided 2026-10-06; shown as "Later" on team pages) | **Not started until the ODI World Cup 2027 is finished** |
 

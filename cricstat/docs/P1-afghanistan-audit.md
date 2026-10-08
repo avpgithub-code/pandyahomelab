@@ -123,3 +123,16 @@ so the supplement keeps them as `no_result` with `has_play = 0`, and Elo skips t
   scorecard id + teams, and an Afghanistan row's id must not exist in Cricsheet.
 - **Restore path, implemented:** a Cricsheet match involving Afghanistan replaces the supplement copy
   automatically; the checksum then counts both sources together.
+- **Reviews (2026-10-08):** the owner accepted the 15 unconfirmed rows. Decisions live in
+  `supplement/reviews.csv` (two 2010 dates corrected to the series article's date); every draft applies
+  them, so a review is never redone. If Wikipedia later changes an overruled value, the row is flagged.
+
+## 9. What a full reload or rebuild does to the supplement
+| Event | Effect on the Afghanistan data | Work needed |
+|---|---|---|
+| Daily `recent` + `build`, weekly `register/enrich/build`, monthly `full` + `build --full` | None: the supplement isn't in raw.sqlite or cricstat.sqlite; the jobs never write it | None. Surrogate keys may renumber; the supplement uses stable ids |
+| Serving DB deleted and rebuilt from scratch | None (same reason) | None |
+| Cricsheet restores Afghanistan matches | Their rows replace the supplement copies automatically | Optional tidy-up later |
+| New Afghanistan ODI | Weekly `supplement-check` proposes the row (about a minute; Wikipedia pages cached for a day) | Review the proposal, commit, publish the models image |
+| NAS lost / repo re-cloned | Everything (CSVs, crosswalks, reviews) is in git | None |
+| Wikipedia restructures its season pages | The weekly check reports a diff or parse issues; the committed data keeps serving | Fix the parser; past reviews still apply |

@@ -88,10 +88,33 @@ def test_draft_rows_second_source_and_checksum(cfg, tmp_path):
     assert totals[-1]["opponent"] == "TOTAL" and totals[-1]["as_of"].endswith("3 March 2018")
 
 
-def test_check_proposes_but_never_edits_and_keeps_reviewer_decisions(cfg, tmp_path):
+def _review(cfg, *rows):
+    import csv
+    with open("%s/%s" % (cfg.SUPPLEMENT_DIR, store.REVIEWS_FILE), "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["match_key", "field", "value", "wikipedia_value", "note", "reviewed_on"])
+        w.writerows(rows)
+
+
+def test_reviews_are_applied_on_every_draft(cfg, tmp_path):
+    _review(cfg, ["900002", "start_date", "2018-03-04", "2018-03-03", "box says 4 March", "x"])
+    rep = _draft(cfg, tmp_path, _wiki())
+    r = store.read_results(str(tmp_path / "out"))[1]
+    assert (r["start_date"], r["check_status"], r["note"]) == ("2018-03-04", "accepted",
+                                                                "box says 4 March")
+    assert rep["issues"] == []
+    # Wikipedia later changes the overruled value: the row is flagged, not silently corrected.
+    moved = SEASON.replace("| 3 March ||", "| 5 March ||")
+    rep = _draft(cfg, tmp_path, _wiki(moved))
+    r = store.read_results(str(tmp_path / "out"))[1]
+    assert r["check_status"] == "differs" and "Wikipedia now says" in rep["issues"][0]
+
+
+def test_check_proposes_but_never_edits(cfg, tmp_path):
+    _review(cfg, ["900002", "", "", "", "checked the scorecard by hand", "x"])
     _draft(cfg, tmp_path, _wiki())
     rows = store.read_results(str(tmp_path / "out"))
-    rows[1]["check_status"], rows[1]["note"] = "accepted", "checked the scorecard by hand"
+    assert rows[1]["check_status"] == "accepted"
     store.write_results(cfg.SUPPLEMENT_DIR, rows)
     store.write_totals(cfg.SUPPLEMENT_DIR, store.read_totals(str(tmp_path / "out")))
     before = open("%s/%s" % (cfg.SUPPLEMENT_DIR, store.RESULTS_FILE)).read()
