@@ -13,7 +13,9 @@
 
 stdout gets exactly one JSON line (the run summary); the human log goes to
 CRICSTAT_LOG_DIR/models-YYYYMMDD.log and stderr.
-Exit codes: 0 success, 1 runtime error, 2 data check failed (nothing downstream runs).
+Exit codes: 0 success, 1 runtime error, 2 data check failed (nothing downstream runs),
+3 supplement-check found something to review (new/changed Afghanistan rows or issues): DSM emails
+the run output, which is the proposal.
 supplement-check never edits the committed files: a proposal becomes live only through a reviewed
 commit and a models-image publish (Wikipedia can be edited by anyone).
 """
@@ -35,7 +37,7 @@ from shared.config import get_config
 from shared.exceptions import DataCheckError
 from shared.logger import get_logger, setup_logging
 
-EXIT_OK, EXIT_ERROR, EXIT_CHECK = 0, 1, 2
+EXIT_OK, EXIT_ERROR, EXIT_CHECK, EXIT_REVIEW = 0, 1, 2, 3
 MODES = ("data-check", "supplement-check", "supplement-draft", "tournament-draft", "backtest",
          "tournament-backtest", "train", "forecast", "selftest")
 
@@ -131,6 +133,11 @@ def main(argv=None) -> int:
             summary.update(fixtures=len(d["fixtures"]), source_revid=d["revid"])
         summary["status"] = "ok"
         code = EXIT_OK
+        if args.mode == "supplement-check" and not (summary.get("up_to_date") and
+                                                    not summary.get("issues") and
+                                                    not summary.get("totals_errors")):
+            summary["status"] = "review_needed"
+            code = EXIT_REVIEW
     except DataCheckError as exc:
         log.error("data check failed: %s", exc)
         summary.update(status="check_failed", error=str(exc))

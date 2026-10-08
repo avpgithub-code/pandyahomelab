@@ -25,3 +25,16 @@ def test_data_check_exit_codes(cfg, capsys, monkeypatch, tmp_path):
     store.write_results(cfg.SUPPLEMENT_DIR, [supp_row(check_status="differs")])
     code, out = _run(capsys, "data-check")
     assert (code, out["status"]) == (2, "check_failed")
+
+
+def test_supplement_check_exit_3_when_review_needed(cfg, capsys, monkeypatch):
+    from application_logic.services import supplement_service
+    monkeypatch.setattr(supplement_service, "propose", lambda _cfg: {"up_to_date": True,
+                                                                     "issues": [], "totals_errors": []})
+    code, out = _run(capsys, "supplement-check")
+    assert (code, out["status"]) == (0, "ok")
+    monkeypatch.setattr(supplement_service, "propose", lambda _cfg: {"up_to_date": False,
+                                                                     "added": [{"match_key": "1"}],
+                                                                     "issues": [], "totals_errors": []})
+    code, out = _run(capsys, "supplement-check")
+    assert (code, out["status"]) == (3, "review_needed")

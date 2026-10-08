@@ -78,7 +78,7 @@ analytics); player and team pages use a regex location that serves the one page 
 |---|---|---|
 | Daily 05:30 | `run --rm cricstat-pipeline recent`, then `build --incremental` | ingest now; build from P0 |
 | Daily 05:30 (chained, D5) | `… && run --rm cricstat-models forecast` (champion ratings + 50,000 simulations; skips in <1 s when nothing changed) | P1.4 |
-| Sunday 06:00 | `run --rm cricstat-pipeline register`, `enrich`, `build`, then `run --rm cricstat-models supplement-check` (proposes Afghanistan rows; never edits) | P0 / P1.4 |
+| Sunday 06:00 | `run --rm cricstat-pipeline register`, `enrich`, `build`, then `run --rm cricstat-models supplement-check` (proposes Afghanistan rows; never edits; exit 3 = review needed → DSM email with the proposal) | P0 / P1.4 |
 | 1st of month 04:00 | `run --rm cricstat-pipeline full`, then `build --full`, then `run --rm cricstat-models forecast --force` | P0 / P1.4 |
 | Manual (later weekly) | `run --rm cricstat-models train` (~5 min: backtests A/B/C; promotes only through the gate) | P1.4 |
 
