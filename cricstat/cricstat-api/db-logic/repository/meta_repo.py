@@ -61,11 +61,16 @@ def competitions(db: ServingDB, featured: Optional[bool]) -> List[dict]:
 
 
 def search_players(db: ServingDB, q: str, gender: Optional[str], limit: int) -> List[dict]:
-    """Candidates whose name or a variant matches; ranked exact > prefix > word > contains, then
-    by career matches. Disambiguation facts (main team, years, matches) come with each."""
+    """Candidates whose name or a variant matches. rank: 0 exact name (two or more words), 1 name
+    starts with q, 2 a word starts with q (a one-word query that equals a surname or a one-word
+    Register variant counts here, not as exact), 3 contains. Results
+    are ordered exact first, then ranks 1 and 2 together by career matches ("Babar" → Babar Azam
+    before Zulfiqar Babar), then contains. Disambiguation facts come with each."""
     return db.all(
         "WITH hits AS ("
-        "  SELECT n.player_key, MIN(CASE WHEN n.name = :q COLLATE NOCASE THEN 0"
+        "  SELECT n.player_key, MIN(CASE WHEN n.name = :q COLLATE NOCASE"
+        "   AND INSTR(TRIM(:q), ' ') > 0 THEN 0"
+        "   WHEN n.name = :q COLLATE NOCASE THEN 2"
         "   WHEN n.name LIKE :prefix THEN 1 WHEN n.name LIKE :word THEN 2 ELSE 3 END) AS rank"
         "  FROM player_names n WHERE n.name LIKE :contains GROUP BY n.player_key)"
         " SELECT p.player_id, p.name, p.unique_name, h.rank, c.gender, c.matches,"
@@ -82,7 +87,8 @@ def search_players(db: ServingDB, q: str, gender: Optional[str], limit: int) -> 
         "   WHERE scope IN (SELECT DISTINCT format_key FROM format_map)"
         "   GROUP BY player_key, gender) c USING (player_key)"
         " WHERE (:gender IS NULL OR c.gender = :gender)"
-        " ORDER BY h.rank, c.matches DESC LIMIT :limit",
+        " ORDER BY CASE h.rank WHEN 2 THEN 1 ELSE h.rank END, c.matches DESC, p.name"
+        " LIMIT :limit",
         {"q": q, "prefix": q + "%", "word": "% " + q + "%", "contains": "%" + q + "%",
          "gender": gender, "limit": limit})
 

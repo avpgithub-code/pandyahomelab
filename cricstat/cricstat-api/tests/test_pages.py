@@ -205,3 +205,22 @@ def test_search_finds_wikidata_name_and_returns_photo(with_bio):
     other = with_bio.get("/v1/search", params={"type": "player", "q": "AusM"}).json()
     other = other["data"]["players"][0]
     assert other["full_name"] == other["name"] and other["photo_url"] is None
+
+
+def test_one_word_search_ranks_by_career_not_by_alias(with_bio):
+    """A one-word Register variant equal to the query is not an 'exact' hit: careers decide."""
+    import sqlite3
+
+    from shared.config import Config
+    c = sqlite3.connect(Config().SERVING_DB)
+    small = c.execute("SELECT p.player_key FROM players p JOIN player_career pc USING (player_key)"
+                      " WHERE pc.scope = 'ALL' AND p.player_id != ? ORDER BY pc.matches LIMIT 1",
+                      (KOHLI,)).fetchone()[0]
+    c.execute("INSERT INTO player_names VALUES (?, 'Kohli', 'register_variant')", (small,))
+    c.commit()
+    c.close()
+    names = [p["name"] for p in with_bio.get("/v1/search", params={
+        "type": "player", "q": "Kohli"}).json()["data"]["players"]]
+    assert names[0] == "V Kohli" and len(names) == 2
+    exact = with_bio.get("/v1/search", params={"type": "player", "q": "Virat Kohli"}).json()
+    assert exact["data"]["players"][0]["match"] == "exact"
