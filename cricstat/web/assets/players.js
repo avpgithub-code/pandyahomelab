@@ -155,6 +155,7 @@
         r.slug ? h("a", { href: "/cricket/countries/" + r.slug + "/", class: "name" }, r.label) : h("span", { class: "name" }, r.label)]),
         h("span", { class: "val" }, [C.ratio(r.average), h("small", {}, r.innings + " inns")])]);
       const venues = ven.data.batting.concat(ven.data.bowling).reduce((m, r) => { m[r.label] = Math.max(m[r.label] || 0, r.matches); return m; }, {});
+      const cityOf = ven.data.batting.concat(ven.data.bowling).reduce((m, r) => { m[r.label] = r.city; return m; }, {});
       const top = Object.entries(venues).sort((a, b) => b[1] - a[1]).slice(0, 5);
       C.fill(target, [
         rows.length ? h("div", { class: "grid", style: "grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem" }, [
@@ -162,7 +163,9 @@
           h("div", {}, [h("div", { class: "section-label" }, "Toughest"), h("ol", { class: "rank" }, rows.slice().sort(by).reverse().slice(0, 3).map(item))])])
           : h("p", { class: "muted small" }, "Not enough innings against any one team (min 3)."),
         h("div", { class: "section-label", style: "margin-top:1.2rem" }, "Most-played venues"),
-        h("ol", { class: "rank" }, top.map(([v, n]) => h("li", {}, [h("span", { class: "name" }, v), h("span", { class: "val" }, [n, h("small", {}, "matches")])])))]);
+        h("ol", { class: "rank" }, top.map(([v, n]) => h("li", {}, [h("span", { class: "name" }, [v, C.isWc2027Venue(v, cityOf[v]) ? C.wc2027Mark(true) : null]),
+          h("span", { class: "val" }, [n, h("small", {}, "matches")])]))),
+        top.some(([v]) => C.isWc2027Venue(v, cityOf[v])) ? h("p", { class: "muted small wc27-key" }, [C.wc2027Mark(true), " 2027 ODI World Cup venue"]) : null]);
     } catch (e) { C.showError(target, e, "opponents and venues"); }
   }
 

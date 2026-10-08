@@ -181,6 +181,9 @@ a.card { color: var(--text); display: block; } a.card:hover { transform: transla
 .mcard .team.won .tname::after { content: " ✓"; color: var(--green); }
 .mcard .res { font-size: .82rem; color: var(--saffron); font-weight: 600; border-top: 1px solid var(--border); padding-top: .6rem; }
 .mcard .where { font-size: .72rem; color: var(--muted); }
+/* 2027 ODI World Cup ground marker (match cards, most-played venues) */
+.wc27 { color: var(--saffron); font-weight: 600; margin-left: .35em; white-space: nowrap; cursor: help; }
+.wc27-key { margin-top: .4rem; } .wc27-key .wc27 { margin: 0 .2em 0 0; }
 
 /* form dots */
 .form { display: inline-flex; gap: .3rem; }

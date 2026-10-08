@@ -441,7 +441,13 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   §3.3; D5 `models forecast` chained onto the 05:30 task. **Key gotcha:** serving `team_key`/`match_key`/`player_key`
   are load-order rowids and can renumber on a full build, so anything outside the serving DB keys on `match_id`,
   (name, gender, team_type) and `player_id`. Exclude composite XIs from Elo. Never join players by name (two Rashid Khans).
-- **Small open items:** Ecclestone T20I runs-conceded check (see Golden follow-up); 19 golden blocks with a few missing
+- **2027 venues (2026-10-08, live):** venue_map merges sponsor renames (Mangaung Oval = Goodyear/Chevrolet/
+  OUTsurance; Wanderers = New Wanderers; Boland Park = Boland Bank Park; Diamond Oval = De Beers Diamond Oval);
+  pipeline 176a2d29e92e, build 9. Pages V=73: "★ WC 2027" on match cards at the 2027 grounds and ★ in player
+  "Most-played venues" (list `WC2027_VENUES` in assets/cricstat.js, matched on name + city). cd-pull from a
+  shell needs `DOCKER="sudo -n docker"` (without it, it wrongly reports "not published yet").
+- **Small open items:** New venue Korogi Sports Park, Nisshin (Japan) has no country in venue_map.csv: add it with the
+  next pipeline publish. Ecclestone T20I runs-conceded check (see Golden follow-up); 19 golden blocks with a few missing
   matches to review.
 - **Workflow:** feature branch per sub-phase, `--no-ff` merge, push, user approves publishes on GitHub, then
   `cd-pull.sh` (schema changes: `CRICSTAT_SERVICES=cricstat-pipeline` first, build, then the API). Docker via
