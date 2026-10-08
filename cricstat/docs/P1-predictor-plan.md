@@ -130,6 +130,18 @@ frame the ML and DL challengers will plug into later (§8). Decisions needed fro
 - **Output per team:** P(reach group stage) for qualifiers, P(Super 7), P(semi-final), P(final), P(champion), and the
   expected Super 7 finish. Checks: the champion probabilities sum to 1, the semi-final ones to 4, and so on.
 
+### 2.5 As built in P1.2 (2026-10-08)
+- **Regression target refined:** each 1 January a team moves r of the way toward the base rating for its
+  ICC status *on that day* (1500 Full Member, 1500 − Δ Associate), not toward its starting rating, which
+  would keep pulling Ireland and Afghanistan (associates at their first match, Full Members since 2017)
+  toward an associate level. It lowered test-A log loss (0.6054 → 0.6049) and fixed calibration
+  (slope 0.91 → 0.97).
+- **Tuned (2,016 combinations, log loss on 2007 → cutoff):** K = 20, home advantage = 75 Elo points,
+  margin multiplier on, Δ = 400–500. Regression r = 0 for the 2019/2023 windows, 0.05 with all data.
+  Walk-forward picked K = 20, H = 75, margin on every year (K = 16 once), so the fit is stable.
+- **Grid points are not MLflow child runs:** the whole grid is one artifact (grid.csv), so the
+  experiment stays readable.
+
 ## 3. Backtests and "good enough to publish"
 ### 3.1 What is tested
 | Test | Sample | Why |
@@ -238,7 +250,7 @@ weekly/manual: cricstat-models train   → tuning + backtests A/B/C → MLflow c
 |---|---|---|
 | P1.0 | This plan | Decisions §10 |
 | P1.1 ✅ built 2026-10-08, in review | Data layer: men's ODI extract, tournament configs (2019, 2023, 2027 + Qualifier) checked against the official fixtures, the Afghanistan supplement + crosswalks (`team_codes`, `supplement_venues`, `team_identities`) and its weekly check, data checks + tests | Configs, row counts, supplement source list |
-| P1.2 | Elo engine + tuning + backtest A, logged to MLflow (run on the NAS host or in a dev container) | Parameters, calibration, baselines |
+| P1.2 ✅ built 2026-10-08, in review | Elo engine + tuning + backtest A, logged to MLflow (run on the NAS host or in a dev container) | Parameters, calibration, baselines |
 | P1.3 | Tournament simulator + backtests B and C + the first 2027 forecast (offline) | Sanity sheet, publish bar |
 | P1.4 | `cricstat-models` service, forecast.sqlite, registry + gate, CI/publish/cd-pull, DSM text | CI green, NAS smoke test |
 | P1.5 | API endpoints + tests | JSON on the dev API (8048) |

@@ -4,7 +4,8 @@ supplement.
 One row per match, oldest first, keyed by stable identifiers only:
     match_key (ESPNcricinfo id, or odi-<number>), start_date, team1, team2 (cricstat team names),
     venue_country, home (the team playing in its own country, or None), result, winner, method,
-    decided_by, has_play, source ('cricsheet' | 'supplement:wikipedia'), event
+    decided_by, has_play, source ('cricsheet' | 'supplement:wikipedia'), event,
+    margin_runs, margin_wickets (the winner's margin; None when there is none)
 Home/away follows the build's rule (serving_store.apply_venue_map): a team is at home when the
 venue's country equals its name. The same rule applies to supplement rows, so Afghanistan, which has
 never hosted an ODI at home, is never 'home'.
@@ -12,6 +13,7 @@ Every check must pass, otherwise DataCheckError (exit 2) and nothing downstream 
 """
 import collections
 import csv
+import re
 from typing import Dict, List, Optional, Tuple
 
 from application_logic.quality import supplement_checks as checks
@@ -25,6 +27,14 @@ SUPPLEMENT_SOURCE = "supplement:wikipedia"
 def known_countries(venue_map_path: str) -> set:
     with open(venue_map_path, encoding="utf-8", newline="") as f:
         return {r["country"].strip() for r in csv.DictReader(f) if r.get("country")}
+
+
+def _margin(text: str) -> Dict[str, Optional[int]]:
+    """'89 runs' / '5 wickets' (supplement) → margin_runs / margin_wickets."""
+    m = re.match(r"\s*(\d+)\s+(run|wicket)", text or "")
+    runs = int(m.group(1)) if m and m.group(2) == "run" else None
+    wkts = int(m.group(1)) if m and m.group(2) == "wicket" else None
+    return {"margin_runs": runs, "margin_wickets": wkts}
 
 
 def _home(team1: str, team2: str, country: Optional[str]) -> Optional[str]:
@@ -81,7 +91,8 @@ def load_matches(cfg, conn=None) -> Tuple[List[Dict[str, object]], Dict[str, obj
             "team2": r["team2"], "venue_country": r["venue_country"],
             "home": _home(r["team1"], r["team2"], r["venue_country"]), "result": r["result"],
             "winner": r["winner"], "method": r["method"], "decided_by": r["decided_by"],
-            "has_play": 1, "source": "cricsheet", "event": r["event"]})
+            "has_play": 1, "source": "cricsheet", "event": r["event"],
+            "margin_runs": r["win_by_runs"], "margin_wickets": r["win_by_wickets"]})
     for r in supp:
         rows.append({
             "match_key": r["match_key"], "start_date": r["start_date"], "team1": r["team1"],
@@ -89,7 +100,7 @@ def load_matches(cfg, conn=None) -> Tuple[List[Dict[str, object]], Dict[str, obj
             "home": _home(r["team1"], r["team2"], r["venue_country"]), "result": r["result"],
             "winner": r["winner"] or None, "method": r["method"] or None,
             "decided_by": r["decided_by"], "has_play": int(r["has_play"]),
-            "source": SUPPLEMENT_SOURCE, "event": None})
+            "source": SUPPLEMENT_SOURCE, "event": None, **_margin(r["margin"])})
     rows.sort(key=lambda r: (r["start_date"], str(r["match_key"])))
     problems = check_combined(rows)
     if problems:

@@ -50,6 +50,12 @@ class Config:
         self.WIKI_PAUSE = _float("CRICSTAT_WIKI_PAUSE", 1.0)            # seconds between requests
         # Jobs re-read pages older than this; development scripts may pass max_age_s=None.
         self.WIKI_CACHE_MAX_AGE_S = _float("CRICSTAT_WIKI_CACHE_MAX_AGE_S", 86400)
+        # ML-domain tracker: the host reaches it on 127.0.0.1:5000, containers as ml-mlflow:5000.
+        self.MLFLOW_URI = os.getenv("CRICSTAT_MLFLOW_URI", "http://127.0.0.1:5000")
+        self.FULL_MEMBERS = os.getenv("CRICSTAT_FULL_MEMBERS",
+                                      os.path.join(_MODELS_DIR, "ratings", "icc_full_members.csv"))
+        self.REPORT_DIR = self._path("CRICSTAT_MODELS_REPORT_DIR",
+                                     os.path.join(self.DATA_DIR, "models", "reports"))
         self.HTTP_TIMEOUT = _float("CRICSTAT_HTTP_TIMEOUT", 60)
         self.HTTP_RETRIES = _int("CRICSTAT_HTTP_RETRIES", 4)
         self.HTTP_BACKOFF = _float("CRICSTAT_HTTP_BACKOFF", 5)

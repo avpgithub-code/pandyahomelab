@@ -3,8 +3,9 @@
 The ODI World Cup 2027 predictor (P1). Plan: `../docs/P1-predictor-plan.md`; Afghanistan design:
 `../docs/P1-afghanistan-audit.md`.
 
-**P1.1 (this step): the data layer.** Ratings (P1.2), the tournament simulator (P1.3) and the
-scheduled job (P1.4) build on it.
+**P1.1: the data layer. P1.2: Elo ratings, tuning and backtest A** (`application-logic/models/`,
+`backtest_service.py`, logged to MLflow `cricstat-elo-backtest` through a stdlib REST client).
+The tournament simulator (P1.3) and the scheduled job (P1.4) build on them.
 
 ## What's here
 | Path | What |
@@ -16,6 +17,7 @@ scheduled job (P1.4) build on it.
 | `application-logic/quality/supplement_checks.py` | The integrity checks every load runs (SQLite can't enforce FKs across files) |
 | `application-logic/services/tournament_service.py` | Draft and validate tournament configs |
 | `supplement/` | `afg_odi_results.csv` (193 rows, 188 played), `afg_totals.csv` (checksum), `reviews.csv`, crosswalks `team_codes.csv`, `supplement_venues.csv` |
+| `ratings/icc_full_members.csv` | ICC Full Member dates: the one fact the starting/regression rule uses |
 | `tournaments/` | `wc2019`, `wc2023` (48 fixtures + results each), `wc2027` (57 fixtures, assumptions listed), `wcq2027` (field TBC) |
 
 ## How the Afghanistan supplement is built
@@ -39,6 +41,7 @@ python3 -m presentation_logic.cli data-check          # exit 2 if any check fail
 python3 -m presentation_logic.cli supplement-check    # weekly proposal (JSON)
 python3 -m presentation_logic.cli supplement-draft --out DIR
 python3 -m presentation_logic.cli tournament-draft wc2027
+python3 -m presentation_logic.cli backtest [--no-mlflow]   # ~1 min on the NAS
 python3 -m pytest tests -q && python3 -m ruff check .
 ```
 Exit codes: 0 ok, 1 error, 2 data check failed (nothing downstream runs; the old forecast stays).

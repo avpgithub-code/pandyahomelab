@@ -4,6 +4,7 @@
     python3 -m presentation_logic.cli supplement-check      # weekly: propose Afghanistan changes
     python3 -m presentation_logic.cli supplement-draft --out DIR    # rebuild the draft (review)
     python3 -m presentation_logic.cli tournament-draft wc2027       # refresh the 2027 fixtures
+    python3 -m presentation_logic.cli backtest [--no-mlflow]        # P1.2: tune Elo + backtest A
 
 stdout gets exactly one JSON line (the run summary); the human log goes to
 CRICSTAT_LOG_DIR/models-YYYYMMDD.log and stderr.
@@ -16,14 +17,19 @@ import json
 import sys
 import time
 
-from application_logic.services import data_service, supplement_service, tournament_service
+from application_logic.services import (
+    backtest_service,
+    data_service,
+    supplement_service,
+    tournament_service,
+)
 from db_logic.repository import serving_reader, tournament_store
 from shared.config import get_config
 from shared.exceptions import DataCheckError
 from shared.logger import get_logger, setup_logging
 
 EXIT_OK, EXIT_ERROR, EXIT_CHECK = 0, 1, 2
-MODES = ("data-check", "supplement-check", "supplement-draft", "tournament-draft")
+MODES = ("data-check", "supplement-check", "supplement-draft", "tournament-draft", "backtest")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -34,6 +40,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--out", help="supplement-draft: folder to write into (default: a review"
                                  " folder under CRICSTAT_DATA_DIR/models, never the committed"
                                  " files)")
+    p.add_argument("--no-mlflow", action="store_true", help="backtest: don't log to MLflow")
     p.add_argument("--quiet", action="store_true", help="only warnings and errors on stderr")
     return p
 
@@ -51,6 +58,14 @@ def data_check(cfg) -> dict:
         _, fixtures = tournament_service.load(cfg, tid, teams)
         report["tournaments"][tid] = "%d fixtures ok" % len(fixtures)
     return report
+
+
+def _headline(rep: dict) -> dict:
+    t = rep["test_a"]
+    pick = ("n", "log_loss", "brier", "accuracy", "calibration_slope")
+    return {"elo": {k: t["elo"][k] for k in pick},
+            "win_rate": {k: t["baselines"]["win_rate"][k] for k in pick},
+            "coin": {k: t["baselines"]["coin"][k] for k in pick[:3]}}
 
 
 def main(argv=None) -> int:
@@ -74,6 +89,11 @@ def main(argv=None) -> int:
         elif args.mode == "supplement-draft":
             out = args.out or "%s/models/supplement-draft" % cfg.DATA_DIR
             summary.update(supplement_service.draft(cfg, out_dir=out))
+        elif args.mode == "backtest":
+            rep = backtest_service.run(cfg, log_to_mlflow=not args.no_mlflow)
+            summary.update(test_a=_headline(rep), gates=rep["gates"], report_dir=rep["report_dir"],
+                           mlflow=rep.get("mlflow"),
+                           params={k: v["params"] for k, v in rep["windows"].items()})
         elif args.mode == "tournament-draft":
             if args.tournament != "wc2027":
                 raise ValueError("only wc2027 is drafted from its schedule; past World Cups"

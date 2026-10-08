@@ -42,7 +42,8 @@ def men_odi_results(conn: sqlite3.Connection) -> List[Dict[str, object]]:
         SELECT m.match_id, m.start_date, a.name AS team1, b.name AS team2,
                v.country AS venue_country,
                tr.home_away AS team1_home_away, m.result, w.name AS winner, m.method, m.decided_by,
-               m.has_deliveries, c.event_name AS event, m.event_stage
+               m.has_deliveries, c.event_name AS event, m.event_stage,
+               m.win_by_runs, m.win_by_wickets
           FROM matches m
           JOIN teams a ON a.team_key = m.team1_key
           JOIN teams b ON b.team_key = m.team2_key
