@@ -138,7 +138,7 @@ Both run as user **root**. Task Settings → Notification: tick "Send run detail
 |---|---|---|
 | cricstat CD pull | Daily, 05:15 | `sh /volume1/pandya-homelab/deployment/cricstat/cd-pull.sh` |
 | cricstat daily refresh | Daily, 05:30 | `cd /volume1/pandya-homelab/deployment/cricstat && /usr/local/bin/docker compose run --rm cricstat-pipeline recent && /usr/local/bin/docker compose run --rm cricstat-pipeline build` |
-| cricstat weekly register | Weekly, Sunday 06:00 | `cd /volume1/pandya-homelab/deployment/cricstat && /usr/local/bin/docker compose run --rm cricstat-pipeline register && /usr/local/bin/docker compose run --rm cricstat-pipeline build` |
+| cricstat weekly register | Weekly, Sunday 06:00 | `cd /volume1/pandya-homelab/deployment/cricstat && /usr/local/bin/docker compose run --rm cricstat-pipeline register && /usr/local/bin/docker compose run --rm cricstat-pipeline enrich && /usr/local/bin/docker compose run --rm cricstat-pipeline build` (enrich added 2026-10-08, verified with synoschedtask) |
 | cricstat monthly full | Monthly, day 1, 04:00 | `cd /volume1/pandya-homelab/deployment/cricstat && /usr/local/bin/docker compose run --rm cricstat-pipeline full && /usr/local/bin/docker compose run --rm cricstat-pipeline build --full` |
 Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deployed by cd-pull; a by-hand containerised
 `build` returned `unchanged` in 4s, same rules_sha as the host). Model jobs (P1) get appended later (F6 §4).
@@ -407,7 +407,8 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   35 (most Indian stars' PIB photos: Kohli, Mandhana, Bumrah), PDM-owner 10, GFDL 1.2 2. Decided 2026-10-08: allow
   GODL-India (credit adds "No endorsement by the Government of India is implied." + licence link) and PDM-owner; GFDL
   stays out. enrich re-fetches previously rejected photos once their licence is allowed.
-  DSM weekly register task needs `… register && … enrich && … build` (owner edits it).
+  DSM weekly register task now runs `register && enrich && build` (edited + verified 2026-10-08). After the licence
+  change: 45 more photos (Kohli, Mandhana, Bumrah…), build 6 → 1,364 players with a photo.
 - **`cricstat/web/` is LIVE** (bind mount). `gen_pages.py` writes to `cricstat/tools/staging/web/` by default
   (gitignored, created from cricstat/web; web_preview.py serves it). Edit CSS/JS there too. Go live after approval:
   `rsync -a cricstat/tools/staging/web/ cricstat/web/` (assets first), then delete the staging copy.
