@@ -1,0 +1,90 @@
+{
+  "id": "wc2019",
+  "name": "ICC Cricket World Cup 2019",
+  "start": "2019-05-30",
+  "end": "2019-07-14",
+  "hosts": [
+    "England"
+  ],
+  "teams": [
+    "Afghanistan",
+    "Australia",
+    "Bangladesh",
+    "England",
+    "India",
+    "New Zealand",
+    "Pakistan",
+    "South Africa",
+    "Sri Lanka",
+    "West Indies"
+  ],
+  "points": {
+    "win": 2,
+    "tie": 1,
+    "no_result": 1
+  },
+  "stages": [
+    {
+      "id": "league",
+      "kind": "round_robin",
+      "groups": {
+        "L": [
+          "India",
+          "Australia",
+          "England",
+          "New Zealand",
+          "Pakistan",
+          "Sri Lanka",
+          "South Africa",
+          "Bangladesh",
+          "West Indies",
+          "Afghanistan"
+        ]
+      },
+      "advance": {
+        "top": 4
+      },
+      "tie": "points_shared"
+    },
+    {
+      "id": "semi",
+      "kind": "knockout",
+      "washout": "higher_placed",
+      "tie": "super_over"
+    },
+    {
+      "id": "final",
+      "kind": "knockout",
+      "washout": "shared",
+      "tie": "super_over"
+    }
+  ],
+  "tiebreakers": [
+    "points",
+    "wins",
+    "nrr",
+    "head_to_head"
+  ],
+  "final_standings": {
+    "L": [
+      "India",
+      "Australia",
+      "England",
+      "New Zealand",
+      "Pakistan",
+      "Sri Lanka",
+      "South Africa",
+      "Bangladesh",
+      "West Indies",
+      "Afghanistan"
+    ]
+  },
+  "sources": [
+    "Wikipedia: International cricket in 2019 (fixtures, results)",
+    "Wikipedia: 2019 Cricket World Cup",
+    "Template:2019 Cricket World Cup points table (revision 1151010651)"
+  ],
+  "assumptions": [
+    "NRR is not simulated (no margins); in a replay the official final standings settle ties, in a forecast equal points and wins are split by a random draw."
+  ]
+}

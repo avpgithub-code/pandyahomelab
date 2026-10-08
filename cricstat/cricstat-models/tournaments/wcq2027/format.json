@@ -1,0 +1,42 @@
+{
+  "id": "wcq2027",
+  "name": "ICC Men's Cricket World Cup Qualifier 2027",
+  "status": "field_tbc",
+  "start": "2027-02-26",
+  "end": "2027-03-21",
+  "hosts": [
+    "South Africa",
+    "Namibia"
+  ],
+  "teams_known": [
+    "West Indies",
+    "Ireland"
+  ],
+  "entry": {
+    "full_members": "West Indies and Ireland (outside the top 8 + hosts on 30 Sep 2026)",
+    "league2_top4": "TBC: CWC League 2 2024-26 ends Dec 2026 (members: Canada, Namibia, Nepal, Netherlands, Oman, Scotland, United Arab Emirates, United States of America)",
+    "playoff_top4": "TBC: CWC Qualifier Play-off, about 1-22 Dec 2026 (League 2 places 5-8 + Challenge League top 2 of each group: Italy, Uganda + 2 TBC)"
+  },
+  "format": "TBC: 10 teams; top 4 go to the World Cup (1st direct, 2nd-4th Super Series). 2023 used two groups of 5 then a Super Six.",
+  "sources": [
+    "Wikipedia: 2027 Cricket World Cup qualification",
+    "Wikipedia: 2027 Cricket World Cup Qualifier"
+  ],
+  "assumptions": [
+    "Owner decision 2026-10-08: until the field is known (Dec 2026), the four World Cup places are drawn by simulating the candidates' chances with Elo.",
+    "Simulated field: West Indies, Ireland and all eight CWC League 2 teams (the League 2 bottom four are assumed to come through the Qualifier Play-off; the Challenge League teams have no ODI history to rate).",
+    "Simulated format: one round robin of 10 teams at neutral venues, places 1-4 = Q1-Q4 (the real format is TBC; 2023 used two groups of 5 then a Super Six)."
+  ],
+  "simulation_field": [
+    "West Indies",
+    "Ireland",
+    "Canada",
+    "Namibia",
+    "Nepal",
+    "Netherlands",
+    "Oman",
+    "Scotland",
+    "United Arab Emirates",
+    "United States of America"
+  ]
+}

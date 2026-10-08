@@ -85,3 +85,39 @@ jobs:
           docker logs api; exit 1
       - name: The golden selection is in the image and readable by the operator UID
         run: docker run --rm -u 1026:100 --entrypoint python3 cricstat-api:ci -c "print(len(open('/cricstat/docs/validation/golden-selection.csv').readlines()))"
+
+  models-tests:
+    # cricstat-models (P1): stdlib only, so it also runs on the NAS host's Python 3.8. Tests build
+    # tiny serving DBs from cricstat/sql/serving_schema.sql and never touch the network.
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.8", "3.12"]
+    defaults:
+      run:
+        working-directory: cricstat/cricstat-models
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install -r requirements-dev.txt
+      - run: ruff check .
+      - run: python -m pytest -q
+
+  models-image:
+    runs-on: ubuntu-22.04
+    needs: models-tests
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build cricstat-models image (no push)
+        run: docker build -f cricstat/cricstat-models/docker/Dockerfile -t cricstat-models:ci cricstat
+      - name: Smoke test as the operator UID, read-only root (catches the Synology 700-bits trap)
+        run: docker run --rm -u 1026:100 --read-only --tmpfs /tmp -e CRICSTAT_LOG_DIR=/tmp/logs cricstat-models:ci --help
+      - name: The reviewed inputs are in the image and readable
+        run: >
+          docker run --rm -u 1026:100 --entrypoint python3 cricstat-models:ci -c
+          "import os, application_logic.services.forecast_service;
+          [open(p).read() for p in ('/cricstat/sql/venue_map.csv', 'supplement/afg_odi_results.csv',
+          'supplement/reviews.csv', 'tournaments/wc2027/fixtures.csv', 'ratings/icc_full_members.csv')]"

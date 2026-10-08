@@ -77,10 +77,10 @@ analytics); player and team pages use a regex location that serves the one page 
 | When (NAS local time) | Command | Phase |
 |---|---|---|
 | Daily 05:30 | `run --rm cricstat-pipeline recent`, then `build --incremental` | ingest now; build from P0 |
-| Daily 05:50 | `run --rm cricstat-models ratings` (Elo update + re-simulate if new ODIs) | P1 |
-| Sunday 06:00 | `run --rm cricstat-pipeline register` (people.csv, names.csv + Wikidata for new ids) | P0 |
-| 1st of month 04:00 | `run --rm cricstat-pipeline full`, then `build --full` | ingest now; build from P0 |
-| Weekly / manual | `run --rm cricstat-models train` (ML/DL challengers, sequence model) | P1+ |
+| Daily 05:30 (chained, D5) | `… && run --rm cricstat-models forecast` (champion ratings + 50,000 simulations; skips in <1 s when nothing changed) | P1.4 |
+| Sunday 06:00 | `run --rm cricstat-pipeline register`, `enrich`, `build`, then `run --rm cricstat-models supplement-check` (proposes Afghanistan rows; never edits) | P0 / P1.4 |
+| 1st of month 04:00 | `run --rm cricstat-pipeline full`, then `build --full`, then `run --rm cricstat-models forecast --force` | P0 / P1.4 |
+| Manual (later weekly) | `run --rm cricstat-models train` (~5 min: backtests A/B/C; promotes only through the gate) | P1.4 |
 
 The jobs are sequential and the daily one runs early in the morning, out of visitors' peak hours. Exit codes from
 the pipeline (0 / 1 / 2) drive the DSM email alert.

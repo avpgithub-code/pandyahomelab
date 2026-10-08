@@ -1,0 +1,90 @@
+{
+  "id": "wc2023",
+  "name": "ICC Cricket World Cup 2023",
+  "start": "2023-10-05",
+  "end": "2023-11-19",
+  "hosts": [
+    "India"
+  ],
+  "teams": [
+    "Afghanistan",
+    "Australia",
+    "Bangladesh",
+    "England",
+    "India",
+    "Netherlands",
+    "New Zealand",
+    "Pakistan",
+    "South Africa",
+    "Sri Lanka"
+  ],
+  "points": {
+    "win": 2,
+    "tie": 1,
+    "no_result": 1
+  },
+  "stages": [
+    {
+      "id": "league",
+      "kind": "round_robin",
+      "groups": {
+        "L": [
+          "India",
+          "South Africa",
+          "Australia",
+          "New Zealand",
+          "Pakistan",
+          "Afghanistan",
+          "England",
+          "Bangladesh",
+          "Sri Lanka",
+          "Netherlands"
+        ]
+      },
+      "advance": {
+        "top": 4
+      },
+      "tie": "points_shared"
+    },
+    {
+      "id": "semi",
+      "kind": "knockout",
+      "washout": "higher_placed",
+      "tie": "super_over"
+    },
+    {
+      "id": "final",
+      "kind": "knockout",
+      "washout": "shared",
+      "tie": "super_over"
+    }
+  ],
+  "tiebreakers": [
+    "points",
+    "wins",
+    "nrr",
+    "head_to_head"
+  ],
+  "final_standings": {
+    "L": [
+      "India",
+      "South Africa",
+      "Australia",
+      "New Zealand",
+      "Pakistan",
+      "Afghanistan",
+      "England",
+      "Bangladesh",
+      "Sri Lanka",
+      "Netherlands"
+    ]
+  },
+  "sources": [
+    "Wikipedia: International cricket in 2023–24 (fixtures, results)",
+    "Wikipedia: 2023 Cricket World Cup",
+    "Template:2023 Cricket World Cup points table (revision 1320388682)"
+  ],
+  "assumptions": [
+    "NRR is not simulated (no margins); in a replay the official final standings settle ties, in a forecast equal points and wins are split by a random draw."
+  ]
+}

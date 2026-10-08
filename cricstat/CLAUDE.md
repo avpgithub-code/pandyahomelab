@@ -29,7 +29,7 @@ Use these only for manual reference/validation.
 ## Cricsheet facts
 - ~22,983 matches (18,316 men's, 4,667 women's), 2001–2026; dense from ~2012.
 - Formats: ~919 Tests, 3,187 ODIs, 5,729 T20Is, plus 40+ leagues (IPL 1,243, BBL 662, T20 Blast, PSL, CPL, SA20, The Hundred, WPL, MLC...).
-- Gaps: Afghanistan men's & Afghanistan Premier League matches withheld (377); completed matches only (~1 day lag); no player bio data.
+- Gaps: Afghanistan men's & Afghanistan Premier League matches withheld (379 on 2026-10-08; a protest over Afghan women's cricket, see cricsheet.org/article/explanation-for-withholding-of-afghanistani-matches/, 14 Nov 2024); completed matches only (~1 day lag); no player bio data.
 - Match files named by match_id, usually the ESPNcricinfo match ID, BUT 25 ids are non-numeric (`wi_*`, West Indies
   women's domestic matches). Never assume match_id is numeric; it is TEXT everywhere.
 - match_type values: T20 (14,274), ODI (3,187), MDM (2,217), ODM (2,066), Test (919), IT20 (320) as of 2026-10-05.
@@ -128,7 +128,7 @@ Background: `docs/llm-strategy-research-2026-10-05.md`.
 | P0 | Ingestion → serving-DB build → cricstat-api → first live pages (+F8) | **Done; public 2026-10-07.** P0.1 build + register, P0.2 golden figures, P0.3 cricstat-api, P0.3b `/admin/cricket` (2026-10-06); P0.4 pages + F8 texts live and linked from the homepage 2026-10-07 (+ `/cricket/about/` page) |
 | P0.6 | Search-engine pages: server-rendered player/team heads, real 404/301, `/cricket/sitemap.xml` | **Done 2026-10-07** (4,840 players + 176 teams indexable; submitted in Search Console) |
 | P0.5 | Wikidata enrichment: full names, birth details, Commons photos | **Done 2026-10-08** (7,192 on Wikidata; 1,364 credited photos incl. GODL-India/PDM-owner; weekly `enrich`; search + cards use names/photos) |
-| P1 | ODI World Cup 2027 predictor: Elo + Monte Carlo baseline first, then ML and DL challengers, backtests on WC 2019/2023, live win probability | **Next** (not started) |
+| P1 | ODI World Cup 2027 predictor: Elo + Monte Carlo baseline first, then ML and DL challengers, backtests on WC 2019/2023, live win probability | **In progress:** plan approved 2026-10-08; P1.1 data layer done (15 Afghanistan rows accepted via supplement/reviews.csv); P1.2 Elo + backtest A done; P1.3 done, gate 5 passed (owner 2026-10-08) → champion elo-v1; P1.4 cricstat-models service/CI/CD built, in review (not deployed) |
 | P2–P6 | Tools → test set → agent → public demo → extras | Later |
 | Later | Men's T20 World Cup 2028 forecast + T20I team ratings (decided 2026-10-06; shown as "Later" on team pages) | **Not started until the ODI World Cup 2027 is finished** |
 
@@ -431,7 +431,16 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   challenger with squad features; (3) DL player embeddings from a ball-by-ball sequence model (also live win
   probability). The best-calibrated model powers the live forecast; the comparison is published. Model jobs run as
   `cricstat-models` (scheduled), MLflow experiments `cricstat-*`, promotion only when backtests don't regress (F9).
-  The forecast is identical for every team; disclose withheld Afghanistan men's matches. Start with a plan for review.
+  The forecast is identical for every team; disclose withheld Afghanistan men's matches.
+  **Plan approved 2026-10-08** on branch `feat/cricstat-p1-elo`: `docs/P1-predictor-plan.md` + `docs/P1-afghanistan-audit.md`.
+  Steps P1.1 data layer -> P1.2 Elo + tuning -> P1.3 simulator + backtests -> P1.4 `cricstat-models` service/CI/CD ->
+  P1.5 API -> P1.6 pages; stop for review after each. Locked: **the 2027 format changed** (ICC 15 Jul 2026: Super Series
+  of 3 -> 2 groups of 6 -> Super 7 -> semis 1v4/2v3 -> final 21 Nov); D1 = S1, an Afghanistan results-only supplement
+  from Wikipedia (188 ODIs 2009-2026) used only for ratings/predictor/backtests, outside the serving DB, reviewed before
+  use (Wikipedia can be vandalised); D2 associates start lower by one rule; D3 simulate the Qualifier; D4 publish bar
+  §3.3; D5 `models forecast` chained onto the 05:30 task. **Key gotcha:** serving `team_key`/`match_key`/`player_key`
+  are load-order rowids and can renumber on a full build, so anything outside the serving DB keys on `match_id`,
+  (name, gender, team_type) and `player_id`. Exclude composite XIs from Elo. Never join players by name (two Rashid Khans).
 - **2027 venues (2026-10-08, live):** venue_map merges sponsor renames (Mangaung Oval = Goodyear/Chevrolet/
   OUTsurance; Wanderers = New Wanderers; Boland Park = Boland Bank Park; Diamond Oval = De Beers Diamond Oval);
   pipeline 176a2d29e92e, build 9. Pages V=73: "★ WC 2027" on match cards at the 2027 grounds and ★ in player
