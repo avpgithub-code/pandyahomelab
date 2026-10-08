@@ -224,3 +224,14 @@ def test_one_word_search_ranks_by_career_not_by_alias(with_bio):
     assert names[0] == "V Kohli" and len(names) == 2
     exact = with_bio.get("/v1/search", params={"type": "player", "q": "Virat Kohli"}).json()
     assert exact["data"]["players"][0]["match"] == "exact"
+
+
+
+def test_leaders_and_top_players_carry_full_name_and_photo(with_bio):
+    rows = with_bio.get("/v1/leaderboards/batting", params={"scope": "ODI"}).json()["data"]
+    kohli = next(r for r in rows if r["player_id"] == KOHLI)
+    assert kohli["full_name"] == "Virat Kohli" and kohli["photo_url"] == "/cricket/photos/ab12.jpg"
+    assert all("full_name" in r and "photo_url" in r for r in rows)
+    top = with_bio.get("/v1/teams/india-men/top-players", params={"metric": "runs"}).json()["data"]
+    kohli = next(r for r in top if r["player_id"] == KOHLI)
+    assert kohli["full_name"] == "Virat Kohli" and kohli["photo_url"] == "/cricket/photos/ab12.jpg"

@@ -32,6 +32,15 @@ def photo(p: dict) -> Optional[dict]:
             "source_url": p["photo_source_url"], "source": "Wikimedia Commons"}
 
 
+def display(db: ServingDB, player_ids: List[str]) -> Dict[str, dict]:
+    """{player_id: {"full_name", "photo_url"}} for a list of players (P0.5), same name rule as
+    the profile; adds them to leaderboard and top-performer rows."""
+    return {r["player_id"]: {"full_name": full_name(r["name"], (r["variants"] or "").split("|"),
+                                                    r["wd_name"]),
+                             "photo_url": PHOTO_PATH + r["photo_file"] if r["photo_file"] else None}
+            for r in pages_repo.display_names(db, player_ids)}
+
+
 def _ref(p: dict) -> dict:
     return {"player_id": p["player_id"], "name": p["name"],
             "slug": player_slug(p["name"], p["player_id"])}

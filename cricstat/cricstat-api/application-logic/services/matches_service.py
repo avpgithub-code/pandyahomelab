@@ -3,6 +3,7 @@ from typing import List, Optional, Tuple
 
 from application_logic.services import metrics
 from application_logic.services.common import dates, gender, page, team_slugs
+from application_logic.services.players_service import display
 from application_logic.services.slugs import player_slug
 from db_logic.repository import matches_repo
 from db_logic.repository.db import ServingDB
@@ -96,5 +97,8 @@ def leaderboard(db: ServingDB, kind: str, metric: str, scope: Optional[str], g: 
                        average=metrics.bowling_average(r["runs_conceded"], r["wickets"]),
                        economy=metrics.economy(r["runs_conceded"], r["legal_balls"]))
         out.append(row)
+    names = display(db, [r["player_id"] for r in out])
+    for row in out:
+        row.update(names.get(row["player_id"], {"full_name": row["name"], "photo_url": None}))
     keys = ("average", "strike_rate") if kind == "batting" else ("bowling_average", "economy")
     return out, {k: metrics.DEFINITIONS[k] for k in keys}

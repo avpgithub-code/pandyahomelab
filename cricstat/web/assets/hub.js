@@ -111,7 +111,7 @@
         const [bat, bowl] = await Promise.all([
           C.api("/v1/teams/" + team.slug + "/top-players?metric=runs" + q),
           C.api("/v1/teams/" + team.slug + "/top-players?metric=wickets" + q)]);
-        const line = (pl, val, unit, sub2) => h("li", {}, [C.who(pl.name, sub2, team.name, "/cricket/players/" + pl.slug + "/"),
+        const line = (pl, val, unit, sub2) => h("li", {}, [C.who(pl.full_name || pl.name, sub2, team.name, "/cricket/players/" + pl.slug + "/", null, pl.photo_url),
           h("span", { class: "val" }, [val, h("small", {}, unit)])]);
         C.fill(body, [
           h("div", { class: "section-label", style: "margin:.2rem 0 0" }, "Runs"),
@@ -175,7 +175,7 @@
         return h("div", { class: "card " + (g === "female" ? "blue" : "accent") }, [
           h("div", { class: "card-head" }, [h("h3", {}, title)]),
           data.length ? h("ol", { class: "rank" }, data.map((p) => h("li", {}, [
-            C.who(p.name, p.team + " · " + p.matches + " matches", p.team, "/cricket/players/" + p.slug + "/"),
+            C.who(p.full_name || p.name, p.team + " · " + p.matches + " matches", p.team, "/cricket/players/" + p.slug + "/", null, p.photo_url),
             h("span", { class: "val" }, kind === "batting" ? [C.num(p.runs), h("small", {}, "avg " + C.ratio(p.average))]
                                                             : [p.wickets, h("small", {}, "econ " + C.ratio(p.economy))])]))) :
             h("p", { class: "muted small" }, "No matches yet this year.")]);
