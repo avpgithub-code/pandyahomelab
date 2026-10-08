@@ -142,6 +142,33 @@ frame the ML and DL challengers will plug into later (§8). Decisions needed fro
 - **Grid points are not MLflow child runs:** the whole grid is one artifact (grid.csv), so the
   experiment stays readable.
 
+### 2.6 Host conditions for 2027 (checked 2026-10-08, men's ODIs 2003–2026)
+The 2027 World Cup is played in South Africa (44 matches), Zimbabwe (10) and Namibia (6), 2 Oct–21 Nov.
+- **Home advantage:** one term for every team (H ≈ 75), applied to South Africa in South Africa, Zimbabwe
+  in Zimbabwe, Namibia in Windhoek. Residual check since 2007: home sides expected 58.0%, won 58.6%.
+  No regional "touring" effect beyond it (Asian teams in SA/ENG/NZ/AUS −0.8 pts, SENA teams in Asia
+  −2.0 pts, Asian visitors in South Africa +4.6 ± 11 pts: all noise).
+- **Batting first vs chasing:** no reliable effect at the host venues once team strength is accounted for
+  (South Africa −1 ± 7 pts, Zimbabwe −6 ± 7, Namibia −1 ± 15; Newlands +16 ± 20, Centurion −12 ± 16 are
+  small samples). Before the toss each team has an even chance of batting first, so a uniform
+  bat-first edge would cancel out in a pre-match forecast anyway. It matters after the toss, so it belongs
+  in the in-match model (P1c), together with day/night (the 2027 schedule flags day/night games;
+  Cricsheet doesn't, so dew can't be measured historically).
+- **Rain:** Cricsheet omits matches abandoned without a ball, so no-result rates come from the complete
+  Wikipedia ODI list: 6.5% of all ODIs since 2008 (2.6% abandoned without a ball), not the ~4%
+  Cricsheet alone suggests. Host countries in October–November: South Africa 3 of 32, Zimbabwe 1 of 34,
+  Namibia 0 of 8. **P1.3 uses a per-country Oct–Nov no-result rate shrunk toward the global rate**
+  (too few matches to trust alone), and the knockouts' reserve-day rule.
+- **Venue character (scoring level):** first-innings averages differ (Wanderers/Newlands/Kingsmead about
+  265, Gqeberha 235, Harare 240, Windhoek 223). That changes margins and NRR, not who wins, so it isn't
+  in Elo. It is a P1b feature (venue profile, plus squad make-up if bowling styles become available).
+- **Not available in any allowed source:** pitch reports, weather, bowling type (Cricsheet has none;
+  Wikidata's bowling style is patchy and not fetched yet).
+- **Data fix found:** `sql/venue_map.csv` leaves sponsor renames as separate grounds (Bloemfontein =
+  Goodyear Park / Chevrolet Park / OUTsurance Oval / Mangaung Oval; "New Wanderers" vs "The Wanderers";
+  Boland Bank Park vs Boland Park; De Beers Diamond Oval vs Diamond Oval). venue_map is applied on every
+  build and isn't in rules_sha, so the fix needs no full rebuild.
+
 ## 3. Backtests and "good enough to publish"
 ### 3.1 What is tested
 | Test | Sample | Why |
