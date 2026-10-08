@@ -216,7 +216,8 @@ def forecast_2027(cfg, c, fm, a_rep, odi, known, n) -> Dict[str, object]:
     data_as_of = a_rep["data"]["data_as_of"]
     days = (datetime.date.fromisoformat(fmt["start"]) -
             datetime.date.fromisoformat(data_as_of)).days
-    a = uncertainty.fit(uncertainty.measure(c, p, fm))
+    drift = uncertainty.measure(c, p, fm)
+    a = uncertainty.fit(drift)
     sig = uncertainty.sigma(a, max(days, 0))
     cond = conditions_service.rates(odi, wnd["cutoff"], fmt["hosts"], (10, 11))
     sp = simulator.SimParams(home=p.home, k_update=p.k, sigma=sig, nr=cond["by_country"],
@@ -243,6 +244,7 @@ def forecast_2027(cfg, c, fm, a_rep, odi, known, n) -> Dict[str, object]:
     table.sort(key=lambda r: (-r["p_champion"], -r["p_semi"], -r["p_world_cup"]))
     return {"n_simulations": n, "seed": SEED, "data_as_of": data_as_of, "days_to_start": days,
             "sigma": sig, "sigma_a": a, "params": wnd["params"], "conditions": cond,
+            "drift": {str(h): round(sd, 2) for h, (sd, _n) in drift.items()},
             "qualifier_field": field, "sums": sums(res), "table": table}
 
 
@@ -302,7 +304,43 @@ def candidate(report) -> Dict[str, object]:
                         "test_a.win_rate.log_loss": ta["baselines"]["win_rate"]["log_loss"],
                         "test_b.win_rate.log_loss": tb_["win_rate"]["log_loss"]},
             "gates": {k: v for k, v in report["gates"].items() if isinstance(v, bool)},
-            "reliability_test_a": ta["elo"]["reliability"]}
+            "reliability_test_a": ta["elo"]["reliability"],
+            "backtest": published_backtest(report)}
+
+
+def _lite(s: Dict[str, object]) -> Dict[str, object]:
+    return {k: (round(s[k], 5) if isinstance(s.get(k), float) and s[k] == s[k] else s.get(k))
+            for k in ("n", "log_loss", "brier", "accuracy", "calibration_slope",
+                      "calibration_intercept")}
+
+
+def published_backtest(report) -> Dict[str, object]:
+    """What the methodology page shows: tests A, B, C with baselines, reliability, drift and the
+    no-result rates. Frozen with the model version, served by the API from forecast.sqlite."""
+    ta = report["test_a"]
+    out = {"test_a": {"from": ta["from"], "elo": _lite(ta["elo"]),
+                      "win_rate": _lite(ta["baselines"]["win_rate"]),
+                      "coin": _lite(ta["baselines"]["coin"]),
+                      "elo_full_members_only": _lite(ta["elo_full_members_only"]),
+                      "elo_with_afghanistan": _lite(ta["elo_with_afghanistan"]),
+                      "reliability": {"elo": ta["elo"]["reliability"],
+                                      "win_rate": ta["baselines"]["win_rate"]["reliability"]},
+                      "by_year": {y: _lite(s) for y, s in ta["by_year"].items()}},
+           "test_b": {"pooled": {m: _lite(s) for m, s in report["test_b_pooled"].items()}},
+           "test_c": {}, "replay": {}, "drift_sd_by_days": report["forecast"].get("drift"),
+           "no_result_rates": report["forecast"]["conditions"]["by_country"],
+           "no_result_counts": report["forecast"]["conditions"]["counts"]}
+    for tid, t in report["tournaments"].items():
+        out["test_b"][tid] = {m: _lite(s) for m, s in t["test_b"].items()}
+        c = t["test_c"]
+        out["test_c"][tid] = {"champion": c["champion"], "p_champion": round(c["p_champion"], 4),
+                              "uniform_p_champion": round(math.exp(c["uniform_log_p_champion"]), 4),
+                              "brier": {k: round(v, 5) for k, v in c["brier"].items()},
+                              "teams": [{k: (round(v, 4) if isinstance(v, float) else v)
+                                         for k, v in r.items()} for r in c["teams"]]}
+        out["replay"][tid] = {"ok": t["replay"]["ok"],
+                              "semi_finalists": t["replay"]["semi_finalists"]}
+    return out
 
 
 def _pct(x: float) -> str:

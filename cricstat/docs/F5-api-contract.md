@@ -132,6 +132,26 @@ Example: "best death-overs economy in IPL since 2020, min 30 overs" becomes
 | `GET /v1/ratings?scope=ODI&gender=male` | Current ratings and rank | Country rating card |
 | `GET /v1/ratings/{team_slug}/history?scope=` | Rating after each match | Charts |
 | `GET /v1/models/predictor/backtest` | The three-model comparison (Elo vs ML vs DL): Brier, log-loss, calibration bins for WC 2019/2023 | Predictor and Methodology backtest |
+
+**As built (P1.5, 2026-10-08).** Data comes from `data/db/forecast.sqlite` (written by cricstat-models,
+same atomic-swap contract as the serving DB); if it's missing only these endpoints answer 503
+"Forecast unavailable". ETag = `"<build_id>-f<forecast_id>"`. `meta.coverage` adds the Afghanistan
+results-list note. Team ids are the API team slugs (`india-men`); Afghanistan men has `slug: null`
+(no team page) but a `team_uid`.
+- `latest`: `tournament` (dates, hosts, groups), `forecast` (id, created_at, data_as_of, n_simulations,
+  model_version, mlflow_run_id, days_to_start, rating_uncertainty_sd), `stages`, `teams[]`
+  (rating, group, direct_qualifier, `probabilities` per stage: qualified, super_series, group, super7,
+  semi, final, champion), `model`, `assumptions` (the format's TBC rules), `disclosures` (model, not
+  advice, not used, Afghanistan, data, qualifier).
+- `history?team=`: one entry per forecast with that team's champion/final/semi/super7 chances and
+  `moved_by` (the men's ODIs new since the previous forecast); without `team`, every team's champion
+  chance per forecast.
+- `ratings?scope=ODI&gender=male` (other scopes → 400): rating, matches, last_match, `active` (an ODI in
+  the last two years) and `rank` among active teams. `ratings/{slug}/history`: rating after each match.
+- `models/predictor/backtest`: champion (version, MLflow run, Elo parameters, drift, no-result rates),
+  metrics, gates, `backtest` (tests A/B/C per tournament, reliability, drift, replay), the `comparison`
+  table (Elo live; win-rate reference; ML and DL "planned"), all `versions`, `disclosures`.
+- `/v1/admin/jobs` gains a `forecast` block (last forecast + model).
 | `GET /v1/models/agent/evals` | Latest eval run per system (accuracy, latency, cost) | Methodology "Analyst evaluation" |
 
 ## 4. Response example — `GET /v1/players/{id}/career?scope=ODI`

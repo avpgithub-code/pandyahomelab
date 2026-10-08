@@ -19,6 +19,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from application_logic.services import (
     admin_service,
+    forecast_service,
     matches_service,
     meta_service,
     players_service,
@@ -27,6 +28,7 @@ from application_logic.services import (
 from application_logic.services.common import catalog_defs, team_slugs
 from db_logic.repository import meta_repo
 from db_logic.repository.db import QueryTimeout, ServingDB
+from db_logic.repository.forecast_db import ForecastDB
 from presentation_logic.api import pages
 from shared.config import ATTRIBUTION, COVERAGE, Config
 from shared.exceptions import ApiError, NoData, NotFound
@@ -40,6 +42,7 @@ def create_app(cfg: Optional[Config] = None) -> FastAPI:
     cfg = cfg or Config()
     setup_logging(cfg.LOG_LEVEL)
     db = ServingDB(cfg.SERVING_DB)
+    fdb = ForecastDB(cfg.FORECAST_DB)          # P1 predictor output; may be absent (→ 503 there)
 
     @asynccontextmanager
     async def lifespan(app):
@@ -54,15 +57,17 @@ def create_app(cfg: Optional[Config] = None) -> FastAPI:
     app = FastAPI(title="cricstat API", version="1.0.0", docs_url=None, redoc_url=None,
                   openapi_url="/openapi.json", lifespan=lifespan,
                   description="Cricket statistics from Cricsheet ball-by-ball data. " + ATTRIBUTION)
-    app.state.db, app.state.cfg = db, cfg
+    app.state.db, app.state.fdb, app.state.cfg = db, fdb, cfg
 
     def build() -> dict:
         return db.cached("build", lambda: meta_repo.latest_build(db) or {})
 
     def envelope(request: Request, data, metrics: dict, more: bool = False,
-                 extra_filters: Optional[dict] = None) -> Response:
+                 extra_filters: Optional[dict] = None, etag_extra: Optional[str] = None,
+                 coverage: str = COVERAGE) -> Response:
         b = build()
-        etag = '"%s"' % b.get("build_id")
+        # Forecast responses change with the forecast id as well as the build.
+        etag = '"%s%s"' % (b.get("build_id"), "-" + etag_extra if etag_extra else "")
         headers = {"ETag": etag, "Cache-Control": "public, max-age=%d, stale-while-revalidate=%d"
                    % (cfg.CACHE_MAX_AGE, cfg.CACHE_SWR)}
         if request.headers.get("if-none-match") == etag:
@@ -70,7 +75,7 @@ def create_app(cfg: Optional[Config] = None) -> FastAPI:
         params = dict(request.query_params)
         meta = {"data_as_of": b.get("data_as_of"), "build_id": b.get("build_id"),
                 "filters": dict(params, **(extra_filters or {})), "metrics": metrics,
-                "coverage": COVERAGE, "attribution": ATTRIBUTION}
+                "coverage": coverage, "attribution": ATTRIBUTION}
         if more:
             limit = int(params.get("limit") or 20)
             params["offset"] = str(int(params.get("offset") or 0) + limit)
@@ -242,6 +247,34 @@ def create_app(cfg: Optional[Config] = None) -> FastAPI:
         return envelope(request, *matches_service.leaderboard(db, kind, metric, scope, gender,
                                                               date_from, date_to, limit))
 
+    # ── ODI World Cup 2027 predictor (P1.5; data written by cricstat-models) ──
+    PREDICTOR_COVERAGE = (COVERAGE + "; for the predictor, Afghanistan's ODI results come from a "
+                          "reviewed results list (Wikipedia), rated by the same rule")
+
+    def fenvelope(request: Request, data_defs) -> Response:
+        return envelope(request, *data_defs, etag_extra=forecast_service.etag(fdb),
+                        coverage=PREDICTOR_COVERAGE)
+
+    @app.get("/v1/forecasts/{tournament}/latest")
+    def forecast_latest(request: Request, tournament: str):
+        return fenvelope(request, forecast_service.latest(db, fdb, tournament))
+
+    @app.get("/v1/forecasts/{tournament}/history")
+    def forecast_history(request: Request, tournament: str, team: Optional[str] = None):
+        return fenvelope(request, forecast_service.history(db, fdb, tournament, team))
+
+    @app.get("/v1/ratings")
+    def rating_list(request: Request, scope: str = "ODI", gender: str = "male"):
+        return fenvelope(request, forecast_service.ratings(db, fdb, scope, gender))
+
+    @app.get("/v1/ratings/{slug}/history")
+    def rating_history(request: Request, slug: str, scope: str = "ODI"):
+        return fenvelope(request, forecast_service.rating_history(db, fdb, slug, scope))
+
+    @app.get("/v1/models/predictor/backtest")
+    def predictor_backtest(request: Request):
+        return fenvelope(request, forecast_service.backtest(fdb))
+
     # ── Internal admin views (P0.3b) — for the admin portal only; Nginx keeps them off the public
     #    site. Not cached: job status changes independently of the build id.
     def admin(data_defs):
@@ -254,7 +287,9 @@ def create_app(cfg: Optional[Config] = None) -> FastAPI:
 
     @app.get("/v1/admin/jobs", include_in_schema=False)
     def admin_jobs():
-        return admin(admin_service.jobs(db, cfg.RAW_DB, cfg.LOG_DIR, cfg.NAS_UTC_OFFSET))
+        data, defs = admin_service.jobs(db, cfg.RAW_DB, cfg.LOG_DIR, cfg.NAS_UTC_OFFSET)
+        data["forecast"] = forecast_service.admin_block(fdb)      # P1 predictor job
+        return admin((data, defs))
 
     @app.get("/v1/admin/overview", include_in_schema=False)
     def admin_overview():

@@ -99,6 +99,9 @@ class ForecastWriter:
             out[n] = uid
         return out
 
+    def meta(self, key: str, value: str) -> None:
+        self.conn.execute("INSERT OR REPLACE INTO meta VALUES (?, ?)", (key, value))
+
     def model_version(self, version: str, params: Dict[str, object], registered: Optional[str],
                       run_id: Optional[str], promoted_at: Optional[str]) -> None:
         self.conn.execute("INSERT OR IGNORE INTO model_versions VALUES (?, ?, ?, ?, ?)",

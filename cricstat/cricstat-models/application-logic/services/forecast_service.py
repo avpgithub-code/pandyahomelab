@@ -217,6 +217,7 @@ def forecast(cfg, force: bool = False, n: Optional[int] = None) -> Dict[str, obj
                            "result": r["result"], "winner_uid": uids.get(r["winner"] or ""),
                            "source": r["source"]} for r in new_inputs])
         _store_backtest(w, model)
+        w.meta("tournament:%s" % TOURNAMENT, json.dumps(tournament_summary(fmt, fixtures, field)))
         expect = dict(EXPECT, **({"qualified": 4} if field else {}))
         errors = w.check(fid, expect)
         if errors:
@@ -229,6 +230,16 @@ def forecast(cfg, force: bool = False, n: Optional[int] = None) -> Dict[str, obj
             "sigma": round(sig, 1), "played_fixtures": played, "new_matches": len(new_inputs),
             "mlflow_run_id": run_id,
             "top": [(t, round(v["champion"], 3)) for t, v in top]}
+
+
+def tournament_summary(fmt, fixtures, field) -> Dict[str, object]:
+    """What the predictor page needs about the event itself (the API has no tournament configs)."""
+    groups = next((st["groups"] for st in fmt["stages"] if st["id"] == "group"), {})
+    return {"id": fmt["id"], "name": fmt["name"], "start": fmt["start"], "end": fmt["end"],
+            "hosts": fmt["hosts"], "groups": groups, "stages": [st["id"] for st in fmt["stages"]],
+            "assumptions": fmt.get("assumptions", []), "qualifier_field": field,
+            "matches": len(fixtures),
+            "played": sum(1 for f in fixtures if f.get("result"))}
 
 
 def _store_backtest(w, model) -> None:
