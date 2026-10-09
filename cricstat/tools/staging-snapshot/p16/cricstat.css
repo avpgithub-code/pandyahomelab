@@ -633,15 +633,15 @@ a.about-trigger[aria-current="page"] { background: rgba(255,153,51,.22); border-
 .wm-tip-rows .on { color: var(--saffron); font-weight: 600; }
 .wm-tip-hint { margin: .15rem 0 0; }
 /* Hub pitch, the "stat" half: Manhattan of India's 2011 final chase (gen_pages manhattan_svg) */
-.manhattan .mh-bar { fill: var(--saffron); opacity: .34; transform-box: fill-box; transform-origin: 50% 100%;
+.manhattan .mh-bar { fill: var(--saffron); opacity: .2; transform-box: fill-box; transform-origin: 50% 100%;
                      animation: mh-grow .45s calc(2s + var(--i) * 28ms) both cubic-bezier(.2,.8,.3,1); }
-.manhattan .mh-six { opacity: .85; }
-.manhattan .mh-wkt { fill: #f5efe6; opacity: .75; animation: mh-fade .3s calc(2.1s + var(--i) * 28ms) both; }
-.manhattan .mh-worm { fill: none; stroke: #ffd29a; stroke-width: 1.4; opacity: .55; stroke-dasharray: 1; stroke-dashoffset: 1;
+.manhattan .mh-six { opacity: .55; }
+.manhattan .mh-wkt { fill: #f5efe6; opacity: .45; animation: mh-fade .3s calc(2.1s + var(--i) * 28ms) both; }
+.manhattan .mh-worm { fill: none; stroke: #ffd29a; stroke-width: 1.2; opacity: .32; stroke-dasharray: 1; stroke-dashoffset: 1;
                       animation: mh-draw 1.6s 2.1s forwards ease-in-out; }
-.manhattan .mh-target { stroke: #ffd29a; stroke-width: .8; stroke-dasharray: 3 3; opacity: .45; }
-.manhattan .mh-label { fill: #ffd29a; opacity: .6; font: 600 7px system-ui, sans-serif; letter-spacing: .04em; }
-.manhattan .mh-six-label { fill: var(--saffron); font: 800 9px system-ui, sans-serif; animation: mh-fade .4s 3.5s both; }
+.manhattan .mh-target { stroke: #ffd29a; stroke-width: .8; stroke-dasharray: 3 3; opacity: .28; }
+.manhattan .mh-label { fill: #ffd29a; opacity: .4; font: 600 7px system-ui, sans-serif; letter-spacing: .04em; }
+.manhattan .mh-six-label { fill: var(--saffron); opacity: .7; font: 800 9px system-ui, sans-serif; animation: mh-fade .4s 3.5s both; }
 @keyframes mh-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
 @keyframes mh-fade { from { opacity: 0; } }
 @keyframes mh-draw { to { stroke-dashoffset: 0; } }
