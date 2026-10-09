@@ -432,6 +432,14 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   the serving DB, photo + credit) · ⚖️ Ratings · 🗺️ Format · ✅ How good is it? Plus the "Read this first" limits panel.
   Nav "ODI WC 2027" is a live link; "Methodology" still "soon". Licences page: Wikipedia (CC BY-SA 4.0) row, venue photo
   sources, Afghanistan note (Cricsheet's protest + predictor results list), forecast disclaimer.
+- **Partial P1.6 deploy LIVE (2026-10-09 23:20 UTC, owner-approved):** merge 9c2b32c → API f974fb246adb (cd-pull,
+  API only; `cricstat-models-publish` run 38003122609 left unapproved on purpose) → staging copied to cricstat/web
+  WITHOUT predictor/, venues/, assets/predictor.js (commit 54ce200). Live: Countries = world map (win % + matches only),
+  hub Following Men/Women + Manhattan, team-page H2H/top-performers tabs, Natural Earth licence row, nav "ODI WC 2027
+  soon". Switch: `PREDICTOR_LIVE = False` in gen_pages.py (owner chose: no model numbers — ratings, WC chances — on
+  the map until the predictor page and its disclosures launch). **Full P1.6 deploy later:** set PREDICTOR_LIVE = True,
+  regenerate (map `data-model="on"`, nav link, predictor page, predictor licence rows), approve models publish,
+  cd-pull models → `forecast --force` → copy predictor/, venues/, predictor.js too.
 - **ON HOLD by the owner (2026-10-09 evening):** predictor-page approval, methodology page (`/cricket/methodology/`,
   data from `/v1/models/predictor/backtest`), live "Ratings & ODI World Cup 2027" card on men's team pages (countries.js
   `ratingsCard`), hub teaser with the real number, and the P1.6 deploy. Don't start them until the owner says so.
