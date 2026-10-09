@@ -445,7 +445,8 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   photo kept), gen_pages (predictor shell, trophy, licences). Tests: models 64, API 78.
 - **Preview in a new session:** live forecast.sqlite lacks the new meta until models deploy, so make a dev copy:
   `cp cricstat/data/db/forecast.sqlite cricstat/data/models/dev-forecast.sqlite`; from cricstat-models:
-  `CRICSTAT_FORECAST_DB=../data/models/dev-forecast.sqlite CRICSTAT_MLFLOW_URI=http://127.0.0.1:9 python3 -m presentation_logic.cli forecast --force`;
+  `CRICSTAT_FORECAST_DB=$PWD/../data/models/dev-forecast.sqlite CRICSTAT_MLFLOW_URI=http://127.0.0.1:9 python3 -m presentation_logic.cli forecast --force`
+  (absolute path: relative paths resolve against CRICSTAT_HOME = cricstat/, not the cwd; ~90 s);
   dev API from cricstat-api: `CRICSTAT_HOME=.. CRICSTAT_WEB_DIR=$PWD/../tools/staging/web CRICSTAT_FORECAST_DB=$PWD/../data/models/dev-forecast.sqlite python3 -m uvicorn presentation_logic.api.main:app --host 127.0.0.1 --port 8048`;
   preview: `CRICSTAT_API=http://127.0.0.1:8048 python3 cricstat/tools/web_preview.py` (8090). jsdom checks need
   `npm install jsdom` in a scratch dir and `window.fetch` set in beforeParse.

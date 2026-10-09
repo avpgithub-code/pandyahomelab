@@ -21,7 +21,7 @@ else:
     WEB = os.path.join(CRICSTAT, "tools", "staging", "web")
     if not os.path.isdir(WEB):
         shutil.copytree(os.path.join(CRICSTAT, "web"), WEB)
-V = "79"
+V = "82"
 SITE = "https://pandyahomelab.com"
 HEAD = '''<!DOCTYPE html>
 <html lang="en">
@@ -145,7 +145,11 @@ HUB = '''<header class="hero">
   <div class="sec-pane" role="tabpanel" id="pane-follow" aria-labelledby="tab-follow" hidden>
   <div class="section-head">
     <div class="row"><span id="follow-badge"></span><div><div class="section-label">Following</div><h2 class="section-title" id="following-title" style="margin:0">India</h2></div></div>
-    <div class="field"><label for="follow">Follow a team</label><select id="follow" autocomplete="off"><option value="india-men">India (men)</option></select>
+    <div class="field"><label for="follow">Follow a team</label>
+      <div class="row follow-pick"><div class="radio-pill" role="radiogroup" aria-label="Men's or women's team">
+        <label><input type="radio" name="fgender" value="male" checked><span>Men</span></label>
+        <label><input type="radio" name="fgender" value="female"><span>Women</span></label>
+      </div><select id="follow" autocomplete="off"><option value="india-men">India</option></select></div>
       <span class="tiny muted">Remembered in this browser only — no cookies <a href="#" id="follow-reset" hidden>· Reset to India</a></span></div>
   </div>
   <div id="follow-period" style="margin-bottom:.9rem"></div>

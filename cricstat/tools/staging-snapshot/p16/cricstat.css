@@ -589,3 +589,8 @@ a.about-trigger[aria-current="page"] { background: rgba(255,153,51,.22); border-
 .wc-move { font-size: .66rem; font-weight: 700; margin: 0 .25rem; }
 .wc-move.up { color: var(--green); } .wc-move.down { color: var(--red); }
 .wc-moved { margin-top: .15rem; }
+/* Following: Men/Women + team name (hub) */
+.follow-pick { gap: .6rem; flex-wrap: wrap; align-items: center; }
+.follow-pick select { min-width: 12rem; }
+/* Countries "By format": Head to head / Top performers tabs */
+[data-bf-pane][hidden] { display: none; }

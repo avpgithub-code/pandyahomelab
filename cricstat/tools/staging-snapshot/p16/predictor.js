@@ -84,6 +84,7 @@
   }
 
   // ── 🏆 Title odds ──
+  let oddsView = null;
   function renderOdds() {
     const direct = F.teams.filter((t) => t.direct_qualifier);
     const qual = F.teams.filter((t) => !t.direct_qualifier).sort((a, b) => b.probabilities.qualified - a.probabilities.qualified);
@@ -96,17 +97,27 @@
       h("td", {}, pct(t.probabilities.final)), h("td", { class: "wc-champ" }, bar(t.probabilities.champion || 0, max))]);
     const head = (q) => h("thead", {}, h("tr", {}, ["#", "Team", "Group", "Rating"].concat(q ? ["Reach World Cup"] : [])
       .concat(["Super 7", "Semi-final", "Final", "Champion"]).map((x, i) => h("th", { scope: "col", class: i === 1 ? "txt" : null }, x))));
+    const mine = F.teams.find((t) => t.team_uid === follow);
+    const view = oddsView || (mine && !mine.direct_qualifier ? "qual" : "direct");
+    const tabs = h("div", { class: "tabs", role: "group", "aria-label": "Show" }, [
+      ["direct", "Every team's chances"], ["qual", "Through the Qualifier (26 Feb – 21 Mar 2027)"]].map(([k, label]) => {
+      const b = h("button", { class: "tab sm", type: "button", "aria-pressed": String(k === view) }, label);
+      b.addEventListener("click", () => { oddsView = k; renderOdds(); });
+      return b;
+    }));
+    const body = view === "direct"
+      ? [h("p", { class: "tiny muted" }, "The " + direct.length + " teams already in the World Cup."),
+        h("div", { class: "scroll" }, h("table", { class: "wc-table", style: "min-width:720px" }, [head(false),
+          h("tbody", {}, direct.map((t, i) => row(t, i, false)))]))]
+      : [h("p", { class: "tiny muted" }, "Four places are still open. Until the Qualifier is played, each simulation draws them from the candidates by their Elo chances."),
+        h("div", { class: "scroll" }, h("table", { class: "wc-table", style: "min-width:780px" }, [head(true),
+          h("tbody", {}, qual.map((t, i) => row(t, i, true)))]))];
     C.fill("pane-odds", [
       h("div", { class: "section-head" }, [h("div", {}, [h("div", { class: "section-label" }, "Title odds"),
         h("h2", { class: "section-title" }, "Every team's chances")]),
         h("p", { class: "tiny muted", style: "max-width:420px;margin:0" }, "Share of " + C.num(F.forecast.n_simulations) +
           " simulated tournaments in which each team reached the stage. Title chances add up to 100%, semi-finals to 400% (four places).")]),
-      h("div", { class: "scroll" }, h("table", { class: "wc-table", style: "min-width:720px" }, [head(false),
-        h("tbody", {}, direct.map((t, i) => row(t, i, false)))])),
-      h("h3", { class: "wc-sub" }, "Through the Qualifier (26 Feb – 21 Mar 2027)"),
-      h("p", { class: "tiny muted" }, "Four places are still open. Until the Qualifier is played, each simulation draws them from the candidates by their Elo chances."),
-      h("div", { class: "scroll" }, h("table", { class: "wc-table", style: "min-width:780px" }, [head(true),
-        h("tbody", {}, qual.map((t, i) => row(t, i, true)))]))]);
+      tabs].concat(body));
   }
 
   // ── 📈 Odds over time ──
