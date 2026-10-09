@@ -184,6 +184,14 @@ def create_app(cfg: Optional[Config] = None) -> FastAPI:
     def teams(request: Request, gender: Optional[str] = None, type: Optional[str] = None):
         return envelope(request, *teams_service.list_teams(db, gender, type))
 
+    @app.get("/v1/records/teams")
+    def team_records(request: Request, scope: Optional[str] = None, gender: Optional[str] = None,
+                     type: Optional[str] = None,
+                     date_from: Optional[str] = Query(None, alias="from"),
+                     date_to: Optional[str] = Query(None, alias="to")):
+        return envelope(request, *teams_service.records(db, scope, gender, type, date_from,
+                                                        date_to))
+
     @app.get("/v1/teams/{slug}")
     def team(request: Request, slug: str):
         return envelope(request, *teams_service.team(db, slug))
@@ -263,6 +271,10 @@ def create_app(cfg: Optional[Config] = None) -> FastAPI:
     @app.get("/v1/forecasts/{tournament}/history")
     def forecast_history(request: Request, tournament: str, team: Optional[str] = None):
         return fenvelope(request, forecast_service.history(db, fdb, tournament, team))
+
+    @app.get("/v1/forecasts/{tournament}/fixtures")
+    def forecast_fixtures(request: Request, tournament: str):
+        return fenvelope(request, forecast_service.fixtures(db, fdb, tournament))
 
     @app.get("/v1/ratings")
     def rating_list(request: Request, scope: str = "ODI", gender: str = "male"):

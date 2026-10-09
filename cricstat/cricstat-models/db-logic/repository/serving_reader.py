@@ -73,3 +73,25 @@ def city_countries(venue_map_path: str) -> Dict[str, str]:
             if city and r.get("country"):
                 seen.setdefault(city, set()).add(r["country"].strip())
     return {c: next(iter(s)) for c, s in seen.items() if len(s) == 1}
+
+
+def venue_history(conn: sqlite3.Connection, countries: List[str]) -> List[Dict[str, object]]:
+    """Every men's ODI played in these countries, with what a venue card needs: venue name + city
+    (as Cricsheet writes them), first-innings total and whether it was a full innings (50 overs or
+    all out, no D/L), who batted first and who won."""
+    marks = ",".join("?" * len(countries))
+    sql = """
+        SELECT m.match_id, m.start_date, v.name AS venue, COALESCE(v.city, '') AS city,
+               v.country, m.result, m.method, w.name AS winner, bt.name AS bat_first,
+               i.total_runs AS first_innings, i.total_wickets AS first_wickets,
+               i.legal_balls AS first_balls
+          FROM matches m
+          JOIN venues v ON v.venue_key = m.venue_key
+          LEFT JOIN teams w ON w.team_key = m.winner_key
+          LEFT JOIN innings i ON i.match_key = m.match_key AND i.innings_no = 1
+                             AND i.is_super_over = 0
+          LEFT JOIN teams bt ON bt.team_key = i.batting_team_key
+         WHERE m.gender = 'male' AND m.match_type = 'ODI' AND m.team_type = 'international'
+           AND v.country IN (%s)
+         ORDER BY m.start_date""" % marks
+    return [dict(r) for r in conn.execute(sql, tuple(countries))]

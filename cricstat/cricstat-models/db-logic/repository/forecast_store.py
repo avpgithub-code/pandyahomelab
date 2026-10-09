@@ -12,7 +12,7 @@ import shutil
 import sqlite3
 from typing import Dict, Iterable, List, Optional
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS team_identities (            -- one stable id per team, incl. Afghanistan
@@ -40,6 +40,11 @@ CREATE TABLE IF NOT EXISTS forecast_inputs (            -- the matches that are 
   match_id TEXT NOT NULL, start_date TEXT NOT NULL,     -- "why did the odds move?"
   team1_uid TEXT NOT NULL, team2_uid TEXT NOT NULL, result TEXT NOT NULL, winner_uid TEXT,
   source TEXT NOT NULL, PRIMARY KEY (forecast_id, match_id));
+CREATE TABLE IF NOT EXISTS forecast_fixtures (          -- each known fixture's chances, per
+  forecast_id INTEGER NOT NULL REFERENCES forecast_runs(forecast_id),   -- forecast: "last moved"
+  match_no TEXT NOT NULL, team1 TEXT NOT NULL, team2 TEXT NOT NULL,
+  p_team1 REAL NOT NULL, p_team2 REAL NOT NULL, p_tie REAL NOT NULL, p_no_result REAL NOT NULL,
+  PRIMARY KEY (forecast_id, match_no));
 CREATE TABLE IF NOT EXISTS backtest_metrics (           -- for the methodology page
   model_version TEXT NOT NULL, test TEXT NOT NULL, model TEXT NOT NULL, metric TEXT NOT NULL,
   value REAL NOT NULL, PRIMARY KEY (model_version, test, model, metric));
@@ -130,6 +135,14 @@ class ForecastWriter:
             ((fid, i["match_id"], i["start_date"], i["team1_uid"], i["team2_uid"], i["result"],
               i["winner_uid"], i["source"]) for i in inputs))
         return fid
+
+    def fixtures(self, forecast_id: int, rows) -> None:
+        """rows: fixtures_summary() entries; only those with chances (two known teams)."""
+        self.conn.executemany(
+            "INSERT INTO forecast_fixtures VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            ((forecast_id, r["match_no"], r["slot1"], r["slot2"], r["chances"]["team1"],
+              r["chances"]["team2"], r["chances"]["tie"], r["chances"]["no_result"])
+             for r in rows if r.get("chances")))
 
     def backtest(self, version: str, metric_rows: Iterable[tuple], bins: Iterable[tuple]) -> None:
         self.conn.execute("DELETE FROM backtest_metrics WHERE model_version = ?", (version,))

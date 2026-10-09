@@ -107,6 +107,7 @@ golden-set checks and the eval harness. If a number appears on the site, it came
 | `GET /v1/teams/{slug}/head-to-head?scope=&opponent=` | `v_head_to_head` | H2H table |
 | `GET /v1/teams/{slug}/home-away?scope=` | Home / away / neutral split | Home vs away |
 | `GET /v1/teams/{slug}/top-players?scope=&metric=runs\|wickets&limit=` | Leaders for that team | Most runs and most wickets |
+| `GET /v1/records/teams?scope=&gender=&type=&from=&to=` (P1.6) | Every team's record in one scope + window, one row per team (W/L/T/D/NR, win %, last date); scope required | World map win % (one call instead of one per team) |
 
 ### Matches and competitions
 | Endpoint | Returns | Used by |

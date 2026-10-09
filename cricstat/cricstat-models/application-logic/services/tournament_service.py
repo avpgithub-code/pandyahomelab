@@ -177,6 +177,7 @@ def draft_2027(cfg, client: Optional[WikipediaClient] = None) -> Dict[str, objec
         d = _START_DATE.search(f.get("date", ""))
         rid = re.search(r"match/(\d+)\.html", f.get("report", ""))
         venue = re.sub(r"\[\[(?:[^\]|]*\|)?([^\]]+)\]\]", r"\1", f.get("venue", "")).strip()
+        tm = re.search(r"(\d{1,2}:\d{2})", f.get("time", ""))
         stage = {"Super Series": "super_series", "Group A": "group", "Group B": "group",
                  "Super 7": "super7", "Semi-finals": "semi", "Final": "final"}.get(sec, sec)
         fixtures.append({
@@ -186,7 +187,8 @@ def draft_2027(cfg, client: Optional[WikipediaClient] = None) -> Dict[str, objec
             "slot1": _slot_2027(f.get("team1", ""), codes),
             "slot2": _slot_2027(f.get("team2", ""), codes),
             "venue": venue, "city": _city(venue), "venue_country": cities.get(_city(venue)),
-            "match_key": rid.group(1) if rid else None})
+            "match_key": rid.group(1) if rid else None, "time": tm.group(1) if tm else None,
+            "daynight": "1" if f.get("daynight", "").strip().lower() in ("y", "yes") else "0"})
     # Knockouts and the Super Series have no match number in the box: number them in date order.
     nxt = max(f["match_no"] or 0 for f in fixtures)
     for f in sorted(fixtures, key=lambda f: f["date"]):

@@ -218,6 +218,10 @@ def forecast(cfg, force: bool = False, n: Optional[int] = None) -> Dict[str, obj
                            "source": r["source"]} for r in new_inputs])
         _store_backtest(w, model)
         w.meta("tournament:%s" % TOURNAMENT, json.dumps(tournament_summary(fmt, fixtures, field)))
+        w.meta("venues:%s" % TOURNAMENT, json.dumps(venues_summary(cfg, fmt, fixtures)))
+        fx_rows = fixtures_summary(fixtures, ratings, p, cond)
+        w.meta("fixtures:%s" % TOURNAMENT, json.dumps(fx_rows))
+        w.fixtures(fid, fx_rows)
         expect = dict(EXPECT, **({"qualified": 4} if field else {}))
         errors = w.check(fid, expect)
         if errors:
@@ -240,6 +244,75 @@ def tournament_summary(fmt, fixtures, field) -> Dict[str, object]:
             "assumptions": fmt.get("assumptions", []), "qualifier_field": field,
             "matches": len(fixtures),
             "played": sum(1 for f in fixtures if f.get("result"))}
+
+
+def fixtures_summary(fixtures, ratings: Dict[str, float], p, cond) -> List[Dict[str, object]]:
+    """Every scheduled match; a match whose two teams are already known also gets its chances from
+    the current ratings, the same home rule and the same no-result/tie rates the simulator uses."""
+    out = []
+    for f in sorted(fixtures, key=lambda f: (f["date"], int(f["match_no"]))):
+        a, b = f["slot1"], f["slot2"]
+        row = {k: f.get(k) or None for k in ("match_no", "stage", "group", "date", "time", "venue",
+                                             "city", "venue_country", "match_key", "result",
+                                             "winner")}
+        row.update(slot1=a, slot2=b, daynight=f.get("daynight") == "1",
+                   played=bool(f.get("result")))
+        if a in ratings and b in ratings:
+            nr = cond["by_country"].get(f["venue_country"], cond["global"])
+            h = 1 if f["venue_country"] == a else -1 if f["venue_country"] == b else 0
+            e = elo.probability(ratings[a], ratings[b], p.home, h)
+            play = (1 - nr) * (1 - cond["tie"])
+            row["chances"] = {"team1": round(play * e, 4), "team2": round(play * (1 - e), 4),
+                              "tie": round((1 - nr) * cond["tie"], 4), "no_result": round(nr, 4)}
+            row["home"] = a if h == 1 else b if h == -1 else None
+        out.append(row)
+    return out
+
+
+def venues_summary(cfg, fmt, fixtures) -> List[Dict[str, object]]:
+    """The reviewed venue facts (tournaments/<id>/venues.csv: capacity, role, photo + credit) with
+    live history from the serving DB: men's ODIs at the ground (incl. its former names), average
+    first-innings total (full innings only), how often the side batting first won."""
+    import csv as _csv
+    import re as _re
+    path = os.path.join(cfg.TOURNAMENTS_DIR, fmt["id"], "venues.csv")
+    if not os.path.exists(path):
+        return []
+    with open(path, encoding="utf-8", newline="") as fh:
+        venues = list(_csv.DictReader(fh))
+    with serving_reader.connect(cfg.SERVING_DB) as conn:
+        hist = serving_reader.venue_history(conn, sorted({v["country"] for v in venues}))
+    per_city = {}
+    for f in fixtures:
+        per_city.setdefault(f["city"], []).append(f)
+    out = []
+    for v in venues:
+        name_re, city_re = _re.compile(v["db_name_pattern"]), _re.compile(v["db_city_pattern"])
+        rows = [r for r in hist if name_re.search(r["venue"]) and
+                city_re.search("%s, %s" % (r["venue"], r["city"]))]
+        full = [r for r in rows if r["first_innings"] is not None and not r["method"] and
+                (r["first_balls"] == 300 or r["first_wickets"] == 10)]
+        decided = [r for r in rows if r["result"] == "win" and r["bat_first"]]
+        games = per_city.get(v["city"], [])
+        out.append({
+            "stadium": v["stadium"], "city": v["city"], "country": v["country"],
+            "capacity": int(v["capacity"]) if v["capacity"] else None, "role": v["role"] or None,
+            "note": v["note"] or None, "wikipedia_article": v["wikipedia_article"],
+            "matches_2027": len(games),
+            "stages_2027": sorted({g["stage"] for g in games}),
+            "day_night_2027": sum(1 for g in games if g.get("daynight") == "1"),
+            "photo": v.get("photo") or None, "photo_caption": v.get("photo_caption") or None,
+            "photo_credit": {"author": v.get("photo_author"), "licence": v.get("photo_licence"),
+                             "licence_url": v.get("photo_licence_url") or None,
+                             "source": v.get("photo_source")} if v.get("photo") else None,
+            "history": {"odis": len(rows), "first": rows[0]["start_date"] if rows else None,
+                        "last": rows[-1]["start_date"] if rows else None,
+                        "avg_first_innings": round(sum(r["first_innings"] for r in full) /
+                                                   len(full)) if full else None,
+                        "full_first_innings": len(full),
+                        "bat_first_won": sum(1 for r in decided if r["winner"] == r["bat_first"]),
+                        "decided": len(decided)}})
+    return out
 
 
 def _store_backtest(w, model) -> None:

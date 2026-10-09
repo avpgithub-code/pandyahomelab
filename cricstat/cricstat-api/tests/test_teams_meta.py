@@ -33,6 +33,22 @@ def test_record_in_a_date_window(client):
     assert client.get("/v1/teams/india-men/record?from=2024").status_code == 400
 
 
+def test_all_team_records_in_one_call(client):
+    rows = {r["slug"]: r for r in data(client, "/v1/records/teams?scope=ODI")}
+    one = data(client, "/v1/teams/india-men/record?scope=ODI")[0]
+    india = rows["india-men"]
+    assert (india["matches"], india["won"], india["win_pct"]) == (one["matches"], one["won"],
+                                                                  one["win_pct"])
+    assert india["format"] == "ODI" and india["last_date"]
+    y2024 = {r["slug"]: r for r in data(client, "/v1/records/teams?scope=ODI&from=2024&to=2024")}
+    assert y2024["india-men"]["matches"] == 2
+    url = "/v1/records/teams?scope=%s&gender=%s"
+    women = [r for f in ("ODI", "T20I", "TEST") for r in data(client, url % (f, "female"))]
+    assert women and all(r["gender"] == "female" for r in women)
+    assert all(r["gender"] == "male" for r in data(client, url % ("ODI", "male")))
+    assert client.get("/v1/records/teams").status_code == 400          # scope is required
+
+
 def test_results_head_to_head_home_away_years(client):
     res = data(client, "/v1/teams/india-men/results?scope=ODI")
     assert [r["match_id"] for r in res] == ["9007", "9002", "9001"]

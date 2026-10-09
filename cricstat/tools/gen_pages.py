@@ -8,6 +8,7 @@ web_preview.py). After approval:  rsync -a cricstat/tools/staging/web/ cricstat/
 then remove the staging copy."""
 import datetime
 import html as H
+import csv
 import json
 import os
 import re
@@ -20,7 +21,10 @@ else:
     WEB = os.path.join(CRICSTAT, "tools", "staging", "web")
     if not os.path.isdir(WEB):
         shutil.copytree(os.path.join(CRICSTAT, "web"), WEB)
-V = "73"
+V = "88"
+# P1.6 ships in two parts: False = the approved non-predictor pages only (nav "ODI WC 2027 soon", no predictor page,
+# no model numbers on the map, no predictor rows on the licences page). True at the full P1.6 deploy.
+PREDICTOR_LIVE = False
 SITE = "https://pandyahomelab.com"
 HEAD = '''<!DOCTYPE html>
 <html lang="en">
@@ -48,7 +52,7 @@ HEAD = '''<!DOCTYPE html>
     <li><a href="/cricket/"{c_hub}>Overview</a></li>
     <li><a href="/cricket/countries/"{c_countries}>Countries</a></li>
     <li><a href="/cricket/players/"{c_players}>Players</a></li>
-    <li><span class="soon" title="Coming in the next phase">ODI WC 2027 <span class="soon-tag">soon</span></span></li>
+    {nav_predictor}
     <li><span class="soon" title="Coming in a later phase">Ask <span class="soon-tag">soon</span></span></li>
     <li><span class="soon" title="Coming in a later phase">Methodology <span class="soon-tag">soon</span></span></li>
     <li><a href="/cricket/licences/"{c_licences}>Licences</a></li>
@@ -72,17 +76,54 @@ FOOT = '''</main>
 </html>
 '''
 def page(rel, path, title, desc, cur, body, scripts, og_type="website", extra_head=""):
-    c = {k: "" for k in ("c_hub", "c_countries", "c_players", "c_licences", "c_about")}
+    c = {k: "" for k in ("c_hub", "c_countries", "c_players", "c_licences", "c_about", "c_predictor")}
     c["c_" + cur] = ' aria-current="page"'
+    c["nav_predictor"] = ('<li><a href="/cricket/predictor/"%s>ODI WC 2027</a></li>' % c["c_predictor"] if PREDICTOR_LIVE else
+                          '<li><span class="soon" title="Coming in a later phase">ODI WC 2027 <span class="soon-tag">soon</span></span></li>')
     html = HEAD.format(title=title, desc=desc, path=path, v=V, og_type=og_type, extra_head=extra_head, **c) + body + FOOT.format(
         v=V, scripts="\n".join('<script src="%s"></script>' % s for s in scripts))
     os.makedirs(os.path.dirname(os.path.join(WEB, rel)) or WEB, exist_ok=True)
     open(os.path.join(WEB, rel), "w").write(html)
 
+# "stat" on the pitch: a Manhattan (runs per over) of India's chase in the 2011 World Cup final, match 433606
+# in Cricsheet (serving DB: SUM(runs_total) per over_no, innings 2; wickets fell in overs 1, 7, 22, 42; target 275).
+# Real data, so it is captioned; the last bar holds Dhoni's six (48.2).
+WC2011_CHASE = [4, 6, 5, 11, 1, 4, 1, 1, 2, 6, 9, 11, 7, 4, 9, 5, 5, 5, 3, 6, 4, 6, 2, 5, 2, 4, 6, 8, 4, 5,
+                6, 8, 5, 5, 8, 8, 5, 8, 6, 11, 2, 4, 5, 8, 5, 3, 11, 11, 7]
+WC2011_WICKETS = {1, 7, 22, 42}
+
+
+def manhattan_svg():
+    x0, x1, base, per_run, worm = 404.0, 776.0, 154.0, 4.2, 0.43
+    w = (x1 - x0) / len(WC2011_CHASE)
+    out = ['<g class="manhattan">']
+    for i, r in enumerate(WC2011_CHASE):
+        x, hgt = x0 + i * w, r * per_run
+        last = i == len(WC2011_CHASE) - 1
+        out.append('<rect class="mh-bar%s" style="--i:%d" x="%.1f" y="%.1f" width="%.1f" height="%.1f" rx="1"/>'
+                   % (" mh-six" if last else "", i, x + .8, base - hgt, w - 1.6, hgt))
+        if i + 1 in WC2011_WICKETS:
+            out.append('<circle class="mh-wkt" style="--i:%d" cx="%.1f" cy="%.1f" r="1.7"/>' % (i, x + w / 2, base - hgt - 3.5))
+    total, pts = 0, ["%.1f,%.1f" % (x0, base)]
+    for i, r in enumerate(WC2011_CHASE):
+        total += r
+        pts.append("%.1f,%.1f" % (x0 + (i + 1) * w, base - total * worm))
+    ty = base - 275 * worm
+    out.append('<line class="mh-target" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>' % (x0, ty, x1, ty))
+    out.append('<text class="mh-label" x="%.1f" y="%.1f">target 275</text>' % (x0 + 2, ty - 3))
+    out.append('<polyline class="mh-worm" pathLength="1" points="%s"/>' % " ".join(pts))
+    lx = x0 + (len(WC2011_CHASE) - .5) * w
+    out.append('<text class="mh-six-label" x="%.1f" y="%.1f" text-anchor="middle">6</text>'
+               % (lx, base - WC2011_CHASE[-1] * per_run - 4))
+    out.append('</g>')
+    return "".join(out)
+
+
 HUB = '''<header class="hero">
   <div class="wrap">
     <div class="eyebrow"><span class="dot"></span><span id="h-asof">Live cricket data</span></div>
-    <div class="pitch"><svg class="pitch-svg" viewBox="0 0 800 170" aria-hidden="true" focusable="false">  <defs><radialGradient id="sq" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#2f8f4e" stop-opacity=".32"/><stop offset="1" stop-color="#2f8f4e" stop-opacity="0"/></radialGradient></defs><ellipse cx="400" cy="85" rx="420" ry="95" fill="url(#sq)"/>  <defs><linearGradient id="mow" x1="0" x2="1" y1="0" y2="0"><stop offset="0.0" stop-color="#fff" stop-opacity="0"/><stop offset="0.1" stop-color="#fff" stop-opacity="0"/><stop offset="0.1" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.2" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.2" stop-color="#fff" stop-opacity="0"/><stop offset="0.3" stop-color="#fff" stop-opacity="0"/><stop offset="0.3" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.4" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.4" stop-color="#fff" stop-opacity="0"/><stop offset="0.5" stop-color="#fff" stop-opacity="0"/><stop offset="0.5" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.6" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.6" stop-color="#fff" stop-opacity="0"/><stop offset="0.7" stop-color="#fff" stop-opacity="0"/><stop offset="0.7" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.8" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.8" stop-color="#fff" stop-opacity="0"/><stop offset="0.9" stop-color="#fff" stop-opacity="0"/><stop offset="0.9" stop-color="#fff" stop-opacity="0.05"/><stop offset="1.0" stop-color="#fff" stop-opacity="0.05"/></linearGradient></defs>  <rect x="20" y="15" width="760" height="140" rx="6" fill="#b89a68" opacity="0.2"/><rect x="20" y="15" width="760" height="140" rx="6" fill="url(#mow)"/>  <line x1="110" y1="15" x2="110" y2="155" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/><line x1="690" y1="15" x2="690" y2="155" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/>  <line x1="70" y1="45" x2="70" y2="125" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/><line x1="730" y1="45" x2="730" y2="125" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/>  <line x1="40" y1="50" x2="110" y2="50" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/><line x1="40" y1="120" x2="110" y2="120" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/>  <line x1="690" y1="50" x2="760" y2="50" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/><line x1="690" y1="120" x2="760" y2="120" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/>  <circle cx="70" cy="75" r="3.2" fill="#f5efe6" opacity="0.85"/><circle cx="70" cy="85" r="3.2" fill="#f5efe6" opacity="0.85"/><circle cx="70" cy="95" r="3.2" fill="#f5efe6" opacity="0.85"/><circle cx="730" cy="75" r="3.2" fill="#f5efe6" opacity="0.85"/><circle cx="730" cy="85" r="3.2" fill="#f5efe6" opacity="0.85"/><circle cx="730" cy="95" r="3.2" fill="#f5efe6" opacity="0.85"/></svg><h1 class="cs-lockup"><span class="sr-only">cricstat</span><span class="cs" aria-hidden="true">cr<span class="i-ball">ı<svg class="i-dot" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><defs><radialGradient id="emBall" cx="35%" cy="32%" r="70%"><stop offset="0" stop-color="#e2544b"/><stop offset=".65" stop-color="#b3201c"/><stop offset="1" stop-color="#6e1210"/></radialGradient></defs><circle cx="10" cy="10" r="9" fill="url(#emBall)"/><path d="M5.5 3.2c2.6 2.4 3.4 8.4 1.3 13.6M14.5 3.2c-2.6 2.4-3.4 8.4-1.3 13.6" stroke="#f5efe6" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></span>c<b>stat</b></span></h1></div>
+    <div class="pitch"><svg class="pitch-svg" viewBox="0 0 800 170" aria-hidden="true" focusable="false">  <defs><radialGradient id="sq" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#2f8f4e" stop-opacity=".32"/><stop offset="1" stop-color="#2f8f4e" stop-opacity="0"/></radialGradient></defs><ellipse cx="400" cy="85" rx="420" ry="95" fill="url(#sq)"/>  <defs><linearGradient id="mow" x1="0" x2="1" y1="0" y2="0"><stop offset="0.0" stop-color="#fff" stop-opacity="0"/><stop offset="0.1" stop-color="#fff" stop-opacity="0"/><stop offset="0.1" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.2" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.2" stop-color="#fff" stop-opacity="0"/><stop offset="0.3" stop-color="#fff" stop-opacity="0"/><stop offset="0.3" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.4" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.4" stop-color="#fff" stop-opacity="0"/><stop offset="0.5" stop-color="#fff" stop-opacity="0"/><stop offset="0.5" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.6" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.6" stop-color="#fff" stop-opacity="0"/><stop offset="0.7" stop-color="#fff" stop-opacity="0"/><stop offset="0.7" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.8" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.8" stop-color="#fff" stop-opacity="0"/><stop offset="0.9" stop-color="#fff" stop-opacity="0"/><stop offset="0.9" stop-color="#fff" stop-opacity="0.05"/><stop offset="1.0" stop-color="#fff" stop-opacity="0.05"/></linearGradient></defs>  <rect x="20" y="15" width="760" height="140" rx="6" fill="#b89a68" opacity="0.2"/><rect x="20" y="15" width="760" height="140" rx="6" fill="url(#mow)"/>  <line x1="110" y1="15" x2="110" y2="155" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/><line x1="690" y1="15" x2="690" y2="155" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/>  <line x1="70" y1="45" x2="70" y2="125" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/><line x1="730" y1="45" x2="730" y2="125" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/>  <line x1="40" y1="50" x2="110" y2="50" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/><line x1="40" y1="120" x2="110" y2="120" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/>  <line x1="690" y1="50" x2="760" y2="50" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/><line x1="690" y1="120" x2="760" y2="120" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/>  <circle cx="70" cy="75" r="3.2" fill="#f5efe6" opacity="0.85"/><circle cx="70" cy="85" r="3.2" fill="#f5efe6" opacity="0.85"/><circle cx="70" cy="95" r="3.2" fill="#f5efe6" opacity="0.85"/><circle cx="730" cy="75" r="3.2" fill="#f5efe6" opacity="0.85"/><circle cx="730" cy="85" r="3.2" fill="#f5efe6" opacity="0.85"/><circle cx="730" cy="95" r="3.2" fill="#f5efe6" opacity="0.85"/>@@MANHATTAN@@</svg><h1 class="cs-lockup"><span class="sr-only">cricstat</span><span class="cs" aria-hidden="true">cr<span class="i-ball">ı<svg class="i-dot" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><defs><radialGradient id="emBall" cx="35%" cy="32%" r="70%"><stop offset="0" stop-color="#e2544b"/><stop offset=".65" stop-color="#b3201c"/><stop offset="1" stop-color="#6e1210"/></radialGradient></defs><circle cx="10" cy="10" r="9" fill="url(#emBall)"/><path d="M5.5 3.2c2.6 2.4 3.4 8.4 1.3 13.6M14.5 3.2c-2.6 2.4-3.4 8.4-1.3 13.6" stroke="#f5efe6" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></span>c<b>stat</b></span></h1></div>
+    <p class="pitch-cap tiny">Behind <b>stat</b>: runs per over in India's chase of 275 in the 2011 World Cup final (Cricsheet). The last bar holds the six.</p>
     <p class="subtitle">Cricket statistics, forecasts and an AI analyst — built from open ball-by-ball data for men's and women's cricket, with every number traceable to its source.</p>
     <p class="hero-hook">2011 gave us the six. 2023 gave us the heartbreak. 2027 is the question. <a class="link-btn" href="/cricket/about/" data-about>Read the story →</a></p>
     <form class="search-bar" action="/cricket/players/" method="get" role="search">
@@ -144,7 +185,11 @@ HUB = '''<header class="hero">
   <div class="sec-pane" role="tabpanel" id="pane-follow" aria-labelledby="tab-follow" hidden>
   <div class="section-head">
     <div class="row"><span id="follow-badge"></span><div><div class="section-label">Following</div><h2 class="section-title" id="following-title" style="margin:0">India</h2></div></div>
-    <div class="field"><label for="follow">Follow a team</label><select id="follow" autocomplete="off"><option value="india-men">India (men)</option></select>
+    <div class="field"><label for="follow">Follow a team</label>
+      <div class="row follow-pick"><div class="radio-pill" role="radiogroup" aria-label="Men's or women's team">
+        <label><input type="radio" name="fgender" value="male" checked><span>Men</span></label>
+        <label><input type="radio" name="fgender" value="female"><span>Women</span></label>
+      </div><select id="follow" autocomplete="off"><option value="india-men">India</option></select></div>
       <span class="tiny muted">Remembered in this browser only — no cookies <a href="#" id="follow-reset" hidden>· Reset to India</a></span></div>
   </div>
   <div id="follow-period" style="margin-bottom:.9rem"></div>
@@ -183,6 +228,7 @@ def ld_json(obj):
 HUB_DESC = ("Cricket statistics for men's and women's cricket across Tests, ODIs, T20Is and major leagues, built from "
             "open ball-by-ball data — and an ODI World Cup 2027 predictor that compares Elo, machine-learning and "
             "deep-learning models.")
+HUB = HUB.replace("@@MANHATTAN@@", manhattan_svg())
 page("index.html", "/cricket/", "cricstat — cricket stats, ODI World Cup 2027 predictor & AI analyst | pandyaHomeLab",
      HUB_DESC, "hub", HUB, ["/cricket/assets/hub.js?v=" + V],
      extra_head=ld_json({"@context": "https://schema.org", "@type": "WebApplication", "@id": SITE + "/cricket/#app",
@@ -208,7 +254,30 @@ page("players/index.html", "/cricket/players/", "Player statistics — cricstat 
      "Career, year-by-year, phase and opponent statistics for men's and women's cricketers: Tests, ODIs, T20Is and major leagues, from Cricsheet ball-by-ball data.",
      "players", PLAYERS, ["/vendor/chart.js-4.4.0/chart.umd.min.js", "/cricket/assets/players.js?v=" + V])
 
-COUNTRIES = '''<header class="hero left" id="c-hero">
+# The Countries landing (/cricket/countries/): the cricket world map. Team pages (/cricket/countries/<slug>/) use
+# the same shell: static = landing (map visible, team header hidden); the API's /pages/countries/<slug>/ swaps
+# them (pages.py) and countries.js does the same in the browser.
+MAP_BOARD = '''<div id="c-landing" data-model="@@MODEL@@">
+<header class="hero left"><div class="wrap">
+  <div class="eyebrow"><span class="dot"></span>Countries</div>
+  <h1 style="font-size:clamp(2rem,5vw,3rem)">Cricket around the world</h1>
+  <p class="subtitle">Every international team in our data on one map. Colour it by ODI rating, ODI World Cup 2027 chances, recent win % or matches played, then pick a team for its record and latest form.</p>
+</div></header>
+<section class="section panel" aria-label="Cricket world map"><div class="wrap scoreboard wm-board">
+  <div class="sb-head board-head" aria-hidden="true"><span class="bulb"></span>Cricket world map<span class="bulb"></span></div>
+  <div id="wm-controls" class="wm-controls"></div>
+  <div class="wm-grid">
+    <div><div id="wm-map" class="wm-map"><p class="muted" style="padding:1rem;margin:0">Loading the map…</p></div><div id="wm-legend" class="wm-legend"></div></div>
+    <aside id="wm-panel" class="card wm-panel" aria-live="polite"><p class="muted">Pick a team on the map.</p></aside>
+  </div>
+  <p class="tiny muted" style="margin-top:.8rem">Borders: Natural Earth (public domain), drawn as India officially shows them. Cricket splits the UK (England with Wales, Scotland), Ireland is one all-island team and the West Indies cover the Caribbean board's members. Tiny members (Bermuda, Jersey, Singapore…) are dots. @@AFG_MAP@@</p>
+</div></section>
+</div>
+'''
+MAP_BOARD = (MAP_BOARD.replace("@@MODEL@@", "on" if PREDICTOR_LIVE else "off")
+             .replace("@@AFG_MAP@@", "Afghanistan men's matches are withheld by Cricsheet; their rating comes from our reviewed results list."
+                      if PREDICTOR_LIVE else "Afghanistan men's matches are withheld by Cricsheet, so they are not on the men's map."))
+COUNTRIES = '''<header class="hero left" id="c-hero" hidden>
   <div class="wrap" style="display:flex;flex-wrap:wrap;gap:1.5rem;align-items:center;justify-content:space-between">
     <div class="row" style="gap:1.2rem"><span id="c-badge"></span>
       <div><div class="eyebrow" style="margin-bottom:.6rem"><span class="dot"></span>Country</div>
@@ -221,9 +290,56 @@ COUNTRIES = '''<header class="hero left" id="c-hero">
 </header>
 <div id="c-body" aria-live="polite"><div class="wrap"><div class="skeleton"></div></div></div>
 '''
-page("countries/index.html", "/cricket/countries/", "Team records — cricstat | pandyaHomeLab",
-     "Team records by format, recent results, head to head, home and away, results by year and top run-scorers and wicket-takers for men's and women's international teams.",
-     "countries", COUNTRIES, ["/vendor/chart.js-4.4.0/chart.umd.min.js", "/cricket/assets/countries.js?v=" + V])
+page("countries/index.html", "/cricket/countries/", "Cricket world map and team records — cricstat | pandyaHomeLab",
+     "A world map of international cricket — every men's and women's team coloured by ODI rating, ODI World Cup 2027 chances, recent win % or matches — and each team's records, results, head to head and top players.",
+     "countries", MAP_BOARD + COUNTRIES, ["/vendor/chart.js-4.4.0/chart.umd.min.js", "/cricket/assets/worldmap.js?v=" + V,
+                                          "/cricket/assets/countries.js?v=" + V])
+
+PREDICTOR = '''<header class="hero left wc-hero">
+  <div class="wrap wc-hero-grid">
+   <div class="wc-hero-main">
+    <div class="eyebrow"><span class="dot"></span>ODI World Cup 2027 · South Africa, Zimbabwe &amp; Namibia · 2 Oct – 21 Nov 2027</div>
+    <h1 class="wc-title" style="font-size:clamp(2rem,5vw,3.2rem)">%s Who will lift the 2027 ODI World&nbsp;Cup?</h1>
+    <p class="subtitle">Every team's chances, from Elo ratings and 50,000 simulated tournaments in the published format. One model for every team: following a team changes what you see first, never the numbers.</p>
+    <p class="wc-stamp tiny muted" id="wc-stamp">Loading the latest forecast…</p>
+    <div id="wc-follow" class="wc-follow" aria-live="polite"></div>
+   </div>
+   <figure class="wc-donut" id="wc-donut" aria-label="Share of simulated tournaments won, by team"></figure>
+  </div>
+</header>
+<section class="section panel" aria-label="ODI World Cup 2027 forecast"><div class="wrap scoreboard wc-board">
+  <div class="sb-head board-head" aria-hidden="true"><span class="bulb"></span>ODI World Cup 2027<span class="mc-asof" id="wc-asof"></span><span class="bulb"></span></div>
+  <div class="sec-tabs" role="tablist" aria-label="Forecast sections">
+    <button class="sec-tab" type="button" role="tab" id="tab-odds" aria-controls="pane-odds" aria-selected="true">🏆 Title odds</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-time" aria-controls="pane-time" aria-selected="false" tabindex="-1">📈 Odds over time</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-fixtures" aria-controls="pane-fixtures" aria-selected="false" tabindex="-1">📅 Fixtures</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-venues" aria-controls="pane-venues" aria-selected="false" tabindex="-1">🏟️ Venues</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-ratings" aria-controls="pane-ratings" aria-selected="false" tabindex="-1">⚖️ Ratings</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-format" aria-controls="pane-format" aria-selected="false" tabindex="-1">🗺️ Format</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-good" aria-controls="pane-good" aria-selected="false" tabindex="-1">✅ How good is it?</button>
+  </div>
+  <div class="sec-pane" role="tabpanel" id="pane-odds" aria-labelledby="tab-odds"><div class="skeleton"></div></div>
+  <div class="sec-pane" role="tabpanel" id="pane-time" aria-labelledby="tab-time" hidden></div>
+  <div class="sec-pane" role="tabpanel" id="pane-fixtures" aria-labelledby="tab-fixtures" hidden></div>
+  <div class="sec-pane" role="tabpanel" id="pane-venues" aria-labelledby="tab-venues" hidden></div>
+  <div class="sec-pane" role="tabpanel" id="pane-ratings" aria-labelledby="tab-ratings" hidden></div>
+  <div class="sec-pane" role="tabpanel" id="pane-format" aria-labelledby="tab-format" hidden></div>
+  <div class="sec-pane" role="tabpanel" id="pane-good" aria-labelledby="tab-good" hidden></div>
+</div></section>
+<section class="section panel" aria-label="What this forecast can and can't tell you"><div class="wrap wc-limits" id="wc-limits"></div></section>
+'''
+# Our own trophy icon (the hub teaser's): the official tournament logo is non-free (ICC trademark).
+TROPHY = HUB[HUB.index('<svg class="wc-icon"'):HUB.index("</svg>", HUB.index('<svg class="wc-icon"')) + 6]
+PREDICTOR = PREDICTOR % TROPHY.replace('id="wcGold"', 'id="wcGoldH"').replace("url(#wcGold)", "url(#wcGoldH)")
+PRED_DESC = ("ODI World Cup 2027 predictor: each team's chances of the Super 7, semi-finals, final and title, from Elo ratings "
+             "and 50,000 simulated tournaments in the published format — with backtests on the 2019 and 2023 World Cups.")
+if PREDICTOR_LIVE:
+  page("predictor/index.html", "/cricket/predictor/",
+       "ODI World Cup 2027 predictor: every team's chances — cricstat | pandyaHomeLab", PRED_DESC, "predictor", PREDICTOR,
+       ["/vendor/chart.js-4.4.0/chart.umd.min.js", "/cricket/assets/predictor.js?v=" + V],
+       extra_head=ld_json({"@context": "https://schema.org", "@type": "WebPage", "name": "ODI World Cup 2027 predictor",
+                           "description": PRED_DESC, "url": SITE + "/cricket/predictor/", "isPartOf": {"@id": SITE + "/#site"},
+                           "about": ["ODI World Cup 2027", "Elo rating", "Monte Carlo simulation"], "author": ARCHIT}))
 
 LIC = '''<header class="hero left"><div class="wrap">
   <div class="eyebrow"><span class="dot"></span>Data &amp; licences</div>
@@ -246,10 +362,17 @@ LIC = '''<header class="hero left"><div class="wrap">
         <tr><td class="txt">Wikidata</td><td class="txt">Players' full names, dates and places of birth, matched only by their ESPNcricinfo id (never by name)</td><td class="txt">CC0 · no attribution required, credited anyway</td></tr>
         <tr><td class="txt">Wikimedia Commons</td><td class="txt">Player photos: a small copy of each image, served from this site, with its author, licence and file page shown next to it</td><td class="txt">Public domain, CC0, CC BY, CC BY-SA or GODL-India, per photo</td></tr>
         <tr><td class="txt">Wikimedia Commons</td><td class="txt">National flags, used unaltered at their official proportions and only to identify national teams (<a href="#flag-sources">source of each flag</a>)</td><td class="txt">Public domain (or CC0)</td></tr>
+        <tr><td class="txt">Wikipedia</td><td class="txt">For the ODI World Cup 2027 predictor: Afghanistan men's ODI results (results only, each checked against a second Wikipedia source and reviewed; Cricsheet withholds these matches), and the 2027 World Cup's format, schedule, start times and venue capacities. Facts only; no Wikipedia text is reproduced</td><td class="txt">CC BY-SA 4.0 · <a href="https://en.wikipedia.org/wiki/2027_Cricket_World_Cup">2027 Cricket World Cup</a>, <a href="https://en.wikipedia.org/wiki/Afghanistan_national_cricket_team">Afghanistan national cricket team</a>, and the yearly "International cricket in …" pages</td></tr>
+        <tr><td class="txt">Wikimedia Commons</td><td class="txt">Photos of the 2027 World Cup grounds (and one from Flickr), served from this site, each credited on the predictor page (<a href="#venue-photos">source of each photo</a>)</td><td class="txt">Public domain (incl. the Public Domain Mark), CC BY or CC BY-SA, per photo</td></tr>
+        <tr><td class="txt">Natural Earth</td><td class="txt">Country shapes for the cricket world map (1:10m, with borders as India officially shows them), simplified and served from this site</td><td class="txt">Public domain · <a href="https://www.naturalearthdata.com/about/terms-of-use/">terms of use</a></td></tr>
         <tr><td class="txt">Chart.js</td><td class="txt">Charts, served from this site (<a href="/vendor/chart.js-4.4.0/LICENSE">licence text</a>)</td><td class="txt">MIT</td></tr>
       </tbody>
     </table></div>
     <p class="tiny muted" style="padding:0 1.3rem 1.1rem">Photos are resized copies of the Commons originals and are not otherwise changed (the profile frame only crops what is shown). Photos under the Government Open Data License – India (GODL-India, mostly from the Press Information Bureau) are credited as it requires and imply no endorsement by the Government of India. Players under 18 are shown without a photo or birth details. Published figures from public records, including Wikipedia, are used privately to cross-check our numbers and are not reproduced here.</p>
+    <details class="flag-sources" id="venue-photos"><summary>Source of each venue photo (@@NVENUES@@)</summary>
+      <p class="tiny muted">Resized copies of the Wikimedia Commons or Flickr files linked here, not otherwise changed. Chosen and checked by hand; grounds without a freely licensed photo show none.</p>
+      <ul>@@VENUES@@</ul>
+    </details>
     <details class="flag-sources" id="flag-sources"><summary>Source of each flag (@@NFLAGS@@)</summary>
       <p class="tiny muted">Each flag is an unchanged copy of the Wikimedia Commons file linked here. Some countries also protect their flag by law (India, for example, by its Flag Code); flags here only identify the national team.</p>
       <ul>@@FLAGS@@</ul>
@@ -260,17 +383,27 @@ LIC = '''<header class="hero left"><div class="wrap">
     <ul class="plain">
       <li>Matches from late 2001 onwards. Earlier history — including the 1983 ODI World Cup — is not in the data.</li>
       <li>Coverage is thinner in the early years: men's Tests before about 2005 and women's international cricket before about 2016.</li>
-      <li>Afghanistan men's matches are not included by the data source, so players' totals against Afghanistan are missing.</li>
+      <li>Afghanistan men's matches are not included by the data source (Cricsheet withholds them as a protest over Afghan women's cricket), so players' totals against Afghanistan are missing. For the ODI World Cup 2027 predictor only, Afghanistan's results come from a reviewed list (see Wikipedia above), so the forecast stays fair to every team.</li>
       <li>Statistics are derived from ball-by-ball records and can differ from official figures. Averages and rates are shown cut to two decimals, as published records show them.</li>
     </ul>
   </div>
   <div class="grid">
     <div class="card"><h2>Privacy</h2><p class="dim">No cookies, and nothing is loaded from third parties. The team you follow is remembered in your browser only (local storage) and never sent to the server. Visits are counted the same way as on the rest of this site.</p><p style="margin-top:.6rem"><a href="/privacy/">Full privacy page →</a></p></div>
-    <div class="card"><h2>Disclaimers</h2><p class="dim">Statistics are derived from the source data and may differ from official records. When forecasts and the AI analyst arrive, forecasts will be for education and entertainment, not betting advice, and every AI answer will show how it was computed.</p></div>
+    <div class="card"><h2>Disclaimers</h2><p class="dim">Statistics are derived from the source data and may differ from official records. Forecasts (the ODI World Cup 2027 predictor) are statistical estimates for education and entertainment, not tips and not betting advice. When the AI analyst arrives, every answer will show how it was computed.</p></div>
     <div class="card"><h2>Corrections</h2><p class="dim">Spotted an error, or want details about a player reviewed or a photo removed? Email <a href="mailto:privacy@pandyahomelab.com">privacy@pandyahomelab.com</a> with the page and what looks wrong.</p></div>
   </div>
 </div></section>
 '''
+PRED_LIC_ROWS = [l for l in LIC.split("\n") if "For the ODI World Cup 2027 predictor:" in l or "Photos of the 2027 World Cup grounds" in l]
+if not PREDICTOR_LIVE:            # until the predictor page is public, the licences page doesn't describe it
+    for l in PRED_LIC_ROWS:
+        LIC = LIC.replace(l + "\n", "")
+    LIC = LIC[:LIC.index('    <details class="flag-sources" id="venue-photos">')] + LIC[LIC.index("    </details>\n", LIC.index('id="venue-photos"')) + len("    </details>\n"):]
+    LIC = LIC.replace(" For the ODI World Cup 2027 predictor only, Afghanistan's results come from a reviewed list (see Wikipedia above), so the forecast stays fair to every team.", "")
+    LIC = LIC.replace("Forecasts (the ODI World Cup 2027 predictor) are statistical estimates for education and entertainment, not tips and not betting advice. When the AI analyst arrives, every answer will show how it was computed.",
+                      "When forecasts and the AI analyst arrive, forecasts will be for education and entertainment, not betting advice, and every AI answer will show how it was computed.")
+
+
 def flag_sources():
     """The licences page lists each flag's Commons page (from flags.js, written by fetch_flags.py)."""
     with open(os.path.join(WEB, "assets", "flags.js"), encoding="utf-8") as f:
@@ -278,7 +411,14 @@ def flag_sources():
     flags = json.loads(src[src.index("{"):src.rindex("}") + 1])
     items = "".join('<li><a href="%s">%s</a> · %s</li>' % (H.escape(f["source"]), H.escape(n), H.escape(f["licence"]))
                     for n, f in sorted(flags.items()))
-    return LIC.replace("@@NFLAGS@@", str(len(flags))).replace("@@FLAGS@@", items)
+    vpath = os.path.join(CRICSTAT, "cricstat-models", "tournaments", "wc2027", "venues.csv")
+    with open(vpath, encoding="utf-8", newline="") as f:
+        venues = [r for r in csv.DictReader(f) if r.get("photo")]
+    vitems = "".join('<li><a href="%s">%s</a> · %s · %s</li>' % (
+        H.escape(v["photo_source"]), H.escape(v["stadium"]), H.escape(v["photo_author"] or "unknown author"),
+        H.escape(v["photo_licence"])) for v in venues)
+    return (LIC.replace("@@NFLAGS@@", str(len(flags))).replace("@@FLAGS@@", items)
+            .replace("@@NVENUES@@", str(len(venues))).replace("@@VENUES@@", vitems))
 
 
 page("licences/index.html", "/cricket/licences/", "Data & licences — cricstat | pandyaHomeLab",

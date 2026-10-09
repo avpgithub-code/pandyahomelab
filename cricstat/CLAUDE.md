@@ -128,7 +128,7 @@ Background: `docs/llm-strategy-research-2026-10-05.md`.
 | P0 | Ingestion → serving-DB build → cricstat-api → first live pages (+F8) | **Done; public 2026-10-07.** P0.1 build + register, P0.2 golden figures, P0.3 cricstat-api, P0.3b `/admin/cricket` (2026-10-06); P0.4 pages + F8 texts live and linked from the homepage 2026-10-07 (+ `/cricket/about/` page) |
 | P0.6 | Search-engine pages: server-rendered player/team heads, real 404/301, `/cricket/sitemap.xml` | **Done 2026-10-07** (4,840 players + 176 teams indexable; submitted in Search Console) |
 | P0.5 | Wikidata enrichment: full names, birth details, Commons photos | **Done 2026-10-08** (7,192 on Wikidata; 1,364 credited photos incl. GODL-India/PDM-owner; weekly `enrich`; search + cards use names/photos) |
-| P1 | ODI World Cup 2027 predictor: Elo + Monte Carlo baseline first, then ML and DL challengers, backtests on WC 2019/2023, live win probability | **In progress:** plan approved 2026-10-08; P1.1 data layer done (15 Afghanistan rows accepted via supplement/reviews.csv); P1.2 Elo + backtest A done; P1.3 done, gate 5 passed (owner 2026-10-08) → champion elo-v1; P1.4 cricstat-models deployed 2026-10-08 (image d5a1a28608c9; DSM tasks edited by the owner and verified with synoschedtask); P1.5 API live 2026-10-08 (cricstat-api 928afc645c64; 5 predictor endpoints at /cricket/api/v1/forecasts|ratings|models, F5 as-built; NaN→null fix); models 900a5f64d184, champion **elo-v2** (same numbers as v1 + published backtest + tournament summary), forecast #2; next P1.6 pages |
+| P1 | ODI World Cup 2027 predictor: Elo + Monte Carlo baseline first, then ML and DL challengers, backtests on WC 2019/2023, live win probability | **In progress:** P1.1–P1.5 live (2026-10-08: models + API deployed, champion elo-v2, daily forecast in DSM); **P1.6 pages in progress** on `feat/cricstat-p16-pages` (predictor page built in staging, awaiting owner approval; then methodology page, team-page card, hub teaser, deploy) |
 | P2–P6 | Tools → test set → agent → public demo → extras | Later |
 | Later | Men's T20 World Cup 2028 forecast + T20I team ratings (decided 2026-10-06; shown as "Later" on team pages) | **Not started until the ODI World Cup 2027 is finished** |
 
@@ -423,7 +423,58 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
 - **P0.5 player photos** (own branch, after the deploy): Wikidata P18 → Commons thumbnails fetched by the pipeline,
   self-hosted, per-image licence + author credit (CC BY-SA needs attribution) on the profile and the licences page.
 
-## Next up and open TODOs (updated 2026-10-08)
+## P1.6 pages (in progress, branch `feat/cricstat-p16-pages`; state at end of the 2026-10-09 evening session, V=88)
+- **Predictor page `/cricket/predictor/`** built in STAGING (not live), V=79. Hero: our own gold trophy icon (the official
+  2027 logo is non-free/ICC trademark: never use), stamp, "Following" strip, **donut** (top 5 + "all other teams", ≤ 6
+  slices, centre = followed team). Board tabs: 🏆 Title odds (direct qualifiers + Qualifier candidates tables) · 📈 Odds
+  over time · 📅 **Fixtures** (57 matches by day, filters, chances bar for the 20 fixed group games, ▲/▼ "last moved"
+  per card, slots in words, 🌙 day/night) · 🏟️ **Venues** (12 cards: capacity, role, 2027 matches, live history from
+  the serving DB, photo + credit) · ⚖️ Ratings · 🗺️ Format · ✅ How good is it? Plus the "Read this first" limits panel.
+  Nav "ODI WC 2027" is a live link; "Methodology" still "soon". Licences page: Wikipedia (CC BY-SA 4.0) row, venue photo
+  sources, Afghanistan note (Cricsheet's protest + predictor results list), forecast disclaimer.
+- **ON HOLD by the owner (2026-10-09 evening):** predictor-page approval, methodology page (`/cricket/methodology/`,
+  data from `/v1/models/predictor/backtest`), live "Ratings & ODI World Cup 2027" card on men's team pages (countries.js
+  `ratingsCard`), hub teaser with the real number, and the P1.6 deploy. Don't start them until the owner says so.
+  Approved this session: Title odds tabs, hub Following Men/Women, team-page H2H/top-performers tabs, the world map as
+  the Countries landing (+ head to head v followed team, win % for men and women), hub "stat" Manhattan (faint).
+- **Staged work is gitignored:** `cricstat/tools/staging/web/` holds predictor.js, worldmap.js, world-map.json, the
+  edited hub.js/countries.js, the CSS additions, venues/*.jpg. Tracked snapshot: `cricstat/tools/staging-snapshot/p16/`
+  (README lists each file; delete at deploy). Tarball (latest): `cricstat/data/models/backups/p16-staging-web-20261009b.tar.gz`.
+- **Code on the branch, not deployed:** models (fixtures time/daynight; forecast stores venues/fixtures meta and the
+  `forecast_fixtures` table, schema v2; `venues.csv` reviewed facts + photo credits), API (`/v1/forecasts/{t}/fixtures`
+  with venues, fixtures, `last_change`; `GET /v1/records/teams`; pages.py landing/team-header swap), `tools/fetch_venue_photos.py`, `tools/fetch_world_map.py` (reviewed Commons files only; hand-added Flickr
+  photo kept), gen_pages (predictor shell, trophy, licences, Countries map landing, hub Manhattan). Tests: models 64, API 79.
+- **Preview in a new session:** (if staging is missing: `python3 cricstat/tools/gen_pages.py`, copy the snapshot files,
+  `python3 cricstat/tools/fetch_world_map.py`) live forecast.sqlite lacks the new meta until models deploy, so make a dev copy:
+  `cp cricstat/data/db/forecast.sqlite cricstat/data/models/dev-forecast.sqlite`; from cricstat-models:
+  `CRICSTAT_FORECAST_DB=$PWD/../data/models/dev-forecast.sqlite CRICSTAT_MLFLOW_URI=http://127.0.0.1:9 python3 -m presentation_logic.cli forecast --force`
+  (absolute path: relative paths resolve against CRICSTAT_HOME = cricstat/, not the cwd; ~90 s);
+  dev API from cricstat-api: `CRICSTAT_HOME=.. CRICSTAT_WEB_DIR=$PWD/../tools/staging/web CRICSTAT_FORECAST_DB=$PWD/../data/models/dev-forecast.sqlite python3 -m uvicorn presentation_logic.api.main:app --host 127.0.0.1 --port 8048`;
+  preview: `CRICSTAT_API=http://127.0.0.1:8048 python3 cricstat/tools/web_preview.py` (8090). jsdom checks need
+  `npm install jsdom` in a scratch dir and `window.fetch` set in beforeParse.
+- **Deploy order for P1.6:** merge → publishes (models, API; pipeline too if the Korogi venue row is added) → cd-pull
+  models → `docker compose run --rm cricstat-models forecast --force` (writes venues/fixtures meta) → cd-pull API →
+  rsync staging/web → cricstat/web (assets first) → delete staging + snapshot → sitemap: add /cricket/predictor/ (and
+  methodology) → check public pages. Licences page: add a Natural Earth (public domain, India's point of view) row for the
+  map before deploy. Run `pytest tests/test_pages.py` with `CRICSTAT_TEST_WEB=<staging/web>` before the rsync.
+- **Photo rules learned:** only PD/CC0/CC BY/CC BY-SA (+ Public Domain Mark) with credit; look at every photo before use
+  (an automatic Wikidata lookup once returned Zimbabwe in Dhaka for "Victoria Falls"); Tripadvisor and Facebook photos
+  are not usable (no licence; terms forbid reuse); Openverse/Flickr licence filters are the search route. 8 of 12 grounds
+  have photos; Harare, Bulawayo, KuGompo City, Victoria Falls have none (owner: fine to leave missing).
+- **Fixture chances** move only when one of the two teams plays; `last_change` = the most recent move.
+- **Review round 2026-10-09 (owner):** Title odds = two small tabs (direct qualifiers / Qualifier); hub "Following" =
+  Men/Women pill + names-only list; team pages' "By format" = Head to head / Top performers tabs. **Countries landing =
+  cricket world map** (`/cricket/countries/`; `assets/worldmap.js`, `assets/world-map.json` built by
+  `tools/fetch_world_map.py` from Natural Earth 1:10m **India's point of view** borders + UK map units, public domain;
+  team pages keep their URL, get a "🌍 World map" link; `pages.py` hides the landing and shows the team header on
+  server-rendered team pages). Map colours: ODI rating / WC 2027 title chance (men), ODI + T20I win % last 2 yrs
+  (min 5 matches) and matches (both); hover card + panel: rating/rank, WC title/final/semi + status, 2-yr W–L, head to
+  head v the followed team (ODI/T20I, same gender), matches + last played. New API `GET /v1/records/teams` (one call for
+  every team's record). Hub pitch: the "stat" half is a **Manhattan of India's 2011 World Cup final chase** (real
+  Cricsheet data, match 433606, captioned; last bar = the six; faint by owner request). V=88. **Predictor page approval: paused by the owner;
+  methodology page not started.** Women's team ratings = a later step with its own backtest (not in P1.6).
+
+## Next up and open TODOs (updated 2026-10-09)
 - **State:** P0, P0.5 and P0.6 are live at pandyahomelab.com/cricket/ and linked from the homepage. Everything is merged
   to `main` and pushed; the NAS runs the latest pipeline and API images. LinkedIn follow-up post published 2026-10-08.
 - **Next: P1, the ODI World Cup 2027 predictor** (plan in "Plan" above): (1) Elo team ratings + Monte Carlo tournament
@@ -447,7 +498,7 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   "Most-played venues" (list `WC2027_VENUES` in assets/cricstat.js, matched on name + city). cd-pull from a
   shell needs `DOCKER="sudo -n docker"` (without it, it wrongly reports "not published yet").
 - **Small open items:** New venue Korogi Sports Park, Nisshin (Japan) has no country in venue_map.csv: add it with the
-  next pipeline publish. Ecclestone T20I runs-conceded check (see Golden follow-up); 19 golden blocks with a few missing
+  next pipeline publish. Later (P1b): Wikidata bowling style coverage check for squad features. Ecclestone T20I runs-conceded check (see Golden follow-up); 19 golden blocks with a few missing
   matches to review.
 - **Workflow:** feature branch per sub-phase, `--no-ff` merge, push, user approves publishes on GitHub, then
   `cd-pull.sh` (schema changes: `CRICSTAT_SERVICES=cricstat-pipeline` first, build, then the API). Docker via

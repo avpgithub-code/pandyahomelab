@@ -30,6 +30,19 @@ def record(db: ServingDB, team_key: int, scope: Optional[str], date_from: Option
                   " WHEN 'T20I' THEN 3 ELSE 4 END, matches DESC", (team_key,))
 
 
+def records(db: ServingDB, scope: str, date_from: Optional[str] = None,
+            date_to: Optional[str] = None) -> List[dict]:
+    """Every team's record in one scope (and date window), one row per team: the map's bulk read."""
+    where, args = db.scopes().clause(scope, "r")
+    dates, dargs = _dates("r.start_date", date_from, date_to)
+    return db.all(
+        "SELECT r.team_key, COUNT(*) AS matches, SUM(r.outcome = 'won') AS won,"
+        " SUM(r.outcome = 'lost') AS lost, SUM(r.outcome = 'tied') AS tied,"
+        " SUM(r.outcome = 'drawn') AS drawn, SUM(r.outcome = 'no_result') AS no_result,"
+        " MAX(r.start_date) AS last_date"
+        " FROM team_results r WHERE %s %s GROUP BY r.team_key" % (where, dates), args + dargs)
+
+
 def results(db: ServingDB, team_key: int, scope: Optional[str], date_from: Optional[str],
             date_to: Optional[str], limit: int, offset: int) -> List[dict]:
     where, args = db.scopes().clause(scope, "r") if scope else ("1", [])

@@ -11,7 +11,7 @@ from application_logic.services.slugs import full_name
 from tests.conftest import CRICSTAT, pid
 
 KOHLI = pid("V Kohli")
-WEB = str(CRICSTAT / "web")
+WEB = os.environ.get("CRICSTAT_TEST_WEB", str(CRICSTAT / "web"))
 
 
 def make_client(home, monkeypatch, **env):
@@ -104,6 +104,10 @@ def test_team_pages(lenient):
     assert '<h1 id="c-name" style="font-size:clamp(2rem,5vw,3rem);margin:0">India men</h1>' in h
     assert "skeleton" not in h and ">Win %<" in h and h.count("<div") == h.count("</div>")
     assert ld(h)["@type"] == "SportsTeam"
+    if 'id="c-landing"' in open(os.path.join(WEB, "countries", "index.html")).read():
+        # P1.6 shell: the static page is the world-map landing; a team page shows the team header
+        assert '<div id="c-landing" hidden' in h and 'id="c-hero">' in h
+        assert 'id="c-hero" hidden' not in h
     club = lenient.get("/pages/countries/mumbai-indians-men/").text
     assert head(club, r'<meta name="robots" content="([^"]*)"') == "noindex,follow"
     assert lenient.get("/pages/countries/nowhere-men/").status_code == 404

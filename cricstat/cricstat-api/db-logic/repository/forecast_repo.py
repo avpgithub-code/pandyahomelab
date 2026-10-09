@@ -42,6 +42,17 @@ def inputs(db: ForecastDB, tournament: str) -> List[dict]:
                   " WHERE r.tournament = ? ORDER BY i.forecast_id, i.start_date", (tournament,))
 
 
+def fixture_series(db: ForecastDB, tournament: str) -> List[dict]:
+    """Each known fixture's chances in every forecast, oldest first (empty on a pre-v2 file)."""
+    try:
+        return db.all("SELECT x.forecast_id, r.data_as_of, x.match_no, x.team1, x.team2,"
+                      " x.p_team1, x.p_team2 FROM forecast_fixtures x"
+                      " JOIN forecast_runs r ON r.forecast_id = x.forecast_id"
+                      " WHERE r.tournament = ? ORDER BY x.match_no, x.forecast_id", (tournament,))
+    except Exception:                                   # table not there yet (older file)
+        return []
+
+
 def team(db: ForecastDB, team_uid: str) -> Optional[dict]:
     return db.one("SELECT * FROM team_identities WHERE team_uid = ?", (team_uid,))
 
