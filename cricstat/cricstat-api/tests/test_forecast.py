@@ -162,3 +162,16 @@ def test_fixtures_and_venues(fclient):
     assert semi["slot1_slug"] is None and "chances" not in semi
     assert d["venues"][0]["capacity"] == 34000 and "Wikipedia" in d["source"]
     assert fclient.get("/v1/forecasts/wc-2031/fixtures").status_code == 404
+
+
+def test_last_change_reports_the_most_recent_move():
+    from application_logic.services.forecast_service import last_changes
+    s = [{"forecast_id": 1, "data_as_of": "2026-10-07", "match_no": "4", "team1": "Australia",
+          "team2": "India", "p_team1": 0.36, "p_team2": 0.56},
+         {"forecast_id": 2, "data_as_of": "2026-11-02", "match_no": "4", "team1": "Australia",
+          "team2": "India", "p_team1": 0.34, "p_team2": 0.58},
+         {"forecast_id": 3, "data_as_of": "2026-11-09", "match_no": "4", "team1": "Australia",
+          "team2": "India", "p_team1": 0.34, "p_team2": 0.58}]       # neither played: no move
+    got = last_changes(s)["4"]
+    assert (got["team1_pts"], got["team2_pts"], got["data_as_of"]) == (-2.0, 2.0, "2026-11-02")
+    assert last_changes(s[:1]) == {}

@@ -126,6 +126,8 @@ def test_daily_forecast_writes_skips_and_forces(cfg, monkeypatch, tmp_path):
                                   ).fetchone()[0])
     assert len(venues) == 12 and sum(v["matches_2027"] for v in venues) == 57
     assert next(v for v in venues if v["city"] == "Johannesburg")["role"] == "Final"
+    per_forecast = c.execute("SELECT forecast_id, COUNT(*) FROM forecast_fixtures GROUP BY 1").fetchall()
+    assert [n for _, n in per_forecast] == [16, 16]            # every forecast keeps its fixtures
 
 
 def test_forecast_refuses_bad_sums(cfg, monkeypatch, tmp_path):

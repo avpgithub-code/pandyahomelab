@@ -219,7 +219,9 @@ def forecast(cfg, force: bool = False, n: Optional[int] = None) -> Dict[str, obj
         _store_backtest(w, model)
         w.meta("tournament:%s" % TOURNAMENT, json.dumps(tournament_summary(fmt, fixtures, field)))
         w.meta("venues:%s" % TOURNAMENT, json.dumps(venues_summary(cfg, fmt, fixtures)))
-        w.meta("fixtures:%s" % TOURNAMENT, json.dumps(fixtures_summary(fixtures, ratings, p, cond)))
+        fx_rows = fixtures_summary(fixtures, ratings, p, cond)
+        w.meta("fixtures:%s" % TOURNAMENT, json.dumps(fx_rows))
+        w.fixtures(fid, fx_rows)
         expect = dict(EXPECT, **({"qualified": 4} if field else {}))
         errors = w.check(fid, expect)
         if errors:
