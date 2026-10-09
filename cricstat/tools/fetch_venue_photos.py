@@ -91,7 +91,8 @@ def main():
         # fallback: an article that redirects elsewhere once supplied another ground's photo.
         name = r["commons_file"]
         if not name:
-            print("%-14s no reviewed photo" % r["city"])
+            # A photo added by hand from elsewhere (e.g. Flickr, licence checked) is kept as is.
+            print("%-14s %s" % (r["city"], "kept: " + r["photo"] if r.get("photo") else "no reviewed photo"))
             continue
         info = imageinfo(name)
         if not info:

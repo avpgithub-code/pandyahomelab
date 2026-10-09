@@ -21,7 +21,7 @@ else:
     WEB = os.path.join(CRICSTAT, "tools", "staging", "web")
     if not os.path.isdir(WEB):
         shutil.copytree(os.path.join(CRICSTAT, "web"), WEB)
-V = "77"
+V = "78"
 SITE = "https://pandyahomelab.com"
 HEAD = '''<!DOCTYPE html>
 <html lang="en">
@@ -293,13 +293,13 @@ LIC = '''<header class="hero left"><div class="wrap">
         <tr><td class="txt">Wikimedia Commons</td><td class="txt">Player photos: a small copy of each image, served from this site, with its author, licence and file page shown next to it</td><td class="txt">Public domain, CC0, CC BY, CC BY-SA or GODL-India, per photo</td></tr>
         <tr><td class="txt">Wikimedia Commons</td><td class="txt">National flags, used unaltered at their official proportions and only to identify national teams (<a href="#flag-sources">source of each flag</a>)</td><td class="txt">Public domain (or CC0)</td></tr>
         <tr><td class="txt">Wikipedia</td><td class="txt">For the ODI World Cup 2027 predictor: Afghanistan men's ODI results (results only, each checked against a second Wikipedia source and reviewed; Cricsheet withholds these matches), and the 2027 World Cup's format, schedule, start times and venue capacities. Facts only; no Wikipedia text is reproduced</td><td class="txt">CC BY-SA 4.0 · <a href="https://en.wikipedia.org/wiki/2027_Cricket_World_Cup">2027 Cricket World Cup</a>, <a href="https://en.wikipedia.org/wiki/Afghanistan_national_cricket_team">Afghanistan national cricket team</a>, and the yearly "International cricket in …" pages</td></tr>
-        <tr><td class="txt">Wikimedia Commons</td><td class="txt">Photos of the 2027 World Cup grounds, served from this site, each credited on the predictor page (<a href="#venue-photos">source of each photo</a>)</td><td class="txt">Public domain, CC BY or CC BY-SA, per photo</td></tr>
+        <tr><td class="txt">Wikimedia Commons</td><td class="txt">Photos of the 2027 World Cup grounds (and one from Flickr), served from this site, each credited on the predictor page (<a href="#venue-photos">source of each photo</a>)</td><td class="txt">Public domain (incl. the Public Domain Mark), CC BY or CC BY-SA, per photo</td></tr>
         <tr><td class="txt">Chart.js</td><td class="txt">Charts, served from this site (<a href="/vendor/chart.js-4.4.0/LICENSE">licence text</a>)</td><td class="txt">MIT</td></tr>
       </tbody>
     </table></div>
     <p class="tiny muted" style="padding:0 1.3rem 1.1rem">Photos are resized copies of the Commons originals and are not otherwise changed (the profile frame only crops what is shown). Photos under the Government Open Data License – India (GODL-India, mostly from the Press Information Bureau) are credited as it requires and imply no endorsement by the Government of India. Players under 18 are shown without a photo or birth details. Published figures from public records, including Wikipedia, are used privately to cross-check our numbers and are not reproduced here.</p>
     <details class="flag-sources" id="venue-photos"><summary>Source of each venue photo (@@NVENUES@@)</summary>
-      <p class="tiny muted">Resized copies of the Wikimedia Commons files linked here, not otherwise changed. Chosen and checked by hand; grounds without a freely licensed photo show none.</p>
+      <p class="tiny muted">Resized copies of the Wikimedia Commons or Flickr files linked here, not otherwise changed. Chosen and checked by hand; grounds without a freely licensed photo show none.</p>
       <ul>@@VENUES@@</ul>
     </details>
     <details class="flag-sources" id="flag-sources"><summary>Source of each flag (@@NFLAGS@@)</summary>
