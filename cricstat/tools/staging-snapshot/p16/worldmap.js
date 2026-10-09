@@ -168,7 +168,7 @@
       tip.style.top = Math.max(4, (ev.clientY - r.top + th + 18 > r.height ? ev.clientY - r.top - th - 10 : ev.clientY - r.top + 14)) + "px";
     });
     svg.addEventListener("pointerleave", () => { tip.hidden = true; });
-    svg.addEventListener("click", (ev) => { const name = ev.target.dataset && ev.target.dataset.team; if (name) select(name); });
+    svg.addEventListener("click", (ev) => { const name = ev.target.dataset && ev.target.dataset.team; if (name) { select(name); askOnce(); } });
     tip = h("div", { class: "wm-tip", hidden: true, "aria-hidden": "true" });
     C.fill(host, [svg, tip]);
   }
@@ -235,7 +235,7 @@
       h("thead", {}, h("tr", {}, ["#", "Team", METRICS[metric].label].map((x, i) => h("th", { scope: "col", class: i === 1 ? "txt" : null }, x)))),
       h("tbody", {}, list.map((t, i) => {
         const b = h("button", { type: "button", class: "link-btn wm-pick" }, t.name);
-        b.addEventListener("click", () => select(t.name));
+        b.addEventListener("click", () => { select(t.name); askOnce(); });
         return h("tr", { class: t.slug === follow ? "me" : null }, [h("td", { class: "num" }, String(i + 1)),
           h("td", { class: "txt" }, h("span", { class: "wc-team" }, [C.teamBadge(t.name, "sm"), b])),
           h("td", {}, METRICS[metric].fmt(value(t)))]);
@@ -285,6 +285,14 @@
   }
 
   // ── detail panel ──
+  // After the visitor's own first pick, the site feedback pill asks about the map (feedback-widget.js).
+  let asked = false;
+  function askOnce() {
+    if (asked) return;
+    asked = true;
+    try { if (window.phl && window.phl.nudge) window.phl.nudge("Like the world map?", "map"); } catch (e) { /* optional */ }
+  }
+
   async function select(name) {
     selected = name;
     if (view === "map") document.querySelectorAll(".wm-team, .wm-dot").forEach((el) => el.classList.toggle("sel", el.dataset.team === name));
