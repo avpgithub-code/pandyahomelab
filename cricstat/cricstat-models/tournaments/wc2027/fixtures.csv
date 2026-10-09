@@ -1,58 +1,58 @@
-match_no,stage,group,date,slot1,slot2,venue,city,venue_country,match_key,team1,team2,result,winner,has_play
-1,super_series,SS,2027-10-02,Q2,Q3,"Namibia Cricket Ground, Windhoek",Windhoek,Namibia,1556786,,,,,
-2,super_series,SS,2027-10-04,Q3,Q4,"Namibia Cricket Ground, Windhoek",Windhoek,Namibia,1556787,,,,,
-3,super_series,SS,2027-10-06,Q2,Q4,"Namibia Cricket Ground, Windhoek",Windhoek,Namibia,1556788,,,,,
-4,group,A,2027-10-07,Australia,India,"Newlands Cricket Ground, Cape Town",Cape Town,South Africa,1556789,,,,,
-5,group,A,2027-10-08,Afghanistan,Pakistan,"Centurion Park, Centurion",Centurion,South Africa,1556790,,,,,
-6,group,B,2027-10-08,Bangladesh,England,"Namibia Cricket Ground, Windhoek",Windhoek,Namibia,1556791,,,,,
-7,group,A,2027-10-09,Zimbabwe,QA,"Queens Sports Club, Bulawayo",Bulawayo,Zimbabwe,1556792,,,,,
-8,group,B,2027-10-09,South Africa,New Zealand,"Newlands Cricket Ground, Cape Town",Cape Town,South Africa,1556793,,,,,
-9,group,A,2027-10-10,India,Pakistan,"Wanderers Stadium, Johannesburg",Johannesburg,South Africa,1556794,,,,,
-10,group,B,2027-10-10,Sri Lanka,QB,"Namibia Cricket Ground, Windhoek",Windhoek,Namibia,1556795,,,,,
-11,group,A,2027-10-11,Zimbabwe,Afghanistan,"Queens Sports Club, Bulawayo",Bulawayo,Zimbabwe,1556796,,,,,
-12,group,A,2027-10-12,Australia,QA,"Boland Park, Paarl",Paarl,South Africa,1556797,,,,,
-13,group,B,2027-10-12,Bangladesh,New Zealand,"Buffalo Park, KuGompo City",KuGompo City,South Africa,1556798,,,,,
-14,group,B,2027-10-13,England,Sri Lanka,"Namibia Cricket Ground, Windhoek",Windhoek,Namibia,1556799,,,,,
-15,group,B,2027-10-13,South Africa,QB,"Boland Park, Paarl",Paarl,South Africa,1556800,,,,,
-16,group,A,2027-10-14,Afghanistan,India,"Centurion Park, Centurion",Centurion,South Africa,1556801,,,,,
-17,group,A,2027-10-15,Pakistan,QA,"Mangaung Oval, Bloemfontein",Bloemfontein,South Africa,1556802,,,,,
-18,group,A,2027-10-15,Zimbabwe,Australia,"Harare Sports Club, Harare",Harare,Zimbabwe,1556803,,,,,
-19,group,B,2027-10-16,Bangladesh,Sri Lanka,"Kingsmead Cricket Ground, Durban",Durban,South Africa,1556804,,,,,
-20,group,B,2027-10-16,South Africa,England,"St George's Park, Gqeberha",Gqeberha,South Africa,1556805,,,,,
-21,group,A,2027-10-17,India,QA,"Mangaung Oval, Bloemfontein",Bloemfontein,South Africa,1556806,,,,,
-22,group,B,2027-10-17,New Zealand,QB,"Harare Sports Club, Harare",Harare,Zimbabwe,1556807,,,,,
-23,group,A,2027-10-18,Afghanistan,Australia,"Buffalo Park, KuGompo City",KuGompo City,South Africa,1556808,,,,,
-24,group,A,2027-10-19,Zimbabwe,Pakistan,"Harare Sports Club, Harare",Harare,Zimbabwe,1556809,,,,,
-25,group,B,2027-10-19,South Africa,Bangladesh,"Kingsmead Cricket Ground, Durban",Durban,South Africa,1556810,,,,,
-26,group,B,2027-10-20,New Zealand,Sri Lanka,"Wanderers Stadium, Johannesburg",Johannesburg,South Africa,1556811,,,,,
-27,group,B,2027-10-20,England,QB,"Harare Sports Club, Harare",Harare,Zimbabwe,1556812,,,,,
-28,group,A,2027-10-21,Afghanistan,QA,"Buffalo Park, KuGompo City",KuGompo City,South Africa,1556813,,,,,
-29,group,A,2027-10-22,Australia,Pakistan,"Boland Park, Paarl",Paarl,South Africa,1556814,,,,,
-30,group,B,2027-10-22,South Africa,Sri Lanka,"Wanderers Stadium, Johannesburg",Johannesburg,South Africa,1556815,,,,,
-31,group,B,2027-10-23,England,New Zealand,"St George's Park, Gqeberha",Gqeberha,South Africa,1556816,,,,,
-32,group,B,2027-10-23,Bangladesh,QB,"Centurion Park, Centurion",Centurion,South Africa,1556817,,,,,
-33,group,A,2027-10-24,Zimbabwe,India,"Mosi-oa-Tunya International Cricket Stadium, Victoria Falls",Victoria Falls,Zimbabwe,1556818,,,,,
-34,super7,S7,2027-10-25,A2,B3,"Wanderers Stadium, Johannesburg",Johannesburg,South Africa,1556819,,,,,
-35,super7,S7,2027-10-26,B1,A3,"St George's Park, Gqeberha",Gqeberha,South Africa,1556820,,,,,
-36,super7,S7,2027-10-27,B2,4TH,"Centurion Park, Centurion",Centurion,South Africa,1556821,,,,,
-37,super7,S7,2027-10-28,A1,A2,"Mosi-oa-Tunya International Cricket Stadium, Victoria Falls",Victoria Falls,Zimbabwe,1556822,,,,,
-38,super7,S7,2027-10-29,B1,B3,"Buffalo Park, KuGompo City",KuGompo City,South Africa,1556823,,,,,
-39,super7,S7,2027-10-30,A3,4TH,"Mosi-oa-Tunya International Cricket Stadium, Victoria Falls",Victoria Falls,Zimbabwe,1556824,,,,,
-40,super7,S7,2027-10-31,B2,A1,"Wanderers Stadium, Johannesburg",Johannesburg,South Africa,1556825,,,,,
-41,super7,S7,2027-11-01,A2,B1,"Mosi-oa-Tunya International Cricket Stadium, Victoria Falls",Victoria Falls,Zimbabwe,1556826,,,,,
-42,super7,S7,2027-11-02,B3,4TH,"Newlands Cricket Ground, Cape Town",Cape Town,South Africa,1556827,,,,,
-43,super7,S7,2027-11-03,B2,A3,"Kingsmead Cricket Ground, Durban",Durban,South Africa,1556828,,,,,
-44,super7,S7,2027-11-04,A1,B1,"Boland Park, Paarl",Paarl,South Africa,1556829,,,,,
-45,super7,S7,2027-11-05,A2,4TH,"Kingsmead Cricket Ground, Durban",Durban,South Africa,1556830,,,,,
-46,super7,S7,2027-11-06,B2,B3,"Mangaung Oval, Bloemfontein",Bloemfontein,South Africa,1556831,,,,,
-47,super7,S7,2027-11-07,A1,A3,"Newlands Cricket Ground, Cape Town",Cape Town,South Africa,1556832,,,,,
-48,super7,S7,2027-11-08,B1,4TH,"Kingsmead Cricket Ground, Durban",Durban,South Africa,1556833,,,,,
-49,super7,S7,2027-11-09,B2,A2,"St George's Park, Gqeberha",Gqeberha,South Africa,1556834,,,,,
-50,super7,S7,2027-11-10,A3,B3,"Mangaung Oval, Bloemfontein",Bloemfontein,South Africa,1556835,,,,,
-51,super7,S7,2027-11-11,A1,4TH,"St George's Park, Gqeberha",Gqeberha,South Africa,1556836,,,,,
-52,super7,S7,2027-11-12,B2,B1,"Newlands Cricket Ground, Cape Town",Cape Town,South Africa,1556837,,,,,
-53,super7,S7,2027-11-13,A2,A3,"Mangaung Oval, Bloemfontein",Bloemfontein,South Africa,1556838,,,,,
-54,super7,S7,2027-11-14,A1,B3,"Kingsmead Cricket Ground, Durban",Durban,South Africa,1556839,,,,,
-55,semi,,2027-11-17,S7-1,S7-4,"Newlands Cricket Ground, Cape Town",Cape Town,South Africa,1556840,,,,,
-56,semi,,2027-11-18,S7-2,S7-3,"Centurion Park, Centurion",Centurion,South Africa,1556841,,,,,
-57,final,,2027-11-21,W55,W56,"Wanderers Stadium, Johannesburg",Johannesburg,South Africa,1556842,,,,,
+match_no,stage,group,date,slot1,slot2,venue,city,venue_country,match_key,team1,team2,result,winner,has_play,time,daynight
+1,super_series,SS,2027-10-02,Q2,Q3,"Namibia Cricket Ground, Windhoek",Windhoek,Namibia,1556786,,,,,,10:00,0
+2,super_series,SS,2027-10-04,Q3,Q4,"Namibia Cricket Ground, Windhoek",Windhoek,Namibia,1556787,,,,,,10:00,0
+3,super_series,SS,2027-10-06,Q2,Q4,"Namibia Cricket Ground, Windhoek",Windhoek,Namibia,1556788,,,,,,10:00,0
+4,group,A,2027-10-07,Australia,India,"Newlands Cricket Ground, Cape Town",Cape Town,South Africa,1556789,,,,,,10:00,0
+5,group,A,2027-10-08,Afghanistan,Pakistan,"Centurion Park, Centurion",Centurion,South Africa,1556790,,,,,,10:00,0
+6,group,B,2027-10-08,Bangladesh,England,"Namibia Cricket Ground, Windhoek",Windhoek,Namibia,1556791,,,,,,12:30,1
+7,group,A,2027-10-09,Zimbabwe,QA,"Queens Sports Club, Bulawayo",Bulawayo,Zimbabwe,1556792,,,,,,10:00,0
+8,group,B,2027-10-09,South Africa,New Zealand,"Newlands Cricket Ground, Cape Town",Cape Town,South Africa,1556793,,,,,,12:30,1
+9,group,A,2027-10-10,India,Pakistan,"Wanderers Stadium, Johannesburg",Johannesburg,South Africa,1556794,,,,,,10:00,0
+10,group,B,2027-10-10,Sri Lanka,QB,"Namibia Cricket Ground, Windhoek",Windhoek,Namibia,1556795,,,,,,12:30,1
+11,group,A,2027-10-11,Zimbabwe,Afghanistan,"Queens Sports Club, Bulawayo",Bulawayo,Zimbabwe,1556796,,,,,,12:30,1
+12,group,A,2027-10-12,Australia,QA,"Boland Park, Paarl",Paarl,South Africa,1556797,,,,,,10:00,0
+13,group,B,2027-10-12,Bangladesh,New Zealand,"Buffalo Park, KuGompo City",KuGompo City,South Africa,1556798,,,,,,12:30,1
+14,group,B,2027-10-13,England,Sri Lanka,"Namibia Cricket Ground, Windhoek",Windhoek,Namibia,1556799,,,,,,10:00,0
+15,group,B,2027-10-13,South Africa,QB,"Boland Park, Paarl",Paarl,South Africa,1556800,,,,,,12:30,1
+16,group,A,2027-10-14,Afghanistan,India,"Centurion Park, Centurion",Centurion,South Africa,1556801,,,,,,10:00,0
+17,group,A,2027-10-15,Pakistan,QA,"Mangaung Oval, Bloemfontein",Bloemfontein,South Africa,1556802,,,,,,10:00,0
+18,group,A,2027-10-15,Zimbabwe,Australia,"Harare Sports Club, Harare",Harare,Zimbabwe,1556803,,,,,,12:30,1
+19,group,B,2027-10-16,Bangladesh,Sri Lanka,"Kingsmead Cricket Ground, Durban",Durban,South Africa,1556804,,,,,,10:00,0
+20,group,B,2027-10-16,South Africa,England,"St George's Park, Gqeberha",Gqeberha,South Africa,1556805,,,,,,12:30,1
+21,group,A,2027-10-17,India,QA,"Mangaung Oval, Bloemfontein",Bloemfontein,South Africa,1556806,,,,,,10:00,0
+22,group,B,2027-10-17,New Zealand,QB,"Harare Sports Club, Harare",Harare,Zimbabwe,1556807,,,,,,12:30,1
+23,group,A,2027-10-18,Afghanistan,Australia,"Buffalo Park, KuGompo City",KuGompo City,South Africa,1556808,,,,,,10:00,0
+24,group,A,2027-10-19,Zimbabwe,Pakistan,"Harare Sports Club, Harare",Harare,Zimbabwe,1556809,,,,,,10:00,0
+25,group,B,2027-10-19,South Africa,Bangladesh,"Kingsmead Cricket Ground, Durban",Durban,South Africa,1556810,,,,,,12:30,1
+26,group,B,2027-10-20,New Zealand,Sri Lanka,"Wanderers Stadium, Johannesburg",Johannesburg,South Africa,1556811,,,,,,10:00,0
+27,group,B,2027-10-20,England,QB,"Harare Sports Club, Harare",Harare,Zimbabwe,1556812,,,,,,12:30,1
+28,group,A,2027-10-21,Afghanistan,QA,"Buffalo Park, KuGompo City",KuGompo City,South Africa,1556813,,,,,,12:30,1
+29,group,A,2027-10-22,Australia,Pakistan,"Boland Park, Paarl",Paarl,South Africa,1556814,,,,,,10:00,0
+30,group,B,2027-10-22,South Africa,Sri Lanka,"Wanderers Stadium, Johannesburg",Johannesburg,South Africa,1556815,,,,,,12:30,1
+31,group,B,2027-10-23,England,New Zealand,"St George's Park, Gqeberha",Gqeberha,South Africa,1556816,,,,,,10:00,0
+32,group,B,2027-10-23,Bangladesh,QB,"Centurion Park, Centurion",Centurion,South Africa,1556817,,,,,,12:30,1
+33,group,A,2027-10-24,Zimbabwe,India,"Mosi-oa-Tunya International Cricket Stadium, Victoria Falls",Victoria Falls,Zimbabwe,1556818,,,,,,10:00,0
+34,super7,S7,2027-10-25,A2,B3,"Wanderers Stadium, Johannesburg",Johannesburg,South Africa,1556819,,,,,,10:00,0
+35,super7,S7,2027-10-26,B1,A3,"St George's Park, Gqeberha",Gqeberha,South Africa,1556820,,,,,,10:00,0
+36,super7,S7,2027-10-27,B2,4TH,"Centurion Park, Centurion",Centurion,South Africa,1556821,,,,,,12:30,1
+37,super7,S7,2027-10-28,A1,A2,"Mosi-oa-Tunya International Cricket Stadium, Victoria Falls",Victoria Falls,Zimbabwe,1556822,,,,,,10:00,0
+38,super7,S7,2027-10-29,B1,B3,"Buffalo Park, KuGompo City",KuGompo City,South Africa,1556823,,,,,,10:00,0
+39,super7,S7,2027-10-30,A3,4TH,"Mosi-oa-Tunya International Cricket Stadium, Victoria Falls",Victoria Falls,Zimbabwe,1556824,,,,,,10:00,0
+40,super7,S7,2027-10-31,B2,A1,"Wanderers Stadium, Johannesburg",Johannesburg,South Africa,1556825,,,,,,12:30,1
+41,super7,S7,2027-11-01,A2,B1,"Mosi-oa-Tunya International Cricket Stadium, Victoria Falls",Victoria Falls,Zimbabwe,1556826,,,,,,10:00,0
+42,super7,S7,2027-11-02,B3,4TH,"Newlands Cricket Ground, Cape Town",Cape Town,South Africa,1556827,,,,,,12:30,1
+43,super7,S7,2027-11-03,B2,A3,"Kingsmead Cricket Ground, Durban",Durban,South Africa,1556828,,,,,,12:30,1
+44,super7,S7,2027-11-04,A1,B1,"Boland Park, Paarl",Paarl,South Africa,1556829,,,,,,10:00,0
+45,super7,S7,2027-11-05,A2,4TH,"Kingsmead Cricket Ground, Durban",Durban,South Africa,1556830,,,,,,10:00,0
+46,super7,S7,2027-11-06,B2,B3,"Mangaung Oval, Bloemfontein",Bloemfontein,South Africa,1556831,,,,,,12:30,1
+47,super7,S7,2027-11-07,A1,A3,"Newlands Cricket Ground, Cape Town",Cape Town,South Africa,1556832,,,,,,10:00,0
+48,super7,S7,2027-11-08,B1,4TH,"Kingsmead Cricket Ground, Durban",Durban,South Africa,1556833,,,,,,10:00,0
+49,super7,S7,2027-11-09,B2,A2,"St George's Park, Gqeberha",Gqeberha,South Africa,1556834,,,,,,12:30,1
+50,super7,S7,2027-11-10,A3,B3,"Mangaung Oval, Bloemfontein",Bloemfontein,South Africa,1556835,,,,,,10:00,0
+51,super7,S7,2027-11-11,A1,4TH,"St George's Park, Gqeberha",Gqeberha,South Africa,1556836,,,,,,10:00,0
+52,super7,S7,2027-11-12,B2,B1,"Newlands Cricket Ground, Cape Town",Cape Town,South Africa,1556837,,,,,,12:30,1
+53,super7,S7,2027-11-13,A2,A3,"Mangaung Oval, Bloemfontein",Bloemfontein,South Africa,1556838,,,,,,10:00,0
+54,super7,S7,2027-11-14,A1,B3,"Kingsmead Cricket Ground, Durban",Durban,South Africa,1556839,,,,,,10:00,0
+55,semi,,2027-11-17,S7-1,S7-4,"Newlands Cricket Ground, Cape Town",Cape Town,South Africa,1556840,,,,,,10:00,0
+56,semi,,2027-11-18,S7-2,S7-3,"Centurion Park, Centurion",Centurion,South Africa,1556841,,,,,,10:00,0
+57,final,,2027-11-21,W55,W56,"Wanderers Stadium, Johannesburg",Johannesburg,South Africa,1556842,,,,,,10:00,0

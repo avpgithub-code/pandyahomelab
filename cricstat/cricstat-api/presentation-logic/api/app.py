@@ -264,6 +264,10 @@ def create_app(cfg: Optional[Config] = None) -> FastAPI:
     def forecast_history(request: Request, tournament: str, team: Optional[str] = None):
         return fenvelope(request, forecast_service.history(db, fdb, tournament, team))
 
+    @app.get("/v1/forecasts/{tournament}/fixtures")
+    def forecast_fixtures(request: Request, tournament: str):
+        return fenvelope(request, forecast_service.fixtures(db, fdb, tournament))
+
     @app.get("/v1/ratings")
     def rating_list(request: Request, scope: str = "ODI", gender: str = "male"):
         return fenvelope(request, forecast_service.ratings(db, fdb, scope, gender))

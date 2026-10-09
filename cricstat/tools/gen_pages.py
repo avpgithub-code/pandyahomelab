@@ -8,6 +8,7 @@ web_preview.py). After approval:  rsync -a cricstat/tools/staging/web/ cricstat/
 then remove the staging copy."""
 import datetime
 import html as H
+import csv
 import json
 import os
 import re
@@ -20,7 +21,7 @@ else:
     WEB = os.path.join(CRICSTAT, "tools", "staging", "web")
     if not os.path.isdir(WEB):
         shutil.copytree(os.path.join(CRICSTAT, "web"), WEB)
-V = "73"
+V = "77"
 SITE = "https://pandyahomelab.com"
 HEAD = '''<!DOCTYPE html>
 <html lang="en">
@@ -48,7 +49,7 @@ HEAD = '''<!DOCTYPE html>
     <li><a href="/cricket/"{c_hub}>Overview</a></li>
     <li><a href="/cricket/countries/"{c_countries}>Countries</a></li>
     <li><a href="/cricket/players/"{c_players}>Players</a></li>
-    <li><span class="soon" title="Coming in the next phase">ODI WC 2027 <span class="soon-tag">soon</span></span></li>
+    <li><a href="/cricket/predictor/"{c_predictor}>ODI WC 2027</a></li>
     <li><span class="soon" title="Coming in a later phase">Ask <span class="soon-tag">soon</span></span></li>
     <li><span class="soon" title="Coming in a later phase">Methodology <span class="soon-tag">soon</span></span></li>
     <li><a href="/cricket/licences/"{c_licences}>Licences</a></li>
@@ -72,7 +73,7 @@ FOOT = '''</main>
 </html>
 '''
 def page(rel, path, title, desc, cur, body, scripts, og_type="website", extra_head=""):
-    c = {k: "" for k in ("c_hub", "c_countries", "c_players", "c_licences", "c_about")}
+    c = {k: "" for k in ("c_hub", "c_countries", "c_players", "c_licences", "c_about", "c_predictor")}
     c["c_" + cur] = ' aria-current="page"'
     html = HEAD.format(title=title, desc=desc, path=path, v=V, og_type=og_type, extra_head=extra_head, **c) + body + FOOT.format(
         v=V, scripts="\n".join('<script src="%s"></script>' % s for s in scripts))
@@ -225,6 +226,51 @@ page("countries/index.html", "/cricket/countries/", "Team records — cricstat |
      "Team records by format, recent results, head to head, home and away, results by year and top run-scorers and wicket-takers for men's and women's international teams.",
      "countries", COUNTRIES, ["/vendor/chart.js-4.4.0/chart.umd.min.js", "/cricket/assets/countries.js?v=" + V])
 
+PREDICTOR = '''<header class="hero left wc-hero">
+  <div class="wrap wc-hero-grid">
+   <div class="wc-hero-main">
+    <div class="eyebrow"><span class="dot"></span>ODI World Cup 2027 · South Africa, Zimbabwe &amp; Namibia · 2 Oct – 21 Nov 2027</div>
+    <h1 class="wc-title" style="font-size:clamp(2rem,5vw,3.2rem)">%s Who will lift the 2027 ODI World&nbsp;Cup?</h1>
+    <p class="subtitle">Every team's chances, from Elo ratings and 50,000 simulated tournaments in the published format. One model for every team: following a team changes what you see first, never the numbers.</p>
+    <p class="wc-stamp tiny muted" id="wc-stamp">Loading the latest forecast…</p>
+    <div id="wc-follow" class="wc-follow" aria-live="polite"></div>
+   </div>
+   <figure class="wc-donut" id="wc-donut" aria-label="Share of simulated tournaments won, by team"></figure>
+  </div>
+</header>
+<section class="section panel" aria-label="ODI World Cup 2027 forecast"><div class="wrap scoreboard wc-board">
+  <div class="sb-head board-head" aria-hidden="true"><span class="bulb"></span>ODI World Cup 2027<span class="mc-asof" id="wc-asof"></span><span class="bulb"></span></div>
+  <div class="sec-tabs" role="tablist" aria-label="Forecast sections">
+    <button class="sec-tab" type="button" role="tab" id="tab-odds" aria-controls="pane-odds" aria-selected="true">🏆 Title odds</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-time" aria-controls="pane-time" aria-selected="false" tabindex="-1">📈 Odds over time</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-fixtures" aria-controls="pane-fixtures" aria-selected="false" tabindex="-1">📅 Fixtures</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-venues" aria-controls="pane-venues" aria-selected="false" tabindex="-1">🏟️ Venues</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-ratings" aria-controls="pane-ratings" aria-selected="false" tabindex="-1">⚖️ Ratings</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-format" aria-controls="pane-format" aria-selected="false" tabindex="-1">🗺️ Format</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-good" aria-controls="pane-good" aria-selected="false" tabindex="-1">✅ How good is it?</button>
+  </div>
+  <div class="sec-pane" role="tabpanel" id="pane-odds" aria-labelledby="tab-odds"><div class="skeleton"></div></div>
+  <div class="sec-pane" role="tabpanel" id="pane-time" aria-labelledby="tab-time" hidden></div>
+  <div class="sec-pane" role="tabpanel" id="pane-fixtures" aria-labelledby="tab-fixtures" hidden></div>
+  <div class="sec-pane" role="tabpanel" id="pane-venues" aria-labelledby="tab-venues" hidden></div>
+  <div class="sec-pane" role="tabpanel" id="pane-ratings" aria-labelledby="tab-ratings" hidden></div>
+  <div class="sec-pane" role="tabpanel" id="pane-format" aria-labelledby="tab-format" hidden></div>
+  <div class="sec-pane" role="tabpanel" id="pane-good" aria-labelledby="tab-good" hidden></div>
+</div></section>
+<section class="section panel" aria-label="What this forecast can and can't tell you"><div class="wrap wc-limits" id="wc-limits"></div></section>
+'''
+# Our own trophy icon (the hub teaser's): the official tournament logo is non-free (ICC trademark).
+TROPHY = HUB[HUB.index('<svg class="wc-icon"'):HUB.index("</svg>", HUB.index('<svg class="wc-icon"')) + 6]
+PREDICTOR = PREDICTOR % TROPHY.replace('id="wcGold"', 'id="wcGoldH"').replace("url(#wcGold)", "url(#wcGoldH)")
+PRED_DESC = ("ODI World Cup 2027 predictor: each team's chances of the Super 7, semi-finals, final and title, from Elo ratings "
+             "and 50,000 simulated tournaments in the published format — with backtests on the 2019 and 2023 World Cups.")
+page("predictor/index.html", "/cricket/predictor/",
+     "ODI World Cup 2027 predictor: every team's chances — cricstat | pandyaHomeLab", PRED_DESC, "predictor", PREDICTOR,
+     ["/vendor/chart.js-4.4.0/chart.umd.min.js", "/cricket/assets/predictor.js?v=" + V],
+     extra_head=ld_json({"@context": "https://schema.org", "@type": "WebPage", "name": "ODI World Cup 2027 predictor",
+                         "description": PRED_DESC, "url": SITE + "/cricket/predictor/", "isPartOf": {"@id": SITE + "/#site"},
+                         "about": ["ODI World Cup 2027", "Elo rating", "Monte Carlo simulation"], "author": ARCHIT}))
+
 LIC = '''<header class="hero left"><div class="wrap">
   <div class="eyebrow"><span class="dot"></span>Data &amp; licences</div>
   <h1 style="font-size:clamp(2rem,5vw,3rem)">Where the numbers come from</h1>
@@ -246,10 +292,16 @@ LIC = '''<header class="hero left"><div class="wrap">
         <tr><td class="txt">Wikidata</td><td class="txt">Players' full names, dates and places of birth, matched only by their ESPNcricinfo id (never by name)</td><td class="txt">CC0 · no attribution required, credited anyway</td></tr>
         <tr><td class="txt">Wikimedia Commons</td><td class="txt">Player photos: a small copy of each image, served from this site, with its author, licence and file page shown next to it</td><td class="txt">Public domain, CC0, CC BY, CC BY-SA or GODL-India, per photo</td></tr>
         <tr><td class="txt">Wikimedia Commons</td><td class="txt">National flags, used unaltered at their official proportions and only to identify national teams (<a href="#flag-sources">source of each flag</a>)</td><td class="txt">Public domain (or CC0)</td></tr>
+        <tr><td class="txt">Wikipedia</td><td class="txt">For the ODI World Cup 2027 predictor: Afghanistan men's ODI results (results only, each checked against a second Wikipedia source and reviewed; Cricsheet withholds these matches), and the 2027 World Cup's format, schedule, start times and venue capacities. Facts only; no Wikipedia text is reproduced</td><td class="txt">CC BY-SA 4.0 · <a href="https://en.wikipedia.org/wiki/2027_Cricket_World_Cup">2027 Cricket World Cup</a>, <a href="https://en.wikipedia.org/wiki/Afghanistan_national_cricket_team">Afghanistan national cricket team</a>, and the yearly "International cricket in …" pages</td></tr>
+        <tr><td class="txt">Wikimedia Commons</td><td class="txt">Photos of the 2027 World Cup grounds, served from this site, each credited on the predictor page (<a href="#venue-photos">source of each photo</a>)</td><td class="txt">Public domain, CC BY or CC BY-SA, per photo</td></tr>
         <tr><td class="txt">Chart.js</td><td class="txt">Charts, served from this site (<a href="/vendor/chart.js-4.4.0/LICENSE">licence text</a>)</td><td class="txt">MIT</td></tr>
       </tbody>
     </table></div>
     <p class="tiny muted" style="padding:0 1.3rem 1.1rem">Photos are resized copies of the Commons originals and are not otherwise changed (the profile frame only crops what is shown). Photos under the Government Open Data License – India (GODL-India, mostly from the Press Information Bureau) are credited as it requires and imply no endorsement by the Government of India. Players under 18 are shown without a photo or birth details. Published figures from public records, including Wikipedia, are used privately to cross-check our numbers and are not reproduced here.</p>
+    <details class="flag-sources" id="venue-photos"><summary>Source of each venue photo (@@NVENUES@@)</summary>
+      <p class="tiny muted">Resized copies of the Wikimedia Commons files linked here, not otherwise changed. Chosen and checked by hand; grounds without a freely licensed photo show none.</p>
+      <ul>@@VENUES@@</ul>
+    </details>
     <details class="flag-sources" id="flag-sources"><summary>Source of each flag (@@NFLAGS@@)</summary>
       <p class="tiny muted">Each flag is an unchanged copy of the Wikimedia Commons file linked here. Some countries also protect their flag by law (India, for example, by its Flag Code); flags here only identify the national team.</p>
       <ul>@@FLAGS@@</ul>
@@ -260,13 +312,13 @@ LIC = '''<header class="hero left"><div class="wrap">
     <ul class="plain">
       <li>Matches from late 2001 onwards. Earlier history — including the 1983 ODI World Cup — is not in the data.</li>
       <li>Coverage is thinner in the early years: men's Tests before about 2005 and women's international cricket before about 2016.</li>
-      <li>Afghanistan men's matches are not included by the data source, so players' totals against Afghanistan are missing.</li>
+      <li>Afghanistan men's matches are not included by the data source (Cricsheet withholds them as a protest over Afghan women's cricket), so players' totals against Afghanistan are missing. For the ODI World Cup 2027 predictor only, Afghanistan's results come from a reviewed list (see Wikipedia above), so the forecast stays fair to every team.</li>
       <li>Statistics are derived from ball-by-ball records and can differ from official figures. Averages and rates are shown cut to two decimals, as published records show them.</li>
     </ul>
   </div>
   <div class="grid">
     <div class="card"><h2>Privacy</h2><p class="dim">No cookies, and nothing is loaded from third parties. The team you follow is remembered in your browser only (local storage) and never sent to the server. Visits are counted the same way as on the rest of this site.</p><p style="margin-top:.6rem"><a href="/privacy/">Full privacy page →</a></p></div>
-    <div class="card"><h2>Disclaimers</h2><p class="dim">Statistics are derived from the source data and may differ from official records. When forecasts and the AI analyst arrive, forecasts will be for education and entertainment, not betting advice, and every AI answer will show how it was computed.</p></div>
+    <div class="card"><h2>Disclaimers</h2><p class="dim">Statistics are derived from the source data and may differ from official records. Forecasts (the ODI World Cup 2027 predictor) are statistical estimates for education and entertainment, not tips and not betting advice. When the AI analyst arrives, every answer will show how it was computed.</p></div>
     <div class="card"><h2>Corrections</h2><p class="dim">Spotted an error, or want details about a player reviewed or a photo removed? Email <a href="mailto:privacy@pandyahomelab.com">privacy@pandyahomelab.com</a> with the page and what looks wrong.</p></div>
   </div>
 </div></section>
@@ -278,7 +330,14 @@ def flag_sources():
     flags = json.loads(src[src.index("{"):src.rindex("}") + 1])
     items = "".join('<li><a href="%s">%s</a> · %s</li>' % (H.escape(f["source"]), H.escape(n), H.escape(f["licence"]))
                     for n, f in sorted(flags.items()))
-    return LIC.replace("@@NFLAGS@@", str(len(flags))).replace("@@FLAGS@@", items)
+    vpath = os.path.join(CRICSTAT, "cricstat-models", "tournaments", "wc2027", "venues.csv")
+    with open(vpath, encoding="utf-8", newline="") as f:
+        venues = [r for r in csv.DictReader(f) if r.get("photo")]
+    vitems = "".join('<li><a href="%s">%s</a> · %s · %s</li>' % (
+        H.escape(v["photo_source"]), H.escape(v["stadium"]), H.escape(v["photo_author"] or "unknown author"),
+        H.escape(v["photo_licence"])) for v in venues)
+    return (LIC.replace("@@NFLAGS@@", str(len(flags))).replace("@@FLAGS@@", items)
+            .replace("@@NVENUES@@", str(len(venues))).replace("@@VENUES@@", vitems))
 
 
 page("licences/index.html", "/cricket/licences/", "Data & licences — cricstat | pandyaHomeLab",

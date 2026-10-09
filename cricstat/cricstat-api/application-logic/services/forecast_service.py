@@ -151,6 +151,37 @@ def history(db: ServingDB, fdb: ForecastDB, tournament: str, team: Optional[str]
     return data, defs
 
 
+def fixtures(db: ServingDB, fdb: ForecastDB, tournament: str) -> Tuple[dict, dict]:
+    """The schedule (with each fixed match's chances) and the venues (facts, photo credit, history),
+    as stored with the latest forecast."""
+    tid = _tournament(tournament)
+    run = forecast_repo.latest(fdb, tid)
+    if not run:
+        raise NoForecast("no %s forecast yet" % tournament)
+    fx = json.loads(forecast_repo.meta(fdb, "fixtures:%s" % tid) or "[]")
+    venues = json.loads(forecast_repo.meta(fdb, "venues:%s" % tid) or "[]")
+    slugs: Dict[str, Optional[str]] = {}
+    for f in fx:
+        for k in ("slot1", "slot2"):
+            name = f[k]
+            if name not in slugs:
+                slugs[name] = _slug(db, name)
+            f[k + "_slug"] = slugs[name]
+    data = {"forecast": _forecast_meta(run), "fixtures": fx, "venues": venues,
+            "source": "Schedule, venues, capacities and start times: Wikipedia, 2027 Cricket World "
+                      "Cup (CC BY-SA 4.0), from the ICC schedule of 1 Oct 2026. Venue history: "
+                      "Cricsheet men's ODIs. Venue photos: Wikimedia Commons, credited per photo."}
+    defs = {"chances": "For a match whose teams are known: win, tie and no-result chances from "
+                       "the current ratings, home advantage and the host country's October–"
+                       "November no-result rate (the same inputs the simulation uses).",
+            "slot": "A placeholder until a stage decides it: A2 = 2nd in Group A, 4TH = best "
+                    "fourth-placed team, S7-1 = 1st in the Super 7, W55 = winner of match 55, "
+                    "Q2–Q4 = Qualifier places, QA/QB = the two qualifier slots in the groups.",
+            "history.avg_first_innings": "Average first-innings total in men's ODIs at the ground "
+                                         "(full innings only: 50 overs or all out, no D/L)."}
+    return data, defs
+
+
 def _parse_scope(scope: str, gender: str) -> None:
     if scope != "ODI" or gender != "male":
         raise BadFilter("ratings are available for scope=ODI and gender=male (the 2027 ODI World "

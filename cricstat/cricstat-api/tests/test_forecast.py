@@ -65,6 +65,14 @@ def forecast_db(tmp_path_factory):
             "id": "wc2027", "name": "ICC Men's Cricket World Cup 2027", "start": "2027-10-02",
             "end": "2027-11-21", "hosts": ["South Africa"], "matches": 57, "played": 0,
             "groups": {"A": ["India", "Australia", "Afghanistan"]}, "assumptions": ["TBC x"]}))
+        w.meta("fixtures:wc2027", json.dumps([
+            {"match_no": "4", "stage": "group", "slot1": "Australia", "slot2": "India",
+             "date": "2027-10-07",
+             "chances": {"team1": 0.36, "team2": 0.56, "tie": 0.01, "no_result": 0.07}},
+            {"match_no": "55", "stage": "semi", "slot1": "S7-1", "slot2": "S7-4",
+             "date": "2027-11-17"}]))
+        w.meta("venues:wc2027", json.dumps([{"stadium": "Wanderers Stadium", "city": "Johannesburg",
+                                             "capacity": 34000, "history": {"odis": 36}}]))
         w.commit()
     return path
 
@@ -144,3 +152,13 @@ def test_backtest_and_admin(fclient):
     assert d["backtest"]["test_a"]["coin"]["accuracy"] is None   # NaN → null, not a 500
     jobs = fclient.get("/v1/admin/jobs").json()["data"]
     assert jobs["forecast"]["forecast_id"] == 2
+
+
+def test_fixtures_and_venues(fclient):
+    d = fclient.get("/v1/forecasts/wc-2027/fixtures").json()["data"]
+    first, semi = d["fixtures"]
+    assert (first["slot1_slug"], first["slot2_slug"]) == ("australia-men", "india-men")
+    assert first["chances"]["team2"] == 0.56
+    assert semi["slot1_slug"] is None and "chances" not in semi
+    assert d["venues"][0]["capacity"] == 34000 and "Wikipedia" in d["source"]
+    assert fclient.get("/v1/forecasts/wc-2031/fixtures").status_code == 404

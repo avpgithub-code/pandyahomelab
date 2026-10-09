@@ -11,7 +11,8 @@ fixtures.csv  one row per scheduled match, all stages:
   W51 = winner of match 51, Q1..Q4 = Qualifier places, SSW = Super Series winner, QA/QB = the two
   qualifier slots in groups A and B).
   team1/team2/result/winner/has_play = what actually happened (blank until played). The replay test
-  and the in-tournament forecast both read them.
+  and the in-tournament forecast both read them. time (local start) and daynight (1 = day/night)
+  come from the published schedule (2027 only).
   match_key = the ESPNcricinfo match id (Cricsheet's id space) when the source lists one.
 """
 import csv
@@ -20,7 +21,8 @@ import os
 from typing import Dict, List
 
 FIXTURE_COLUMNS = ("match_no", "stage", "group", "date", "slot1", "slot2", "venue", "city",
-                   "venue_country", "match_key", "team1", "team2", "result", "winner", "has_play")
+                   "venue_country", "match_key", "team1", "team2", "result", "winner", "has_play",
+                   "time", "daynight")
 
 
 def tournament_dir(root: str, tid: str) -> str:

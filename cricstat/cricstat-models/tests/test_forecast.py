@@ -114,6 +114,18 @@ def test_daily_forecast_writes_skips_and_forces(cfg, monkeypatch, tmp_path):
     summary = json.loads(c.execute("SELECT value FROM meta WHERE key = 'tournament:wc2027'"
                                    ).fetchone()[0])
     assert summary["groups"]["A"][0] == "India" and summary["matches"] == 57
+    fixtures = json.loads(c.execute("SELECT value FROM meta WHERE key = 'fixtures:wc2027'"
+                                    ).fetchone()[0])
+    known = [f for f in fixtures if f.get("chances")]
+    # 20 group games have two known teams; Afghanistan's 4 have no rating in this tiny DB (no
+    # supplement), so no chances: unrated teams are left blank, never guessed.
+    assert len(fixtures) == 57 and len(known) == 16
+    assert all(abs(sum(f["chances"].values()) - 1) < 1e-3 for f in known)
+    assert sum(f["daynight"] for f in fixtures) == 21
+    venues = json.loads(c.execute("SELECT value FROM meta WHERE key = 'venues:wc2027'"
+                                  ).fetchone()[0])
+    assert len(venues) == 12 and sum(v["matches_2027"] for v in venues) == 57
+    assert next(v for v in venues if v["city"] == "Johannesburg")["role"] == "Final"
 
 
 def test_forecast_refuses_bad_sums(cfg, monkeypatch, tmp_path):
