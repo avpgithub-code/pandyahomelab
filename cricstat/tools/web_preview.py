@@ -11,7 +11,7 @@ Mirrors what Nginx will do, without touching the live site:
   /cricket/sitemap.xml        → the API's /pages/sitemap.xml
   /cricket/photos/<hash>.jpg  → CRICSTAT_PHOTO_DIR (default cricstat/data/photos)
   /cricket/...                → cricstat/tools/staging/web/... (else cricstat/web/...)
-  /, /privacy/, /sitemap.xml  → the STAGED copies in cricstat/tools/staging/ (not the live files)
+  /, /privacy/, /sitemap.xml, /feedback-widget.js → the STAGED copies in cricstat/tools/staging/ (not the live files)
   /admin-preview/cricket/     → a static snapshot of /admin/cricket rendered from local templates
   /feedback/...               → 204 (the widget's endpoints are not needed for a preview)
   anything else               → website/ (vendor scripts, og image, …)
@@ -34,7 +34,8 @@ SITE = os.path.join(ROOT, "website")
 API = os.environ.get("CRICSTAT_API", "http://127.0.0.1:8040")
 STAGED = {"/": "homepage.html", "/index.html": "homepage.html", "/privacy/": "privacy.html",
           "/sitemap.xml": "sitemap.xml", "/robots.txt": "robots.txt",
-          "/admin-preview/cricket/": "admin-cricket.html"}   # static snapshot, not the live admin
+          "/admin-preview/cricket/": "admin-cricket.html",   # static snapshot, not the live admin
+          "/feedback-widget.js": "feedback-widget.js"}        # staged widget (website/ is live)
 PHOTOS = os.environ.get("CRICSTAT_PHOTO_DIR", os.path.join(ROOT, "cricstat", "data", "photos"))
 PHOTO = re.compile(r"^/cricket/photos/([0-9a-f]{16}\.(?:jpg|png|webp))$")
 DYNAMIC = re.compile(r"^/cricket/(players|countries)/[a-z0-9-]+/$")
