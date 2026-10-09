@@ -625,3 +625,10 @@ a.about-trigger[aria-current="page"] { background: rgba(255,153,51,.22); border-
 .wm-list { max-height: 520px; overflow: auto; }
 .wm-pick { background: none; border: 0; padding: 0; color: var(--text); font: inherit; cursor: pointer; }
 .wm-pick:hover { color: var(--saffron); }
+.wm-tip { min-width: 230px; max-width: 290px; gap: .3rem; box-shadow: 0 8px 24px rgba(0,0,0,.45); }
+.wm-tip-head { display: flex; align-items: center; gap: .45rem; }
+.wm-tip-rows { display: grid; grid-template-columns: auto 1fr; gap: .15rem .6rem; margin: .2rem 0 0; }
+.wm-tip-rows dt { color: var(--dim); } .wm-tip-rows dd { margin: 0; }
+.wm-tip-rows dd small { display: block; color: var(--dim); font-size: .72rem; }
+.wm-tip-rows .on { color: var(--saffron); font-weight: 600; }
+.wm-tip-hint { margin: .15rem 0 0; }

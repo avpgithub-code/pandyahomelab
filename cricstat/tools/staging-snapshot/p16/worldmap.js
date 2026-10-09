@@ -146,16 +146,42 @@
     svg.addEventListener("pointermove", (ev) => {
       const name = ev.target.dataset && ev.target.dataset.team;
       if (!name) { tip.hidden = true; return; }
-      const t = list.find((x) => x.name === name), v = value(t), r = host.getBoundingClientRect();
-      C.fill(tip, [h("b", {}, t.name), h("span", {}, METRICS[metric].label + ": " + (v === null ? "—" : METRICS[metric].fmt(v)))]);
+      const t = list.find((x) => x.name === name), r = host.getBoundingClientRect();
+      C.fill(tip, tipBody(t));
       tip.hidden = false;
-      tip.style.left = Math.min(ev.clientX - r.left + 14, r.width - 190) + "px";
-      tip.style.top = (ev.clientY - r.top + 14) + "px";
+      const tw = tip.offsetWidth || 260, th = tip.offsetHeight || 150;      // keep the card inside the map
+      tip.style.left = Math.max(4, Math.min(ev.clientX - r.left + 14, r.width - tw - 4)) + "px";
+      tip.style.top = Math.max(4, (ev.clientY - r.top + th + 18 > r.height ? ev.clientY - r.top - th - 10 : ev.clientY - r.top + 14)) + "px";
     });
     svg.addEventListener("pointerleave", () => { tip.hidden = true; });
     svg.addEventListener("click", (ev) => { const name = ev.target.dataset && ev.target.dataset.team; if (name) select(name); });
     tip = h("div", { class: "wm-tip", hidden: true, "aria-hidden": "true" });
     C.fill(host, [svg, tip]);
+  }
+
+  // Hover card: only what the page already holds (no request per hover); record + form are in the panel.
+  function wcLine(t) {
+    if (gender !== "male" || !WC) return null;
+    const w = t.wc;
+    if (!w) return ["ODI WC 2027", "not in the 2027 race"];
+    const p = w.probabilities;
+    const where = w.direct_qualifier ? "qualified · group " + w.group : pct(p.qualified) + " to get through the Qualifier";
+    return ["ODI WC 2027", pct(p.champion) + " title · " + pct(p.final) + " final · " + pct(p.semi) + " semi", where];
+  }
+  const ROW = { rating: "ODI rating", wc: "ODI WC 2027", matches: "In our data" };
+  function tipBody(t) {
+    const rows = [];
+    if (gender === "male") rows.push(["ODI rating", t.rating ? Math.round(t.rating.rating) + (t.rating.rank ? " · #" + t.rating.rank : " · unranked (no recent ODIs)") : "not rated"]);
+    const wc = wcLine(t);
+    if (wc) rows.push(wc);
+    rows.push(["In our data", t.matches ? C.num(t.matches) + " matches · last " + C.date(t.last) : "withheld by Cricsheet"]);
+    return [
+      h("div", { class: "wm-tip-head" }, [C.teamBadge(t.name, "sm"), h("b", {}, t.name), h("span", { class: "tiny muted" }, gender === "male" ? "men" : "women")]),
+      h("dl", { class: "wm-tip-rows" }, rows.map((r) => {
+        const on = r[0] === ROW[metric] ? "on" : null;              // the row the map is coloured by
+        return [h("dt", { class: on }, r[0]), h("dd", { class: on }, [r[1], r[2] ? h("small", {}, r[2]) : null])];
+      }).flat()),
+      h("p", { class: "tiny muted wm-tip-hint" }, "Click for record and recent form")];
   }
 
   // ── list view (the same numbers as text; also the keyboard route) ──
@@ -176,7 +202,7 @@
     const m = METRICS[metric];
     C.fill("wm-legend", [h("span", { class: "tiny muted" }, m.label + ":"),
       ...m.legend.map((l, i) => h("span", { class: "wm-key" }, [h("i", { style: "background:" + BANDS[i] }), l])),
-      h("span", { class: "wm-key" }, [h("i", { style: "background:" + NO_VALUE }), metric === "wc" ? "not in the World Cup race" : "no " + m.label.toLowerCase()]),
+      h("span", { class: "wm-key" }, [h("i", { style: "background:" + NO_VALUE }), metric === "wc" ? "not in the World Cup race" : "no " + m.label.charAt(0).toLowerCase() + m.label.slice(1)]),
       metric === "wc" ? h("span", { class: "wm-key" }, [h("b", { class: "wm-star-key" }, "★"), "already qualified"]) : null]);
   }
 
@@ -221,7 +247,7 @@
     const panel = document.getElementById("wm-panel");
     if (!t) { C.fill(panel, h("p", { class: "muted" }, "Pick a team on the map.")); return; }
     const facts = [];
-    if (t.rating) facts.push(["ODI rating", Math.round(t.rating.rating) + (t.rating.rank ? " · #" + t.rating.rank : " · not ranked (inactive)")]);
+    if (t.rating) facts.push(["ODI rating", Math.round(t.rating.rating) + (t.rating.rank ? " · #" + t.rating.rank : " · unranked (no recent ODIs)")]);
     if (t.wc) facts.push(["ODI WC 2027", pct(t.wc.probabilities.champion) + " title chance" + (t.wc.direct_qualifier ? " · qualified (group " + t.wc.group + ")" : " · via the Qualifier")]);
     if (t.matches) facts.push(["In our data", C.num(t.matches) + " international matches since " + t.first.slice(0, 4)]);
     C.fill(panel, [
