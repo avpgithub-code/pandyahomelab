@@ -423,7 +423,7 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
 - **P0.5 player photos** (own branch, after the deploy): Wikidata P18 → Commons thumbnails fetched by the pipeline,
   self-hosted, per-image licence + author credit (CC BY-SA needs attribution) on the profile and the licences page.
 
-## P1.6 pages (in progress, branch `feat/cricstat-p16-pages`, state at end of 2026-10-09 session)
+## P1.6 pages (in progress, branch `feat/cricstat-p16-pages`; state at end of the 2026-10-09 evening session, V=88)
 - **Predictor page `/cricket/predictor/`** built in STAGING (not live), V=79. Hero: our own gold trophy icon (the official
   2027 logo is non-free/ICC trademark: never use), stamp, "Following" strip, **donut** (top 5 + "all other teams", ≤ 6
   slices, centre = followed team). Board tabs: 🏆 Title odds (direct qualifiers + Qualifier candidates tables) · 📈 Odds
@@ -432,18 +432,20 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   the serving DB, photo + credit) · ⚖️ Ratings · 🗺️ Format · ✅ How good is it? Plus the "Read this first" limits panel.
   Nav "ODI WC 2027" is a live link; "Methodology" still "soon". Licences page: Wikipedia (CC BY-SA 4.0) row, venue photo
   sources, Afghanistan note (Cricsheet's protest + predictor results list), forecast disclaimer.
-- **Owner's last open question:** none pending; the owner was reviewing the Fixtures/Venues tabs. **Next: ask for
-  approval of the predictor page**, then build the **methodology page** (`/cricket/methodology/`, data from
-  `/v1/models/predictor/backtest`), the live **"Ratings & ODI World Cup 2027" card on men's team pages** (countries.js
-  `ratingsCard`, now "Next"), the **hub teaser** with the real number, then deploy.
-- **Staged work is gitignored:** `cricstat/tools/staging/web/` holds predictor.js, the CSS additions, venues/*.jpg.
-  Tracked snapshot: `cricstat/tools/staging-snapshot/p16/` (README there; delete at deploy). Tarball:
-  `cricstat/data/models/backups/p16-staging-web-20261009.tar.gz`.
+- **ON HOLD by the owner (2026-10-09 evening):** predictor-page approval, methodology page (`/cricket/methodology/`,
+  data from `/v1/models/predictor/backtest`), live "Ratings & ODI World Cup 2027" card on men's team pages (countries.js
+  `ratingsCard`), hub teaser with the real number, and the P1.6 deploy. Don't start them until the owner says so.
+  Approved this session: Title odds tabs, hub Following Men/Women, team-page H2H/top-performers tabs, the world map as
+  the Countries landing (+ head to head v followed team, win % for men and women), hub "stat" Manhattan (faint).
+- **Staged work is gitignored:** `cricstat/tools/staging/web/` holds predictor.js, worldmap.js, world-map.json, the
+  edited hub.js/countries.js, the CSS additions, venues/*.jpg. Tracked snapshot: `cricstat/tools/staging-snapshot/p16/`
+  (README lists each file; delete at deploy). Tarball (latest): `cricstat/data/models/backups/p16-staging-web-20261009b.tar.gz`.
 - **Code on the branch, not deployed:** models (fixtures time/daynight; forecast stores venues/fixtures meta and the
   `forecast_fixtures` table, schema v2; `venues.csv` reviewed facts + photo credits), API (`/v1/forecasts/{t}/fixtures`
-  with venues, fixtures, `last_change`), `tools/fetch_venue_photos.py` (reviewed Commons files only; hand-added Flickr
-  photo kept), gen_pages (predictor shell, trophy, licences). Tests: models 64, API 78.
-- **Preview in a new session:** live forecast.sqlite lacks the new meta until models deploy, so make a dev copy:
+  with venues, fixtures, `last_change`; `GET /v1/records/teams`; pages.py landing/team-header swap), `tools/fetch_venue_photos.py`, `tools/fetch_world_map.py` (reviewed Commons files only; hand-added Flickr
+  photo kept), gen_pages (predictor shell, trophy, licences, Countries map landing, hub Manhattan). Tests: models 64, API 79.
+- **Preview in a new session:** (if staging is missing: `python3 cricstat/tools/gen_pages.py`, copy the snapshot files,
+  `python3 cricstat/tools/fetch_world_map.py`) live forecast.sqlite lacks the new meta until models deploy, so make a dev copy:
   `cp cricstat/data/db/forecast.sqlite cricstat/data/models/dev-forecast.sqlite`; from cricstat-models:
   `CRICSTAT_FORECAST_DB=$PWD/../data/models/dev-forecast.sqlite CRICSTAT_MLFLOW_URI=http://127.0.0.1:9 python3 -m presentation_logic.cli forecast --force`
   (absolute path: relative paths resolve against CRICSTAT_HOME = cricstat/, not the cwd; ~90 s);
@@ -453,7 +455,8 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
 - **Deploy order for P1.6:** merge → publishes (models, API; pipeline too if the Korogi venue row is added) → cd-pull
   models → `docker compose run --rm cricstat-models forecast --force` (writes venues/fixtures meta) → cd-pull API →
   rsync staging/web → cricstat/web (assets first) → delete staging + snapshot → sitemap: add /cricket/predictor/ (and
-  methodology) → check public pages.
+  methodology) → check public pages. Licences page: add a Natural Earth (public domain, India's point of view) row for the
+  map before deploy. Run `pytest tests/test_pages.py` with `CRICSTAT_TEST_WEB=<staging/web>` before the rsync.
 - **Photo rules learned:** only PD/CC0/CC BY/CC BY-SA (+ Public Domain Mark) with credit; look at every photo before use
   (an automatic Wikidata lookup once returned Zimbabwe in Dhaka for "Victoria Falls"); Tripadvisor and Facebook photos
   are not usable (no licence; terms forbid reuse); Openverse/Flickr licence filters are the search route. 8 of 12 grounds
