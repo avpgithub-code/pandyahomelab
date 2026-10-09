@@ -594,3 +594,34 @@ a.about-trigger[aria-current="page"] { background: rgba(255,153,51,.22); border-
 .follow-pick select { min-width: 12rem; }
 /* Countries "By format": Head to head / Top performers tabs */
 [data-bf-pane][hidden] { display: none; }
+/* Cricket world map (sample) */
+.wm-controls { display: flex; flex-direction: column; gap: .6rem; margin-bottom: .8rem; }
+.wm-row { gap: .6rem; flex-wrap: wrap; align-items: center; }
+.wm-grid { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(260px, 1fr); gap: 1rem; align-items: start; }
+@media (max-width: 860px) { .wm-grid { grid-template-columns: 1fr; } }
+.wm-map { position: relative; background: #10131a; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.wm-svg { display: block; width: 100%; height: auto; }
+.wm-svg path { stroke: #10131a; stroke-width: .35; vector-effect: non-scaling-stroke; }
+.wm-team, .wm-dot { cursor: pointer; transition: opacity .15s; }
+.wm-team:hover, .wm-dot:hover { opacity: .8; }
+.wm-svg .wm-team.me { stroke: var(--saffron); stroke-width: 1.2; }
+.wm-svg .wm-team.sel, .wm-svg .wm-dot.sel { stroke: #fff; stroke-width: 1.6; }
+.wm-dot { stroke: #10131a; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.wm-star { fill: #f5c542; font-size: 9px; pointer-events: none; paint-order: stroke; stroke: #10131a; stroke-width: 2px; }
+.wm-tip { position: absolute; z-index: 5; pointer-events: none; background: var(--surface2); border: 1px solid var(--border);
+          border-radius: 8px; padding: .4rem .6rem; font-size: .8rem; display: flex; flex-direction: column; min-width: 150px; }
+.wm-tip[hidden] { display: none; }
+.wm-legend { display: flex; flex-wrap: wrap; gap: .35rem .9rem; align-items: center; margin-top: .55rem; font-size: .78rem; color: var(--soft); }
+.wm-key { display: inline-flex; align-items: center; gap: .35rem; }
+.wm-key i { width: 14px; height: 10px; border-radius: 3px; display: inline-block; }
+.wm-star-key { color: #f5c542; }
+.wm-panel { position: sticky; top: 80px; }
+.wm-head { display: flex; gap: .7rem; align-items: center; margin-bottom: .6rem; }
+.wm-facts { display: grid; grid-template-columns: auto 1fr; gap: .25rem .8rem; margin: 0 0 .8rem; font-size: .88rem; }
+.wm-facts dt { color: var(--dim); } .wm-facts dd { margin: 0; }
+.wm-note { color: var(--soft); border-left: 3px solid var(--saffron); padding-left: .6rem; }
+.wm-form { gap: .5rem; align-items: center; margin: .6rem 0; flex-wrap: wrap; }
+.wm-open { display: inline-block; margin-top: .4rem; }
+.wm-list { max-height: 520px; overflow: auto; }
+.wm-pick { background: none; border: 0; padding: 0; color: var(--text); font: inherit; cursor: pointer; }
+.wm-pick:hover { color: var(--saffron); }

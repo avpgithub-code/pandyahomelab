@@ -21,7 +21,7 @@ else:
     WEB = os.path.join(CRICSTAT, "tools", "staging", "web")
     if not os.path.isdir(WEB):
         shutil.copytree(os.path.join(CRICSTAT, "web"), WEB)
-V = "82"
+V = "83"
 SITE = "https://pandyahomelab.com"
 HEAD = '''<!DOCTYPE html>
 <html lang="en">
@@ -274,6 +274,25 @@ page("predictor/index.html", "/cricket/predictor/",
      extra_head=ld_json({"@context": "https://schema.org", "@type": "WebPage", "name": "ODI World Cup 2027 predictor",
                          "description": PRED_DESC, "url": SITE + "/cricket/predictor/", "isPartOf": {"@id": SITE + "/#site"},
                          "about": ["ODI World Cup 2027", "Elo rating", "Monte Carlo simulation"], "author": ARCHIT}))
+
+MAP = '''<header class="hero left"><div class="wrap">
+  <div class="eyebrow"><span class="dot"></span>Cricket world map · sample</div>
+  <h1 style="font-size:clamp(2rem,5vw,3rem)">Where cricket is played</h1>
+  <p class="subtitle">Every international team in our data on one map. Colour a country by its ODI rating, its ODI World Cup 2027 title chance or how many matches we hold, then pick it for its record and latest form.</p>
+</div></header>
+<section class="section panel" aria-label="Cricket world map"><div class="wrap scoreboard wm-board">
+  <div class="sb-head board-head" aria-hidden="true"><span class="bulb"></span>Cricket world map<span class="bulb"></span></div>
+  <div id="wm-controls" class="wm-controls"></div>
+  <div class="wm-grid">
+    <div><div id="wm-map" class="wm-map"><div class="skeleton" style="height:360px"></div></div><div id="wm-legend" class="wm-legend"></div></div>
+    <aside id="wm-panel" class="card wm-panel" aria-live="polite"><p class="muted">Pick a team on the map.</p></aside>
+  </div>
+  <p class="tiny muted" style="margin-top:.8rem">Borders: Natural Earth (public domain), drawn as India officially shows them. Cricket splits the UK (England with Wales, Scotland), Ireland is one all-island team and the West Indies cover the Caribbean board's members. Tiny members (Bermuda, Jersey, Singapore…) are dots. Afghanistan men's matches are withheld by Cricsheet; their rating comes from our reviewed results list.</p>
+</div></section>
+'''
+MAP_DESC = "A world map of international cricket: every team coloured by ODI rating, ODI World Cup 2027 title chance or matches played, with its record and latest form."
+page("map/index.html", "/cricket/map/", "Cricket world map — cricstat | pandyaHomeLab", MAP_DESC, "countries", MAP,
+     ["/cricket/assets/worldmap.js?v=" + V])
 
 LIC = '''<header class="hero left"><div class="wrap">
   <div class="eyebrow"><span class="dot"></span>Data &amp; licences</div>
