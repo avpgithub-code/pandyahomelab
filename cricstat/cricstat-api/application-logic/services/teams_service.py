@@ -77,6 +77,29 @@ def record(db: ServingDB, slug: str, scope: Optional[str], date_from: Optional[s
                                    ("v_team_record", "win_pct")])
 
 
+def records(db: ServingDB, scope: Optional[str], g: Optional[str], team_type: Optional[str],
+            date_from: Optional[str] = None, date_to: Optional[str] = None
+            ) -> Tuple[List[dict], dict]:
+    """Every team's record in one scope (needed) and optional date window, most matches first."""
+    if not scope:
+        raise BadFilter("scope is required (e.g. scope=ODI)")
+    scope = _scope(db, scope)
+    g = gender(g)
+    if team_type and team_type not in TYPES:
+        raise BadFilter("type is international or club")
+    d_from, d_to = dates(date_from, date_to)
+    slugs = team_slugs(db)
+    out = []
+    for r in teams_repo.records(db, scope, d_from, d_to):
+        t = slugs.get(slugs.slug(r["team_key"]) or "")
+        if t is None or (g and t["gender"] != g) or (team_type and t["team_type"] != team_type):
+            continue
+        out.append(dict(_with_pct({k: r[k] for k in ("matches",) + _RESULT}), **_ref(t),
+                        format=scope, last_date=r["last_date"]))
+    return sorted(out, key=lambda r: -r["matches"]), catalog_defs(
+        db, [("v_team_record", "matches"), ("v_team_record", "win_pct")])
+
+
 def results(db: ServingDB, slug: str, scope: Optional[str], date_from: Optional[str],
             date_to: Optional[str], limit: Optional[int], offset: Optional[int]
             ) -> Tuple[List[dict], dict, bool]:

@@ -40,6 +40,10 @@
               legend: ["< 1100", "1100–1249", "1250–1399", "1400–1499", "1500+"] },
     wc: { label: "ODI WC 2027 title chance", men: true, breaks: [0.001, 0.01, 0.05, 0.10], fmt: (v) => pct(v),
           legend: ["< 0.1%", "0.1–1%", "1–5%", "5–10%", "10%+"] },
+    odiwin: { label: "ODI win % (2 yrs)", men: false, breaks: [20, 40, 55, 70], fmt: (v) => C.ratio(v) + "%",
+              legend: ["< 20%", "20–39%", "40–54%", "55–69%", "70%+"] },
+    t20win: { label: "T20I win % (2 yrs)", men: false, breaks: [20, 40, 55, 70], fmt: (v) => C.ratio(v) + "%",
+              legend: ["< 20%", "20–39%", "40–54%", "55–69%", "70%+"] },
     matches: { label: "Matches in our data", men: false, breaks: [25, 75, 200, 500], fmt: (v) => C.num(v),
                legend: ["< 25", "25–74", "75–199", "200–499", "500+"] },
   };
@@ -48,6 +52,8 @@
     ["europe", "Europe", [-12, 35, 32, 62]], ["africa", "Africa", [-20, -36, 52, 18]],
     ["americas", "Americas & Caribbean", [-125, -10, -55, 50]], ["oceania", "Oceania", [110, -48, 180, 0]]];
 
+  const MIN_MATCHES = 5;          // fewer and a win % says little (1–0 would be 100%)
+  let FORM = { ODI: {}, T20I: {} }, SINCE = null;
   let MAP = null, TEAMS = [], RATINGS = {}, WC = null, gender = "male", metric = "rating", view = "map", region = "world";
   let selected = null;
   const follow = C.getFollow();
@@ -83,7 +89,8 @@
     const list = TEAMS.filter((t) => t.gender === gender && CODES[t.name]).map((t) => ({
       name: t.name, slug: t.slug, matches: t.matches, first: t.first_date, last: t.last_date,
       rating: gender === "male" && RATINGS[t.name] ? RATINGS[t.name] : null,
-      wc: gender === "male" && WC ? WC.byName[t.name] || null : null }));
+      wc: gender === "male" && WC ? WC.byName[t.name] || null : null,
+      odi: FORM.ODI[t.slug] || null, t20: FORM.T20I[t.slug] || null }));
     // Afghanistan men: no Cricsheet matches (withheld), but rated from our reviewed results list.
     if (gender === "male" && RATINGS.Afghanistan && !list.some((t) => t.name === "Afghanistan"))
       list.push({ name: "Afghanistan", slug: null, matches: null, rating: RATINGS.Afghanistan,
@@ -93,6 +100,8 @@
   function value(t) {
     if (metric === "rating") return t.rating ? t.rating.rating : null;
     if (metric === "wc") return t.wc ? t.wc.probabilities.champion || 0 : null;
+    if (metric === "odiwin") return t.odi && t.odi.matches >= MIN_MATCHES ? t.odi.win_pct : null;
+    if (metric === "t20win") return t.t20 && t.t20.matches >= MIN_MATCHES ? t.t20.win_pct : null;
     return t.matches;
   }
   function band(v) {
@@ -168,12 +177,18 @@
     const where = w.direct_qualifier ? "qualified · group " + w.group : pct(p.qualified) + " to get through the Qualifier";
     return ["ODI WC 2027", pct(p.champion) + " title · " + pct(p.final) + " final · " + pct(p.semi) + " semi", where];
   }
-  const ROW = { rating: "ODI rating", wc: "ODI WC 2027", matches: "In our data" };
+  const ROW = { rating: "ODI rating", wc: "ODI WC 2027", matches: "In our data", odiwin: "ODIs · 2 yrs", t20win: "T20Is · 2 yrs" };
+  function formLine(r) {
+    if (!r) return "none";
+    return r.won + "–" + r.lost + (r.tied ? "–" + r.tied + "T" : "") + " in " + r.matches +
+      (r.matches >= MIN_MATCHES ? " · " + C.ratio(r.win_pct) + "% won" : " (too few for a win %)");
+  }
   function tipBody(t) {
     const rows = [];
     if (gender === "male") rows.push(["ODI rating", t.rating ? Math.round(t.rating.rating) + (t.rating.rank ? " · #" + t.rating.rank : " · unranked (no recent ODIs)") : "not rated"]);
     const wc = wcLine(t);
     if (wc) rows.push(wc);
+    if (!t.withheld) { rows.push(["ODIs · 2 yrs", formLine(t.odi)]); rows.push(["T20Is · 2 yrs", formLine(t.t20)]); }
     rows.push(["In our data", t.matches ? C.num(t.matches) + " matches · last " + C.date(t.last) : "withheld by Cricsheet"]);
     return [
       h("div", { class: "wm-tip-head" }, [C.teamBadge(t.name, "sm"), h("b", {}, t.name), h("span", { class: "tiny muted" }, gender === "male" ? "men" : "women")]),
@@ -202,8 +217,9 @@
     const m = METRICS[metric];
     C.fill("wm-legend", [h("span", { class: "tiny muted" }, m.label + ":"),
       ...m.legend.map((l, i) => h("span", { class: "wm-key" }, [h("i", { style: "background:" + BANDS[i] }), l])),
-      h("span", { class: "wm-key" }, [h("i", { style: "background:" + NO_VALUE }), metric === "wc" ? "not in the World Cup race" : "no " + m.label.charAt(0).toLowerCase() + m.label.slice(1)]),
-      metric === "wc" ? h("span", { class: "wm-key" }, [h("b", { class: "wm-star-key" }, "★"), "already qualified"]) : null]);
+      h("span", { class: "wm-key" }, [h("i", { style: "background:" + NO_VALUE }), metric === "wc" ? "not in the World Cup race" : /win/.test(metric) ? "fewer than " + MIN_MATCHES + " matches" : "no " + m.label.charAt(0).toLowerCase() + m.label.slice(1)]),
+      metric === "wc" ? h("span", { class: "wm-key" }, [h("b", { class: "wm-star-key" }, "★"), "already qualified"]) : null,
+      /win/.test(metric) && SINCE ? h("span", { class: "tiny muted" }, "Matches since " + C.date(SINCE) + " · win % = won ÷ matches with a result (ties count as not won; no results are left out).") : null]);
   }
 
   // ── controls ──
@@ -214,7 +230,7 @@
         i.checked = k === gender;
         i.addEventListener("change", () => {
           gender = k;
-          if (gender === "female") metric = "matches";
+          if (gender === "female" && METRICS[metric].men) metric = "odiwin";
           if (!teamsNow().some((t) => t.name === selected)) selected = "India";   // same country if it has a side, else India
           render();
         });
@@ -249,6 +265,7 @@
     const facts = [];
     if (t.rating) facts.push(["ODI rating", Math.round(t.rating.rating) + (t.rating.rank ? " · #" + t.rating.rank : " · unranked (no recent ODIs)")]);
     if (t.wc) facts.push(["ODI WC 2027", pct(t.wc.probabilities.champion) + " title chance" + (t.wc.direct_qualifier ? " · qualified (group " + t.wc.group + ")" : " · via the Qualifier")]);
+    if (!t.withheld) { facts.push(["ODIs · 2 yrs", formLine(t.odi)]); facts.push(["T20Is · 2 yrs", formLine(t.t20)]); }
     if (t.matches) facts.push(["In our data", C.num(t.matches) + " international matches since " + t.first.slice(0, 4)]);
     C.fill(panel, [
       h("div", { class: "wm-head" }, [C.teamBadge(t.name, "lg"), h("div", {}, [h("div", { class: "section-label" }, gender === "male" ? "Men" : "Women"), h("h2", { class: "section-title", style: "margin:0" }, t.name)])]),
@@ -280,11 +297,16 @@
         C.api("/v1/teams?type=international"), C.api("/v1/ratings?scope=ODI&gender=male").catch(() => ({ data: [] })),
         C.api("/v1/forecasts/wc-2027/latest").catch(() => null)]);
       MAP = map; TEAMS = teams.data;
+      // last two years up to the newest match we hold
+      const newest = TEAMS.reduce((m, t) => (t.last_date > m ? t.last_date : m), "");
+      SINCE = (Number(newest.slice(0, 4)) - 2) + newest.slice(4);
+      const recs = await Promise.all(["ODI", "T20I"].map((f) => C.api("/v1/records/teams?type=international&scope=" + f + "&from=" + SINCE).catch(() => ({ data: [] }))));
+      ["ODI", "T20I"].forEach((f, i) => recs[i].data.forEach((r) => { FORM[f][r.slug] = r; }));
       ratings.data.forEach((r) => { RATINGS[r.team] = r; });
       if (wc) { WC = { byName: {} }; wc.data.teams.forEach((t) => { WC.byName[t.team] = t; }); }
       const me = TEAMS.find((t) => t.slug === follow);
       gender = me ? me.gender : "male";
-      if (gender === "female") metric = "matches";
+      if (gender === "female" && METRICS[metric].men) metric = "odiwin";
       selected = me && CODES[me.name] ? me.name : "India";
       render();
     } catch (e) { C.showError("wm-map", e, "the map"); }
