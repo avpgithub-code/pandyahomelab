@@ -106,7 +106,7 @@ def test_team_pages(lenient):
     assert ld(h)["@type"] == "SportsTeam"
     if 'id="c-landing"' in open(os.path.join(WEB, "countries", "index.html")).read():
         # P1.6 shell: the static page is the world-map landing; a team page shows the team header
-        assert '<div id="c-landing" hidden>' in h and 'id="c-hero">' in h
+        assert '<div id="c-landing" hidden' in h and 'id="c-hero">' in h
         assert 'id="c-hero" hidden' not in h
     club = lenient.get("/pages/countries/mumbai-indians-men/").text
     assert head(club, r'<meta name="robots" content="([^"]*)"') == "noindex,follow"

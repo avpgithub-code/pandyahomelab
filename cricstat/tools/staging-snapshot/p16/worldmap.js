@@ -58,6 +58,10 @@
   let MAP = null, TEAMS = [], RATINGS = {}, WC = null, gender = "male", metric = "rating", view = "map", region = "world";
   let selected = null;
   const follow = C.getFollow();
+  // data-model="off" (until the predictor page is public): no model numbers (ratings, WC 2027 chances) on the map.
+  const landingEl = document.getElementById("c-landing");
+  const MODEL = !landingEl || landingEl.dataset.model !== "off";
+  if (!MODEL) { delete METRICS.rating; delete METRICS.wc; metric = "odiwin"; }
 
   function pct(p) {
     if (p === null || p === undefined) return "—";
@@ -208,7 +212,7 @@
   }
   function tipBody(t) {
     const rows = [];
-    if (gender === "male") rows.push(["ODI rating", t.rating ? Math.round(t.rating.rating) + (t.rating.rank ? " · #" + t.rating.rank : " · unranked (no recent ODIs)") : "not rated"]);
+    if (gender === "male" && MODEL) rows.push(["ODI rating", t.rating ? Math.round(t.rating.rating) + (t.rating.rank ? " · #" + t.rating.rank : " · unranked (no recent ODIs)") : "not rated"]);
     const wc = wcLine(t);
     if (wc) rows.push(wc);
     if (!t.withheld) { rows.push(["ODIs · 2 yrs", formLine(t.odi)]); rows.push(["T20Is · 2 yrs", formLine(t.t20)]); }
@@ -255,7 +259,7 @@
         i.checked = k === gender;
         i.addEventListener("change", () => {
           gender = k;
-          if (gender === "female" && METRICS[metric].men) metric = "odiwin";
+          if (!METRICS[metric] || (gender === "female" && METRICS[metric].men)) metric = "odiwin";
           if (!teamsNow().some((t) => t.name === selected)) selected = "India";   // same country if it has a side, else India
           render();
         });
@@ -323,8 +327,8 @@
     try {
       const [map, teams, ratings, wc] = await Promise.all([
         fetch(MAP_URL).then((r) => { if (!r.ok) throw new Error("map " + r.status); return r.json(); }),
-        C.api("/v1/teams?type=international"), C.api("/v1/ratings?scope=ODI&gender=male").catch(() => ({ data: [] })),
-        C.api("/v1/forecasts/wc-2027/latest").catch(() => null)]);
+        C.api("/v1/teams?type=international"), MODEL ? C.api("/v1/ratings?scope=ODI&gender=male").catch(() => ({ data: [] })) : { data: [] },
+        MODEL ? C.api("/v1/forecasts/wc-2027/latest").catch(() => null) : null]);
       MAP = map; TEAMS = teams.data;
       // last two years up to the newest match we hold
       const newest = TEAMS.reduce((m, t) => (t.last_date > m ? t.last_date : m), "");
@@ -335,7 +339,7 @@
       if (wc) { WC = { byName: {} }; wc.data.teams.forEach((t) => { WC.byName[t.team] = t; }); }
       const me = TEAMS.find((t) => t.slug === follow);
       gender = me ? me.gender : "male";
-      if (gender === "female" && METRICS[metric].men) metric = "odiwin";
+      if (!METRICS[metric] || (gender === "female" && METRICS[metric].men)) metric = "odiwin";
       selected = me && CODES[me.name] ? me.name : "India";
       render();
     } catch (e) { C.showError("wm-map", e, "the map"); }

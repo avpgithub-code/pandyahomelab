@@ -253,7 +253,7 @@ def register(app: FastAPI, cfg: Config) -> None:
             out = fill(out, '<h1 id="c-name" style="font-size:clamp(2rem,5vw,3rem);margin:0">',
                        esc(page["name"]))
             # The shell is the Countries landing (world map); a team page shows its own header.
-            out = out.replace('<div id="c-landing">', '<div id="c-landing" hidden>', 1)
+            out = out.replace('<div id="c-landing"', '<div id="c-landing" hidden', 1)
             out = out.replace('<header class="hero left" id="c-hero" hidden>',
                               '<header class="hero left" id="c-hero">', 1)
             return fill(out, '<div id="c-body" aria-live="polite">', team_summary(page, as_of))

@@ -22,6 +22,9 @@ else:
     if not os.path.isdir(WEB):
         shutil.copytree(os.path.join(CRICSTAT, "web"), WEB)
 V = "88"
+# P1.6 ships in two parts: False = the approved non-predictor pages only (nav "ODI WC 2027 soon", no predictor page,
+# no model numbers on the map, no predictor rows on the licences page). True at the full P1.6 deploy.
+PREDICTOR_LIVE = False
 SITE = "https://pandyahomelab.com"
 HEAD = '''<!DOCTYPE html>
 <html lang="en">
@@ -49,7 +52,7 @@ HEAD = '''<!DOCTYPE html>
     <li><a href="/cricket/"{c_hub}>Overview</a></li>
     <li><a href="/cricket/countries/"{c_countries}>Countries</a></li>
     <li><a href="/cricket/players/"{c_players}>Players</a></li>
-    <li><a href="/cricket/predictor/"{c_predictor}>ODI WC 2027</a></li>
+    {nav_predictor}
     <li><span class="soon" title="Coming in a later phase">Ask <span class="soon-tag">soon</span></span></li>
     <li><span class="soon" title="Coming in a later phase">Methodology <span class="soon-tag">soon</span></span></li>
     <li><a href="/cricket/licences/"{c_licences}>Licences</a></li>
@@ -75,6 +78,8 @@ FOOT = '''</main>
 def page(rel, path, title, desc, cur, body, scripts, og_type="website", extra_head=""):
     c = {k: "" for k in ("c_hub", "c_countries", "c_players", "c_licences", "c_about", "c_predictor")}
     c["c_" + cur] = ' aria-current="page"'
+    c["nav_predictor"] = ('<li><a href="/cricket/predictor/"%s>ODI WC 2027</a></li>' % c["c_predictor"] if PREDICTOR_LIVE else
+                          '<li><span class="soon" title="Coming in a later phase">ODI WC 2027 <span class="soon-tag">soon</span></span></li>')
     html = HEAD.format(title=title, desc=desc, path=path, v=V, og_type=og_type, extra_head=extra_head, **c) + body + FOOT.format(
         v=V, scripts="\n".join('<script src="%s"></script>' % s for s in scripts))
     os.makedirs(os.path.dirname(os.path.join(WEB, rel)) or WEB, exist_ok=True)
@@ -252,7 +257,7 @@ page("players/index.html", "/cricket/players/", "Player statistics — cricstat 
 # The Countries landing (/cricket/countries/): the cricket world map. Team pages (/cricket/countries/<slug>/) use
 # the same shell: static = landing (map visible, team header hidden); the API's /pages/countries/<slug>/ swaps
 # them (pages.py) and countries.js does the same in the browser.
-MAP_BOARD = '''<div id="c-landing">
+MAP_BOARD = '''<div id="c-landing" data-model="@@MODEL@@">
 <header class="hero left"><div class="wrap">
   <div class="eyebrow"><span class="dot"></span>Countries</div>
   <h1 style="font-size:clamp(2rem,5vw,3rem)">Cricket around the world</h1>
@@ -265,10 +270,13 @@ MAP_BOARD = '''<div id="c-landing">
     <div><div id="wm-map" class="wm-map"><p class="muted" style="padding:1rem;margin:0">Loading the map…</p></div><div id="wm-legend" class="wm-legend"></div></div>
     <aside id="wm-panel" class="card wm-panel" aria-live="polite"><p class="muted">Pick a team on the map.</p></aside>
   </div>
-  <p class="tiny muted" style="margin-top:.8rem">Borders: Natural Earth (public domain), drawn as India officially shows them. Cricket splits the UK (England with Wales, Scotland), Ireland is one all-island team and the West Indies cover the Caribbean board's members. Tiny members (Bermuda, Jersey, Singapore…) are dots. Afghanistan men's matches are withheld by Cricsheet; their rating comes from our reviewed results list.</p>
+  <p class="tiny muted" style="margin-top:.8rem">Borders: Natural Earth (public domain), drawn as India officially shows them. Cricket splits the UK (England with Wales, Scotland), Ireland is one all-island team and the West Indies cover the Caribbean board's members. Tiny members (Bermuda, Jersey, Singapore…) are dots. @@AFG_MAP@@</p>
 </div></section>
 </div>
 '''
+MAP_BOARD = (MAP_BOARD.replace("@@MODEL@@", "on" if PREDICTOR_LIVE else "off")
+             .replace("@@AFG_MAP@@", "Afghanistan men's matches are withheld by Cricsheet; their rating comes from our reviewed results list."
+                      if PREDICTOR_LIVE else "Afghanistan men's matches are withheld by Cricsheet, so they are not on the men's map."))
 COUNTRIES = '''<header class="hero left" id="c-hero" hidden>
   <div class="wrap" style="display:flex;flex-wrap:wrap;gap:1.5rem;align-items:center;justify-content:space-between">
     <div class="row" style="gap:1.2rem"><span id="c-badge"></span>
@@ -325,12 +333,13 @@ TROPHY = HUB[HUB.index('<svg class="wc-icon"'):HUB.index("</svg>", HUB.index('<s
 PREDICTOR = PREDICTOR % TROPHY.replace('id="wcGold"', 'id="wcGoldH"').replace("url(#wcGold)", "url(#wcGoldH)")
 PRED_DESC = ("ODI World Cup 2027 predictor: each team's chances of the Super 7, semi-finals, final and title, from Elo ratings "
              "and 50,000 simulated tournaments in the published format — with backtests on the 2019 and 2023 World Cups.")
-page("predictor/index.html", "/cricket/predictor/",
-     "ODI World Cup 2027 predictor: every team's chances — cricstat | pandyaHomeLab", PRED_DESC, "predictor", PREDICTOR,
-     ["/vendor/chart.js-4.4.0/chart.umd.min.js", "/cricket/assets/predictor.js?v=" + V],
-     extra_head=ld_json({"@context": "https://schema.org", "@type": "WebPage", "name": "ODI World Cup 2027 predictor",
-                         "description": PRED_DESC, "url": SITE + "/cricket/predictor/", "isPartOf": {"@id": SITE + "/#site"},
-                         "about": ["ODI World Cup 2027", "Elo rating", "Monte Carlo simulation"], "author": ARCHIT}))
+if PREDICTOR_LIVE:
+  page("predictor/index.html", "/cricket/predictor/",
+       "ODI World Cup 2027 predictor: every team's chances — cricstat | pandyaHomeLab", PRED_DESC, "predictor", PREDICTOR,
+       ["/vendor/chart.js-4.4.0/chart.umd.min.js", "/cricket/assets/predictor.js?v=" + V],
+       extra_head=ld_json({"@context": "https://schema.org", "@type": "WebPage", "name": "ODI World Cup 2027 predictor",
+                           "description": PRED_DESC, "url": SITE + "/cricket/predictor/", "isPartOf": {"@id": SITE + "/#site"},
+                           "about": ["ODI World Cup 2027", "Elo rating", "Monte Carlo simulation"], "author": ARCHIT}))
 
 LIC = '''<header class="hero left"><div class="wrap">
   <div class="eyebrow"><span class="dot"></span>Data &amp; licences</div>
@@ -355,6 +364,7 @@ LIC = '''<header class="hero left"><div class="wrap">
         <tr><td class="txt">Wikimedia Commons</td><td class="txt">National flags, used unaltered at their official proportions and only to identify national teams (<a href="#flag-sources">source of each flag</a>)</td><td class="txt">Public domain (or CC0)</td></tr>
         <tr><td class="txt">Wikipedia</td><td class="txt">For the ODI World Cup 2027 predictor: Afghanistan men's ODI results (results only, each checked against a second Wikipedia source and reviewed; Cricsheet withholds these matches), and the 2027 World Cup's format, schedule, start times and venue capacities. Facts only; no Wikipedia text is reproduced</td><td class="txt">CC BY-SA 4.0 · <a href="https://en.wikipedia.org/wiki/2027_Cricket_World_Cup">2027 Cricket World Cup</a>, <a href="https://en.wikipedia.org/wiki/Afghanistan_national_cricket_team">Afghanistan national cricket team</a>, and the yearly "International cricket in …" pages</td></tr>
         <tr><td class="txt">Wikimedia Commons</td><td class="txt">Photos of the 2027 World Cup grounds (and one from Flickr), served from this site, each credited on the predictor page (<a href="#venue-photos">source of each photo</a>)</td><td class="txt">Public domain (incl. the Public Domain Mark), CC BY or CC BY-SA, per photo</td></tr>
+        <tr><td class="txt">Natural Earth</td><td class="txt">Country shapes for the cricket world map (1:10m, with borders as India officially shows them), simplified and served from this site</td><td class="txt">Public domain · <a href="https://www.naturalearthdata.com/about/terms-of-use/">terms of use</a></td></tr>
         <tr><td class="txt">Chart.js</td><td class="txt">Charts, served from this site (<a href="/vendor/chart.js-4.4.0/LICENSE">licence text</a>)</td><td class="txt">MIT</td></tr>
       </tbody>
     </table></div>
@@ -384,6 +394,16 @@ LIC = '''<header class="hero left"><div class="wrap">
   </div>
 </div></section>
 '''
+PRED_LIC_ROWS = [l for l in LIC.split("\n") if "For the ODI World Cup 2027 predictor:" in l or "Photos of the 2027 World Cup grounds" in l]
+if not PREDICTOR_LIVE:            # until the predictor page is public, the licences page doesn't describe it
+    for l in PRED_LIC_ROWS:
+        LIC = LIC.replace(l + "\n", "")
+    LIC = LIC[:LIC.index('    <details class="flag-sources" id="venue-photos">')] + LIC[LIC.index("    </details>\n", LIC.index('id="venue-photos"')) + len("    </details>\n"):]
+    LIC = LIC.replace(" For the ODI World Cup 2027 predictor only, Afghanistan's results come from a reviewed list (see Wikipedia above), so the forecast stays fair to every team.", "")
+    LIC = LIC.replace("Forecasts (the ODI World Cup 2027 predictor) are statistical estimates for education and entertainment, not tips and not betting advice. When the AI analyst arrives, every answer will show how it was computed.",
+                      "When forecasts and the AI analyst arrive, forecasts will be for education and entertainment, not betting advice, and every AI answer will show how it was computed.")
+
+
 def flag_sources():
     """The licences page lists each flag's Commons page (from flags.js, written by fetch_flags.py)."""
     with open(os.path.join(WEB, "assets", "flags.js"), encoding="utf-8") as f:
