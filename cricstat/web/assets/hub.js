@@ -210,19 +210,40 @@
 
   async function follow() {
     const select = document.getElementById("follow");
+    const radios = document.querySelectorAll('input[name="fgender"]');
     try {
       const { data: teams } = await C.api("/v1/teams?type=international");
-      const india = (t) => t.name === "India" ? (t.gender === "male" ? 0 : 1) : 2;   // India first: the default
-      const keep = teams.filter((t) => t.matches >= 20)
-        .sort((a, b) => india(a) - india(b) || a.name.localeCompare(b.name) || b.gender.localeCompare(a.gender));
-      C.fill(select, keep.map((t) => h("option", { value: t.slug }, t.name + " (" + GENDER[t.gender] + ")")));
-      const current = C.getFollow();
-      select.value = keep.some((t) => t.slug === current) ? current : "india-men";
+      const keep = teams.filter((t) => t.matches >= 20);
+      const bySlug = {};
+      keep.forEach((t) => { bySlug[t.slug] = t; });
+      const india = (t) => t.name === "India" ? 0 : 1;                       // India first: the default
+      // One list per gender, names only; Men/Women picks the list. The stored value stays the team slug.
+      const fill = (gender, slug) => {
+        const list = keep.filter((t) => t.gender === gender)
+          .sort((a, b) => india(a) - india(b) || a.name.localeCompare(b.name));
+        C.fill(select, list.map((t) => h("option", { value: t.slug }, t.name)));
+        select.value = list.some((t) => t.slug === slug) ? slug : list[0].slug;
+        radios.forEach((r) => { r.checked = r.value === gender; });
+      };
+      const show = (slug) => {
+        const t = bySlug[slug] || bySlug["india-men"];
+        fill(t.gender, t.slug);
+        C.setFollow(t.slug); showReset(); cards(t.slug, keep);
+      };
       const reset = document.getElementById("follow-reset");
       const showReset = () => { if (reset) reset.hidden = select.value === "india-men"; };
-      select.addEventListener("change", () => { C.setFollow(select.value); showReset(); cards(select.value, keep); });
-      if (reset) reset.addEventListener("click", (ev) => { ev.preventDefault(); select.value = "india-men";
-        C.setFollow("india-men"); showReset(); cards("india-men", keep); });
+      select.addEventListener("change", () => show(select.value));
+      radios.forEach((r) => r.addEventListener("change", () => {
+        // Same country in the other gender when it has a side, else India.
+        const name = (bySlug[select.value] || {}).name;
+        const other = keep.find((t) => t.gender === r.value && t.name === name) ||
+          keep.find((t) => t.gender === r.value && t.name === "India");
+        show(other.slug);
+      }));
+      if (reset) reset.addEventListener("click", (ev) => { ev.preventDefault(); show("india-men"); });
+      const current = C.getFollow();
+      const start = bySlug[current] || bySlug["india-men"];
+      fill(start.gender, start.slug);
       showReset();
       await cards(select.value, keep);
     } catch (e) { C.showError("follow-cards", e, "teams"); }

@@ -501,3 +501,150 @@ a.about-trigger[aria-current="page"] { background: rgba(255,153,51,.22); border-
 .cs-lockup.jolt .i-ball { animation: cs-jolt .25s ease-out; }
 @keyframes cs-jolt { 30% { transform: translateY(.04em) rotate(-2deg); } 60% { transform: translateY(-.02em) rotate(1deg); } }
 @media (prefers-reduced-motion: reduce) { .i-ball .chip { display: none; } .cs-lockup.jolt .i-ball { animation: none; } }
+
+/* ── P1.6 ODI World Cup 2027 predictor ─────────────────────────────────────────────────────── */
+.chart-box { position: relative; width: 100%; }
+.wc-stamp { margin: -.4rem 0 1rem; }
+.wc-follow-card { display: flex; flex-wrap: wrap; gap: 1rem 1.6rem; align-items: center; justify-content: space-between;
+  background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--saffron); border-radius: var(--radius);
+  padding: .9rem 1.1rem; max-width: 980px; }
+.wc-follow-big { font-size: 1.05rem; } .wc-follow-big b { color: var(--saffron); font-size: 1.6rem; font-weight: 800; margin-right: .2rem;
+  font-variant-numeric: tabular-nums; }
+.wc-table td, .wc-table th { padding: .5rem .7rem; }
+.wc-table tbody tr:hover { background: var(--surface2); }
+.wc-table tr.me td { background: rgba(255,153,51,.08); }
+.wc-table tr.me td:first-child { box-shadow: inset 3px 0 0 var(--saffron); }
+.wc-table td.num { color: var(--muted); font-weight: 700; width: 2.2rem; }
+.wc-team { display: inline-flex; align-items: center; gap: .5rem; }
+.wc-team .tname { color: var(--text); font-weight: 600; } .wc-team a.tname:hover { color: var(--saffron); text-decoration: none; }
+.wc-note-mark { color: var(--saffron); font-weight: 700; margin-left: -.25rem; cursor: help; }
+.wc-champ { min-width: 180px; }
+.wc-bar { display: flex; align-items: center; gap: .5rem; justify-content: flex-end; }
+.wc-bar-fill { display: inline-block; height: 8px; max-width: 110px; border-radius: 4px; background: linear-gradient(90deg, var(--blue-deep), var(--saffron)); }
+.wc-bar-val { min-width: 3.4rem; text-align: right; font-weight: 800; color: var(--text); }
+.wc-sub { font-size: 1rem; font-weight: 700; margin: 1.4rem 0 .3rem; }
+.wc-moves, .wc-assume, .wc-group, .wc-limits-list { list-style: none; margin: .4rem 0 0; padding: 0; }
+.wc-moves li, .wc-assume li { padding: .45rem 0; border-bottom: 1px solid var(--border); color: var(--soft); font-size: .9rem; }
+.wc-assume li::before { content: "TBC"; font-size: .62rem; font-weight: 800; letter-spacing: .08em; color: var(--amber);
+  border: 1px solid rgba(250,204,21,.4); border-radius: 4px; padding: .05rem .3rem; margin-right: .6rem; }
+.wc-group li { padding: .4rem 0; border-bottom: 1px solid var(--border); }
+.wc-group li:last-child { border-bottom: 0; }
+.wc-flow { list-style: none; margin: .4rem 0 0; padding: 0; display: grid; gap: .6rem; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); counter-reset: st; }
+.wc-stage { position: relative; background: var(--surface); border: 1px solid var(--border); border-top: 3px solid var(--blue); border-radius: 10px;
+  padding: .8rem .9rem; display: flex; flex-direction: column; gap: .25rem; counter-increment: st; }
+.wc-stage:last-child { border-top-color: var(--saffron); }
+.wc-stage b::before { content: counter(st) ". "; color: var(--muted); }
+.wc-stage span { font-size: .82rem; color: var(--soft); } .wc-stage small { font-size: .72rem; color: var(--dim); margin-top: auto; }
+.wc-limits-list { display: grid; gap: .5rem 1.6rem; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+.wc-limits-list li { display: flex; gap: .7rem; align-items: flex-start; font-size: .88rem; color: var(--soft); padding: .35rem 0; }
+.wc-limits-list b { color: var(--text); }
+.wc-li-icon { flex: 0 0 1.6rem; text-align: center; font-size: 1.05rem; color: var(--saffron); font-weight: 800; }
+@media (max-width: 600px) { .wc-follow-big b { font-size: 1.35rem; } .wc-champ { min-width: 150px; } }
+/* Who wins donut in the predictor hero (top five + all others, ≤ 6 segments) */
+.wc-hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 1.5rem 2.5rem; align-items: center; }
+.wc-donut { margin: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.1rem; }
+.wc-donut .section-label { margin-bottom: .2rem; }
+.wc-donut-box { position: relative; max-width: 230px; margin: 0 auto; }
+.wc-donut-mid { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; pointer-events: none; padding: 0 22%; }
+.wc-donut-mid b { font-size: 1.7rem; font-weight: 800; color: var(--saffron); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.wc-donut-mid span { font-size: .85rem; font-weight: 700; color: var(--text); }
+.wc-donut-mid small { font-size: .68rem; color: var(--dim); line-height: 1.25; }
+.wc-donut-legend { list-style: none; margin: .6rem 0 0; padding: 0; font-size: .82rem; }
+.wc-donut-legend li { display: flex; align-items: center; gap: .5rem; padding: .18rem .3rem; border-radius: 6px; }
+.wc-donut-legend li.me { background: rgba(255,153,51,.1); }
+.wc-donut-legend i { width: 10px; height: 10px; border-radius: 3px; flex: 0 0 10px; }
+.wc-donut-legend span { color: var(--soft); flex: 1; } .wc-donut-legend b { font-variant-numeric: tabular-nums; }
+@media (max-width: 900px) { .wc-hero-grid { grid-template-columns: 1fr; } .wc-donut { max-width: 420px; } }
+/* Predictor: trophy, fixtures, venues */
+.wc-title .wc-icon { width: .9em; height: .9em; vertical-align: -.08em; margin-right: .1em; }
+.wc-days { display: grid; gap: .9rem; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+.wc-day-h { font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; color: var(--saffron); margin: 0 0 .3rem; }
+.wc-day ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .5rem; }
+.wc-fx { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: .6rem .8rem; display: flex; flex-direction: column; gap: .35rem; }
+.wc-fx.me { border-color: rgba(255,153,51,.55); box-shadow: inset 3px 0 0 var(--saffron); }
+.wc-fx-meta { display: flex; flex-wrap: wrap; gap: .4rem .6rem; align-items: center; }
+.wc-fx-teams { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .6rem; font-weight: 600; }
+.wc-v { color: var(--muted); font-size: .8rem; }
+.wc-slot { color: var(--dim); font-style: italic; font-weight: 500; }
+.wc-chance { display: flex; align-items: center; gap: .5rem; font-size: .82rem; }
+.wc-chance > b { min-width: 2.6rem; font-variant-numeric: tabular-nums; } .wc-chance > b:last-child { text-align: right; }
+.wc-segs { flex: 1; display: flex; height: 8px; gap: 2px; border-radius: 4px; overflow: hidden; }
+.wc-seg { display: block; height: 100%; flex-grow: 0; flex-shrink: 0; }
+.wc-seg.t1 { background: #3987e5; } .wc-seg.t2 { background: #d95926; } .wc-seg.nr { background: #475569; }
+.wc-venues { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.wc-venue { padding: 0 0 1rem; overflow: hidden; }
+.wc-venue > :not(.wc-vphoto) { margin-left: 1rem; margin-right: 1rem; }
+.wc-vphoto { margin: 0; position: relative; aspect-ratio: 16 / 10; background: var(--surface2); }
+.wc-vphoto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.wc-vphoto.none { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .3rem; color: var(--muted);
+  background: repeating-linear-gradient(135deg, var(--surface2) 0 12px, var(--surface3) 12px 24px); }
+.wc-vphoto.none span { font-size: 2rem; opacity: .6; }
+.wc-vcap { position: absolute; left: 0; right: 0; bottom: 0; padding: .3rem .6rem; font-size: .72rem; color: #fff; background: linear-gradient(transparent, rgba(0,0,0,.7)); }
+.wc-credit { font-size: .66rem; color: var(--muted); margin-top: .35rem; }
+.wc-credit a { color: var(--dim); }
+.wc-vstats { display: grid; grid-template-columns: repeat(4, 1fr); gap: .4rem; }
+.wc-vstats .kpi b { font-size: 1.15rem; } .wc-vstats .kpi span { font-size: .58rem; letter-spacing: .06em; }
+@media (max-width: 480px) { .wc-vstats { grid-template-columns: repeat(2, 1fr); } .wc-days { grid-template-columns: 1fr; } }
+.wc-move { font-size: .66rem; font-weight: 700; margin: 0 .25rem; }
+.wc-move.up { color: var(--green); } .wc-move.down { color: var(--red); }
+.wc-moved { margin-top: .15rem; }
+/* Following: Men/Women + team name (hub) */
+.follow-pick { gap: .6rem; flex-wrap: wrap; align-items: center; }
+.follow-pick select { min-width: 12rem; }
+/* Countries "By format": Head to head / Top performers tabs */
+[data-bf-pane][hidden] { display: none; }
+/* Cricket world map (sample) */
+.wm-controls { display: flex; flex-direction: column; gap: .6rem; margin-bottom: .8rem; }
+.wm-row { gap: .6rem; flex-wrap: wrap; align-items: center; }
+.wm-grid { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(260px, 1fr); gap: 1rem; align-items: start; }
+@media (max-width: 860px) { .wm-grid { grid-template-columns: 1fr; } }
+.wm-map { position: relative; background: #10131a; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.wm-svg { display: block; width: 100%; height: auto; }
+.wm-svg path { stroke: #10131a; stroke-width: .35; vector-effect: non-scaling-stroke; }
+.wm-team, .wm-dot { cursor: pointer; transition: opacity .15s; }
+.wm-team:hover, .wm-dot:hover { opacity: .8; }
+.wm-svg .wm-team.me { stroke: var(--saffron); stroke-width: 1.2; }
+.wm-svg .wm-team.sel, .wm-svg .wm-dot.sel { stroke: #fff; stroke-width: 1.6; }
+.wm-dot { stroke: #10131a; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.wm-star { fill: #f5c542; font-size: 9px; pointer-events: none; paint-order: stroke; stroke: #10131a; stroke-width: 2px; }
+.wm-tip { position: absolute; z-index: 5; pointer-events: none; background: var(--surface2); border: 1px solid var(--border);
+          border-radius: 8px; padding: .4rem .6rem; font-size: .8rem; display: flex; flex-direction: column; min-width: 150px; }
+.wm-tip[hidden] { display: none; }
+.wm-legend { display: flex; flex-wrap: wrap; gap: .35rem .9rem; align-items: center; margin-top: .55rem; font-size: .78rem; color: var(--soft); }
+.wm-key { display: inline-flex; align-items: center; gap: .35rem; }
+.wm-key i { width: 14px; height: 10px; border-radius: 3px; display: inline-block; }
+.wm-star-key { color: #f5c542; }
+.wm-panel { position: sticky; top: 80px; }
+.wm-head { display: flex; gap: .7rem; align-items: center; margin-bottom: .6rem; }
+.wm-facts { display: grid; grid-template-columns: auto 1fr; gap: .25rem .8rem; margin: 0 0 .8rem; font-size: .88rem; }
+.wm-facts dt { color: var(--dim); } .wm-facts dd { margin: 0; }
+.wm-note { color: var(--soft); border-left: 3px solid var(--saffron); padding-left: .6rem; }
+.wm-form { gap: .5rem; align-items: center; margin: .6rem 0; flex-wrap: wrap; }
+.wm-open { display: inline-block; margin-top: .4rem; }
+.wm-list { max-height: 520px; overflow: auto; }
+.wm-pick { background: none; border: 0; padding: 0; color: var(--text); font: inherit; cursor: pointer; }
+.wm-pick:hover { color: var(--saffron); }
+.wm-tip { min-width: 230px; max-width: 290px; gap: .3rem; box-shadow: 0 8px 24px rgba(0,0,0,.45); }
+.wm-tip-head { display: flex; align-items: center; gap: .45rem; }
+.wm-tip-rows { display: grid; grid-template-columns: auto 1fr; gap: .15rem .6rem; margin: .2rem 0 0; }
+.wm-tip-rows dt { color: var(--dim); } .wm-tip-rows dd { margin: 0; }
+.wm-tip-rows dd small { display: block; color: var(--dim); font-size: .72rem; }
+.wm-tip-rows .on { color: var(--saffron); font-weight: 600; }
+.wm-tip-hint { margin: .15rem 0 0; }
+/* Hub pitch, the "stat" half: Manhattan of India's 2011 final chase (gen_pages manhattan_svg) */
+.manhattan .mh-bar { fill: var(--saffron); opacity: .2; transform-box: fill-box; transform-origin: 50% 100%;
+                     animation: mh-grow .45s calc(2s + var(--i) * 28ms) both cubic-bezier(.2,.8,.3,1); }
+.manhattan .mh-six { opacity: .55; }
+.manhattan .mh-wkt { fill: #f5efe6; opacity: .45; animation: mh-fade .3s calc(2.1s + var(--i) * 28ms) both; }
+.manhattan .mh-worm { fill: none; stroke: #ffd29a; stroke-width: 1.2; opacity: .32; stroke-dasharray: 1; stroke-dashoffset: 1;
+                      animation: mh-draw 1.6s 2.1s forwards ease-in-out; }
+.manhattan .mh-target { stroke: #ffd29a; stroke-width: .8; stroke-dasharray: 3 3; opacity: .28; }
+.manhattan .mh-label { fill: #ffd29a; opacity: .4; font: 600 7px system-ui, sans-serif; letter-spacing: .04em; }
+.manhattan .mh-six-label { fill: var(--saffron); opacity: .7; font: 800 9px system-ui, sans-serif; animation: mh-fade .4s 3.5s both; }
+@keyframes mh-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes mh-fade { from { opacity: 0; } }
+@keyframes mh-draw { to { stroke-dashoffset: 0; } }
+@media (prefers-reduced-motion: reduce) { .manhattan .mh-worm { stroke-dashoffset: 0; } }
+.hero .pitch-cap { color: var(--muted); margin: -.6rem auto .9rem; max-width: 640px; }
+.hero .pitch-cap b { color: var(--saffron); font-weight: 700; }

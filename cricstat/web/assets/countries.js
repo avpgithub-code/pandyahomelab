@@ -22,6 +22,10 @@
     C.fill(select, same.map((t) => h("option", { value: t.slug }, t.name)));
     select.value = team.slug;
     select.onchange = () => { location.href = "/cricket/countries/" + select.value + "/"; };
+    const back = document.getElementById("c-maplink");
+    if (!back && document.getElementById("c-landing")) {
+      document.getElementById("c-gender").before(h("a", { id: "c-maplink", class: "tab", href: "/cricket/countries/" }, "🌍 World map"));
+    }
     C.fill("c-gender", ["male", "female"].map((g) => {
       const slug = slugFor(team.name, g);
       return slug ? h("a", { class: "tab", href: "/cricket/countries/" + slug + "/", "aria-pressed": String(g === team.gender) }, GENDER[g])
@@ -113,6 +117,11 @@
     ]);
   }
 
+  function byFormatView(k) {
+    document.querySelectorAll("[data-bf]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.bf === k)));
+    document.querySelectorAll("[data-bf-pane]").forEach((p) => { p.hidden = p.dataset.bfPane !== k; });
+  }
+
   async function render() {
     header();
     const body = C.fill("c-body", [
@@ -146,8 +155,11 @@
         h("div", { class: "grid" }, [
           h("div", { class: "card accent", id: "f-ratings" }),
           h("div", { class: "card tablecard" }, [h("div", { class: "card-head" }, h("h2", {}, ["Home vs away · ", h("span", { class: "fmt-name" }, "ODI")])), h("div", { id: "f-home-away" })])]),
-        h("div", { class: "card tablecard" }, [h("div", { class: "card-head" }, h("h2", {}, ["Head to head · ", h("span", { class: "fmt-name" }, "ODI")])), h("div", { id: "f-head-to-head" })]),
-        h("div", { class: "grid" }, [
+        // Head to head and top performers share one spot (tabs), to save scrolling.
+        h("div", { class: "tabs", role: "group", "aria-label": "Show" }, [["h2h", "🤝 Head to head"], ["top", "⭐ Top performers"]].map(([k, n]) =>
+          h("button", { type: "button", class: "tab sm", "data-bf": k, "aria-pressed": String(k === "h2h"), onclick: () => byFormatView(k) }, n))),
+        h("div", { class: "card tablecard", "data-bf-pane": "h2h" }, [h("div", { class: "card-head" }, h("h2", {}, ["Head to head · ", h("span", { class: "fmt-name" }, "ODI")])), h("div", { id: "f-head-to-head" })]),
+        h("div", { class: "grid", "data-bf-pane": "top", hidden: true }, [
           h("div", { class: "card" }, [h("h2", {}, ["Most runs · ", h("span", { class: "fmt-name" }, "ODI")]), h("div", { id: "f-runs" })]),
           h("div", { class: "card" }, [h("h2", {}, ["Most wickets · ", h("span", { class: "fmt-name" }, "ODI")]), h("div", { id: "f-wickets" })])]),
         h("p", { class: "tiny muted" }, ["Matches with play only; ties and draws count in win % (no results don't). Top performers count only matches for this team. Data as of ",
@@ -175,8 +187,18 @@
     try {
       const { data } = await C.api("/v1/teams?type=international");
       teams = data;
-      // A team's own address shows that team; the plain Countries page always starts on India.
-      const slug = C.pathTail("countries") || "india-men";
+      // A team's own address shows that team; the plain Countries page is the cricket world map.
+      const slug = C.pathTail("countries");
+      const landing = document.getElementById("c-landing"), hero = document.getElementById("c-hero");
+      if (!slug && landing && window.cricstatMap) {
+        landing.hidden = false;
+        if (hero) hero.hidden = true;
+        document.getElementById("c-body").hidden = true;
+        window.cricstatMap.init();
+        return;
+      }
+      if (landing) landing.hidden = true;
+      if (hero) hero.hidden = false;
       team = teams.find((t) => t.slug === slug) || teams.find((t) => t.slug === "india-men");
       if (!team) throw new Error("unknown team");
       render();
