@@ -54,6 +54,7 @@
 
   const MIN_MATCHES = 5;          // fewer and a win % says little (1–0 would be 100%)
   let FORM = { ODI: {}, T20I: {} }, SINCE = null;
+  const H2H = {};                // followed team's slug → { ODI: {opponent slug: row}, T20I: {...} }
   let MAP = null, TEAMS = [], RATINGS = {}, WC = null, gender = "male", metric = "rating", view = "map", region = "world";
   let selected = null;
   const follow = C.getFollow();
@@ -168,6 +169,28 @@
     C.fill(host, [svg, tip]);
   }
 
+  // Head to head against the team you follow (same country, in the gender on show): two calls per
+  // followed team (ODI, T20I), cached, so hovering never waits on the API.
+  function followedNow() {
+    const f = TEAMS.find((t) => t.slug === follow);
+    if (!f) return null;
+    return TEAMS.find((t) => t.name === f.name && t.gender === gender && t.team_type === "international") || null;
+  }
+  async function loadH2H() {
+    const me = followedNow();
+    if (!me || H2H[me.slug]) return;
+    H2H[me.slug] = { ODI: {}, T20I: {} };
+    await Promise.all(["ODI", "T20I"].map((f) => C.api("/v1/teams/" + me.slug + "/head-to-head?scope=" + f)
+      .then(({ data }) => data.forEach((r) => { if (r.opponent.slug) H2H[me.slug][f][r.opponent.slug] = r; })).catch(() => {})));
+  }
+  function h2hLine(t) {
+    const me = followedNow();
+    if (!me || !t.slug || t.slug === me.slug || !H2H[me.slug]) return null;
+    const parts = [["ODIs", H2H[me.slug].ODI[t.slug]], ["T20Is", H2H[me.slug].T20I[t.slug]]].filter((x) => x[1])
+      .map(([n, r]) => n + " " + r.won + "–" + r.lost + (r.tied ? " (" + r.tied + " tied)" : ""));
+    return ["v " + me.name, parts.length ? me.name + " won–lost: " + parts.join(" · ") : "never met in our data"];
+  }
+
   // Hover card: only what the page already holds (no request per hover); record + form are in the panel.
   function wcLine(t) {
     if (gender !== "male" || !WC) return null;
@@ -189,6 +212,8 @@
     const wc = wcLine(t);
     if (wc) rows.push(wc);
     if (!t.withheld) { rows.push(["ODIs · 2 yrs", formLine(t.odi)]); rows.push(["T20Is · 2 yrs", formLine(t.t20)]); }
+    const hh = h2hLine(t);
+    if (hh) rows.push(hh);
     rows.push(["In our data", t.matches ? C.num(t.matches) + " matches · last " + C.date(t.last) : "withheld by Cricsheet"]);
     return [
       h("div", { class: "wm-tip-head" }, [C.teamBadge(t.name, "sm"), h("b", {}, t.name), h("span", { class: "tiny muted" }, gender === "male" ? "men" : "women")]),
@@ -266,6 +291,8 @@
     if (t.rating) facts.push(["ODI rating", Math.round(t.rating.rating) + (t.rating.rank ? " · #" + t.rating.rank : " · unranked (no recent ODIs)")]);
     if (t.wc) facts.push(["ODI WC 2027", pct(t.wc.probabilities.champion) + " title chance" + (t.wc.direct_qualifier ? " · qualified (group " + t.wc.group + ")" : " · via the Qualifier")]);
     if (!t.withheld) { facts.push(["ODIs · 2 yrs", formLine(t.odi)]); facts.push(["T20Is · 2 yrs", formLine(t.t20)]); }
+    const hh = h2hLine(t);
+    if (hh) facts.push(hh);
     if (t.matches) facts.push(["In our data", C.num(t.matches) + " international matches since " + t.first.slice(0, 4)]);
     C.fill(panel, [
       h("div", { class: "wm-head" }, [C.teamBadge(t.name, "lg"), h("div", {}, [h("div", { class: "section-label" }, gender === "male" ? "Men" : "Women"), h("h2", { class: "section-title", style: "margin:0" }, t.name)])]),
@@ -285,6 +312,8 @@
   }
 
   function render() {
+    const me = followedNow();
+    if (me && !H2H[me.slug]) loadH2H().then(() => { if (selected) select(selected); });
     controls(); legend();
     if (view === "map") drawMap(); else drawList();
     if (selected) select(selected);
@@ -311,5 +340,6 @@
       render();
     } catch (e) { C.showError("wm-map", e, "the map"); }
   }
-  init();
+  // countries.js starts it on the Countries landing (/cricket/countries/), not on team pages.
+  window.cricstatMap = { init };
 })();

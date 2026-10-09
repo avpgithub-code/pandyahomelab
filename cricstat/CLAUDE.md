@@ -459,6 +459,17 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   are not usable (no licence; terms forbid reuse); Openverse/Flickr licence filters are the search route. 8 of 12 grounds
   have photos; Harare, Bulawayo, KuGompo City, Victoria Falls have none (owner: fine to leave missing).
 - **Fixture chances** move only when one of the two teams plays; `last_change` = the most recent move.
+- **Review round 2026-10-09 (owner):** Title odds = two small tabs (direct qualifiers / Qualifier); hub "Following" =
+  Men/Women pill + names-only list; team pages' "By format" = Head to head / Top performers tabs. **Countries landing =
+  cricket world map** (`/cricket/countries/`; `assets/worldmap.js`, `assets/world-map.json` built by
+  `tools/fetch_world_map.py` from Natural Earth 1:10m **India's point of view** borders + UK map units, public domain;
+  team pages keep their URL, get a "🌍 World map" link; `pages.py` hides the landing and shows the team header on
+  server-rendered team pages). Map colours: ODI rating / WC 2027 title chance (men), ODI + T20I win % last 2 yrs
+  (min 5 matches) and matches (both); hover card + panel: rating/rank, WC title/final/semi + status, 2-yr W–L, head to
+  head v the followed team (ODI/T20I, same gender), matches + last played. New API `GET /v1/records/teams` (one call for
+  every team's record). Hub pitch: the "stat" half is a **Manhattan of India's 2011 World Cup final chase** (real
+  Cricsheet data, match 433606, captioned; last bar = the six). V=87. **Predictor page approval: paused by the owner;
+  methodology page not started.** Women's team ratings = a later step with its own backtest (not in P1.6).
 
 ## Next up and open TODOs (updated 2026-10-09)
 - **State:** P0, P0.5 and P0.6 are live at pandyahomelab.com/cricket/ and linked from the homepage. Everything is merged

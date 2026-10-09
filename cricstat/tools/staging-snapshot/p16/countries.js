@@ -22,6 +22,10 @@
     C.fill(select, same.map((t) => h("option", { value: t.slug }, t.name)));
     select.value = team.slug;
     select.onchange = () => { location.href = "/cricket/countries/" + select.value + "/"; };
+    const back = document.getElementById("c-maplink");
+    if (!back && document.getElementById("c-landing")) {
+      document.getElementById("c-gender").before(h("a", { id: "c-maplink", class: "tab", href: "/cricket/countries/" }, "🌍 World map"));
+    }
     C.fill("c-gender", ["male", "female"].map((g) => {
       const slug = slugFor(team.name, g);
       return slug ? h("a", { class: "tab", href: "/cricket/countries/" + slug + "/", "aria-pressed": String(g === team.gender) }, GENDER[g])
@@ -183,8 +187,18 @@
     try {
       const { data } = await C.api("/v1/teams?type=international");
       teams = data;
-      // A team's own address shows that team; the plain Countries page always starts on India.
-      const slug = C.pathTail("countries") || "india-men";
+      // A team's own address shows that team; the plain Countries page is the cricket world map.
+      const slug = C.pathTail("countries");
+      const landing = document.getElementById("c-landing"), hero = document.getElementById("c-hero");
+      if (!slug && landing && window.cricstatMap) {
+        landing.hidden = false;
+        if (hero) hero.hidden = true;
+        document.getElementById("c-body").hidden = true;
+        window.cricstatMap.init();
+        return;
+      }
+      if (landing) landing.hidden = true;
+      if (hero) hero.hidden = false;
       team = teams.find((t) => t.slug === slug) || teams.find((t) => t.slug === "india-men");
       if (!team) throw new Error("unknown team");
       render();

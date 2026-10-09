@@ -21,7 +21,7 @@ else:
     WEB = os.path.join(CRICSTAT, "tools", "staging", "web")
     if not os.path.isdir(WEB):
         shutil.copytree(os.path.join(CRICSTAT, "web"), WEB)
-V = "85"
+V = "87"
 SITE = "https://pandyahomelab.com"
 HEAD = '''<!DOCTYPE html>
 <html lang="en">
@@ -80,10 +80,45 @@ def page(rel, path, title, desc, cur, body, scripts, og_type="website", extra_he
     os.makedirs(os.path.dirname(os.path.join(WEB, rel)) or WEB, exist_ok=True)
     open(os.path.join(WEB, rel), "w").write(html)
 
+# "stat" on the pitch: a Manhattan (runs per over) of India's chase in the 2011 World Cup final, match 433606
+# in Cricsheet (serving DB: SUM(runs_total) per over_no, innings 2; wickets fell in overs 1, 7, 22, 42; target 275).
+# Real data, so it is captioned; the last bar holds Dhoni's six (48.2).
+WC2011_CHASE = [4, 6, 5, 11, 1, 4, 1, 1, 2, 6, 9, 11, 7, 4, 9, 5, 5, 5, 3, 6, 4, 6, 2, 5, 2, 4, 6, 8, 4, 5,
+                6, 8, 5, 5, 8, 8, 5, 8, 6, 11, 2, 4, 5, 8, 5, 3, 11, 11, 7]
+WC2011_WICKETS = {1, 7, 22, 42}
+
+
+def manhattan_svg():
+    x0, x1, base, per_run, worm = 404.0, 776.0, 154.0, 4.2, 0.43
+    w = (x1 - x0) / len(WC2011_CHASE)
+    out = ['<g class="manhattan">']
+    for i, r in enumerate(WC2011_CHASE):
+        x, hgt = x0 + i * w, r * per_run
+        last = i == len(WC2011_CHASE) - 1
+        out.append('<rect class="mh-bar%s" style="--i:%d" x="%.1f" y="%.1f" width="%.1f" height="%.1f" rx="1"/>'
+                   % (" mh-six" if last else "", i, x + .8, base - hgt, w - 1.6, hgt))
+        if i + 1 in WC2011_WICKETS:
+            out.append('<circle class="mh-wkt" style="--i:%d" cx="%.1f" cy="%.1f" r="1.7"/>' % (i, x + w / 2, base - hgt - 3.5))
+    total, pts = 0, ["%.1f,%.1f" % (x0, base)]
+    for i, r in enumerate(WC2011_CHASE):
+        total += r
+        pts.append("%.1f,%.1f" % (x0 + (i + 1) * w, base - total * worm))
+    ty = base - 275 * worm
+    out.append('<line class="mh-target" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>' % (x0, ty, x1, ty))
+    out.append('<text class="mh-label" x="%.1f" y="%.1f">target 275</text>' % (x0 + 2, ty - 3))
+    out.append('<polyline class="mh-worm" pathLength="1" points="%s"/>' % " ".join(pts))
+    lx = x0 + (len(WC2011_CHASE) - .5) * w
+    out.append('<text class="mh-six-label" x="%.1f" y="%.1f" text-anchor="middle">6</text>'
+               % (lx, base - WC2011_CHASE[-1] * per_run - 4))
+    out.append('</g>')
+    return "".join(out)
+
+
 HUB = '''<header class="hero">
   <div class="wrap">
     <div class="eyebrow"><span class="dot"></span><span id="h-asof">Live cricket data</span></div>
-    <div class="pitch"><svg class="pitch-svg" viewBox="0 0 800 170" aria-hidden="true" focusable="false">  <defs><radialGradient id="sq" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#2f8f4e" stop-opacity=".32"/><stop offset="1" stop-color="#2f8f4e" stop-opacity="0"/></radialGradient></defs><ellipse cx="400" cy="85" rx="420" ry="95" fill="url(#sq)"/>  <defs><linearGradient id="mow" x1="0" x2="1" y1="0" y2="0"><stop offset="0.0" stop-color="#fff" stop-opacity="0"/><stop offset="0.1" stop-color="#fff" stop-opacity="0"/><stop offset="0.1" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.2" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.2" stop-color="#fff" stop-opacity="0"/><stop offset="0.3" stop-color="#fff" stop-opacity="0"/><stop offset="0.3" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.4" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.4" stop-color="#fff" stop-opacity="0"/><stop offset="0.5" stop-color="#fff" stop-opacity="0"/><stop offset="0.5" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.6" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.6" stop-color="#fff" stop-opacity="0"/><stop offset="0.7" stop-color="#fff" stop-opacity="0"/><stop offset="0.7" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.8" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.8" stop-color="#fff" stop-opacity="0"/><stop offset="0.9" stop-color="#fff" stop-opacity="0"/><stop offset="0.9" stop-color="#fff" stop-opacity="0.05"/><stop offset="1.0" stop-color="#fff" stop-opacity="0.05"/></linearGradient></defs>  <rect x="20" y="15" width="760" height="140" rx="6" fill="#b89a68" opacity="0.2"/><rect x="20" y="15" width="760" height="140" rx="6" fill="url(#mow)"/>  <line x1="110" y1="15" x2="110" y2="155" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/><line x1="690" y1="15" x2="690" y2="155" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/>  <line x1="70" y1="45" x2="70" y2="125" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/><line x1="730" y1="45" x2="730" y2="125" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/>  <line x1="40" y1="50" x2="110" y2="50" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/><line x1="40" y1="120" x2="110" y2="120" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/>  <line x1="690" y1="50" x2="760" y2="50" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/><line x1="690" y1="120" x2="760" y2="120" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/>  <circle cx="70" cy="75" r="3.2" fill="#f5efe6" opacity="0.85"/><circle cx="70" cy="85" r="3.2" fill="#f5efe6" opacity="0.85"/><circle cx="70" cy="95" r="3.2" fill="#f5efe6" opacity="0.85"/><circle cx="730" cy="75" r="3.2" fill="#f5efe6" opacity="0.85"/><circle cx="730" cy="85" r="3.2" fill="#f5efe6" opacity="0.85"/><circle cx="730" cy="95" r="3.2" fill="#f5efe6" opacity="0.85"/></svg><h1 class="cs-lockup"><span class="sr-only">cricstat</span><span class="cs" aria-hidden="true">cr<span class="i-ball">ı<svg class="i-dot" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><defs><radialGradient id="emBall" cx="35%" cy="32%" r="70%"><stop offset="0" stop-color="#e2544b"/><stop offset=".65" stop-color="#b3201c"/><stop offset="1" stop-color="#6e1210"/></radialGradient></defs><circle cx="10" cy="10" r="9" fill="url(#emBall)"/><path d="M5.5 3.2c2.6 2.4 3.4 8.4 1.3 13.6M14.5 3.2c-2.6 2.4-3.4 8.4-1.3 13.6" stroke="#f5efe6" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></span>c<b>stat</b></span></h1></div>
+    <div class="pitch"><svg class="pitch-svg" viewBox="0 0 800 170" aria-hidden="true" focusable="false">  <defs><radialGradient id="sq" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#2f8f4e" stop-opacity=".32"/><stop offset="1" stop-color="#2f8f4e" stop-opacity="0"/></radialGradient></defs><ellipse cx="400" cy="85" rx="420" ry="95" fill="url(#sq)"/>  <defs><linearGradient id="mow" x1="0" x2="1" y1="0" y2="0"><stop offset="0.0" stop-color="#fff" stop-opacity="0"/><stop offset="0.1" stop-color="#fff" stop-opacity="0"/><stop offset="0.1" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.2" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.2" stop-color="#fff" stop-opacity="0"/><stop offset="0.3" stop-color="#fff" stop-opacity="0"/><stop offset="0.3" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.4" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.4" stop-color="#fff" stop-opacity="0"/><stop offset="0.5" stop-color="#fff" stop-opacity="0"/><stop offset="0.5" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.6" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.6" stop-color="#fff" stop-opacity="0"/><stop offset="0.7" stop-color="#fff" stop-opacity="0"/><stop offset="0.7" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.8" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.8" stop-color="#fff" stop-opacity="0"/><stop offset="0.9" stop-color="#fff" stop-opacity="0"/><stop offset="0.9" stop-color="#fff" stop-opacity="0.05"/><stop offset="1.0" stop-color="#fff" stop-opacity="0.05"/></linearGradient></defs>  <rect x="20" y="15" width="760" height="140" rx="6" fill="#b89a68" opacity="0.2"/><rect x="20" y="15" width="760" height="140" rx="6" fill="url(#mow)"/>  <line x1="110" y1="15" x2="110" y2="155" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/><line x1="690" y1="15" x2="690" y2="155" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/>  <line x1="70" y1="45" x2="70" y2="125" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/><line x1="730" y1="45" x2="730" y2="125" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/>  <line x1="40" y1="50" x2="110" y2="50" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/><line x1="40" y1="120" x2="110" y2="120" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/>  <line x1="690" y1="50" x2="760" y2="50" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/><line x1="690" y1="120" x2="760" y2="120" stroke="rgba(255,255,255,0.42)" stroke-width="2.2"/>  <circle cx="70" cy="75" r="3.2" fill="#f5efe6" opacity="0.85"/><circle cx="70" cy="85" r="3.2" fill="#f5efe6" opacity="0.85"/><circle cx="70" cy="95" r="3.2" fill="#f5efe6" opacity="0.85"/><circle cx="730" cy="75" r="3.2" fill="#f5efe6" opacity="0.85"/><circle cx="730" cy="85" r="3.2" fill="#f5efe6" opacity="0.85"/><circle cx="730" cy="95" r="3.2" fill="#f5efe6" opacity="0.85"/>@@MANHATTAN@@</svg><h1 class="cs-lockup"><span class="sr-only">cricstat</span><span class="cs" aria-hidden="true">cr<span class="i-ball">ı<svg class="i-dot" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><defs><radialGradient id="emBall" cx="35%" cy="32%" r="70%"><stop offset="0" stop-color="#e2544b"/><stop offset=".65" stop-color="#b3201c"/><stop offset="1" stop-color="#6e1210"/></radialGradient></defs><circle cx="10" cy="10" r="9" fill="url(#emBall)"/><path d="M5.5 3.2c2.6 2.4 3.4 8.4 1.3 13.6M14.5 3.2c-2.6 2.4-3.4 8.4-1.3 13.6" stroke="#f5efe6" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></span>c<b>stat</b></span></h1></div>
+    <p class="pitch-cap tiny">Behind <b>stat</b>: runs per over in India's chase of 275 in the 2011 World Cup final (Cricsheet). The last bar holds the six.</p>
     <p class="subtitle">Cricket statistics, forecasts and an AI analyst — built from open ball-by-ball data for men's and women's cricket, with every number traceable to its source.</p>
     <p class="hero-hook">2011 gave us the six. 2023 gave us the heartbreak. 2027 is the question. <a class="link-btn" href="/cricket/about/" data-about>Read the story →</a></p>
     <form class="search-bar" action="/cricket/players/" method="get" role="search">
@@ -188,6 +223,7 @@ def ld_json(obj):
 HUB_DESC = ("Cricket statistics for men's and women's cricket across Tests, ODIs, T20Is and major leagues, built from "
             "open ball-by-ball data — and an ODI World Cup 2027 predictor that compares Elo, machine-learning and "
             "deep-learning models.")
+HUB = HUB.replace("@@MANHATTAN@@", manhattan_svg())
 page("index.html", "/cricket/", "cricstat — cricket stats, ODI World Cup 2027 predictor & AI analyst | pandyaHomeLab",
      HUB_DESC, "hub", HUB, ["/cricket/assets/hub.js?v=" + V],
      extra_head=ld_json({"@context": "https://schema.org", "@type": "WebApplication", "@id": SITE + "/cricket/#app",
@@ -213,7 +249,27 @@ page("players/index.html", "/cricket/players/", "Player statistics — cricstat 
      "Career, year-by-year, phase and opponent statistics for men's and women's cricketers: Tests, ODIs, T20Is and major leagues, from Cricsheet ball-by-ball data.",
      "players", PLAYERS, ["/vendor/chart.js-4.4.0/chart.umd.min.js", "/cricket/assets/players.js?v=" + V])
 
-COUNTRIES = '''<header class="hero left" id="c-hero">
+# The Countries landing (/cricket/countries/): the cricket world map. Team pages (/cricket/countries/<slug>/) use
+# the same shell: static = landing (map visible, team header hidden); the API's /pages/countries/<slug>/ swaps
+# them (pages.py) and countries.js does the same in the browser.
+MAP_BOARD = '''<div id="c-landing">
+<header class="hero left"><div class="wrap">
+  <div class="eyebrow"><span class="dot"></span>Countries</div>
+  <h1 style="font-size:clamp(2rem,5vw,3rem)">Cricket around the world</h1>
+  <p class="subtitle">Every international team in our data on one map. Colour it by ODI rating, ODI World Cup 2027 chances, recent win % or matches played, then pick a team for its record and latest form.</p>
+</div></header>
+<section class="section panel" aria-label="Cricket world map"><div class="wrap scoreboard wm-board">
+  <div class="sb-head board-head" aria-hidden="true"><span class="bulb"></span>Cricket world map<span class="bulb"></span></div>
+  <div id="wm-controls" class="wm-controls"></div>
+  <div class="wm-grid">
+    <div><div id="wm-map" class="wm-map"><p class="muted" style="padding:1rem;margin:0">Loading the map…</p></div><div id="wm-legend" class="wm-legend"></div></div>
+    <aside id="wm-panel" class="card wm-panel" aria-live="polite"><p class="muted">Pick a team on the map.</p></aside>
+  </div>
+  <p class="tiny muted" style="margin-top:.8rem">Borders: Natural Earth (public domain), drawn as India officially shows them. Cricket splits the UK (England with Wales, Scotland), Ireland is one all-island team and the West Indies cover the Caribbean board's members. Tiny members (Bermuda, Jersey, Singapore…) are dots. Afghanistan men's matches are withheld by Cricsheet; their rating comes from our reviewed results list.</p>
+</div></section>
+</div>
+'''
+COUNTRIES = '''<header class="hero left" id="c-hero" hidden>
   <div class="wrap" style="display:flex;flex-wrap:wrap;gap:1.5rem;align-items:center;justify-content:space-between">
     <div class="row" style="gap:1.2rem"><span id="c-badge"></span>
       <div><div class="eyebrow" style="margin-bottom:.6rem"><span class="dot"></span>Country</div>
@@ -226,9 +282,10 @@ COUNTRIES = '''<header class="hero left" id="c-hero">
 </header>
 <div id="c-body" aria-live="polite"><div class="wrap"><div class="skeleton"></div></div></div>
 '''
-page("countries/index.html", "/cricket/countries/", "Team records — cricstat | pandyaHomeLab",
-     "Team records by format, recent results, head to head, home and away, results by year and top run-scorers and wicket-takers for men's and women's international teams.",
-     "countries", COUNTRIES, ["/vendor/chart.js-4.4.0/chart.umd.min.js", "/cricket/assets/countries.js?v=" + V])
+page("countries/index.html", "/cricket/countries/", "Cricket world map and team records — cricstat | pandyaHomeLab",
+     "A world map of international cricket — every men's and women's team coloured by ODI rating, ODI World Cup 2027 chances, recent win % or matches — and each team's records, results, head to head and top players.",
+     "countries", MAP_BOARD + COUNTRIES, ["/vendor/chart.js-4.4.0/chart.umd.min.js", "/cricket/assets/worldmap.js?v=" + V,
+                                          "/cricket/assets/countries.js?v=" + V])
 
 PREDICTOR = '''<header class="hero left wc-hero">
   <div class="wrap wc-hero-grid">
@@ -274,25 +331,6 @@ page("predictor/index.html", "/cricket/predictor/",
      extra_head=ld_json({"@context": "https://schema.org", "@type": "WebPage", "name": "ODI World Cup 2027 predictor",
                          "description": PRED_DESC, "url": SITE + "/cricket/predictor/", "isPartOf": {"@id": SITE + "/#site"},
                          "about": ["ODI World Cup 2027", "Elo rating", "Monte Carlo simulation"], "author": ARCHIT}))
-
-MAP = '''<header class="hero left"><div class="wrap">
-  <div class="eyebrow"><span class="dot"></span>Cricket world map · sample</div>
-  <h1 style="font-size:clamp(2rem,5vw,3rem)">Where cricket is played</h1>
-  <p class="subtitle">Every international team in our data on one map. Colour a country by its ODI rating, its ODI World Cup 2027 title chance or how many matches we hold, then pick it for its record and latest form.</p>
-</div></header>
-<section class="section panel" aria-label="Cricket world map"><div class="wrap scoreboard wm-board">
-  <div class="sb-head board-head" aria-hidden="true"><span class="bulb"></span>Cricket world map<span class="bulb"></span></div>
-  <div id="wm-controls" class="wm-controls"></div>
-  <div class="wm-grid">
-    <div><div id="wm-map" class="wm-map"><div class="skeleton" style="height:360px"></div></div><div id="wm-legend" class="wm-legend"></div></div>
-    <aside id="wm-panel" class="card wm-panel" aria-live="polite"><p class="muted">Pick a team on the map.</p></aside>
-  </div>
-  <p class="tiny muted" style="margin-top:.8rem">Borders: Natural Earth (public domain), drawn as India officially shows them. Cricket splits the UK (England with Wales, Scotland), Ireland is one all-island team and the West Indies cover the Caribbean board's members. Tiny members (Bermuda, Jersey, Singapore…) are dots. Afghanistan men's matches are withheld by Cricsheet; their rating comes from our reviewed results list.</p>
-</div></section>
-'''
-MAP_DESC = "A world map of international cricket: every team coloured by ODI rating, ODI World Cup 2027 title chance or matches played, with its record and latest form."
-page("map/index.html", "/cricket/map/", "Cricket world map — cricstat | pandyaHomeLab", MAP_DESC, "countries", MAP,
-     ["/cricket/assets/worldmap.js?v=" + V])
 
 LIC = '''<header class="hero left"><div class="wrap">
   <div class="eyebrow"><span class="dot"></span>Data &amp; licences</div>
