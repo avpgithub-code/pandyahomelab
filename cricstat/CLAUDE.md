@@ -122,13 +122,13 @@ Background: `docs/llm-strategy-research-2026-10-05.md`.
 | F4 | Metric dictionary + formula tests (`docs/F4-metric-dictionary.md`) | Done 2026-10-05 |
 | F5 | API contract (`docs/F5-api-contract.md`) | Done 2026-10-05 |
 | F6 | Engineering setup (`docs/F6-engineering-setup.md`) + ADR-022 (Accepted) + CI skeleton | Done 2026-10-05; pipeline deployed, DSM tasks live (daily 05:30, monthly day 1 04:00; verified) |
-| F7 | Roadmap + decision log | Ongoing in this file (current to 2026-10-08) |
+| F7 | Roadmap + decision log | Ongoing in this file (current to 2026-10-09) |
 | F8 | Compliance & trust (licences page, privacy update, disclaimers) | Folded into P0 (decided 2026-10-05) |
 | F9 | CI/CD & automation (`docs/F9-cicd-automation.md`) | Done 2026-10-05: CI + approval gate + GHCR + NAS cd-pull.sh (DSM daily 05:15); merged to main |
 | P0 | Ingestion → serving-DB build → cricstat-api → first live pages (+F8) | **Done; public 2026-10-07.** P0.1 build + register, P0.2 golden figures, P0.3 cricstat-api, P0.3b `/admin/cricket` (2026-10-06); P0.4 pages + F8 texts live and linked from the homepage 2026-10-07 (+ `/cricket/about/` page) |
 | P0.6 | Search-engine pages: server-rendered player/team heads, real 404/301, `/cricket/sitemap.xml` | **Done 2026-10-07** (4,840 players + 176 teams indexable; submitted in Search Console) |
 | P0.5 | Wikidata enrichment: full names, birth details, Commons photos | **Done 2026-10-08** (7,192 on Wikidata; 1,364 credited photos incl. GODL-India/PDM-owner; weekly `enrich`; search + cards use names/photos) |
-| P1 | ODI World Cup 2027 predictor: Elo + Monte Carlo baseline first, then ML and DL challengers, backtests on WC 2019/2023, live win probability | **In progress:** P1.1–P1.5 live (2026-10-08: models + API deployed, champion elo-v2, daily forecast in DSM); **P1.6 pages in progress** on `feat/cricstat-p16-pages` (predictor page built in staging, awaiting owner approval; then methodology page, team-page card, hub teaser, deploy) |
+| P1 | ODI World Cup 2027 predictor: Elo + Monte Carlo baseline first, then ML and DL challengers, backtests on WC 2019/2023, live win probability | **In progress:** P1.1–P1.5 live (2026-10-08: models + API deployed, champion elo-v2, daily forecast in DSM); **P1.6 partly live 2026-10-09** (world map Countries landing, records API, review tweaks; owner checked the live site); predictor page, methodology page, team-page ratings card, hub teaser and `PREDICTOR_LIVE` **on hold by the owner** on `feat/cricstat-p16-pages` |
 | P2–P6 | Tools → test set → agent → public demo → extras | Later |
 | Later | Men's T20 World Cup 2028 forecast + T20I team ratings (decided 2026-10-06; shown as "Later" on team pages) | **Not started until the ODI World Cup 2027 is finished** |
 
@@ -482,9 +482,12 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   Cricsheet data, match 433606, captioned; last bar = the six; faint by owner request). V=88. **Predictor page approval: paused by the owner;
   methodology page not started.** Women's team ratings = a later step with its own backtest (not in P1.6).
 
-## Next up and open TODOs (updated 2026-10-09)
-- **State:** P0, P0.5 and P0.6 are live at pandyahomelab.com/cricket/ and linked from the homepage. Everything is merged
-  to `main` and pushed; the NAS runs the latest pipeline and API images. LinkedIn follow-up post published 2026-10-08.
+## Next up and open TODOs (updated 2026-10-09, after the partial P1.6 deploy)
+- **State (2026-10-09):** P0, P0.5, P0.6 and P1.1–P1.5 live; **partial P1.6 live** (world map Countries landing with
+  win %/matches, Following Men/Women, team-page tabs, hub Manhattan; API f974fb246adb; web commit 54ce200; owner
+  checked it). Everything is merged to `main` and pushed. **On hold until the owner says so:** predictor page,
+  methodology, team-page ratings card, hub teaser, `PREDICTOR_LIVE = True`, models publish (run 38003122609 waiting).
+  LinkedIn follow-up post published 2026-10-08.
 - **Next: P1, the ODI World Cup 2027 predictor** (plan in "Plan" above): (1) Elo team ratings + Monte Carlo tournament
   simulation as the baseline (ships first), backtested on WC 2019 and 2023 with calibration; (2) gradient-boosting
   challenger with squad features; (3) DL player embeddings from a ball-by-ball sequence model (also live win

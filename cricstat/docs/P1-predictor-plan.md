@@ -313,7 +313,7 @@ weekly/manual: cricstat-models train   → tuning + backtests A/B/C → MLflow c
 | P1.3 ✅ built 2026-10-08, gate 5 pending | Tournament simulator + backtests B and C + the first 2027 forecast (offline) | Sanity sheet, publish bar |
 | P1.4 ✅ built 2026-10-08, in review | `cricstat-models` service, forecast.sqlite, registry + gate, CI/publish/cd-pull, DSM text | CI green, NAS smoke test |
 | P1.5 ✅ built 2026-10-08, in review | API endpoints + tests | JSON on the dev API (8048) |
-| P1.6 🔶 in progress (predictor page + world map + review tweaks built; on hold by owner 2026-10-09) | Predictor, Methodology, team card, hub teaser in `tools/staging/web` | Preview (8090), section by section |
+| P1.6 🔶 partly live 2026-10-09 (world map Countries landing, records API, review tweaks); predictor page + methodology + team card + hub teaser on hold by owner | Predictor, Methodology, team card, hub teaser in `tools/staging/web` | Preview (8090), section by section |
 | Deploy | Merge `--no-ff`, publishes (models, API), cd-pull, DSM edit, rsync web, sitemap | Live check |
 
 ## 8. The ML and DL challengers later (P1b, P1c)
