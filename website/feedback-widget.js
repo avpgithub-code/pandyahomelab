@@ -13,6 +13,14 @@
  *     (active time, scroll depth, interactions) — see pageViewBeacon below
  *   - Records actions: demo runs (same-origin POSTs), example / About clicks,
  *     and anything a page sends via window.phl.track('name')
+ *   - Records the widget's own funnel (v2, 2026-10-09): feedback:seen (the card scrolled
+ *     into view, once per page view), feedback:like, feedback:open (form opened),
+ *     feedback:sent (comment accepted) — so the dashboard shows view → click rates
+ *   - Feedback pill (v2): a small "👍 Helpful? · 💬" pill in the bottom corner, shown after ~20 s
+ *     of active reading or half a page of scrolling, or at once after a demo run / when a page
+ *     calls window.phl.nudge('question'). Hidden while the bottom card is on screen; never again
+ *     on that page once liked, or for 14 days once dismissed. Events: feedback:pill:<why>,
+ *     feedback:like:pill / feedback:like:card, feedback:pill-off
  *
  * User interactions:
  *   - Like button       → POST /feedback/likes, increment count, lock to "Liked ✓"
@@ -28,6 +36,9 @@
   // Normalise: every page_id ends with /  (except root '/' itself is already correct)
   if (pageId !== '/' && !pageId.endsWith('/')) pageId += '/';
   const LIKED_KEY = 'phl:liked:' + pageId;
+  // A low like count reads as "nobody liked this", so the number only shows from this many likes up.
+  const SHOW_COUNT_FROM = 3;
+  function track(name) { try { if (window.phl && window.phl.track) window.phl.track(name); } catch (_) {} }
 
   // ─── Page-view / engagement beacon ─────────────────────────────────────
   // Tells the admin dashboard a real browser opened this page, and how long
@@ -156,6 +167,9 @@
       }
       window.phl = window.phl || {};
       window.phl.track = track;
+      // Pages ask for feedback at the moment of use: window.phl.nudge('Like the world map?').
+      // init() below replaces the queue with the real pill; calls before that are kept.
+      window.phl.nudge = window.phl.nudge || function (q, why) { window.phl._nudge = [q, why]; };
 
       // Every demo runs its model with a same-origin POST (/predict, /forecast,
       // /neighbors …), while model-info / about / history are GETs. A successful
@@ -171,7 +185,11 @@
             if (method === 'POST' && url.origin === window.location.origin
                 && !url.pathname.startsWith(API_BASE + '/')) {
               const seg = url.pathname.replace(/\/+$/, '').split('/').pop() || 'post';
-              result.then((r) => { if (r.ok) track('run:' + seg); }, () => {});
+              result.then((r) => {
+                if (!r.ok) return;
+                track('run:' + seg);
+                try { window.phl.nudge('Was that result useful?', 'run'); } catch (_) {}
+              }, () => {});
             }
           } catch (_) {}
           return result;
@@ -251,6 +269,33 @@
       color: #22c55e;
     }
     .phl-btn-like.liked:disabled { opacity: 1; }
+    .phl-like-count[hidden] { display: none; }
+    .phl-pill {
+      position: fixed; right: 18px; bottom: 18px; z-index: 9000;
+      display: flex; align-items: center; gap: .35rem;
+      padding: .35rem .4rem .35rem .9rem; border-radius: 99px;
+      background: #1a1e2a; border: 1px solid rgba(79,142,247,.45); color: #e2e8f0;
+      box-shadow: 0 10px 28px rgba(0,0,0,.45);
+      font: 600 .85rem 'Segoe UI', system-ui, -apple-system, sans-serif;
+      transform: translateY(0); opacity: 1; transition: transform .25s ease, opacity .25s ease;
+    }
+    .phl-pill[hidden] { display: none; }
+    .phl-pill.out { transform: translateY(140%); opacity: 0; }
+    .phl-pill-q { margin-right: .2rem; white-space: nowrap; }
+    .phl-pill button {
+      border: 1px solid rgba(79,142,247,.35); background: rgba(79,142,247,.1); color: #e2e8f0;
+      border-radius: 99px; min-width: 40px; height: 34px; padding: 0 .7rem; cursor: pointer;
+      font: inherit; line-height: 1;
+    }
+    .phl-pill button:hover { background: rgba(79,142,247,.22); border-color: #4f8ef7; }
+    .phl-pill .phl-pill-x { border-color: transparent; background: none; color: #64748b; min-width: 30px; padding: 0 .4rem; }
+    .phl-pill .phl-pill-x:hover { color: #e2e8f0; background: rgba(255,255,255,.06); }
+    @media (max-width: 600px) {
+      .phl-pill { left: 50%; right: auto; bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+                  transform: translate(-50%, 0); }
+      .phl-pill.out { transform: translate(-50%, 140%); }
+    }
+    @media (prefers-reduced-motion: reduce) { .phl-pill { transition: none; } }
     .phl-like-count {
       font-family: 'SF Mono', Consolas, monospace;
       font-weight: 700;
@@ -351,7 +396,7 @@
       + '  <div class="phl-feedback-title">💬 Was this helpful?</div>'
       + '  <div class="phl-feedback-actions">'
       + '    <button type="button" class="phl-btn phl-btn-like" data-role="like">'
-      + '      <span>👍</span><span class="phl-like-count" data-role="count">—</span>'
+      + '      <span>👍</span><span data-role="like-label">Helpful</span><span class="phl-like-count" data-role="count" hidden></span>'
       + '    </button>'
       + '    <button type="button" class="phl-btn" data-role="toggle-form">✍️ Share thoughts</button>'
       + '  </div>'
@@ -416,20 +461,147 @@
     }
     function clearMessage() { messageEl.innerHTML = ''; }
     function markLiked() {
+      const label = widget.querySelector('[data-role="like-label"]');
+      if (label && label.textContent === 'Helpful') label.textContent = 'Liked';
       likeBtn.classList.add('liked');
       likeBtn.disabled = true;
     }
 
+    // ── Feedback pill ────────────────────────────────────────────────────
+    const PILL_OFF_KEY = 'phl:pill-off:' + pageId;
+    const PILL_OFF_DAYS = 14;
+    const pill = document.createElement('div');
+    pill.className = 'phl-pill out';
+    pill.hidden = true;
+    pill.setAttribute('role', 'region');
+    pill.setAttribute('aria-label', 'Feedback');
+    pill.innerHTML = '<span class="phl-pill-q" aria-live="polite">Helpful?</span>'
+      + '<button type="button" data-p="like" aria-label="Yes, this was helpful">👍</button>'
+      + '<button type="button" data-p="comment" aria-label="Leave a comment">💬</button>'
+      + '<button type="button" class="phl-pill-x" data-p="close" aria-label="Dismiss">✕</button>';
+    document.body.appendChild(pill);
+    const pillQ = pill.querySelector('.phl-pill-q');
+    let pillDone = false, cardOnScreen = false, pillWanted = false;
+    function pillAllowed() {
+      if (pillDone) return false;
+      try {
+        if (localStorage.getItem(LIKED_KEY)) return false;
+        const off = Number(localStorage.getItem(PILL_OFF_KEY) || 0);
+        if (off && Date.now() - off < PILL_OFF_DAYS * 864e5) return false;
+      } catch (_) {}
+      return true;
+    }
+    function renderPill() {
+      const show = pillWanted && !cardOnScreen && pillAllowed();
+      if (show && pill.hidden) {
+        pill.hidden = false;
+        requestAnimationFrame(() => requestAnimationFrame(() => pill.classList.remove('out')));
+      } else if (!show && !pill.hidden) {
+        pill.classList.add('out');
+        setTimeout(() => { if (pill.classList.contains('out')) pill.hidden = true; }, 260);
+      }
+    }
+    let pillShownWhy = null;
+    function showPill(question, why) {
+      if (!pillAllowed()) return;
+      if (question) pillQ.textContent = question;
+      pillWanted = true;
+      if (!pillShownWhy) { pillShownWhy = why || 'auto'; track('feedback:pill:' + pillShownWhy); }
+      renderPill();
+    }
+    function hidePill(forGood) {
+      if (forGood) pillDone = true;
+      pillWanted = false;
+      renderPill();
+    }
+    pill.addEventListener('click', async (e) => {
+      const b = e.target instanceof Element ? e.target.closest('button') : null;
+      if (!b) return;
+      if (b.dataset.p === 'like') {
+        b.disabled = true;
+        try {
+          const data = await postLike();
+          showCount(data.total_likes);
+          try { localStorage.setItem(LIKED_KEY, '1'); } catch (_) {}
+          markLiked();
+          likeLabel.textContent = 'Thanks';
+          if (data.new_like) track('feedback:like:pill');
+          pillQ.textContent = 'Thanks! 🙏';
+          pill.querySelectorAll('button').forEach((x) => { x.hidden = x.dataset.p !== 'close'; });
+          setTimeout(() => hidePill(true), 2200);
+        } catch (_) { b.disabled = false; pillQ.textContent = 'Could not save — try again?'; }
+      } else if (b.dataset.p === 'comment') {
+        hidePill(true);
+        form.classList.add('visible');
+        track('feedback:open');
+        widget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => { try { bodyEl.focus({ preventScroll: true }); } catch (_) { bodyEl.focus(); } }, 450);
+      } else if (b.dataset.p === 'close') {
+        if (!pillDone) { try { localStorage.setItem(PILL_OFF_KEY, String(Date.now())); } catch (_) {} track('feedback:pill-off'); }
+        hidePill(true);
+      }
+    });
+    // Hide the pill while the full card is on screen (no point showing both).
+    try {
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver((entries) => {
+          cardOnScreen = entries.some((e) => e.isIntersecting);
+          renderPill();
+        }, { threshold: 0.15 }).observe(widget);
+      }
+    } catch (_) {}
+    // Automatic: ~20 s of active reading (tab visible, activity in the last 30 s) or half a page scrolled.
+    (function autoPill() {
+      let active = 0, lastAct = Date.now();
+      const bump = () => { lastAct = Date.now(); };
+      ['pointerdown', 'keydown', 'touchstart', 'mousemove'].forEach((ev) =>
+        window.addEventListener(ev, bump, { passive: true }));
+      window.addEventListener('scroll', () => {
+        bump();
+        const d = document.documentElement;
+        const total = Math.max(d.scrollHeight, document.body.scrollHeight);
+        if (total > window.innerHeight * 1.3 && (window.scrollY + window.innerHeight) / total >= 0.5) showPill(null, 'scroll');
+      }, { passive: true });
+      const t = setInterval(() => {
+        if (pillShownWhy || pillDone) { clearInterval(t); return; }
+        if (document.visibilityState === 'visible' && Date.now() - lastAct < 30000) active++;
+        if (active >= 20) { clearInterval(t); showPill(null, 'time'); }
+      }, 1000);
+    })();
+    // Pages (and demo runs) ask at the moment of use.
+    window.phl = window.phl || {};
+    const queued = window.phl._nudge;
+    window.phl.nudge = function (q, why) { showPill(q || null, why || 'ask'); };
+    if (queued) window.phl.nudge(queued[0], queued[1]);
+
     // Initial state — fetch count, restore liked from localStorage
-    const initial = await getLikeCount();
-    countEl.textContent = initial === null ? '—' : String(initial);
+    const likeLabel = $('like-label');
+    function showCount(n) {
+      const show = typeof n === 'number' && n >= SHOW_COUNT_FROM;
+      countEl.hidden = !show;
+      countEl.textContent = show ? String(n) : '';
+    }
+    showCount(await getLikeCount());
+
+    // feedback:seen once per page view, when at least half the card is on screen
+    try {
+      if ('IntersectionObserver' in window) {
+        const seen = new IntersectionObserver((entries) => {
+          if (entries.some((e) => e.isIntersecting)) { track('feedback:seen'); seen.disconnect(); }
+        }, { threshold: 0.5 });
+        seen.observe(widget);
+      }
+    } catch (_) {}
     try { if (localStorage.getItem(LIKED_KEY)) markLiked(); } catch (_) {}
 
     // Like
     likeBtn.addEventListener('click', async () => {
       try {
         const data = await postLike();
-        if (typeof data.total_likes === 'number') countEl.textContent = String(data.total_likes);
+        showCount(data.total_likes);
+        likeLabel.textContent = 'Thanks';
+        if (data.new_like) track('feedback:like:card');
+        hidePill(true);
         try { localStorage.setItem(LIKED_KEY, '1'); } catch (_) {}
         markLiked();
       } catch (e) {
@@ -440,7 +612,7 @@
     // Toggle form
     toggleBtn.addEventListener('click', () => {
       form.classList.toggle('visible');
-      if (form.classList.contains('visible')) bodyEl.focus();
+      if (form.classList.contains('visible')) { bodyEl.focus(); track('feedback:open'); }
     });
 
     // Char counter + submit enable
@@ -464,6 +636,7 @@
       try {
         const data = await postComment(name, body);
         showMessage(data.message || 'Thanks — your feedback was received.', 'success');
+        track('feedback:sent');
         nameEl.value = '';
         bodyEl.value = '';
         charEl.textContent = '0';
