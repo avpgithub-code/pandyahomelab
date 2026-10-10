@@ -175,20 +175,10 @@
     .panel-card .bottom-tabs { max-width: none; padding: 0; }
     .panel-card .domain-section:last-child { margin-bottom: 0; }
     @media (max-width: 720px) { .panel-card { padding: 1.1rem; } .panel-wrap { padding: 0 1rem; } }
-    /* — Project rows as a horizontal carousel inside each tab (JS adds .tabs-on and the arrows) — */
-    .proj-carousel { position: relative; }
-    .tabs-on .projects-grid { display: flex; gap: 1.25rem; overflow-x: auto; scroll-snap-type: x proximity; scroll-behavior: smooth;
-      padding: .5rem .2rem 1rem; scrollbar-width: thin; scrollbar-color: #3a4256 transparent; }
-    .tabs-on .projects-grid::-webkit-scrollbar { height: 8px; }
-    .tabs-on .projects-grid::-webkit-scrollbar-thumb { background: #3a4256; border-radius: 4px; }
-    .tabs-on .proj-card { flex: 0 0 min(300px, 82vw); scroll-snap-align: start; }
-    .car-arrow { position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; width: 38px; height: 38px; border-radius: 50%;
-      border: 1px solid var(--border); background: rgba(19,22,30,.92); color: var(--text); font-size: 1.3rem; line-height: 1;
-      cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.45); transition: opacity .2s, border-color .2s; }
-    .car-arrow:hover { border-color: var(--text); }
-    .car-arrow.prev { left: -14px; } .car-arrow.next { right: -14px; }
-    .car-arrow:disabled { opacity: 0; pointer-events: none; }
-    .proj-carousel.fits .car-arrow { display: none; }
+    /* — Project cards in each tab: two per row, widened to fill; an odd last card spans the row; one column on phones — */
+    .tabs-on .projects-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
+    .tabs-on .projects-grid > .proj-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
+    @media (max-width: 760px) { .tabs-on .projects-grid { grid-template-columns: 1fr; } }
     /* — PROJECTS — */
     .projects-section { padding-top: 0; }
     .projects-grid {
@@ -914,7 +904,6 @@
     const select = (i, focus) => {
       tabs.forEach((t, j) => { const on = i === j; t.setAttribute("aria-selected", String(on)); t.tabIndex = on ? 0 : -1; sections[j].hidden = !on; });
       if (focus) tabs[i].focus();
-      window.dispatchEvent(new Event("resize"));   // carousels re-measure once their tab is visible
     };
     tabs.forEach((t, i) => {
       t.addEventListener("click", () => select(i));
@@ -924,27 +913,6 @@
         else if (e.key === "Home") { e.preventDefault(); select(0, true); }
         else if (e.key === "End") { e.preventDefault(); select(tabs.length - 1, true); }
       });
-    });
-    // Each tab's cards scroll sideways; ‹ › arrows at the sides (hidden when everything fits or at an end).
-    sections.forEach((sec) => {
-      const grid = sec.querySelector(".projects-grid"); if (!grid) return;
-      const wrap = document.createElement("div"); wrap.className = "proj-carousel";
-      grid.parentNode.insertBefore(wrap, grid); wrap.appendChild(grid);
-      const mk = (cls, label, sym, dir) => {
-        const b = document.createElement("button"); b.type = "button"; b.className = "car-arrow " + cls;
-        b.setAttribute("aria-label", label); b.textContent = sym;
-        b.addEventListener("click", () => grid.scrollBy({ left: dir * Math.max(grid.clientWidth * 0.8, 280), behavior: "smooth" }));
-        wrap.appendChild(b); return b;
-      };
-      const prev = mk("prev", "Previous projects", "‹", -1), next = mk("next", "More projects", "›", 1);
-      const update = () => {
-        const max = grid.scrollWidth - grid.clientWidth;
-        wrap.classList.toggle("fits", max <= 4);
-        prev.disabled = grid.scrollLeft <= 4; next.disabled = grid.scrollLeft >= max - 4;
-      };
-      grid.addEventListener("scroll", update, { passive: true });
-      window.addEventListener("resize", update);
-      update();
     });
     const ids = sections.map((s) => s.id);
     const open = (hash, scroll) => {
