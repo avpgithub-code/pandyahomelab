@@ -175,3 +175,51 @@ def test_last_change_reports_the_most_recent_move():
     got = last_changes(s)["4"]
     assert (got["team1_pts"], got["team2_pts"], got["data_as_of"]) == (-2.0, 2.0, "2026-11-02")
     assert last_changes(s[:1]) == {}
+
+
+SHELL = """<!DOCTYPE html><html><head><title>x</title>
+<meta name="description" content="x"><meta property="og:title" content="x">
+<meta property="og:description" content="x"><link rel="canonical" href="x">
+<meta property="og:url" content="x">
+<script type="application/ld+json">{"static": true}</script>
+</head><body><h1>Who will lift</h1>
+<section><div class="wrap wc-seo" id="wc-seo"><p>generic text</p></div></section></body></html>"""
+
+
+def test_predictor_page_has_the_live_forecast_in_words(home, forecast_db, tmp_path):
+    from fastapi.testclient import TestClient
+
+    from presentation_logic.api.app import create_app
+    from shared.config import Config
+
+    web = tmp_path / "web"
+    (web / "predictor").mkdir(parents=True)
+    (web / "predictor" / "index.html").write_text(SHELL)
+    env = {"CRICSTAT_HOME": str(home), "CRICSTAT_FORECAST_DB": forecast_db,
+           "CRICSTAT_WEB_DIR": str(web)}
+    old = {k: os.environ.get(k) for k in env}
+    os.environ.update(env)
+    try:
+        with TestClient(create_app(Config())) as c:
+            r = c.get("/pages/predictor/")
+            assert r.status_code == 200, r.text
+            h = r.text
+            assert "<title>Cricket World Cup 2027 Prediction: Who Will Win? | cricstat</title>" in h
+            assert "India 60.0%" in h and "generic text" not in h   # live numbers, not the fallback
+            assert '"@type": "FAQPage"' in h and '"dateModified": "2026-10-07"' in h
+            assert '"static": true' not in h                      # the shell's JSON-LD is replaced
+            assert 'name="robots" content="index,follow"' in h
+            again = c.get("/pages/predictor/", headers={"if-none-match": r.headers["etag"]})
+            assert again.status_code == 304
+            assert "<loc>http" in c.get("/pages/sitemap.xml").text and "predictor/</loc>" in \
+                c.get("/pages/sitemap.xml").text
+    finally:
+        for k, v in old.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+
+
+def test_predictor_page_falls_back_without_a_forecast(client):
+    assert client.get("/pages/predictor/").status_code == 503   # Nginx serves the static page

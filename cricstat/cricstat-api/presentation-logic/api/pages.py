@@ -1,4 +1,4 @@
-"""Server-rendered heads for player and team pages, plus the cricstat sitemap (P0.6).
+"""Server-rendered heads: player and team pages, the WC 2027 predictor, the cricstat sitemap.
 
 Nginx sends /cricket/players/<slug>/ and /cricket/countries/<slug>/ here (/pages/...), and falls
 back to the plain static shell if the API is down. The shell is the same file Nginx would serve
@@ -16,10 +16,11 @@ from typing import Dict, Optional, Tuple
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 
-from application_logic.services import pages_service
+from application_logic.services import forecast_service, pages_service
 from application_logic.services.golden import trunc2
 from db_logic.repository import meta_repo
 from shared.config import ATTRIBUTION, Config
+from shared.exceptions import ApiError
 from shared.logger import get_logger
 
 log = get_logger("pages")
@@ -170,6 +171,83 @@ def team_summary(t: dict, data_as_of: Optional[str]) -> str:
                " Data as of %s." % esc(data_as_of) if data_as_of else ""))
 
 
+def _pct(p) -> str:
+    p = p or 0
+    return "0%" if p == 0 else "<0.1%" if p < 0.001 else "%.1f%%" % (100 * p)
+
+
+def _nth(n: int) -> str:
+    suffix = "th" if 10 <= n % 100 <= 20 else {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+    return "%d%s" % (n, suffix)
+
+
+def _day(iso: Optional[str]) -> str:
+    """'2026-10-07' → '7 Oct 2026' (no locale dependence)."""
+    if not iso:
+        return ""
+    y, m, d = iso[:10].split("-")
+    month = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split()[int(m) - 1]
+    return "%d %s %s" % (int(d), month, y)
+
+
+def predictor_text(data: dict) -> Tuple[str, str, list]:
+    """The forecast in plain words (for search engines and anyone reading the page without scripts):
+    returns the meta description, the HTML section and the FAQ entries for JSON-LD."""
+    teams = data["teams"]
+    as_of = _day(data["forecast"]["data_as_of"])
+    sims = "{:,}".format(data["forecast"]["n_simulations"])
+    hosts = data["tournament"].get("hosts") or []
+    home = ((data.get("model") or {}).get("elo") or {}).get("home") or 75
+
+    def p(t: dict, stage: str = "champion") -> str:
+        return _pct(t["probabilities"].get(stage))
+
+    a, b, c = teams[:3]
+    # ~155 characters: Google cuts longer descriptions, so the numbers come first.
+    desc = ("%s %s, %s %s, %s %s: every team's chances to win the 2027 Cricket World Cup, from "
+            "%s simulations. Updated %s." % (a["team"], p(a), b["team"], p(b), c["team"], p(c),
+                                             sims, as_of))
+    host_chances = ", ".join("%s %s (%s favourite)" % (t["team"], p(t), _nth(i + 1))
+                             for i, t in enumerate(teams) if t["team"] in hosts)
+    faq = [
+        ("Who is the favourite to win the 2027 Cricket World Cup?",
+         "On %s, cricstat's model makes %s the favourite with a %s chance of winning the title, "
+         "ahead of %s (%s) and %s (%s). The numbers come from %s simulated tournaments in the "
+         "published format and change as teams play."
+         % (as_of, a["team"], p(a), b["team"], p(b), c["team"], p(c), sims)),
+        ("Can the hosts win?",
+         "South Africa, Zimbabwe and Namibia host the tournament. Home teams get a %s-point boost "
+         "in cricstat Elo, measured from every ODI since 2002. Their title chances: %s."
+         % (home, host_chances)),
+        ("How are the chances calculated?",
+         "Every team gets a cricstat Elo rating (cricstat's own rating, not the ICC ranking) from "
+         "every men's ODI since 2002. The 2027 tournament, Qualifier included, is then played %s "
+         "times with those ratings, home advantage, rain-offs at each host's usual rate and a "
+         "year's worth of uncertainty; a team's chance is the share of runs it wins. The model was "
+         "tested on 900 ODIs since 2019, each predicted before it was played." % sims),
+        ("How often is the forecast updated?",
+         "Daily, after the latest results arrive; it only moves when a team plays an ODI. "
+         "Last update: %s." % as_of),
+    ]
+    rows = "".join(
+        "<tr><td>%d</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>"
+        % (i + 1, esc(t["team"]),
+           esc(t.get("group") or ("" if t.get("direct_qualifier") else "Qualifier")),
+           esc(p(t, "semi")), esc(p(t, "final")), esc(p(t)))
+        for i, t in enumerate(teams))
+    table = ('<details class="wc-seo-table"><summary>Every team\'s chances as text (%d teams, '
+             '%s)</summary><table><thead><tr><th>#</th><th>Team</th><th>Group</th>'
+             '<th>Semi-final</th><th>Final</th><th>Title</th></tr></thead><tbody>%s</tbody>'
+             '</table></details>' % (len(teams), esc(as_of), rows))
+    section = ('<div class="section-label">The forecast in words</div>'
+               '<h2 class="section-title">Who will win the 2027 Cricket World Cup?</h2>'
+               + "".join("<h3>%s</h3><p>%s</p>" % (esc(q), esc(ans)) for q, ans in faq)
+               + table
+               + '<p class="tiny muted">A statistical estimate for fun and learning, not betting '
+                 'advice. <a href="/cricket/methodology/">How it works</a>.</p>')
+    return desc, section, faq
+
+
 def register(app: FastAPI, cfg: Config) -> None:
     db = app.state.db
     shells = Shells(cfg.WEB_DIR)
@@ -262,16 +340,55 @@ def register(app: FastAPI, cfg: Config) -> None:
             return fill(out, '<div id="c-body" aria-live="polite">', team_summary(page, as_of))
         return respond(request, "countries", page, render)
 
+    @app.get("/pages/predictor/", include_in_schema=False)
+    def predictor_page(request: Request):
+        """The predictor with the live forecast written into the page (title, description, the
+        forecast in words, FAQ JSON-LD, dateModified); 503 → Nginx serves the static page."""
+        fdb = app.state.fdb
+        try:
+            data, _ = forecast_service.latest(db, fdb, "wc-2027")
+            shell, mtime = shells.get("predictor")
+        except (ApiError, OSError) as exc:
+            log.warning("predictor page not rendered: %s", exc)
+            return Response("predictor unavailable", status_code=503, media_type="text/plain")
+        etag = '"w%s-%d"' % (data["forecast"]["forecast_id"], int(mtime))
+        headers = {"ETag": etag, "Cache-Control": cache}
+        if request.headers.get("if-none-match") == etag:
+            return Response(status_code=304, headers=headers)
+        url = "%s%s/predictor/" % (site, prefix)
+        desc, section, faq = predictor_text(data)
+        title = "Cricket World Cup 2027 Prediction: Who Will Win? | cricstat"   # ≤ 60 characters
+        ld = [{"@context": "https://schema.org", "@type": "WebPage", "name": title, "url": url,
+               "description": desc, "dateModified": data["forecast"]["data_as_of"],
+               "isPartOf": {"@id": site + "/#site"}, "author": author,
+               "about": ["ICC Men's Cricket World Cup 2027", "Elo rating",
+                         "Monte Carlo simulation"]},
+              {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [
+                  {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}}
+                  for q, a in faq]}]
+        out = re.sub(r'<script type="application/ld\+json">.*?</script>\n?', "", shell,
+                     count=1, flags=re.S)
+        out = set_head(out, title, desc, url, "index,follow", "".join(ld_json(x) for x in ld))
+        out = fill(out, '<div class="wrap wc-seo" id="wc-seo">', section)
+        return HTMLResponse(out, headers=headers)
+
     @app.get("/pages/sitemap.xml", include_in_schema=False)
     def sitemap(request: Request):
         b = build()
-        etag = '"s%s"' % b.get("build_id")
+        try:                                       # the predictor's date = its latest forecast
+            fc = forecast_service.latest(db, app.state.fdb, "wc-2027")[0]["forecast"]
+        except ApiError:
+            fc = {}
+        etag = '"s%s-f%s"' % (b.get("build_id"), fc.get("forecast_id"))
         headers = {"ETag": etag, "Cache-Control": cache}
         if request.headers.get("if-none-match") == etag:
             return Response(status_code=304, headers=headers)
         key = "sitemap-%d-%d" % (cfg.INDEX_MIN_INTL, cfg.INDEX_MIN_LEAGUE)
         entries = db.cached(key, lambda: pages_service.sitemap_entries(
             db, cfg.INDEX_MIN_INTL, cfg.INDEX_MIN_LEAGUE))
+        if fc:
+            entries = [{"path": "predictor/", "lastmod": fc.get("data_as_of")},
+                       {"path": "methodology/", "lastmod": fc.get("data_as_of")}] + list(entries)
         urls = "".join("<url><loc>%s%s/%s</loc>%s</url>\n" % (
             site, prefix, esc(e["path"]),
             "<lastmod>%s</lastmod>" % esc(e["lastmod"]) if e["lastmod"] else "") for e in entries)
