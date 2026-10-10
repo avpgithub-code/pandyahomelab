@@ -167,6 +167,14 @@
     .bottom-tabs .domain-tabs { margin-bottom: 0; }
     section.tabbed > .section-label { display: none; }
     .tabs-on .domain-section { margin-bottom: 0; }
+    /* — Bordered panels: Featured Projects and Stack/Tools in cards like the flagship one — */
+    .panel-card { background: var(--surface); border: 1px solid var(--border); border-top: 3px solid #3a4256;
+      border-radius: var(--radius); padding: 1.8rem; }
+    .panel-wrap { max-width: 1200px; margin: 0 auto 5rem; padding: 0 2rem; }
+    .panel-card > section { max-width: none; margin: 0; padding: 0; }
+    .panel-card .bottom-tabs { max-width: none; padding: 0; }
+    .panel-card .domain-section:last-child { margin-bottom: 0; }
+    @media (max-width: 720px) { .panel-card { padding: 1.1rem; } .panel-wrap { padding: 0 1rem; } }
     /* — PROJECTS — */
     .projects-section { padding-top: 0; }
     .projects-grid {
@@ -434,7 +442,7 @@
     .btn-cric:hover { box-shadow: 0 6px 28px rgba(255,153,51,.55); }
     .btn-ghost-cric { border: 1px solid rgba(255,153,51,.45); background: rgba(255,153,51,.08); color: #fff; }
     .btn-ghost-cric:hover { background: rgba(255,153,51,.18); border-color: var(--accent-cric); }
-    .flagship { max-width: 1100px; margin: 0 auto 1rem; padding: 0 1.5rem; }
+    .flagship { max-width: 1200px; margin: 0 auto 1rem; padding: 0 2rem; }
     .flagship-card { background: linear-gradient(135deg, rgba(19,71,163,.35), rgba(255,153,51,.10)); border: 1px solid var(--border);
                      border-top: 3px solid var(--accent-cric); border-radius: var(--radius); padding: 1.8rem; }
     .flagship-eyebrow { font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent-cric); }
@@ -531,6 +539,7 @@
 </section>
 
 <section id="projects" class="projects-section">
+  <div class="panel-card">
   <div class="section-label">Live Deployments</div>
   <h2 class="section-title">Featured Projects</h2>
   <p class="section-desc">Each project is a containerized microservice — built and tested on NAS, deployed to AWS.</p>
@@ -699,8 +708,10 @@
       </div>
     </div>
   </div>
+  </div>
 </section>
 
+<div class="panel-wrap"><div class="panel-card">
 <section id="stack">
   <div class="section-label">Technology Stack</div>
   <h2 class="section-title">Built With</h2>
@@ -777,6 +788,7 @@
 
   </div>
 </section>
+</div></div>
 
 <footer>
   <p>
