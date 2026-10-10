@@ -308,12 +308,14 @@ weekly/manual: cricstat-models train   → tuning + backtests A/B/C → MLflow c
 | Step | Deliverable | Review on |
 |---|---|---|
 | P1.0 | This plan | Decisions §10 |
-| P1.1 ✅ built 2026-10-08, in review | Data layer: men's ODI extract, tournament configs (2019, 2023, 2027 + Qualifier) checked against the official fixtures, the Afghanistan supplement + crosswalks (`team_codes`, `supplement_venues`, `team_identities`) and its weekly check, data checks + tests | Configs, row counts, supplement source list |
-| P1.2 ✅ built 2026-10-08, in review | Elo engine + tuning + backtest A, logged to MLflow (run on the NAS host or in a dev container) | Parameters, calibration, baselines |
-| P1.3 ✅ built 2026-10-08, gate 5 pending | Tournament simulator + backtests B and C + the first 2027 forecast (offline) | Sanity sheet, publish bar |
-| P1.4 ✅ built 2026-10-08, in review | `cricstat-models` service, forecast.sqlite, registry + gate, CI/publish/cd-pull, DSM text | CI green, NAS smoke test |
-| P1.5 ✅ built 2026-10-08, in review | API endpoints + tests | JSON on the dev API (8048) |
+| P1.1 ✅ LIVE 2026-10-08 | Data layer: men's ODI extract, tournament configs (2019, 2023, 2027 + Qualifier) checked against the official fixtures, the Afghanistan supplement + crosswalks (`team_codes`, `supplement_venues`, `team_identities`) and its weekly check, data checks + tests | Configs, row counts, supplement source list |
+| P1.2 ✅ LIVE 2026-10-08 | Elo engine + tuning + backtest A, logged to MLflow (run on the NAS host or in a dev container) | Parameters, calibration, baselines |
+| P1.3 ✅ LIVE 2026-10-08 (gate 5 approved) | Tournament simulator + backtests B and C + the first 2027 forecast (offline) | Sanity sheet, publish bar |
+| P1.4 ✅ LIVE 2026-10-08 | `cricstat-models` service, forecast.sqlite, registry + gate, CI/publish/cd-pull, DSM text | CI green, NAS smoke test |
+| P1.5 ✅ LIVE 2026-10-08 | API endpoints + tests | JSON on the dev API (8048) |
 | P1.6 ✅ LIVE 2026-10-10 (predictor, methodology, team card, hub teaser, world map, cricstat Elo) | Predictor, Methodology, team card, hub teaser in `tools/staging/web` | Preview (8090), section by section |
+| **P1b — next** | ML challenger: HistGradientBoosting on Elo diff + home/away + squad strength (XI player atoms as of the match date) + form, same harness/backtests/gates (§8) | Backtest table v cricstat Elo; promote only if it wins on log loss + calibration |
+| P1c — later | DL challenger: player embeddings from ball-by-ball (laptop training, numpy inference on the NAS) | Same |
 | Deploy | Merge `--no-ff`, publishes (models, API), cd-pull, DSM edit, rsync web, sitemap | Live check |
 
 ## 8. The ML and DL challengers later (P1b, P1c)

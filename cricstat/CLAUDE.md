@@ -122,7 +122,7 @@ Background: `docs/llm-strategy-research-2026-10-05.md`.
 | F4 | Metric dictionary + formula tests (`docs/F4-metric-dictionary.md`) | Done 2026-10-05 |
 | F5 | API contract (`docs/F5-api-contract.md`) | Done 2026-10-05 |
 | F6 | Engineering setup (`docs/F6-engineering-setup.md`) + ADR-022 (Accepted) + CI skeleton | Done 2026-10-05; pipeline deployed, DSM tasks live (daily 05:30, monthly day 1 04:00; verified) |
-| F7 | Roadmap + decision log | Ongoing in this file (current to 2026-10-09) |
+| F7 | Roadmap + decision log | Ongoing in this file (current to 2026-10-10) |
 | F8 | Compliance & trust (licences page, privacy update, disclaimers) | Folded into P0 (decided 2026-10-05) |
 | F9 | CI/CD & automation (`docs/F9-cicd-automation.md`) | Done 2026-10-05: CI + approval gate + GHCR + NAS cd-pull.sh (DSM daily 05:15); merged to main |
 | P0 | Ingestion → serving-DB build → cricstat-api → first live pages (+F8) | **Done; public 2026-10-07.** P0.1 build + register, P0.2 golden figures, P0.3 cricstat-api, P0.3b `/admin/cricket` (2026-10-06); P0.4 pages + F8 texts live and linked from the homepage 2026-10-07 (+ `/cricket/about/` page) |
@@ -502,6 +502,11 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   methodology page not started.** Women's team ratings = a later step with its own backtest (not in P1.6).
 
 ## Next up and open TODOs (updated 2026-10-09, after the partial P1.6 deploy)
+- **Start of P1b (next session):** read `docs/P1-predictor-plan.md` §8 (challenger harness), §3 (tests + publish bar)
+  and the P1.6 section above. New branch `feat/cricstat-p1b-ml`. Plan first (features, leakage rules, squad source,
+  the Afghanistan coverage rule, MLflow experiment, how the comparison table and promotion work), get approval, then
+  build step by step with review stops. Training may need scikit-learn in the models image (stdlib-only today, py3.8
+  compatible); check no-AVX wheels on the NAS before choosing.
 - **State (2026-10-10):** **P1 baseline complete and LIVE** (P1.1–P1.6: predictor, methodology, cricstat Elo,
   world map, hub teaser). **Next: P1b, the gradient-boosting challenger** (squad features), then the DL challenger; then P2.
   Polish deployed 2026-10-10 04:08 UTC: "cricstat Elo" label everywhere (API dec23852e626), Korogi Sports Park name
