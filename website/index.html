@@ -90,7 +90,7 @@
     /* — HERO — */
     .hero {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      padding: 7rem 2rem 5rem;
+      padding: 5.75rem 2rem 2.5rem;
       text-align: center;
       background:
         radial-gradient(ellipse 70% 50% at 20% 40%, rgba(79,142,247,.07) 0%, transparent 60%),
@@ -100,28 +100,28 @@
     .hero-eyebrow {
       display: inline-flex; align-items: center; gap: .5rem;
       background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 99px; padding: .35rem 1rem;
-      font-size: .75rem; color: #cbd5e1; letter-spacing: .08em; text-transform: uppercase;
-      margin-bottom: 1.75rem;
+      border-radius: 99px; padding: .3rem .9rem;
+      font-size: .7rem; color: #cbd5e1; letter-spacing: .08em; text-transform: uppercase;
+      margin-bottom: 1rem;
     }
     .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-ml);
            box-shadow: 0 0 6px var(--accent-ml); animation: pulse 2s infinite; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
     .hero h1 {
-      font-size: clamp(2.4rem, 5vw, 4rem);
+      font-size: clamp(2rem, 3.4vw, 2.75rem);
       font-weight: 800; letter-spacing: -.03em; line-height: 1.1;
-      margin-bottom: 1.25rem;
+      margin-bottom: .85rem;
     }
     .hero h1 em { font-style: normal; color: var(--accent-ml); }
     .hero p.subtitle {
-      max-width: 780px; color: #cbd5e1; font-size: 1.05rem; margin-bottom: 2.5rem;
+      max-width: 780px; color: #cbd5e1; font-size: .95rem; margin-bottom: 1.75rem;
     }
     .cta-row { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
     .btn {
       display: inline-flex; align-items: center; gap: .5rem;
-      padding: .7rem 1.6rem; border-radius: var(--radius);
-      font-size: .9rem; font-weight: 600; cursor: pointer;
+      padding: .55rem 1.2rem; border-radius: var(--radius);
+      font-size: .85rem; font-weight: 600; cursor: pointer;
       text-decoration: none; border: none; transition: transform .15s, box-shadow .15s;
     }
     .btn:hover { transform: translateY(-2px); }
@@ -134,7 +134,7 @@
     .btn-ag  { background: var(--accent-ag);  color: #fff; box-shadow: 0 4px 20px rgba(168,85,247,.35); }
     .btn-ag:hover  { box-shadow: 0 6px 28px rgba(168,85,247,.55); }
 
-    .builder { color: #cbd5e1; font-size: .95rem; margin: -1.25rem 0 2rem; }
+    .builder { color: #cbd5e1; font-size: .875rem; margin: -.9rem 0 1.4rem; }
     .builder strong { color: var(--text); }
     .builder a { color: var(--accent-ml); text-decoration: none; font-weight: 600; }
     .builder a:hover { text-decoration: underline; }
