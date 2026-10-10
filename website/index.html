@@ -151,6 +151,18 @@
     }
     .section-desc { color: #cbd5e1; max-width: 580px; margin-bottom: 3rem; }
 
+    /* — DOMAIN TABS (built by the script below; without it the four sections stay stacked) — */
+    .domain-tabs { display: flex; flex-wrap: wrap; gap: .4rem; border-bottom: 1px solid var(--border); margin: 0 0 2rem; scroll-margin-top: 90px; }
+    .domain-tab { --c: var(--accent-ml); background: none; border: 0; border-bottom: 3px solid transparent; color: var(--muted);
+      font: inherit; font-size: .95rem; font-weight: 700; padding: .75rem 1.1rem .8rem; margin-bottom: -1px; cursor: pointer;
+      white-space: nowrap; transition: color .2s, border-color .2s; }
+    .domain-tab small { font-weight: 500; font-size: .75rem; margin-left: .35rem; opacity: .8; }
+    .domain-tab:hover { color: var(--text); }
+    .domain-tab[aria-selected="true"] { color: var(--c); border-bottom-color: var(--c); }
+    .domain-tab:focus-visible { outline: 2px solid var(--c); outline-offset: -2px; border-radius: 6px 6px 0 0; }
+    .domain-tab.dl { --c: var(--accent-dl); } .domain-tab.nlp { --c: var(--accent-nlp); } .domain-tab.ag { --c: var(--accent-ag); }
+    .tabs-on .domain-section .domain-header { display: none; }
+    .tabs-on .domain-section { margin-bottom: 0; }
     /* — PROJECTS — */
     .projects-section { padding-top: 0; }
     .projects-grid {
@@ -843,6 +855,60 @@
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAbout(); });
 </script>
 
+<script>
+  // ——— Featured Projects: ML / DL / NLP / Agentic as tabs ———
+  // Progressive: the tab bar is built here from each section's header, so without JS all four stay stacked.
+  (function () {
+    const sections = ["ml", "dl", "nlp", "agentic"].map((id) => document.getElementById(id)).filter(Boolean);
+    if (sections.length < 2) return;
+    const names = { ml: "Machine Learning", dl: "Deep Learning", nlp: "NLP", agentic: "Agentic AI" };
+    const cls = { ml: "", dl: "dl", nlp: "nlp", agentic: "ag" };
+    const bar = document.createElement("div");
+    bar.className = "domain-tabs"; bar.setAttribute("role", "tablist"); bar.setAttribute("aria-label", "Project areas");
+    const tabs = sections.map((sec) => {
+      const head = sec.querySelector(".domain-header");
+      const icon = (head && head.querySelector(".domain-icon") || {}).textContent || "";
+      const count = ((head && head.querySelector(".domain-count") || {}).textContent || "").trim();
+      const live = (count.match(/(\d+)\s*live/) || [])[1];
+      const b = document.createElement("button");
+      b.type = "button"; b.className = ("domain-tab " + cls[sec.id]).trim(); b.id = "tab-" + sec.id;
+      b.setAttribute("role", "tab"); b.setAttribute("aria-controls", sec.id);
+      b.textContent = (icon + " " + names[sec.id]).trim();
+      const sm = document.createElement("small"); sm.textContent = live && live !== "0" ? live + " live" : "planned"; b.appendChild(sm);
+      sec.setAttribute("role", "tabpanel"); sec.setAttribute("aria-labelledby", b.id);
+      bar.appendChild(b);
+      return b;
+    });
+    sections[0].parentNode.insertBefore(bar, sections[0]);
+    document.getElementById("projects").classList.add("tabs-on");
+    const select = (i, focus) => {
+      tabs.forEach((t, j) => { const on = i === j; t.setAttribute("aria-selected", String(on)); t.tabIndex = on ? 0 : -1; sections[j].hidden = !on; });
+      if (focus) tabs[i].focus();
+    };
+    tabs.forEach((t, i) => {
+      t.addEventListener("click", () => select(i));
+      t.addEventListener("keydown", (e) => {
+        const k = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+        if (k) { e.preventDefault(); select((i + k + tabs.length) % tabs.length, true); }
+        else if (e.key === "Home") { e.preventDefault(); select(0, true); }
+        else if (e.key === "End") { e.preventDefault(); select(tabs.length - 1, true); }
+      });
+    });
+    const ids = sections.map((s) => s.id);
+    const open = (hash, scroll) => {
+      const i = ids.indexOf(String(hash || "").replace("#", "")); if (i < 0) return false;
+      select(i); if (scroll && bar.scrollIntoView) bar.scrollIntoView({ behavior: "smooth", block: "start" });
+      return true;
+    };
+    // Top menu, hero buttons and any other #ml / #dl / #nlp / #agentic link open the tab instead of jumping.
+    document.querySelectorAll('a[href="#ml"], a[href="#dl"], a[href="#nlp"], a[href="#agentic"]').forEach((a) =>
+      a.addEventListener("click", (e) => {
+        if (open(a.getAttribute("href"), true)) { e.preventDefault(); history.replaceState(null, "", a.getAttribute("href")); }
+      }));
+    if (!open(location.hash, true)) select(0);
+    window.addEventListener("hashchange", () => open(location.hash, true));
+  })();
+</script>
 <script src="/feedback-widget.js"></script>
 </body>
 </html>
