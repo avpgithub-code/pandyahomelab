@@ -443,7 +443,12 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
 - **2026-10-10 (owner):** **predictor page APPROVED** (incl. hero = our own seal + hosts' map from `tools/gen_wc_badges.py`;
   the host map is hidden below 1100 px; owner agreed 2026-10-10: seal only on phones, no phone map). Live today: homepage cricstat-card icons,
   cricket-ball dot on every small cricstat wordmark (dotless ı + CSS ball; nav, homepage, about, licences, admin),
-  admin portal rebuilt. **Next: methodology page**, then team-page ratings card, hub teaser, full P1.6 deploy.
+  admin portal rebuilt. Built since in staging (V=98, full build = `CRICSTAT_PREDICTOR_LIVE=1`): **methodology page**
+  (`/cricket/methodology/`, 7 tabs, live numbers; hero = balance-scale seal + live mini calibration plot), **Players
+  intro** (bowler seal — final, owner 2026-10-10; batter kept via `PLAYERS_FIGURE` in gen_wc_badges.py — + live player
+  count; hidden on profiles by pages.py + players.js), **Countries hero** (globe seal + "cricket nations" count;
+  subtitle follows PREDICTOR_LIVE — the live subtitle still mentions ratings/WC chances until the next copy).
+  **Next:** team-page ratings card, hub teaser, then the full P1.6 deploy (API publish needed for pages.py).
 - **(Superseded 2026-10-10: owner resumed P1.6.) Was ON HOLD 2026-10-09 evening:** predictor-page approval, methodology page (`/cricket/methodology/`,
   data from `/v1/models/predictor/backtest`), live "Ratings & ODI World Cup 2027" card on men's team pages (countries.js
   `ratingsCard`), hub teaser with the real number, and the P1.6 deploy. Don't start them until the owner says so.
