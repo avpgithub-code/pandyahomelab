@@ -516,6 +516,7 @@ a.about-trigger[aria-current="page"] { background: rgba(255,153,51,.22); border-
 .wc-table tr.me td { background: rgba(255,153,51,.08); }
 .wc-table tr.me td:first-child { box-shadow: inset 3px 0 0 var(--saffron); }
 .wc-table tr.wc-pick { cursor: pointer; }
+.wc-gap-head { display: flex; align-items: center; justify-content: space-between; gap: .6rem; margin: .7rem 0 .3rem; flex-wrap: wrap; }
 /* Ratings: list and chart column side by side; the list scrolls so both columns end level. Stacked on narrow screens. */
 .wc-rate-grid { display: grid; gap: 1.25rem; grid-template-columns: 1fr; }
 .wc-rate-scroll { max-height: 70vh; overflow: auto; border: 1px solid var(--border); border-radius: var(--radius); }
