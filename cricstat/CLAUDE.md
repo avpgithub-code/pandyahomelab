@@ -542,7 +542,8 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   **Predictor answers up top (2026-10-10, V=117, API de595530cc46):** hero sentence "On <data_as_of>, cricstat's model
   makes <#1> the favourite at <x%>, ahead of <#2> and <#3>" is server-rendered into `#wc-answer` by
   `pages.predictor_answer` (predictor.js writes the same); caveats strip under the follow card; "Jump to" links
-  (forecast in words · How good is it? opens the tab · Read this first). Cards stay at the bottom, nothing hidden:
+  (since V=118: two saffron capsules under the answer, "⚠️ Read this first ↓" and "📝 The forecast in words ↓",
+  replacing the text line). Cards stay at the bottom, nothing hidden:
   crawler-visible words 553 → 613, FAQ JSON-LD unchanged.
 - **Previous state (2026-10-09):** P0, P0.5, P0.6 and P1.1–P1.5 live; **partial P1.6 live** (world map Countries landing with
   win %/matches, Following Men/Women, team-page tabs, hub Manhattan; API f974fb246adb; web commit 54ce200; owner

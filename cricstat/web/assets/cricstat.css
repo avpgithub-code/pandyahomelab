@@ -510,8 +510,14 @@ a.about-trigger[aria-current="page"] { background: rgba(255,153,51,.22); border-
 .wc-answer:empty { display: none; }
 .wc-answer b { color: var(--saffron); }
 .wc-caveats { margin: .8rem 0 .2rem; color: var(--dim); max-width: 980px; }
-.wc-jump { margin: .2rem 0 0; color: var(--muted); }
-.wc-caveats a, .wc-jump a { color: var(--saffron); }
+.wc-caveats a { color: var(--saffron); }
+/* Hero capsules that jump to the cards below the board (fixed nav is 72px tall). */
+.wc-pills { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0 0 1rem; }
+.wc-pill { display: inline-flex; align-items: center; gap: .35rem; padding: .4rem .95rem; border-radius: 999px;
+  border: 1px solid var(--saffron); color: var(--saffron); background: rgba(255,153,51,.08); font-size: .85rem;
+  font-weight: 600; text-decoration: none; transition: background .15s; }
+.wc-pill:hover, .wc-pill:focus-visible { background: rgba(255,153,51,.2); }
+#wc-limits, #wc-seo { scroll-margin-top: 90px; }
 .wc-follow-card { display: flex; flex-wrap: wrap; gap: 1rem 1.6rem; align-items: center; justify-content: space-between;
   background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--saffron); border-radius: var(--radius);
   padding: .9rem 1.1rem; max-width: 980px; }
