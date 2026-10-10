@@ -363,8 +363,9 @@
         h("div", { class: "section-head" }, [h("div", {}, [h("div", { class: "section-label" }, "Ratings"),
           h("h2", { class: "section-title" }, [C.wordmark(), " Elo · men's ODIs ", C.ourModel()]),
           h("p", { class: "tiny muted", style: "margin:.2rem 0 0" }, [C.wordmark(), " own rating, updated daily from every men's ODI since 2002 · tested on every ODI since 2019 before it was played · not the ICC ranking."])]), toggle]),
-        h("div", { class: "grid", style: "grid-template-columns:repeat(auto-fit,minmax(320px,1fr));align-items:start" }, [
-          h("div", { class: "scroll" }, h("table", { class: "wc-table" }, [
+        // Two columns on wide screens: the list scrolls inside a box as tall as the chart column (CSS .wc-rate-*).
+        h("div", { class: "wc-rate-grid" }, [
+          h("div", { class: "wc-rate-list" }, h("div", { class: "scroll wc-rate-scroll" }, h("table", { class: "wc-table" }, [
             h("thead", {}, h("tr", {}, ["Rank", "Team", "Rating", "ODIs", "Last ODI"].map((x, i) => h("th", { scope: "col", class: i === 1 ? "txt" : null }, x)))),
             h("tbody", {}, rows.map((r) => {
               // Click (or Enter/Space) charts that team; the team-name link still opens its page.
@@ -377,7 +378,7 @@
               tr.addEventListener("click", (e) => { if (!e.target.closest("a")) choose(false); });
               tr.addEventListener("keydown", (e) => { if ((e.key === "Enter" || e.key === " ") && e.target === tr) { e.preventDefault(); choose(true); } });
               return tr;
-            }))])),
+            }))]))),
           h("div", {}, [h("h3", { class: "wc-sub", style: "margin-top:0" }, hist ? hist.data.team + "'s rating after every ODI" : ""),
             h("div", { class: "chart-box", style: "height:300px" }, h("canvas", { id: "wc-rating", role: "img", "aria-label": "Rating history" })),
             h("p", { class: "tiny muted" }, "Click a team to see its rating history" + (base ? " (" + base.data.team + ", the team you follow, in grey)" : "") +
