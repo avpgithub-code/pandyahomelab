@@ -521,6 +521,21 @@
 
   async function init() {
     C.sectionTabs(document.querySelector(".wc-board .sec-tabs"));
+    // Board title bar = top-level tabs. Links to #wc-limits / #wc-seo (caveats, hero capsules, shared URLs) open that tab.
+    C.sectionTabs(document.querySelector(".wc-top-tabs"));
+    const TOP = { "#wc-limits": "top-limits", "#wc-seo": "top-words", "#wc-board": "top-board" };
+    const openTop = (hash, scroll) => {
+      const tab = document.getElementById(TOP[hash]); if (!tab) return false;
+      tab.click();
+      const board = document.getElementById("wc-board");
+      if (scroll && board && board.scrollIntoView) board.scrollIntoView({ behavior: "smooth", block: "start" });
+      return true;
+    };
+    document.querySelectorAll('a[href="#wc-limits"], a[href="#wc-seo"]').forEach((a) => a.addEventListener("click", (e) => {
+      if (openTop(a.getAttribute("href"), true)) { e.preventDefault(); history.replaceState(null, "", a.getAttribute("href")); }
+    }));
+    if (TOP[location.hash]) openTop(location.hash, true);
+    window.addEventListener("hashchange", () => openTop(location.hash, true));
     // Hero "Jump to" links that name a tab open it, then scroll to the board.
     document.querySelectorAll("a[data-tab]").forEach((a) => a.addEventListener("click", (e) => {
       const tab = document.getElementById(a.dataset.tab); if (!tab) return;

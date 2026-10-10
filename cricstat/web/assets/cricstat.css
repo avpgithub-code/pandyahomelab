@@ -517,7 +517,18 @@ a.about-trigger[aria-current="page"] { background: rgba(255,153,51,.22); border-
   border: 1px solid var(--saffron); color: var(--saffron); background: rgba(255,153,51,.08); font-size: .85rem;
   font-weight: 600; text-decoration: none; transition: background .15s; }
 .wc-pill:hover, .wc-pill:focus-visible { background: rgba(255,153,51,.2); }
-#wc-limits, #wc-seo { scroll-margin-top: 90px; }
+#wc-board { scroll-margin-top: 90px; }
+/* Predictor board title bar as top-level tabs (scoreboard lettering; the inner .sec-tabs stay as they are). */
+.wc-top-tabs { gap: .4rem 1.6rem; flex-wrap: wrap; margin-bottom: 1rem; border-bottom: 1px dashed #2f3b37; padding-bottom: 0; }
+.top-tab { display: inline-flex; align-items: center; gap: .6rem; background: none; border: 0; border-bottom: 2px solid transparent;
+  font: inherit; letter-spacing: inherit; text-transform: inherit; color: #7f8f88; text-shadow: none; cursor: pointer;
+  padding: .3rem .2rem .7rem; margin-bottom: -1px; transition: color .2s, border-color .2s; }
+.top-tab:hover { color: #d9b77e; }
+.top-tab[aria-selected="true"] { color: #ffc46b; text-shadow: 0 0 8px rgba(255,170,60,.45); border-bottom-color: #ffc46b; }
+.top-tab:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 4px; }
+.top-tab .bulb { flex: none; }
+.top-tab .mc-asof { margin-left: -.2rem; }
+.wc-board .wrap.wc-limits, .wc-board .wrap.wc-seo { max-width: none; padding: 0; }
 .wc-follow-card { display: flex; flex-wrap: wrap; gap: 1rem 1.6rem; align-items: center; justify-content: space-between;
   background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--saffron); border-radius: var(--radius);
   padding: .9rem 1.1rem; max-width: 980px; }
