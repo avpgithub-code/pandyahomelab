@@ -47,7 +47,7 @@
     const sel = h("select", { id: "wc-follow-sel", autocomplete: "off", "aria-label": "Team to follow" },
       F.teams.slice().sort((a, b) => a.team.localeCompare(b.team)).map((x) =>
         h("option", { value: x.team_uid, selected: x.team_uid === t.team_uid ? "selected" : null }, x.team)));
-    sel.addEventListener("change", () => { follow = sel.value; C.setFollow(follow); followStrip(); renderDonut(); renderOdds(); renderTime(); renderRatings(); if (SCHED) renderFixtures(); });
+    sel.addEventListener("change", () => { follow = sel.value; ratingSel = null; C.setFollow(follow); followStrip(); renderDonut(); renderOdds(); renderTime(); renderRatings(); if (SCHED) renderFixtures(); });
     const p = t.probabilities;
     C.fill("wc-follow", h("div", { class: "wc-follow-card" }, [
       h("div", { class: "row", style: "gap:.8rem" }, [C.teamBadge(t.team), h("div", {}, [
@@ -274,12 +274,17 @@
   }
 
   // ── ⚖️ Ratings ──
-  let showAll = false;
-  async function renderRatings() {
+  let showAll = false, ratingSel = null, ratingList = null;       // ratingSel: team charted (null = followed team)
+  const histCache = {};
+  const ratingHist = (uid) => histCache[uid] || (histCache[uid] =
+    C.api("/v1/ratings/" + encodeURIComponent(uid) + "/history?scope=ODI").catch(() => { delete histCache[uid]; return null; }));
+  async function renderRatings(focusRow) {
     const target = document.getElementById("pane-ratings");
     try {
-      const [list, hist] = await Promise.all([C.api("/v1/ratings?scope=ODI&gender=male"),
-        C.api("/v1/ratings/" + encodeURIComponent(follow) + "/history?scope=ODI").catch(() => null)]);
+      const pick = ratingSel || follow;
+      const [list, hist, base] = await Promise.all([ratingList || C.api("/v1/ratings?scope=ODI&gender=male"),
+        ratingHist(pick), pick !== follow ? ratingHist(follow) : null]);
+      ratingList = list;
       const rows = list.data.filter((r) => showAll || r.active);
       const toggle = h("button", { class: "tab sm", type: "button", "aria-pressed": String(showAll) }, showAll ? "Active teams only" : "Show inactive teams too");
       toggle.addEventListener("click", () => { showAll = !showAll; renderRatings(); });
@@ -290,22 +295,37 @@
         h("div", { class: "grid", style: "grid-template-columns:repeat(auto-fit,minmax(320px,1fr));align-items:start" }, [
           h("div", { class: "scroll" }, h("table", { class: "wc-table" }, [
             h("thead", {}, h("tr", {}, ["Rank", "Team", "Rating", "ODIs", "Last ODI"].map((x, i) => h("th", { scope: "col", class: i === 1 ? "txt" : null }, x)))),
-            h("tbody", {}, rows.map((r) => h("tr", { class: r.team_uid === follow ? "me" : null }, [
-              h("td", { class: "num" }, r.rank ? String(r.rank) : "–"), h("td", { class: "txt" }, teamCell(r)),
-              h("td", {}, String(Math.round(r.rating))), h("td", {}, C.num(r.matches)), h("td", {}, day(r.last_match))])))])),
+            h("tbody", {}, rows.map((r) => {
+              // Click (or Enter/Space) charts that team; the team-name link still opens its page.
+              const tr = h("tr", { class: ["wc-pick", r.team_uid === follow ? "me" : "", r.team_uid === pick && pick !== follow ? "sel" : ""].join(" ").trim(),
+                tabindex: "0", "data-uid": r.team_uid, "aria-selected": String(r.team_uid === pick),
+                "aria-label": r.team + ": show rating history" }, [
+                h("td", { class: "num" }, r.rank ? String(r.rank) : "–"), h("td", { class: "txt" }, teamCell(r)),
+                h("td", {}, String(Math.round(r.rating))), h("td", {}, C.num(r.matches)), h("td", {}, day(r.last_match))]);
+              const choose = (kb) => { if (r.team_uid === pick) return; ratingSel = r.team_uid === follow ? null : r.team_uid; renderRatings(kb ? r.team_uid : null); };
+              tr.addEventListener("click", (e) => { if (!e.target.closest("a")) choose(false); });
+              tr.addEventListener("keydown", (e) => { if ((e.key === "Enter" || e.key === " ") && e.target === tr) { e.preventDefault(); choose(true); } });
+              return tr;
+            }))])),
           h("div", {}, [h("h3", { class: "wc-sub", style: "margin-top:0" }, hist ? hist.data.team + "'s rating after every ODI" : ""),
             h("div", { class: "chart-box", style: "height:300px" }, h("canvas", { id: "wc-rating", role: "img", "aria-label": "Rating history" })),
-            h("p", { class: "tiny muted" }, "1500 = an average Full Member when the data starts (2002). Ranked: teams with an ODI in the last two years. Change the team with ‘Following’ above.")])]),
+            h("p", { class: "tiny muted" }, "Click a team to see its rating history" + (base ? " (" + base.data.team + ", the team you follow, in grey)" : "") +
+              ". 1500 = an average Full Member when the data starts (2002). Ranked: teams with an ODI in the last two years.")])]),
       ]);
+      if (focusRow) { const el = target.querySelector('tr[data-uid="' + focusRow + '"]'); if (el) el.focus(); }
       if (charts.rating) charts.rating.destroy();
       if (hist && window.Chart) {
-        const pts = hist.data.points;
+        // Linear time axis: two teams have different ODI dates, so a shared category axis would misalign them.
+        const line = (hd, color, width) => ({ label: hd.data.team, data: hd.data.points.map((p) => ({ x: Date.parse(p.date), y: p.rating })),
+          borderColor: color, backgroundColor: color, borderWidth: width, pointRadius: 0, pointHoverRadius: 4, tension: 0.15 });
+        const sets = [line(hist, PAL[0], 2)].concat(base ? [line(base, "#6b7280", 1.5)] : []);
         charts.rating = new window.Chart(document.getElementById("wc-rating"), { type: "line",
-          data: { labels: pts.map((p) => p.date), datasets: [{ label: hist.data.team, data: pts.map((p) => p.rating), borderColor: PAL[0],
-            backgroundColor: PAL[0], borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, tension: 0.15 }] },
-          options: { responsive: true, maintainAspectRatio: false, interaction: { mode: "index", intersect: false },
-            plugins: { legend: { display: false }, tooltip: { callbacks: { title: (c) => day(c[0].label), label: (c) => "Rating " + Math.round(c.parsed.y) } } },
-            scales: { x: { ticks: { maxTicksLimit: 8, callback: function (v) { return String(this.getLabelForValue(v)).slice(0, 4); } }, grid: { display: false } },
+          data: { datasets: sets },
+          options: { responsive: true, maintainAspectRatio: false, interaction: { mode: "nearest", axis: "x", intersect: false },
+            plugins: { legend: { display: !!base, position: "bottom", labels: { boxWidth: 12, boxHeight: 3 } },
+              tooltip: { callbacks: { title: (c) => day(new Date(c[0].parsed.x).toISOString().slice(0, 10)),
+                label: (c) => (base ? c.dataset.label + ": " : "Rating ") + Math.round(c.parsed.y) } } },
+            scales: { x: { type: "linear", ticks: { maxTicksLimit: 8, callback: (v) => String(new Date(v).getUTCFullYear()) }, grid: { display: false } },
               y: { grid: { color: "#1c2130" } } } } });
       }
     } catch (e) { C.showError(target, e, "the ratings"); }
