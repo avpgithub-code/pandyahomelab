@@ -441,7 +441,7 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   regenerate (map `data-model="on"`, nav link, predictor page, predictor licence rows), approve models publish,
   cd-pull models → `forecast --force` → copy predictor/, venues/, predictor.js too.
 - **2026-10-10 (owner):** **predictor page APPROVED** (incl. hero = our own seal + hosts' map from `tools/gen_wc_badges.py`;
-  the host map is hidden below 1100 px; Claude suggested seal-only on phones, owner not yet decided). Live today: homepage cricstat-card icons,
+  the host map is hidden below 1100 px; owner agreed 2026-10-10: seal only on phones, no phone map). Live today: homepage cricstat-card icons,
   cricket-ball dot on every small cricstat wordmark (dotless ı + CSS ball; nav, homepage, about, licences, admin),
   admin portal rebuilt. **Next: methodology page**, then team-page ratings card, hub teaser, full P1.6 deploy.
 - **(Superseded 2026-10-10: owner resumed P1.6.) Was ON HOLD 2026-10-09 evening:** predictor-page approval, methodology page (`/cricket/methodology/`,
