@@ -520,6 +520,12 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   "✓ Live" + 3 direct links. API 018fcac516be. Crawler-visible words 181 → 553. HEAD fix (API f515baf28e51): pages,
   sitemap and /v1 answered HEAD with 405, now 200 (HeadAsGet middleware). Cricket sitemap resubmitted in Search
   Console 2026-10-10 ("Couldn't fetch" before its first read is normal; recheck ~2026-10-13).
+  **Forecast dates (2026-10-10, V=109):** every user-facing forecast date is `data_as_of` (results to), never
+  `created_at` (run time). The predictor band/stamp showed the run date (10 Oct) while the hub teaser and Match centre
+  showed 7 Oct; now "results to 7 Oct · last run 10 Oct", and Odds over time keeps one point per `data_as_of` (latest
+  run wins; the API still returns every run). Re-runs on the same results are legitimate (fingerprint covers model,
+  fixtures and qualifier field, e.g. run 3 after the 9 Oct polish deploy). Staging holds unpublished extras
+  (wc-seal.svg, wc-hosts.svg, badge-options/): copy only changed files live, don't rsync the whole tree.
 - **Previous state (2026-10-09):** P0, P0.5, P0.6 and P1.1–P1.5 live; **partial P1.6 live** (world map Countries landing with
   win %/matches, Following Men/Women, team-page tabs, hub Manhattan; API f974fb246adb; web commit 54ce200; owner
   checked it). Everything is merged to `main` and pushed. **On hold until the owner says so:** predictor page,
