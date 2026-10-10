@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Methodology: how the ODI World Cup 2027 predictor works and how well — cricstat | pandyaHomeLab</title>
+<meta name="description" content="How cricstat's ODI World Cup 2027 predictor works: Elo ratings from every men's ODI, 50,000 simulated tournaments, and backtests on the 2019 and 2023 World Cups with calibration, baselines and model versions.">
+<meta name="theme-color" content="#0d0f14">
+<link rel="canonical" href="https://pandyahomelab.com/cricket/methodology/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="pandyaHomeLab">
+<meta property="og:title" content="Methodology: how the ODI World Cup 2027 predictor works and how well — cricstat | pandyaHomeLab">
+<meta property="og:description" content="How cricstat's ODI World Cup 2027 predictor works: Elo ratings from every men's ODI, 50,000 simulated tournaments, and backtests on the 2019 and 2023 World Cups with calibration, baselines and model versions.">
+<meta property="og:url" content="https://pandyahomelab.com/cricket/methodology/">
+<meta property="og:image" content="https://pandyahomelab.com/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/cricket/assets/cricstat.css?v=106">
+<script type="application/ld+json">{
+ "@context": "https://schema.org",
+ "@type": "TechArticle",
+ "headline": "How the ODI World Cup 2027 predictor works",
+ "description": "How cricstat's ODI World Cup 2027 predictor works: Elo ratings from every men's ODI, 50,000 simulated tournaments, and backtests on the 2019 and 2023 World Cups with calibration, baselines and model versions.",
+ "url": "https://pandyahomelab.com/cricket/methodology/",
+ "isPartOf": {
+  "@id": "https://pandyahomelab.com/#site"
+ },
+ "about": [
+  "Elo rating",
+  "Monte Carlo simulation",
+  "Calibration",
+  "Backtesting"
+ ],
+ "author": {
+  "@type": "Person",
+  "@id": "https://pandyahomelab.com/#archit",
+  "name": "Archit Pandya",
+  "url": "https://pandyahomelab.com/"
+ }
+}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<nav class="site-nav" aria-label="cricstat">
+  <a class="brand" href="/">pandya<em>HomeLab</em><span class="sep">/</span><span class="cs"><i class="cs-sr">cricstat</i><i class="cs-w" aria-hidden="true">cr<i class="cs-i">ı</i>c<b>stat</b></i></span></a>
+  <ul class="nav-links">
+    <li><a href="/cricket/">Overview</a></li>
+    <li><a href="/cricket/countries/">Countries</a></li>
+    <li><a href="/cricket/players/">Players</a></li>
+    <li><a href="/cricket/predictor/">ODI WC 2027</a></li>
+    <li><span class="soon" title="Coming in a later phase">Ask <span class="soon-tag">soon</span></span></li>
+    <li><a href="/cricket/methodology/" aria-current="page">Methodology</a></li>
+    <li><a href="/cricket/licences/">Licences</a></li>
+  </ul>
+  <a class="about-trigger" href="/cricket/about/" data-about><span aria-hidden="true">ⓘ</span> About cricstat</a>
+</nav>
+<main id="main" class="page-top">
+<header class="hero left"><div class="wrap">
+  <div class="eyebrow"><span class="dot"></span>Methodology · ODI World Cup 2027 predictor</div>
+  <div class="wc-head"><svg class="wc-seal" viewBox="0 0 200 200" role="img" aria-label="Methodology of the cricstat predictor"><defs><linearGradient id="mGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE38A"/><stop offset=".5" stop-color="#F5B82E"/><stop offset="1" stop-color="#C98500"/></linearGradient><path id="mTop" d="M30 100a70 70 0 0 1 140 0"/><path id="mBot" d="M24 100a76 76 0 0 0 152 0"/></defs><circle cx="100" cy="100" r="96" fill="#13161e" stroke="url(#mGold)" stroke-width="3"/><circle cx="100" cy="100" r="86" fill="none" stroke="#F5B82E" stroke-opacity=".35" stroke-width="1"/><circle cx="100" cy="100" r="58" fill="none" stroke="#F5B82E" stroke-opacity=".35" stroke-width="1"/><text font-family="system-ui, sans-serif" font-weight="800" font-size="12.5" letter-spacing="2.2" fill="#F5B82E"><textPath href="#mTop" startOffset="50%" text-anchor="middle">HOW IT WORKS · METHODOLOGY</textPath></text><text font-family="system-ui, sans-serif" font-weight="700" font-size="9" letter-spacing="1.4" fill="#cbd5e1"><textPath href="#mBot" startOffset="50%" text-anchor="middle">ELO · 50,000 SIMULATIONS · BACKTESTS</textPath></text><circle cx="31" cy="100" r="2.4" fill="#FF9933"/><circle cx="169" cy="100" r="2.4" fill="#FF9933"/><g fill="none" stroke="url(#mGold)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M100 66v52M86 121h28"/><path d="M70 82l60-6"/><path d="M70 82l-11 22M70 82l11 22M130 76l-11 22M130 76l11 22"/><path d="M56 104q14 10 28 0M116 98q14 10 28 0"/></g><circle cx="100" cy="64" r="3.6" fill="url(#mGold)"/><circle cx="70" cy="99" r="5.2" fill="#b3201c"/><path d="M67.4 95.6c1.2 1.1 1.6 3.9.6 6.2M72.6 95.6c-1.2 1.1-1.6 3.9-.6 6.2" stroke="#f5efe6" stroke-width=".8" fill="none"/><text x="100" y="140" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="900" font-size="17" letter-spacing="1" fill="url(#mGold)">Elo</text><text x="100" y="152" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="700" font-size="7.5" letter-spacing="1.5" fill="#94a3b8">cric<tspan fill="#FF9933">stat</tspan></text></svg>
+   <div class="wc-head-text"><h1 class="wc-title" style="font-size:clamp(2rem,4.4vw,3rem);margin:0">How the predictor works — and how well</h1>
+  <p class="subtitle" style="margin-top:.6rem">The model in plain words and in formulas, every setting and how it was chosen, and the tests it had to pass
+  on matches it had never seen. One model for every team; every number below comes from the same files the forecast uses.</p></div>
+   <figure class="wc-hosts-fig m-calfig"><svg class="m-calmini" id="m-calmini" viewBox="0 0 120 120" role="img" aria-label="Calibration: predicted against observed win rate (loading)"></svg><figcaption id="m-calcap">said vs happened</figcaption></figure>
+  </div>
+  <p class="tiny muted" id="m-stamp">Loading…</p>
+</div></header>
+<section class="section panel" aria-label="Methodology"><div class="wrap scoreboard m-board">
+  <div class="sb-head board-head" aria-hidden="true"><span class="bulb"></span>Methodology<span class="mc-asof" id="m-asof"></span><span class="bulb"></span></div>
+  <div class="sec-tabs" role="tablist" aria-label="Methodology sections">
+    <button class="sec-tab" type="button" role="tab" id="tab-m-plain" aria-controls="pane-m-plain" aria-selected="true">🧭 In plain words</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-m-elo" aria-controls="pane-m-elo" aria-selected="false" tabindex="-1">📐 Ratings</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-m-sim" aria-controls="pane-m-sim" aria-selected="false" tabindex="-1">🎲 Simulation</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-m-tests" aria-controls="pane-m-tests" aria-selected="false" tabindex="-1">✅ Backtests</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-m-cal" aria-controls="pane-m-cal" aria-selected="false" tabindex="-1">🎯 Calibration</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-m-models" aria-controls="pane-m-models" aria-selected="false" tabindex="-1">🏁 Models &amp; versions</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-m-limits" aria-controls="pane-m-limits" aria-selected="false" tabindex="-1">⚠️ Limits</button>
+  </div>
+  <div class="sec-pane" role="tabpanel" id="pane-m-plain" aria-labelledby="tab-m-plain"><div class="skeleton"></div></div>
+  <div class="sec-pane" role="tabpanel" id="pane-m-elo" aria-labelledby="tab-m-elo" hidden></div>
+  <div class="sec-pane" role="tabpanel" id="pane-m-sim" aria-labelledby="tab-m-sim" hidden></div>
+  <div class="sec-pane" role="tabpanel" id="pane-m-tests" aria-labelledby="tab-m-tests" hidden></div>
+  <div class="sec-pane" role="tabpanel" id="pane-m-cal" aria-labelledby="tab-m-cal" hidden></div>
+  <div class="sec-pane" role="tabpanel" id="pane-m-models" aria-labelledby="tab-m-models" hidden></div>
+  <div class="sec-pane" role="tabpanel" id="pane-m-limits" aria-labelledby="tab-m-limits" hidden></div>
+</div></section>
+</main>
+<footer class="site-foot">
+  <p>Match data from Cricsheet (cricsheet.org), used under the Open Data Commons Attribution License 1.0.</p>
+  <p>Not affiliated with or endorsed by Cricsheet, the ICC or any cricket board. Statistics are derived from the source data and may differ from official records.</p>
+  <p><a href="/cricket/licences/">Data &amp; licences</a> · <a href="/privacy/">Privacy</a> · <a href="/cricket/about/">How cricstat was built</a> · <a href="/">pandyaHomeLab</a> · Built by <a href="/">Archit Pandya</a></p>
+</footer>
+<script src="/cricket/assets/flags.js?v=106"></script>
+<script src="/cricket/assets/cricstat.js?v=106"></script>
+<script src="/cricket/assets/about.js?v=106"></script>
+<script src="/vendor/chart.js-4.4.0/chart.umd.min.js"></script>
+<script src="/cricket/assets/methodology.js?v=106"></script>
+<script src="/feedback-widget.js"></script>
+</body>
+</html>

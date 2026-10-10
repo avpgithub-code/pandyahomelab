@@ -78,8 +78,102 @@
 
   // What's planned for this format and gender. Only the men's ODI World Cup 2027 predictor is
   // committed (P1); everything else is said to come later, without promising a date.
+  // Men's ODI: the live Elo rating and ODI World Cup 2027 chances (P1.6), once the predictor is public
+  // (the shell's data-model="off" keeps the "Next" placeholder until then). Fetched once per page.
+  const MODEL_ON = (() => { const l = document.getElementById("c-landing"); return !!l && l.dataset.model !== "off"; })();
+  let model = null;
+  function loadModel() {
+    if (!model) {
+      model = Promise.all([C.api("/v1/ratings?scope=ODI&gender=male"), C.api("/v1/ratings/" + team.slug + "/history").catch(() => null),
+        C.api("/v1/forecasts/wc-2027/latest").catch(() => null)])
+        .then(([r, hist, wc]) => ({ rating: r.data.find((x) => x.slug === team.slug) || null, ranked: r.data.filter((x) => x.rank).length,
+          all: r.data,
+          points: hist ? hist.data.points : [], wc: wc ? wc.data.teams.find((t) => t.slug === team.slug) || null : null,
+          asOf: wc ? wc.data.forecast.data_as_of : null,
+          rank: wc ? wc.data.teams.slice().sort((a, b) => (b.probabilities.champion || 0) - (a.probabilities.champion || 0)).findIndex((t) => t.slug === team.slug) + 1 : 0,
+          host: wc ? (wc.data.tournament.hosts || []).includes(team.name) : false, home: wc ? ((wc.data.model || {}).elo || {}).home : null }));
+    }
+    return model;
+  }
+  function spark(points) {
+    const NS = "http://www.w3.org/2000/svg", W = 260, H = 54;
+    if (points.length < 2) return null;
+    const ys = points.map((p) => p.rating), lo = Math.min.apply(null, ys) - 5, hi = Math.max.apply(null, ys) + 5;
+    const t0 = Date.parse(points[0].date), t1 = Date.parse(points[points.length - 1].date) || t0 + 1;
+    const xy = points.map((p) => [(Date.parse(p.date) - t0) / (t1 - t0 || 1) * (W - 8) + 4, H - 4 - (p.rating - lo) / (hi - lo) * (H - 8)]);
+    const svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H); svg.setAttribute("class", "r-spark"); svg.setAttribute("role", "img");
+    svg.setAttribute("aria-label", "Rating over the last two years: from " + Math.round(ys[0]) + " to " + Math.round(ys[ys.length - 1]));
+    const line = document.createElementNS(NS, "polyline");
+    line.setAttribute("points", xy.map((p) => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" "));
+    line.setAttribute("fill", "none"); line.setAttribute("stroke", "#3987e5"); line.setAttribute("stroke-width", "2"); line.setAttribute("stroke-linejoin", "round");
+    const dot = document.createElementNS(NS, "circle"), last = xy[xy.length - 1];
+    dot.setAttribute("cx", last[0]); dot.setAttribute("cy", last[1]); dot.setAttribute("r", "3.5"); dot.setAttribute("fill", "#FF9933");
+    svg.appendChild(line); svg.appendChild(dot);
+    return svg;
+  }
+  const nth = (n) => n + ([, "st", "nd", "rd"][(n % 100 >> 3 ^ 1) && n % 10] || "th");
+  const pctTxt = (p) => (p === null || p === undefined ? "—" : p === 0 ? "0%" : p < 0.001 ? "<0.1%" : (100 * p).toFixed(1) + "%");
+  // What a rating means: the scale, and the win chance against a team people know (#1, or #2 for the #1),
+  // from the model's own formula E = 1 / (1 + 10^(−gap/400)) on neutral ground.
+  function explain(r, all) {
+    const ranked = all.filter((x) => x.rank).sort((a, b) => a.rank - b.rank);
+    const other = r.rank === 1 ? ranked[1] : ranked[0];
+    const line = [];
+    if (other) {
+      const e = 1 / (1 + Math.pow(10, -(r.rating - other.rating) / 400));
+      line.push("v " + other.team + " (#" + other.rank + ", " + Math.round(other.rating) + "): " + team.name + " win " + Math.round(100 * e) + "% on neutral ground");
+    }
+    const tip = h("details", { class: "r-what" }, [h("summary", {}, "ⓘ What does " + Math.round(r.rating) + " mean?"),
+      h("p", {}, "cricstat Elo is our own Elo rating — not the ICC ranking. Every Full Member starts at 1500, and each ODI moves the two teams' ratings up or down — more for beating a stronger side, a little for beating a weaker one. Only the gap matters: 100 points ahead ≈ 64% to win on neutral ground, 200 ≈ 76%, 0 = 50/50."),
+      h("p", {}, ["The same numbers drive the World Cup forecast. ", h("a", { href: "/cricket/methodology/" }, "How it works →")])]);
+    return h("div", { class: "r-explain" }, [line.length ? h("p", { class: "small", style: "margin:0 0 .3rem" }, line[0]) : null, tip,
+      h("p", { class: "tiny muted r-proof" }, [C.wordmark(), " own rating, updated daily from every men's ODI since 2002 · tested on every ODI since 2019 before it was played · not the ICC ranking."])]);
+  }
+
+  async function liveRatings() {
+    const target = C.fill("f-ratings", [h("div", { class: "card-head" }, [h("h2", {}, "Ratings & ODI World Cup 2027"), h("span", { class: "badge live" }, "Live")]),
+      h("div", { class: "skeleton", style: "height:120px" })]);
+    try {
+      const m = await loadModel();
+      if (!m.rating) {
+        C.fill(target, [h("div", { class: "card-head" }, [h("h2", {}, "Ratings & ODI World Cup 2027"), h("span", { class: "badge soon" }, "Not rated")]),
+          h("p", { class: "dim small" }, "Not rated: " + team.name + " hasn't played enough official ODIs for an Elo rating."),
+          h("a", { class: "small", href: "/cricket/methodology/" }, "How ratings work →")]);
+        return;
+      }
+      // Windows run back from the data date, not from the team's last match (a team that stopped
+      // playing ODIs years ago has no "last 12 months").
+      const r = m.rating, ref = Date.parse(m.asOf || new Date().toISOString().slice(0, 10));
+      const ago = (days) => new Date(ref - days * 864e5).toISOString().slice(0, 10);
+      const pts = m.points.filter((p) => p.date >= ago(730));
+      const before = m.points.filter((p) => p.date <= ago(365)).pop();
+      const recent = m.points.some((p) => p.date > ago(365));
+      const delta = before && recent ? Math.round(r.rating - before.rating) : null;
+      const w = m.wc, p = w ? w.probabilities : null;
+      const where = !w ? "Not in the 2027 race." : (m.rank ? nth(m.rank) + " favourite · " : "") + (w.direct_qualifier ? "Qualified · group " + w.group + "."
+        : pctTxt(p.qualified) + " to get through the Qualifier (Feb–Mar 2027).") + (m.host && m.home ? " 🏠 Host: +" + m.home + " home advantage in its home matches." : "");
+      C.fill(target, [
+        h("div", { class: "card-head" }, [h("h2", {}, [C.wordmark(), " Elo & ODI World Cup 2027 ", C.ourModel()]), h("span", { class: "badge live" }, "Live")]),
+        h("div", { class: "r-top" }, [
+          h("div", { class: "r-big" }, [h("b", {}, String(Math.round(r.rating))), h("span", {}, r.rank ? "#" + r.rank + " of " + m.ranked + " ranked" : "unranked (no recent ODIs)"),
+            delta !== null ? h("small", { class: delta >= 0 ? "up" : "down" }, (delta >= 0 ? "▲ " : "▼ ") + Math.abs(delta) + " in 12 months")
+              : h("small", { class: "dim" }, "no ODIs in the last 12 months · last " + C.date(r.last_match))]),
+          spark(pts)]),
+        explain(r, m.all),
+        w ? h("div", { class: "r-wc" }, [
+          h("div", {}, [h("b", {}, pctTxt(p.champion)), h("span", {}, "title")]),
+          h("div", {}, [h("b", {}, pctTxt(p.final)), h("span", {}, "final")]),
+          h("div", {}, [h("b", {}, pctTxt(p.semi)), h("span", {}, "semi-final")])]) : null,
+        h("p", { class: "tiny dim", style: "margin:.4rem 0 .5rem" }, where + (m.asOf ? " Forecast as of " + C.date(m.asOf) + "." : "")),
+        h("div", { class: "row", style: "gap:1rem;flex-wrap:wrap" }, [h("a", { class: "small", href: "/cricket/predictor/" }, "Full forecast →"),
+          h("a", { class: "small", href: "/cricket/methodology/" }, "How ratings work →")])]);
+    } catch (e) { C.showError(target, e, "ratings"); }
+  }
+
   function ratingsCard(scope) {
     const men = team.gender === "male", name = C.fmtName(scope);
+    if (men && scope === "ODI" && MODEL_ON) { liveRatings(); return; }
     const [title, badge, text] = men && scope === "ODI"
       ? ["Ratings & ODI World Cup 2027", "Next", "Team ratings and title chances arrive with the ODI World Cup 2027 predictor in the next phase."]
       : men && scope === "T20I"

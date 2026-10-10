@@ -313,5 +313,14 @@
   const params = new URLSearchParams(location.search);
   const q = params.get("q"), id = C.playerIdFromPath();
   if (q) { document.getElementById("p-search").value = q; search(q); }
+  // The intro (heading, seal, live player count) belongs to the plain Players page, not to a profile.
+  const intro = document.getElementById("p-intro");
+  if (intro && id) intro.hidden = true;
+  if (intro && !id) {
+    C.api("/v1/status").then(({ data }) => {
+      C.countUp(document.getElementById("p-count"), data.counts.players);
+      document.getElementById("p-count-sub").textContent = "men & women · since " + String(data.counts.first_match).slice(0, 4);
+    }).catch(() => { /* the count is decoration; the page works without it */ });
+  }
   if (id) profile(id); else if (!q) featured();
 })();

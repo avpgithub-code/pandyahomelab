@@ -14,7 +14,7 @@
 <meta property="og:url" content="https://pandyahomelab.com/cricket/countries/">
 <meta property="og:image" content="https://pandyahomelab.com/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="/cricket/assets/cricstat.css?v=92">
+<link rel="stylesheet" href="/cricket/assets/cricstat.css?v=106">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -24,19 +24,22 @@
     <li><a href="/cricket/">Overview</a></li>
     <li><a href="/cricket/countries/" aria-current="page">Countries</a></li>
     <li><a href="/cricket/players/">Players</a></li>
-    <li><span class="soon" title="Coming in a later phase">ODI WC 2027 <span class="soon-tag">soon</span></span></li>
+    <li><a href="/cricket/predictor/">ODI WC 2027</a></li>
     <li><span class="soon" title="Coming in a later phase">Ask <span class="soon-tag">soon</span></span></li>
-    <li><span class="soon" title="Coming in a later phase">Methodology <span class="soon-tag">soon</span></span></li>
+    <li><a href="/cricket/methodology/">Methodology</a></li>
     <li><a href="/cricket/licences/">Licences</a></li>
   </ul>
   <a class="about-trigger" href="/cricket/about/" data-about><span aria-hidden="true">ⓘ</span> About cricstat</a>
 </nav>
 <main id="main" class="page-top">
-<div id="c-landing" data-model="off">
+<div id="c-landing" data-model="on">
 <header class="hero left"><div class="wrap">
   <div class="eyebrow"><span class="dot"></span>Countries</div>
-  <h1 style="font-size:clamp(2rem,5vw,3rem)">Cricket around the world</h1>
-  <p class="subtitle">Every international team in our data on one map. Colour it by ODI rating, ODI World Cup 2027 chances, recent win % or matches played, then pick a team for its record and latest form.</p>
+  <div class="wc-head"><svg class="wc-seal" viewBox="0 0 200 200" role="img" aria-label="cricstat countries"><defs><linearGradient id="cGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE38A"/><stop offset=".5" stop-color="#F5B82E"/><stop offset="1" stop-color="#C98500"/></linearGradient><radialGradient id="cBall" cx="35%" cy="32%" r="70%"><stop offset="0" stop-color="#e2544b"/><stop offset=".65" stop-color="#b3201c"/><stop offset="1" stop-color="#6e1210"/></radialGradient><clipPath id="cClip"><circle cx="96" cy="94" r="30"/></clipPath><path id="cTop" d="M30 100a70 70 0 0 1 140 0"/><path id="cBot" d="M24 100a76 76 0 0 0 152 0"/></defs><circle cx="100" cy="100" r="96" fill="#13161e" stroke="url(#cGold)" stroke-width="3"/><circle cx="100" cy="100" r="86" fill="none" stroke="#F5B82E" stroke-opacity=".35" stroke-width="1"/><circle cx="100" cy="100" r="58" fill="none" stroke="#F5B82E" stroke-opacity=".35" stroke-width="1"/><text font-family="system-ui, sans-serif" font-weight="800" font-size="12.5" letter-spacing="2.2" fill="#F5B82E"><textPath href="#cTop" startOffset="50%" text-anchor="middle">COUNTRIES · TEAMS</textPath></text><text font-family="system-ui, sans-serif" font-weight="700" font-size="9" letter-spacing="1.4" fill="#cbd5e1"><textPath href="#cBot" startOffset="50%" text-anchor="middle">MEN &amp; WOMEN · EVERY FORMAT</textPath></text><circle cx="31" cy="100" r="2.4" fill="#FF9933"/><circle cx="169" cy="100" r="2.4" fill="#FF9933"/><circle cx="96" cy="94" r="30" fill="#1a2440"/><g clip-path="url(#cClip)" fill="none" stroke="url(#cGold)" stroke-width="1.6" opacity=".9"><ellipse cx="96" cy="94" rx="13" ry="30"/><path d="M96 64v60M66 84h60M66 104h60M70 74h52M70 114h52"/></g><circle cx="96" cy="94" r="30" fill="none" stroke="url(#cGold)" stroke-width="3"/><circle cx="124" cy="119" r="10" fill="url(#cBall)" stroke="#13161e" stroke-width="2"/><path d="M119.2 112.6c2.2 2.1 3 7.3 1.1 11.7M128.8 112.6c-2.2 2.1-3 7.3-1.1 11.7" stroke="#f5efe6" stroke-width="1.2" fill="none" stroke-linecap="round"/><text x="100" y="146" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="700" font-size="7.5" letter-spacing="1.5" fill="#94a3b8">cric<tspan fill="#FF9933">stat</tspan></text></svg>
+   <div class="wc-head-text"><h1 class="wc-title" style="font-size:clamp(2rem,4.4vw,3rem);margin:0">Cricket around the world</h1>
+    <p class="subtitle" style="margin-top:.6rem">Every international team in our data on one map. Colour it by cricstat Elo (our own ODI rating), ODI World Cup 2027 chances, recent win % or matches played, then pick a team for its record and latest form.</p></div>
+   <figure class="wc-hosts-fig"><div class="p-count"><b id="c-count" class="sb">—</b><span>cricket nations</span><small id="c-count-sub">men &amp; women · internationals</small></div><figcaption>on the map, updated daily</figcaption></figure>
+  </div>
 </div></header>
 <section class="section panel" aria-label="Cricket world map"><div class="wrap scoreboard wm-board">
   <div class="sb-head board-head" aria-hidden="true"><span class="bulb"></span>Cricket world map<span class="bulb"></span></div>
@@ -45,7 +48,7 @@
     <div><div id="wm-map" class="wm-map"><p class="muted" style="padding:1rem;margin:0">Loading the map…</p></div><div id="wm-legend" class="wm-legend"></div></div>
     <aside id="wm-panel" class="card wm-panel" aria-live="polite"><p class="muted">Pick a team on the map.</p></aside>
   </div>
-  <p class="tiny muted" style="margin-top:.8rem">Borders: Natural Earth (public domain), drawn as India officially shows them. Cricket splits the UK (England with Wales, Scotland), Ireland is one all-island team and the West Indies cover the Caribbean board's members. Tiny members (Bermuda, Jersey, Singapore…) are dots. Afghanistan men's matches are withheld by Cricsheet, so they are not on the men's map.</p>
+  <p class="tiny muted" style="margin-top:.8rem">Borders: Natural Earth (public domain), drawn as India officially shows them. Cricket splits the UK (England with Wales, Scotland), Ireland is one all-island team and the West Indies cover the Caribbean board's members. Tiny members (Bermuda, Jersey, Singapore…) are dots. Afghanistan men's matches are withheld by Cricsheet; their rating comes from our reviewed results list.</p>
 </div></section>
 </div>
 <header class="hero left" id="c-hero" hidden>
@@ -66,12 +69,12 @@
   <p>Not affiliated with or endorsed by Cricsheet, the ICC or any cricket board. Statistics are derived from the source data and may differ from official records.</p>
   <p><a href="/cricket/licences/">Data &amp; licences</a> · <a href="/privacy/">Privacy</a> · <a href="/cricket/about/">How cricstat was built</a> · <a href="/">pandyaHomeLab</a> · Built by <a href="/">Archit Pandya</a></p>
 </footer>
-<script src="/cricket/assets/flags.js?v=92"></script>
-<script src="/cricket/assets/cricstat.js?v=92"></script>
-<script src="/cricket/assets/about.js?v=92"></script>
+<script src="/cricket/assets/flags.js?v=106"></script>
+<script src="/cricket/assets/cricstat.js?v=106"></script>
+<script src="/cricket/assets/about.js?v=106"></script>
 <script src="/vendor/chart.js-4.4.0/chart.umd.min.js"></script>
-<script src="/cricket/assets/worldmap.js?v=92"></script>
-<script src="/cricket/assets/countries.js?v=92"></script>
+<script src="/cricket/assets/worldmap.js?v=106"></script>
+<script src="/cricket/assets/countries.js?v=106"></script>
 <script src="/feedback-widget.js"></script>
 </body>
 </html>

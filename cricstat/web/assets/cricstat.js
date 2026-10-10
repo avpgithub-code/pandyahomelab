@@ -423,9 +423,20 @@
 
   // Player and team pages get their head (title, description, canonical, robots) from the server
   // since P0.6; scripts then leave document.title alone. Static shells have no robots meta.
+  // The cricstat wordmark (white "cric", saffron "stat", a ball for the i's dot); screen readers get "cricstat".
+  function wordmark() {
+    return h("span", { class: "cs" }, [h("i", { class: "cs-sr" }, "cricstat"),
+      h("i", { class: "cs-w", "aria-hidden": "true" }, ["cr", h("i", { class: "cs-i" }, "ı"), "c", h("b", {}, "stat")])]);
+  }
+
+  // "cricstat Elo" is our own rating (P1): this pill marks it wherever it appears, and says it isn't the ICC's.
+  function ourModel() {
+    return h("span", { class: "our-model", title: "Computed by cricstat from every men's ODI since 2002 — not the ICC ranking" }, "our model");
+  }
+
   const serverHead = !!document.querySelector('meta[name="robots"]');
   window.cricstat = { serverHead, sectionTabs, scoreText, freshness, carousel, teamLine, roleIcon, roleLabel, api, ratio, num, hs, bbi, overs, date, letter, h, fill, table, showError,
                       getFollow, setFollow, pathTail, playerIdFromPath, dataNote, teamBadge, teamStyle,
                       avatar, who, formDots, fmtName, resultText, matchCard, countUp, compact, ago, isWc2027Venue, wc2027Mark,
-                      donut, donutLegend, periodControl, formatCard, periodRange };
+                      donut, donutLegend, periodControl, formatCard, periodRange, ourModel, wordmark };
 })();

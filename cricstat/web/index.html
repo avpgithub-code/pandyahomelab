@@ -14,7 +14,7 @@
 <meta property="og:url" content="https://pandyahomelab.com/cricket/">
 <meta property="og:image" content="https://pandyahomelab.com/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="/cricket/assets/cricstat.css?v=92">
+<link rel="stylesheet" href="/cricket/assets/cricstat.css?v=106">
 <script type="application/ld+json">{
  "@context": "https://schema.org",
  "@type": "WebApplication",
@@ -51,9 +51,9 @@
     <li><a href="/cricket/" aria-current="page">Overview</a></li>
     <li><a href="/cricket/countries/">Countries</a></li>
     <li><a href="/cricket/players/">Players</a></li>
-    <li><span class="soon" title="Coming in a later phase">ODI WC 2027 <span class="soon-tag">soon</span></span></li>
+    <li><a href="/cricket/predictor/">ODI WC 2027</a></li>
     <li><span class="soon" title="Coming in a later phase">Ask <span class="soon-tag">soon</span></span></li>
-    <li><span class="soon" title="Coming in a later phase">Methodology <span class="soon-tag">soon</span></span></li>
+    <li><a href="/cricket/methodology/">Methodology</a></li>
     <li><a href="/cricket/licences/">Licences</a></li>
   </ul>
   <a class="about-trigger" href="/cricket/about/" data-about><span aria-hidden="true">ⓘ</span> About cricstat</a>
@@ -82,9 +82,10 @@
       <div class="counter"><i class="c-icon blue" aria-hidden="true">🌍</i><b id="k-teams" class="sb">—</b><span>Teams</span><small class="c-note">National sides and franchises, all rated by the same model.</small></div>
     </div>
     <p class="why-volume"><b>Why the volume matters:</b> about 2,600 men's ODIs are too few to teach a model who wins a match. 11.6 million deliveries are plenty, so the <a class="wc-hl" href="#about" data-about="predictor">ODI World Cup 2027 predictor</a> will learn team and player strength from every ball, then simulate the tournament thousands of times.</p>
-    <a class="wc-tease" href="#about" data-about="predictor">
-      <span class="wc-q"><svg class="wc-icon" viewBox="0 0 64 64" width="44" height="44" aria-hidden="true" focusable="false"><defs><linearGradient id="wcGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE38A"/><stop offset=".5" stop-color="#F5B82E"/><stop offset="1" stop-color="#B9800F"/></linearGradient></defs><path d="M33 22 C 36 14, 44 13, 47 6 C 50 11, 47 16, 52 19 C 46 21, 41 19, 37 25 Z" fill="#FF9933"/><path d="M33.6 23.6 C 37 17, 44.6 16.4, 48.2 10.6 C 50.6 14.6, 48.4 18.6, 53.4 21.6 C 47.4 23.4, 42.4 21.6, 38.4 27 Z" fill="#FFFFFF"/><path d="M34.4 25.4 C 38 20, 45 19.6, 49 15 C 51 18.4, 49.6 22, 54.6 24.4 C 48.6 26, 43.4 24.4, 39.6 29 Z" fill="#138808"/><path d="M18 20 H46 V24 C46 34, 40 41, 32 41 C24 41, 18 34, 18 24 Z" fill="url(#wcGold)"/><path d="M18 23 C11 23, 10 32, 19 34" fill="none" stroke="url(#wcGold)" stroke-width="3" stroke-linecap="round"/><path d="M46 23 C53 23, 54 32, 45 34" fill="none" stroke="url(#wcGold)" stroke-width="3" stroke-linecap="round"/><rect x="29.5" y="40" width="5" height="8" fill="url(#wcGold)"/><path d="M23 48 H41 L43 54 H21 Z" fill="url(#wcGold)"/><rect x="19" y="54" width="26" height="4" rx="1.5" fill="#8A5A0B"/><path d="M23 22 C23 30, 26 36, 30 38" fill="none" stroke="#FFF6CF" stroke-width="1.6" stroke-linecap="round" opacity=".7"/></svg> What are the chances of India lifting the 2027 ODI World Cup?</span>
-      <span class="wc-sub">Three models — Elo ratings (statistics), machine learning and deep learning — are about to compete to answer that <span aria-hidden="true">→</span></span>
+    <a class="wc-tease" href="/cricket/predictor/" id="wc-tease">
+      <span class="wc-q"><svg class="wc-icon" viewBox="0 0 64 64" width="44" height="44" aria-hidden="true" focusable="false"><defs><linearGradient id="wcGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE38A"/><stop offset=".5" stop-color="#F5B82E"/><stop offset="1" stop-color="#B9800F"/></linearGradient></defs><path d="M33 22 C 36 14, 44 13, 47 6 C 50 11, 47 16, 52 19 C 46 21, 41 19, 37 25 Z" fill="#FF9933"/><path d="M33.6 23.6 C 37 17, 44.6 16.4, 48.2 10.6 C 50.6 14.6, 48.4 18.6, 53.4 21.6 C 47.4 23.4, 42.4 21.6, 38.4 27 Z" fill="#FFFFFF"/><path d="M34.4 25.4 C 38 20, 45 19.6, 49 15 C 51 18.4, 49.6 22, 54.6 24.4 C 48.6 26, 43.4 24.4, 39.6 29 Z" fill="#138808"/><path d="M18 20 H46 V24 C46 34, 40 41, 32 41 C24 41, 18 34, 18 24 Z" fill="url(#wcGold)"/><path d="M18 23 C11 23, 10 32, 19 34" fill="none" stroke="url(#wcGold)" stroke-width="3" stroke-linecap="round"/><path d="M46 23 C53 23, 54 32, 45 34" fill="none" stroke="url(#wcGold)" stroke-width="3" stroke-linecap="round"/><rect x="29.5" y="40" width="5" height="8" fill="url(#wcGold)"/><path d="M23 48 H41 L43 54 H21 Z" fill="url(#wcGold)"/><rect x="19" y="54" width="26" height="4" rx="1.5" fill="#8A5A0B"/><path d="M23 22 C23 30, 26 36, 30 38" fill="none" stroke="#FFF6CF" stroke-width="1.6" stroke-linecap="round" opacity=".7"/></svg> <span id="wc-qtext">What are the chances of India lifting the 2027 ODI World Cup?</span></span>
+      <span class="wc-a" id="wc-answer" aria-live="polite"></span>
+      <span class="wc-sub">Today: cricstat Elo and 50,000 simulated tournaments. Machine-learning and deep-learning challengers are coming <span aria-hidden="true">→</span></span>
     </a>
 </div></section>
 
@@ -161,10 +162,10 @@
   <p>Not affiliated with or endorsed by Cricsheet, the ICC or any cricket board. Statistics are derived from the source data and may differ from official records.</p>
   <p><a href="/cricket/licences/">Data &amp; licences</a> · <a href="/privacy/">Privacy</a> · <a href="/cricket/about/">How cricstat was built</a> · <a href="/">pandyaHomeLab</a> · Built by <a href="/">Archit Pandya</a></p>
 </footer>
-<script src="/cricket/assets/flags.js?v=92"></script>
-<script src="/cricket/assets/cricstat.js?v=92"></script>
-<script src="/cricket/assets/about.js?v=92"></script>
-<script src="/cricket/assets/hub.js?v=92"></script>
+<script src="/cricket/assets/flags.js?v=106"></script>
+<script src="/cricket/assets/cricstat.js?v=106"></script>
+<script src="/cricket/assets/about.js?v=106"></script>
+<script src="/cricket/assets/hub.js?v=106"></script>
 <script src="/feedback-widget.js"></script>
 </body>
 </html>

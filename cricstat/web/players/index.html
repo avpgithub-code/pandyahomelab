@@ -14,7 +14,7 @@
 <meta property="og:url" content="https://pandyahomelab.com/cricket/players/">
 <meta property="og:image" content="https://pandyahomelab.com/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="/cricket/assets/cricstat.css?v=92">
+<link rel="stylesheet" href="/cricket/assets/cricstat.css?v=106">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -24,9 +24,9 @@
     <li><a href="/cricket/">Overview</a></li>
     <li><a href="/cricket/countries/">Countries</a></li>
     <li><a href="/cricket/players/" aria-current="page">Players</a></li>
-    <li><span class="soon" title="Coming in a later phase">ODI WC 2027 <span class="soon-tag">soon</span></span></li>
+    <li><a href="/cricket/predictor/">ODI WC 2027</a></li>
     <li><span class="soon" title="Coming in a later phase">Ask <span class="soon-tag">soon</span></span></li>
-    <li><span class="soon" title="Coming in a later phase">Methodology <span class="soon-tag">soon</span></span></li>
+    <li><a href="/cricket/methodology/">Methodology</a></li>
     <li><a href="/cricket/licences/">Licences</a></li>
   </ul>
   <a class="about-trigger" href="/cricket/about/" data-about><span aria-hidden="true">ⓘ</span> About cricstat</a>
@@ -35,6 +35,11 @@
 <header class="hero left">
   <div class="wrap">
     <div class="eyebrow"><span class="dot"></span>Players</div>
+    <div class="wc-head p-intro" id="p-intro"><svg class="wc-seal" viewBox="0 0 200 200" role="img" aria-label="cricstat players"><defs><linearGradient id="pGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE38A"/><stop offset=".5" stop-color="#F5B82E"/><stop offset="1" stop-color="#C98500"/></linearGradient><radialGradient id="pBall" cx="35%" cy="32%" r="70%"><stop offset="0" stop-color="#e2544b"/><stop offset=".65" stop-color="#b3201c"/><stop offset="1" stop-color="#6e1210"/></radialGradient><path id="pTop" d="M30 100a70 70 0 0 1 140 0"/><path id="pBot" d="M24 100a76 76 0 0 0 152 0"/></defs><circle cx="100" cy="100" r="96" fill="#13161e" stroke="url(#pGold)" stroke-width="3"/><circle cx="100" cy="100" r="86" fill="none" stroke="#F5B82E" stroke-opacity=".35" stroke-width="1"/><circle cx="100" cy="100" r="58" fill="none" stroke="#F5B82E" stroke-opacity=".35" stroke-width="1"/><text font-family="system-ui, sans-serif" font-weight="800" font-size="12.5" letter-spacing="2.2" fill="#F5B82E"><textPath href="#pTop" startOffset="50%" text-anchor="middle">PLAYERS · CAREERS</textPath></text><text font-family="system-ui, sans-serif" font-weight="700" font-size="9" letter-spacing="1.4" fill="#cbd5e1"><textPath href="#pBot" startOffset="50%" text-anchor="middle">MEN &amp; WOMEN · EVERY FORMAT</textPath></text><circle cx="31" cy="100" r="2.4" fill="#FF9933"/><circle cx="169" cy="100" r="2.4" fill="#FF9933"/><g fill="none" stroke="url(#pGold)" stroke-linecap="round" stroke-linejoin="round"><polyline points="92.8,85.0 102.4,107.8" stroke-width="13.2"/><polyline points="102.4,107.8 92.8,122.2 85.6,135.4" stroke-width="9.6"/><polyline points="102.4,107.8 116.8,117.4 128.8,121.0" stroke-width="9.6"/><polyline points="96.4,85.0 106.0,69.4 112.0,56.2" stroke-width="7.2"/><polyline points="91.6,87.4 80.8,93.4 72.4,101.8" stroke-width="7.2"/></g><circle cx="87.4" cy="74.8" r="9.0" fill="url(#pGold)"/><circle cx="114.4" cy="51.4" r="5.5" fill="url(#pBall)"/><text x="100" y="146" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="700" font-size="7.5" letter-spacing="1.5" fill="#94a3b8">cric<tspan fill="#FF9933">stat</tspan></text></svg>
+     <div class="wc-head-text"><h1 class="wc-title" style="font-size:clamp(2rem,4.4vw,3rem);margin:0">Every player, every ball</h1>
+      <p class="subtitle" style="margin-top:.6rem">Careers built ball by ball for men and women in Tests, ODIs, T20Is and the big leagues: batting, bowling and fielding by format, year, phase and opponent. Search any name, surname or initials.</p></div>
+     <figure class="wc-hosts-fig p-countfig"><div class="p-count"><b id="p-count" class="sb">—</b><span>players</span><small id="p-count-sub">men &amp; women · since 2001</small></div><figcaption>in our data, updated daily</figcaption></figure>
+    </div>
     <form class="search-bar" id="p-form" action="/cricket/players/" method="get" role="search">
       <input id="p-search" name="q" type="search" placeholder="Name, surname or initials — e.g. Kohli, S Mandhana" aria-label="Search players" autocomplete="off" minlength="2" required>
       <button class="btn pri" type="submit">Search</button>
@@ -49,11 +54,11 @@
   <p>Not affiliated with or endorsed by Cricsheet, the ICC or any cricket board. Statistics are derived from the source data and may differ from official records.</p>
   <p><a href="/cricket/licences/">Data &amp; licences</a> · <a href="/privacy/">Privacy</a> · <a href="/cricket/about/">How cricstat was built</a> · <a href="/">pandyaHomeLab</a> · Built by <a href="/">Archit Pandya</a></p>
 </footer>
-<script src="/cricket/assets/flags.js?v=92"></script>
-<script src="/cricket/assets/cricstat.js?v=92"></script>
-<script src="/cricket/assets/about.js?v=92"></script>
+<script src="/cricket/assets/flags.js?v=106"></script>
+<script src="/cricket/assets/cricstat.js?v=106"></script>
+<script src="/cricket/assets/about.js?v=106"></script>
 <script src="/vendor/chart.js-4.4.0/chart.umd.min.js"></script>
-<script src="/cricket/assets/players.js?v=92"></script>
+<script src="/cricket/assets/players.js?v=106"></script>
 <script src="/feedback-widget.js"></script>
 </body>
 </html>
