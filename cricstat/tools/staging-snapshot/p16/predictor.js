@@ -279,7 +279,7 @@
       C.fill(target, [
         h("div", { class: "section-head" }, [h("div", {}, [h("div", { class: "section-label" }, "Ratings"),
           h("h2", { class: "section-title" }, [C.wordmark(), " Elo · men's ODIs ", C.ourModel()]),
-          h("p", { class: "tiny muted", style: "margin:.2rem 0 0" }, "Our own rating, updated daily from every men's ODI since 2002 · tested on every ODI since 2019 before it was played · not the ICC ranking.")]), toggle]),
+          h("p", { class: "tiny muted", style: "margin:.2rem 0 0" }, [C.wordmark(), " own rating, updated daily from every men's ODI since 2002 · tested on every ODI since 2019 before it was played · not the ICC ranking."])]), toggle]),
         h("div", { class: "grid", style: "grid-template-columns:repeat(auto-fit,minmax(320px,1fr));align-items:start" }, [
           h("div", { class: "scroll" }, h("table", { class: "wc-table" }, [
             h("thead", {}, h("tr", {}, ["Rank", "Team", "Rating", "ODIs", "Last ODI"].map((x, i) => h("th", { scope: "col", class: i === 1 ? "txt" : null }, x)))),

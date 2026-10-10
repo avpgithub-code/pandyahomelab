@@ -125,7 +125,7 @@
       h("p", {}, "cricstat Elo is our own Elo rating — not the ICC ranking. Every Full Member starts at 1500, and each ODI moves the two teams' ratings up or down — more for beating a stronger side, a little for beating a weaker one. Only the gap matters: 100 points ahead ≈ 64% to win on neutral ground, 200 ≈ 76%, 0 = 50/50."),
       h("p", {}, ["The same numbers drive the World Cup forecast. ", h("a", { href: "/cricket/methodology/" }, "How it works →")])]);
     return h("div", { class: "r-explain" }, [line.length ? h("p", { class: "small", style: "margin:0 0 .3rem" }, line[0]) : null, tip,
-      h("p", { class: "tiny muted r-proof" }, "Our own rating, updated daily from every men's ODI since 2002 · tested on every ODI since 2019 before it was played · not the ICC ranking.")]);
+      h("p", { class: "tiny muted r-proof" }, [C.wordmark(), " own rating, updated daily from every men's ODI since 2002 · tested on every ODI since 2019 before it was played · not the ICC ranking."])]);
   }
 
   async function liveRatings() {
