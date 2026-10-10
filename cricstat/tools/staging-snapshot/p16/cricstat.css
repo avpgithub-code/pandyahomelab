@@ -691,3 +691,13 @@ a.about-trigger[aria-current="page"] { background: rgba(255,153,51,.22); border-
 .p-count b { font: 800 1.55rem 'SF Mono', Consolas, monospace; color: #ffb547; text-shadow: 0 0 8px rgba(255,181,71,.45); letter-spacing: .02em; }
 .p-count span { font-size: .78rem; font-weight: 700; color: var(--text); text-transform: uppercase; letter-spacing: .12em; }
 .p-count small { font-size: .66rem; color: var(--dim); padding: 0 .4rem; line-height: 1.25; }
+/* Team page: live ratings card (men's ODI) */
+.r-top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin: .2rem 0 .6rem; }
+.r-big { display: flex; flex-direction: column; }
+.r-big b { font-size: 2.1rem; font-weight: 800; color: var(--saffron); line-height: 1.05; font-variant-numeric: tabular-nums; }
+.r-big span { font-size: .85rem; color: var(--text); }
+.r-big small { font-size: .75rem; } .r-big small.up { color: #22c55e; } .r-big small.down { color: #f87171; }
+.r-spark { width: 100%; max-width: 260px; height: 54px; }
+.r-wc { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; text-align: center; background: var(--surface2);
+        border-radius: 10px; padding: .55rem .3rem; }
+.r-wc b { display: block; font-size: 1.15rem; font-variant-numeric: tabular-nums; } .r-wc span { font-size: .72rem; color: var(--dim); }
