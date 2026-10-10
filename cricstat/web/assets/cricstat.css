@@ -515,6 +515,10 @@ a.about-trigger[aria-current="page"] { background: rgba(255,153,51,.22); border-
 .wc-table tbody tr:hover { background: var(--surface2); }
 .wc-table tr.me td { background: rgba(255,153,51,.08); }
 .wc-table tr.me td:first-child { box-shadow: inset 3px 0 0 var(--saffron); }
+.wc-table tr.wc-pick { cursor: pointer; }
+.wc-table tr.sel td { background: rgba(79,127,214,.14); }
+.wc-table tr.sel td:first-child { box-shadow: inset 3px 0 0 var(--blue); }
+.wc-table tr.wc-pick:focus-visible { outline: 2px solid var(--saffron); outline-offset: -2px; }
 .wc-table td.num { color: var(--muted); font-weight: 700; width: 2.2rem; }
 .wc-team { display: inline-flex; align-items: center; gap: .5rem; }
 .wc-team .tname { color: var(--text); font-weight: 600; } .wc-team a.tname:hover { color: var(--saffron); text-decoration: none; }
