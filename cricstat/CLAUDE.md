@@ -539,6 +539,14 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   the list scrolls in a box as tall as the chart column (`.wc-rate-*`, sticky header); stacked below that.
   Homepage cricstat card (same day): Players / Countries titles link to their pages; card title links are gold +
   underlined at rest; paragraph links stay gold when visited.
+  **Homepage layout (2026-10-10, owner-approved step by step):** three equal-width cards (1200px / 2rem gutters):
+  flagship cricstat (orange rule) · Featured Projects · Technology Stack + Platform Tools (slate rule, `.panel-card`).
+  Compact headers (`.panel-head`: eyebrow + title left, one-line description right). Two inline scripts build tab bars
+  from the existing sections (ML · DL · NLP · Agentic with live/planned counts; Stack · Tools with item counts); menu
+  links, hero buttons and #ml/#dl/#nlp/#agentic/#stack/#tools open the tab. No JS → everything stacked, all content
+  in the HTML. In each project tab the cricstat card is first and all cards sit in one row (`--cols` = card count:
+  4/4/5/2; two per row < 1100px, one < 760px). Tried and dropped: sideways carousel, Flagship-vs-Featured tabs.
+  Edit `cricstat/tools/staging/homepage.html`, test in jsdom, then copy to `website/index.html`.
   **Predictor answers up top (2026-10-10, V=117, API de595530cc46):** hero sentence "On <data_as_of>, cricstat's model
   makes <#1> the favourite at <x%>, ahead of <#2> and <#3>" is server-rendered into `#wc-answer` by
   `pages.predictor_answer` (predictor.js writes the same); caveats strip under the follow card; "Jump to" links
