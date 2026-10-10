@@ -21,7 +21,7 @@ else:
     WEB = os.path.join(CRICSTAT, "tools", "staging", "web")
     if not os.path.isdir(WEB):
         shutil.copytree(os.path.join(CRICSTAT, "web"), WEB)
-V = "92"
+V = "93"
 # P1.6 ships in two parts: False = the approved non-predictor pages only (nav "ODI WC 2027 soon", no predictor page,
 # no model numbers on the map, no predictor rows on the licences page). True at the full P1.6 deploy.
 PREDICTOR_LIVE = os.environ.get("CRICSTAT_PREDICTOR_LIVE") == "1"   # preview: CRICSTAT_PREDICTOR_LIVE=1
@@ -54,7 +54,7 @@ HEAD = '''<!DOCTYPE html>
     <li><a href="/cricket/players/"{c_players}>Players</a></li>
     {nav_predictor}
     <li><span class="soon" title="Coming in a later phase">Ask <span class="soon-tag">soon</span></span></li>
-    <li><span class="soon" title="Coming in a later phase">Methodology <span class="soon-tag">soon</span></span></li>
+    {nav_method}
     <li><a href="/cricket/licences/"{c_licences}>Licences</a></li>
   </ul>
   <a class="about-trigger" href="/cricket/about/" data-about{c_about}><span aria-hidden="true">ⓘ</span> About cricstat</a>
@@ -76,8 +76,10 @@ FOOT = '''</main>
 </html>
 '''
 def page(rel, path, title, desc, cur, body, scripts, og_type="website", extra_head=""):
-    c = {k: "" for k in ("c_hub", "c_countries", "c_players", "c_licences", "c_about", "c_predictor")}
+    c = {k: "" for k in ("c_hub", "c_countries", "c_players", "c_licences", "c_about", "c_predictor", "c_method")}
     c["c_" + cur] = ' aria-current="page"'
+    c["nav_method"] = ('<li><a href="/cricket/methodology/"%s>Methodology</a></li>' % c["c_method"] if PREDICTOR_LIVE else
+                       '<li><span class="soon" title="Coming in a later phase">Methodology <span class="soon-tag">soon</span></span></li>')
     c["nav_predictor"] = ('<li><a href="/cricket/predictor/"%s>ODI WC 2027</a></li>' % c["c_predictor"] if PREDICTOR_LIVE else
                           '<li><span class="soon" title="Coming in a later phase">ODI WC 2027 <span class="soon-tag">soon</span></span></li>')
     html = HEAD.format(title=title, desc=desc, path=path, v=V, og_type=og_type, extra_head=extra_head, **c) + body + FOOT.format(
@@ -343,6 +345,43 @@ if PREDICTOR_LIVE:
        extra_head=ld_json({"@context": "https://schema.org", "@type": "WebPage", "name": "ODI World Cup 2027 predictor",
                            "description": PRED_DESC, "url": SITE + "/cricket/predictor/", "isPartOf": {"@id": SITE + "/#site"},
                            "about": ["ODI World Cup 2027", "Elo rating", "Monte Carlo simulation"], "author": ARCHIT}))
+
+METHOD = '''<header class="hero left"><div class="wrap">
+  <div class="eyebrow"><span class="dot"></span>Methodology · ODI World Cup 2027 predictor</div>
+  <h1 style="font-size:clamp(2rem,5vw,3rem)">How the predictor works — and how well</h1>
+  <p class="subtitle">The model in plain words and in formulas, every setting and how it was chosen, and the tests it had to pass
+  on matches it had never seen. One model for every team; every number below comes from the same files the forecast uses.</p>
+  <p class="tiny muted" id="m-stamp">Loading…</p>
+</div></header>
+<section class="section panel" aria-label="Methodology"><div class="wrap scoreboard m-board">
+  <div class="sb-head board-head" aria-hidden="true"><span class="bulb"></span>Methodology<span class="mc-asof" id="m-asof"></span><span class="bulb"></span></div>
+  <div class="sec-tabs" role="tablist" aria-label="Methodology sections">
+    <button class="sec-tab" type="button" role="tab" id="tab-m-plain" aria-controls="pane-m-plain" aria-selected="true">🧭 In plain words</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-m-elo" aria-controls="pane-m-elo" aria-selected="false" tabindex="-1">📐 Ratings</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-m-sim" aria-controls="pane-m-sim" aria-selected="false" tabindex="-1">🎲 Simulation</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-m-tests" aria-controls="pane-m-tests" aria-selected="false" tabindex="-1">✅ Backtests</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-m-cal" aria-controls="pane-m-cal" aria-selected="false" tabindex="-1">🎯 Calibration</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-m-models" aria-controls="pane-m-models" aria-selected="false" tabindex="-1">🏁 Models &amp; versions</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-m-limits" aria-controls="pane-m-limits" aria-selected="false" tabindex="-1">⚠️ Limits</button>
+  </div>
+  <div class="sec-pane" role="tabpanel" id="pane-m-plain" aria-labelledby="tab-m-plain"><div class="skeleton"></div></div>
+  <div class="sec-pane" role="tabpanel" id="pane-m-elo" aria-labelledby="tab-m-elo" hidden></div>
+  <div class="sec-pane" role="tabpanel" id="pane-m-sim" aria-labelledby="tab-m-sim" hidden></div>
+  <div class="sec-pane" role="tabpanel" id="pane-m-tests" aria-labelledby="tab-m-tests" hidden></div>
+  <div class="sec-pane" role="tabpanel" id="pane-m-cal" aria-labelledby="tab-m-cal" hidden></div>
+  <div class="sec-pane" role="tabpanel" id="pane-m-models" aria-labelledby="tab-m-models" hidden></div>
+  <div class="sec-pane" role="tabpanel" id="pane-m-limits" aria-labelledby="tab-m-limits" hidden></div>
+</div></section>
+'''
+METHOD_DESC = ("How cricstat's ODI World Cup 2027 predictor works: Elo ratings from every men's ODI, 50,000 simulated "
+               "tournaments, and backtests on the 2019 and 2023 World Cups with calibration, baselines and model versions.")
+if PREDICTOR_LIVE:
+    page("methodology/index.html", "/cricket/methodology/",
+         "Methodology: how the ODI World Cup 2027 predictor works and how well — cricstat | pandyaHomeLab", METHOD_DESC,
+         "method", METHOD, ["/vendor/chart.js-4.4.0/chart.umd.min.js", "/cricket/assets/methodology.js?v=" + V],
+         extra_head=ld_json({"@context": "https://schema.org", "@type": "TechArticle", "headline": "How the ODI World Cup 2027 predictor works",
+                             "description": METHOD_DESC, "url": SITE + "/cricket/methodology/", "isPartOf": {"@id": SITE + "/#site"},
+                             "about": ["Elo rating", "Monte Carlo simulation", "Calibration", "Backtesting"], "author": ARCHIT}))
 
 LIC = '''<header class="hero left"><div class="wrap">
   <div class="eyebrow"><span class="dot"></span>Data &amp; licences</div>
