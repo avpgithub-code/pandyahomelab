@@ -162,6 +162,10 @@
     .domain-tab:focus-visible { outline: 2px solid var(--c); outline-offset: -2px; border-radius: 6px 6px 0 0; }
     .domain-tab.dl { --c: var(--accent-dl); } .domain-tab.nlp { --c: var(--accent-nlp); } .domain-tab.ag { --c: var(--accent-ag); }
     .tabs-on .domain-section .domain-header { display: none; }
+    .domain-tab.neutral { --c: var(--text); }
+    .bottom-tabs { max-width: 1200px; margin: 0 auto 1.5rem; padding: 0 2rem; }
+    .bottom-tabs .domain-tabs { margin-bottom: 0; }
+    section.tabbed > .section-label { display: none; }
     .tabs-on .domain-section { margin-bottom: 0; }
     /* — PROJECTS — */
     .projects-section { padding-top: 0; }
@@ -905,6 +909,51 @@
       a.addEventListener("click", (e) => {
         if (open(a.getAttribute("href"), true)) { e.preventDefault(); history.replaceState(null, "", a.getAttribute("href")); }
       }));
+    if (!open(location.hash, true)) select(0);
+    window.addEventListener("hashchange", () => open(location.hash, true));
+  })();
+</script>
+<script>
+  // ——— Technology Stack / Platform Tools as tabs (same progressive pattern: no JS → both stacked) ———
+  (function () {
+    const secs = ["stack", "tools"].map((id) => document.getElementById(id));
+    if (secs.some((s) => !s)) return;
+    const spec = { stack: ["🧰", "Technology Stack", ".stack-chip", "tools"], tools: ["🛠️", "Platform Tools", ".tool-card", "services"] };
+    const wrap = document.createElement("div"); wrap.className = "bottom-tabs";
+    const bar = document.createElement("div");
+    bar.className = "domain-tabs"; bar.setAttribute("role", "tablist"); bar.setAttribute("aria-label", "Stack and tools");
+    wrap.appendChild(bar);
+    const tabs = secs.map((sec) => {
+      const [icon, name, item, unit] = spec[sec.id];
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "domain-tab neutral"; b.id = "tab-" + sec.id;
+      b.setAttribute("role", "tab"); b.setAttribute("aria-controls", sec.id);
+      b.textContent = icon + " " + name;
+      const sm = document.createElement("small"); sm.textContent = sec.querySelectorAll(item).length + " " + unit; b.appendChild(sm);
+      sec.setAttribute("role", "tabpanel"); sec.setAttribute("aria-labelledby", b.id); sec.classList.add("tabbed");
+      bar.appendChild(b);
+      return b;
+    });
+    secs[0].parentNode.insertBefore(wrap, secs[0]);
+    const select = (i, focus) => {
+      tabs.forEach((t, j) => { const on = i === j; t.setAttribute("aria-selected", String(on)); t.tabIndex = on ? 0 : -1; secs[j].hidden = !on; });
+      if (focus) tabs[i].focus();
+    };
+    tabs.forEach((t, i) => {
+      t.addEventListener("click", () => select(i));
+      t.addEventListener("keydown", (e) => {
+        const k = { ArrowRight: 1, ArrowLeft: -1, Home: -i, End: tabs.length - 1 - i }[e.key];
+        if (k !== undefined) { e.preventDefault(); select((i + k + tabs.length) % tabs.length, true); }
+      });
+    });
+    const open = (hash, scroll) => {
+      const i = ["#stack", "#tools"].indexOf(hash); if (i < 0) return false;
+      select(i); if (scroll && bar.scrollIntoView) bar.scrollIntoView({ behavior: "smooth", block: "start" });
+      return true;
+    };
+    document.querySelectorAll('a[href="#stack"], a[href="#tools"]').forEach((a) => a.addEventListener("click", (e) => {
+      if (open(a.getAttribute("href"), true)) { e.preventDefault(); history.replaceState(null, "", a.getAttribute("href")); }
+    }));
     if (!open(location.hash, true)) select(0);
     window.addEventListener("hashchange", () => open(location.hash, true));
   })();
