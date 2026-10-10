@@ -63,6 +63,7 @@
   const MODEL = !landingEl || landingEl.dataset.model !== "off";
   if (!MODEL) { delete METRICS.rating; delete METRICS.wc; metric = "odiwin"; }
 
+  const nth = (n) => n + ([, "st", "nd", "rd"][(n % 100 >> 3 ^ 1) && n % 10] || "th");
   function pct(p) {
     if (p === null || p === undefined) return "—";
     if (p === 0) return "0%";
@@ -201,8 +202,9 @@
     const w = t.wc;
     if (!w) return ["ODI WC 2027", "not in the 2027 race"];
     const p = w.probabilities;
-    const where = w.direct_qualifier ? "qualified · group " + w.group : pct(p.qualified) + " to get through the Qualifier";
-    return ["ODI WC 2027", pct(p.champion) + " title · " + pct(p.final) + " final · " + pct(p.semi) + " semi", where];
+    const where = (w.direct_qualifier ? "qualified · group " + w.group : pct(p.qualified) + " to get through the Qualifier")
+      + (WC.hosts.includes(t.name) && WC.home ? " · 🏠 host: +" + WC.home + " home advantage" : "");
+    return ["ODI WC 2027", pct(p.champion) + " title (" + nth(WC.rank[t.name]) + " favourite) · " + pct(p.final) + " final · " + pct(p.semi) + " semi", where];
   }
   const ROW = { rating: "cricstat Elo", wc: "ODI WC 2027", matches: "In our data", odiwin: "ODIs · 2 yrs", t20win: "T20Is · 2 yrs" };
   function formLine(r) {
@@ -301,7 +303,8 @@
     if (!t) { C.fill(panel, h("p", { class: "muted" }, "Pick a team on the map.")); return; }
     const facts = [];
     if (t.rating) facts.push(["cricstat Elo", Math.round(t.rating.rating) + (t.rating.rank ? " · #" + t.rating.rank : " · unranked (no recent ODIs)")]);
-    if (t.wc) facts.push(["ODI WC 2027", pct(t.wc.probabilities.champion) + " title chance" + (t.wc.direct_qualifier ? " · qualified (group " + t.wc.group + ")" : " · via the Qualifier")]);
+    if (t.wc) facts.push(["ODI WC 2027", pct(t.wc.probabilities.champion) + " title chance · " + nth(WC.rank[t.name]) + " favourite" + (t.wc.direct_qualifier ? " · qualified (group " + t.wc.group + ")" : " · via the Qualifier")
+      + (WC.hosts.includes(t.name) && WC.home ? " · 🏠 host (+" + WC.home + " home advantage)" : "")]);
     if (!t.withheld) { facts.push(["ODIs · 2 yrs", formLine(t.odi)]); facts.push(["T20Is · 2 yrs", formLine(t.t20)]); }
     const hh = h2hLine(t);
     if (hh) facts.push(hh);
@@ -350,7 +353,13 @@
       const recs = await Promise.all(["ODI", "T20I"].map((f) => C.api("/v1/records/teams?type=international&scope=" + f + "&from=" + SINCE).catch(() => ({ data: [] }))));
       ["ODI", "T20I"].forEach((f, i) => recs[i].data.forEach((r) => { FORM[f][r.slug] = r; }));
       ratings.data.forEach((r) => { RATINGS[r.team] = r; });
-      if (wc) { WC = { byName: {} }; wc.data.teams.forEach((t) => { WC.byName[t.team] = t; }); }
+      if (wc) {
+        // title-chance rank ("2nd favourite") and the hosts' home advantage, both from the forecast itself
+        WC = { byName: {}, rank: {}, hosts: wc.data.tournament.hosts || [], home: ((wc.data.model || {}).elo || {}).home };
+        wc.data.teams.forEach((t) => { WC.byName[t.team] = t; });
+        wc.data.teams.slice().sort((a, b) => (b.probabilities.champion || 0) - (a.probabilities.champion || 0))
+          .forEach((t, i) => { WC.rank[t.team] = i + 1; });
+      }
       const me = TEAMS.find((t) => t.slug === follow);
       gender = me ? me.gender : "male";
       if (!METRICS[metric] || (gender === "female" && METRICS[metric].men)) metric = "odiwin";

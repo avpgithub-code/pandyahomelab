@@ -89,7 +89,9 @@
         .then(([r, hist, wc]) => ({ rating: r.data.find((x) => x.slug === team.slug) || null, ranked: r.data.filter((x) => x.rank).length,
           all: r.data,
           points: hist ? hist.data.points : [], wc: wc ? wc.data.teams.find((t) => t.slug === team.slug) || null : null,
-          asOf: wc ? wc.data.forecast.data_as_of : null }));
+          asOf: wc ? wc.data.forecast.data_as_of : null,
+          rank: wc ? wc.data.teams.slice().sort((a, b) => (b.probabilities.champion || 0) - (a.probabilities.champion || 0)).findIndex((t) => t.slug === team.slug) + 1 : 0,
+          host: wc ? (wc.data.tournament.hosts || []).includes(team.name) : false, home: wc ? ((wc.data.model || {}).elo || {}).home : null }));
     }
     return model;
   }
@@ -110,6 +112,7 @@
     svg.appendChild(line); svg.appendChild(dot);
     return svg;
   }
+  const nth = (n) => n + ([, "st", "nd", "rd"][(n % 100 >> 3 ^ 1) && n % 10] || "th");
   const pctTxt = (p) => (p === null || p === undefined ? "—" : p === 0 ? "0%" : p < 0.001 ? "<0.1%" : (100 * p).toFixed(1) + "%");
   // What a rating means: the scale, and the win chance against a team people know (#1, or #2 for the #1),
   // from the model's own formula E = 1 / (1 + 10^(−gap/400)) on neutral ground.
@@ -148,8 +151,8 @@
       const recent = m.points.some((p) => p.date > ago(365));
       const delta = before && recent ? Math.round(r.rating - before.rating) : null;
       const w = m.wc, p = w ? w.probabilities : null;
-      const where = !w ? "Not in the 2027 race." : w.direct_qualifier ? "Qualified · group " + w.group + "."
-        : pctTxt(p.qualified) + " to get through the Qualifier (Feb–Mar 2027).";
+      const where = !w ? "Not in the 2027 race." : (m.rank ? nth(m.rank) + " favourite · " : "") + (w.direct_qualifier ? "Qualified · group " + w.group + "."
+        : pctTxt(p.qualified) + " to get through the Qualifier (Feb–Mar 2027).") + (m.host && m.home ? " 🏠 Host: +" + m.home + " home advantage in its home matches." : "");
       C.fill(target, [
         h("div", { class: "card-head" }, [h("h2", {}, [C.wordmark(), " Elo & ODI World Cup 2027 ", C.ourModel()]), h("span", { class: "badge live" }, "Live")]),
         h("div", { class: "r-top" }, [

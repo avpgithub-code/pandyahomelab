@@ -24,7 +24,8 @@
     const name = t.slug ? h("a", { href: "/cricket/countries/" + t.slug + "/", class: "tname" }, t.team)
       : h("span", { class: "tname" }, t.team);
     return h("span", { class: "wc-team" }, [C.teamBadge(t.team, "sm"), name,
-      t.team === "Afghanistan" ? h("sup", { class: "wc-note-mark", title: "Results from a reviewed list: see 'What this forecast can and can't tell you'" }, "†") : null]);
+      t.team === "Afghanistan" ? h("sup", { class: "wc-note-mark", title: "Results from a reviewed list: see 'What this forecast can and can't tell you'" }, "†") : null,
+      F && (F.tournament.hosts || []).includes(t.team) ? h("span", { class: "wc-host", title: "Host: +" + (((F.model || {}).elo || {}).home || "") + " Elo home advantage in its home matches" }, "🏠") : null]);
   }
   function bar(p, max) {
     return h("span", { class: "wc-bar" }, [h("span", { class: "wc-bar-fill", style: "width:" + Math.max(1.5, 100 * p / (max || 1)).toFixed(1) + "%" }),
@@ -116,7 +117,8 @@
       h("div", { class: "section-head" }, [h("div", {}, [h("div", { class: "section-label" }, "Title odds"),
         h("h2", { class: "section-title" }, "Every team's chances")]),
         h("p", { class: "tiny muted", style: "max-width:420px;margin:0" }, "Share of " + C.num(F.forecast.n_simulations) +
-          " simulated tournaments in which each team reached the stage. Title chances add up to 100%, semi-finals to 400% (four places).")]),
+          " simulated tournaments in which each team reached the stage. Title chances add up to 100%, semi-finals to 400% (four places)."
+          + ((F.tournament.hosts || []).length ? " 🏠 = host, +" + (((F.model || {}).elo || {}).home || "") + " Elo in its home matches." : ""))]),
       tabs].concat(body));
   }
 
