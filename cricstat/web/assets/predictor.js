@@ -20,10 +20,13 @@
     if (p < 0.001) return "<0.1%";
     return (100 * p).toFixed(digits === undefined ? 1 : digits) + "%";
   }
-  function teamCell(t) {
-    const name = t.slug ? h("a", { href: "/cricket/countries/" + t.slug + "/", class: "tname" }, t.team)
+  function teamCell(t, pickable) {
+    // pickable (Ratings): the name charts the team, so the team page moves to a small ↗ link.
+    const name = t.slug && !pickable ? h("a", { href: "/cricket/countries/" + t.slug + "/", class: "tname" }, t.team)
       : h("span", { class: "tname" }, t.team);
     return h("span", { class: "wc-team" }, [C.teamBadge(t.team, "sm"), name,
+      pickable && t.slug ? h("a", { href: "/cricket/countries/" + t.slug + "/", class: "wc-team-open", title: "Open the " + t.team + " page",
+        "aria-label": "Open the " + t.team + " page" }, "↗") : null,
       t.team === "Afghanistan" ? h("sup", { class: "wc-note-mark", title: "Results from a reviewed list: see 'What this forecast can and can't tell you'" }, "†") : null,
       F && (F.tournament.hosts || []).includes(t.team) ? h("span", { class: "wc-host", title: "Host: +" + (((F.model || {}).elo || {}).home || "") + " Elo home advantage in its home matches" }, "🏠") : null]);
   }
@@ -343,7 +346,7 @@
               const tr = h("tr", { class: ["wc-pick", r.team_uid === follow ? "me" : "", r.team_uid === pick && pick !== follow ? "sel" : ""].join(" ").trim(),
                 tabindex: "0", "data-uid": r.team_uid, "aria-selected": String(r.team_uid === pick),
                 "aria-label": r.team + ": show rating history" }, [
-                h("td", { class: "num" }, r.rank ? String(r.rank) : "–"), h("td", { class: "txt" }, teamCell(r)),
+                h("td", { class: "num" }, r.rank ? String(r.rank) : "–"), h("td", { class: "txt" }, teamCell(r, true)),
                 h("td", {}, String(Math.round(r.rating))), h("td", {}, C.num(r.matches)), h("td", {}, day(r.last_match))]);
               const choose = (kb) => { if (r.team_uid === pick) return; ratingSel = r.team_uid === follow ? null : r.team_uid; renderRatings(kb ? r.team_uid : null); };
               tr.addEventListener("click", (e) => { if (!e.target.closest("a")) choose(false); });
