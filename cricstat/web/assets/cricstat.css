@@ -714,3 +714,10 @@ a.about-trigger[aria-current="page"] { background: rgba(255,153,51,.22); border-
 .wc-tease .wc-a { font-size: 1rem; color: var(--soft); }
 .wc-tease .wc-a b { color: var(--saffron); font-size: 1.15rem; }
 .wc-tease .wc-a:empty { display: none; }
+/* Predictor: the forecast in words (server-rendered for search engines; readable for everyone) */
+.wc-seo h3 { font-size: 1rem; margin: 1.1rem 0 .3rem; color: var(--text); }
+.wc-seo p { color: var(--soft); max-width: 820px; margin: .2rem 0; font-size: .95rem; }
+.wc-seo-table { margin-top: 1rem; } .wc-seo-table summary { cursor: pointer; color: var(--saffron); font-size: .9rem; }
+.wc-seo-table table { margin-top: .6rem; border-collapse: collapse; font-size: .88rem; }
+.wc-seo-table th, .wc-seo-table td { padding: .3rem .8rem; border-bottom: 1px solid var(--border); text-align: right; }
+.wc-seo-table th:nth-child(2), .wc-seo-table td:nth-child(2), .wc-seo-table th:nth-child(3), .wc-seo-table td:nth-child(3) { text-align: left; }

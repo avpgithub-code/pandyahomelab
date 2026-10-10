@@ -511,6 +511,13 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   world map, hub teaser). **Next: P1b, the gradient-boosting challenger** (squad features), then the DL challenger; then P2.
   Polish deployed 2026-10-10 04:08 UTC: "cricstat Elo" label everywhere (API dec23852e626), Korogi Sports Park name
   variant → Japan (pipeline bd2a79a96866, build 10: 971/971 venues mapped), models 8fb57dc53b42.
+- **Predictor SEO (LIVE 2026-10-10 14:20 UTC, merge db89d8a):** nginx `location = /cricket/predictor/` → API
+  `/pages/predictor/` (static shell on 502/503/504; nginx tested in the live container, reloaded, image rebuilt) writes
+  the live forecast into the page: title "Cricket World Cup 2027 Prediction: Who Will Win? | cricstat" (≤ 60), description
+  with the top-3 chances + date (≤ 155), "The forecast in words" (4 Q&A + 20-team table), WebPage `dateModified` +
+  FAQPage JSON-LD, og:image `/cricket/og/predictor.png` (no numbers; `tools/gen_og_card.py --fonts DIR`). Predictor +
+  methodology now in the API sitemap with the forecast date (removed from the static sitemap). Homepage: predictor card
+  "✓ Live" + 3 direct links. API 018fcac516be. Crawler-visible words 181 → 553.
 - **Previous state (2026-10-09):** P0, P0.5, P0.6 and P1.1–P1.5 live; **partial P1.6 live** (world map Countries landing with
   win %/matches, Following Men/Women, team-page tabs, hub Manhattan; API f974fb246adb; web commit 54ce200; owner
   checked it). Everything is merged to `main` and pushed. **On hold until the owner says so:** predictor page,
