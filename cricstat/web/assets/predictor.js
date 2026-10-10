@@ -508,20 +508,39 @@
   }
 
   // ── Limits (always visible) ──
-  function renderLimits() {
+  async function renderLimits() {
     const d = F.disclosures;
-    const item = (icon, title, text) => h("li", {}, [h("span", { class: "wc-li-icon", "aria-hidden": "true" }, icon), h("div", {}, [h("b", {}, title), " ", text])]);
-    C.fill("wc-limits", [h("div", { class: "section-label" }, "Read this first"),
+    const item = (icon, title, text) => h("li", {}, [h("span", { class: "wc-li-icon", "aria-hidden": "true" }, icon), h("div", {}, [h("b", {}, title), " "].concat(text))]);
+    // Strengths use the live backtest numbers (the same ones as "How good is it?"), so they can't drift from it.
+    let ta = null;
+    try { ta = ((await C.api("/v1/models/predictor/backtest")).data.backtest || {}).test_a || null; } catch (e) { ta = null; }
+    const elo = ta && ta.elo, wr = ta && ta.win_rate;
+    const good = h("a", { href: "#tab-good" }, "How good is it? →");
+    good.addEventListener("click", (e) => {
+      e.preventDefault(); document.getElementById("top-board").click(); document.getElementById("tab-good").click();
+      const board = document.getElementById("wc-board"); if (board && board.scrollIntoView) board.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    const tested = elo && elo.n
+      ? ["All " + C.num(elo.n) + " men's ODIs since 2019 were predicted before they were played: the favourite won " + pct(elo.accuracy, 0) +
+          " of decided matches" + (wr && elo.log_loss < wr.log_loss ? ", and its log loss (" + elo.log_loss.toFixed(3) + ") beats a simple win-rate model (" +
+          wr.log_loss.toFixed(3) + ") and a coin flip (0.693)" : "") + ". ", good]
+      : ["Every men's ODI since 2019 was predicted before it was played. ", good];
+    C.fill("wc-limits", [h("div", { class: "section-label" }, "Strengths & limits"),
       h("h2", { class: "section-title" }, "What this forecast can and can't tell you"),
+      h("h3", { class: "wc-sub" }, "Strengths"),
       h("ul", { class: "wc-limits-list" }, [
-        item("📐", "One model for everyone.", d.model), item("🎲", "Not a tip.", d.not_advice),
-        item("🧩", "What it doesn't know.", d.not_used), item("†", "Afghanistan.", d.afghanistan),
-        item("📅", "Data.", d.data), item("🎟️", "Qualifier places.", d.qualifier)])]);
+        item("✅", "Tested before it was played.", tested),
+        item("📐", "One model for everyone.", d.model),
+        item("🔄", "Kept current.", "Updated daily from every men's ODI result; home advantage is measured from every ODI since 2002, not assumed.")]),
+      h("h3", { class: "wc-sub" }, "Limits"),
+      h("ul", { class: "wc-limits-list" }, [
+        item("🎲", "Not a tip.", d.not_advice), item("🧩", "What it doesn't know.", d.not_used),
+        item("†", "Afghanistan.", d.afghanistan), item("📅", "Data.", d.data), item("🎟️", "Qualifier places.", d.qualifier)])]);
   }
 
   async function init() {
     C.sectionTabs(document.querySelector(".wc-board .sec-tabs"));
-    // Board title bar = top-level tabs. Links to #wc-limits / #wc-seo (caveats, hero capsules, shared URLs) open that tab.
+    // Board title bar = top-level tabs. Links to #wc-limits / #wc-seo (caveats link, shared URLs) open that tab.
     C.sectionTabs(document.querySelector(".wc-top-tabs"));
     const TOP = { "#wc-limits": "top-limits", "#wc-seo": "top-words", "#wc-board": "top-board" };
     const openTop = (hash, scroll) => {
