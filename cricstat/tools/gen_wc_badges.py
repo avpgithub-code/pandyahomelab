@@ -87,6 +87,35 @@ def method_seal():
             '</svg>')
 
 
+def players_seal():
+    """Players page: the same seal family, a bat and ball."""
+    return ('<svg class="wc-seal" viewBox="0 0 200 200" role="img" aria-label="cricstat players">'
+            '<defs>' + GOLD % "pGold" +
+            '<radialGradient id="pBall" cx="35%" cy="32%" r="70%"><stop offset="0" stop-color="#e2544b"/>'
+            '<stop offset=".65" stop-color="#b3201c"/><stop offset="1" stop-color="#6e1210"/></radialGradient>'
+            '<path id="pTop" d="M30 100a70 70 0 0 1 140 0"/><path id="pBot" d="M24 100a76 76 0 0 0 152 0"/></defs>'
+            '<circle cx="100" cy="100" r="96" fill="#13161e" stroke="url(#pGold)" stroke-width="3"/>'
+            '<circle cx="100" cy="100" r="86" fill="none" stroke="#F5B82E" stroke-opacity=".35" stroke-width="1"/>'
+            '<circle cx="100" cy="100" r="58" fill="none" stroke="#F5B82E" stroke-opacity=".35" stroke-width="1"/>'
+            '<text font-family="system-ui, sans-serif" font-weight="800" font-size="12.5" letter-spacing="2.2" fill="#F5B82E">'
+            '<textPath href="#pTop" startOffset="50%" text-anchor="middle">PLAYERS · CAREERS</textPath></text>'
+            '<text font-family="system-ui, sans-serif" font-weight="700" font-size="9" letter-spacing="1.4" fill="#cbd5e1">'
+            '<textPath href="#pBot" startOffset="50%" text-anchor="middle">MEN &amp; WOMEN · EVERY FORMAT</textPath></text>'
+            '<circle cx="31" cy="100" r="2.4" fill="#FF9933"/><circle cx="169" cy="100" r="2.4" fill="#FF9933"/>'
+            # a bat, diagonal: blade + shoulder + handle with grip lines
+            '<g transform="rotate(-38 100 98)">'
+            '<rect x="93" y="62" width="14" height="46" rx="5" fill="url(#pGold)"/>'
+            '<path d="M95 62q5-6 10 0" fill="url(#pGold)"/>'
+            '<rect x="97.6" y="40" width="4.8" height="21" rx="2.2" fill="#e2e8f0"/>'
+            '<path d="M97.6 45h4.8M97.6 49h4.8M97.6 53h4.8M97.6 57h4.8" stroke="#64748b" stroke-width=".8"/>'
+            '<path d="M100 66v38" stroke="#fff" stroke-opacity=".35" stroke-width="1.4" stroke-linecap="round"/></g>'
+            '<circle cx="125" cy="116" r="9" fill="url(#pBall)"/>'
+            '<path d="M120.6 110.2c2 1.9 2.7 6.6 1 10.6M129.4 110.2c-2 1.9-2.7 6.6-1 10.6" stroke="#f5efe6" stroke-width="1.1" fill="none" stroke-linecap="round"/>'
+            '<text x="100" y="146" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="700" font-size="7.5" '
+            'letter-spacing="1.5" fill="#94a3b8">cric<tspan fill="#FF9933">stat</tspan></text>'
+            '</svg>')
+
+
 def hosts():
     with open(os.path.join(WEB, "assets", "world-map.json"), encoding="utf-8") as f:
         world = json.load(f)

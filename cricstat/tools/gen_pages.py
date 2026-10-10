@@ -21,7 +21,7 @@ else:
     WEB = os.path.join(CRICSTAT, "tools", "staging", "web")
     if not os.path.isdir(WEB):
         shutil.copytree(os.path.join(CRICSTAT, "web"), WEB)
-V = "94"
+V = "95"
 # P1.6 ships in two parts: False = the approved non-predictor pages only (nav "ODI WC 2027 soon", no predictor page,
 # no model numbers on the map, no predictor rows on the licences page). True at the full P1.6 deploy.
 PREDICTOR_LIVE = os.environ.get("CRICSTAT_PREDICTOR_LIVE") == "1"   # preview: CRICSTAT_PREDICTOR_LIVE=1
@@ -243,6 +243,11 @@ page("index.html", "/cricket/", "cricstat — cricket stats, ODI World Cup 2027 
 PLAYERS = '''<header class="hero left">
   <div class="wrap">
     <div class="eyebrow"><span class="dot"></span>Players</div>
+    <div class="wc-head p-intro" id="p-intro">@@PSEAL@@
+     <div class="wc-head-text"><h1 class="wc-title" style="font-size:clamp(2rem,4.4vw,3rem);margin:0">Every player, every ball</h1>
+      <p class="subtitle" style="margin-top:.6rem">Careers built ball by ball for men and women in Tests, ODIs, T20Is and the big leagues: batting, bowling and fielding by format, year, phase and opponent. Search any name, surname or initials.</p></div>
+     <figure class="wc-hosts-fig p-countfig"><div class="p-count"><b id="p-count" class="sb">—</b><span>players</span><small id="p-count-sub">men &amp; women · since 2001</small></div><figcaption>in our data, updated daily</figcaption></figure>
+    </div>
     <form class="search-bar" id="p-form" action="/cricket/players/" method="get" role="search">
       <input id="p-search" name="q" type="search" placeholder="Name, surname or initials — e.g. Kohli, S Mandhana" aria-label="Search players" autocomplete="off" minlength="2" required>
       <button class="btn pri" type="submit">Search</button>
@@ -252,6 +257,8 @@ PLAYERS = '''<header class="hero left">
 </header>
 <div id="p-profile" aria-live="polite"></div>
 '''
+from gen_wc_badges import players_seal  # noqa: E402
+PLAYERS = PLAYERS.replace("@@PSEAL@@", players_seal())
 page("players/index.html", "/cricket/players/", "Player statistics — cricstat | pandyaHomeLab",
      "Career, year-by-year, phase and opponent statistics for men's and women's cricketers: Tests, ODIs, T20Is and major leagues, from Cricsheet ball-by-ball data.",
      "players", PLAYERS, ["/vendor/chart.js-4.4.0/chart.umd.min.js", "/cricket/assets/players.js?v=" + V])
