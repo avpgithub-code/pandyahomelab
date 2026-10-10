@@ -526,6 +526,19 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   run wins; the API still returns every run). Re-runs on the same results are legitimate (fingerprint covers model,
   fixtures and qualifier field, e.g. run 3 after the 9 Oct polish deploy). Staging holds unpublished extras
   (wc-seal.svg, wc-hosts.svg, badge-options/): copy only changed files live, don't rsync the whole tree.
+  **Branch-switch trap:** `cricstat/web/` and `website/` are git-tracked AND bind-mounted live, so `git checkout` to a
+  branch cut before a web change silently reverts the live site (happened 2026-10-10). After merging a web change to
+  main, merge main into every branch before switching to it, then confirm the live page's `?v=` number.
+  **Predictor Ratings tab (owner-approved 2026-10-10, V=110–116):** clicking a row (name included; the small ↗ opens the
+  team page) charts that team's Elo, with the followed team as a grey line (linear time axis so different ODI dates
+  align). Below it, "‹Team› vs rivals": rivals = India, Australia, South Africa, Pakistan, England minus the team,
+  topped up with the highest-rated other active team, sorted by rating; table = rating, the team's neutral-ground win
+  chance (Elo, no home edge), ODI W–L (`/v1/teams/{uid}/head-to-head?opponent=`), last met; chart = one gap line per
+  rival (team − rival, above zero = team ahead). Clicking a rival row filters the chart to that rival alone (shaded,
+  meeting dots = shared match ids, "who gained" tooltip); "All rivals" or a second click restores all five. On ≥ 900px
+  the list scrolls in a box as tall as the chart column (`.wc-rate-*`, sticky header); stacked below that.
+  Homepage cricstat card (same day): Players / Countries titles link to their pages; card title links are gold +
+  underlined at rest; paragraph links stay gold when visited.
 - **Previous state (2026-10-09):** P0, P0.5, P0.6 and P1.1–P1.5 live; **partial P1.6 live** (world map Countries landing with
   win %/matches, Following Men/Women, team-page tabs, hub Manhattan; API f974fb246adb; web commit 54ce200; owner
   checked it). Everything is merged to `main` and pushed. **On hold until the owner says so:** predictor page,
