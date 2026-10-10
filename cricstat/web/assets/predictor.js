@@ -36,7 +36,7 @@
   // ── Header: stamp + the followed team's line ──
   function stamp() {
     const f = F.forecast;
-    C.fill("wc-stamp", ["Elo baseline · " + C.num(f.n_simulations) + " simulated tournaments · updated " + day(f.created_at.slice(0, 10)) +
+    C.fill("wc-stamp", ["cricstat Elo · " + C.num(f.n_simulations) + " simulated tournaments · updated " + day(f.created_at.slice(0, 10)) +
       " · results to " + day(f.data_as_of) + " · model " + f.model_version]);
     C.fill("wc-asof", " · " + day(f.created_at.slice(0, 10)));
   }

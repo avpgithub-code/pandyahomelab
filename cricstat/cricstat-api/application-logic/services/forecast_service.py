@@ -105,7 +105,7 @@ def latest(db: ServingDB, fdb: ForecastDB, tournament: str) -> Tuple[dict, dict]
             "forecast": _forecast_meta(run),
             "stages": [{"id": s, "label": label} for s, label in STAGES],
             "teams": rows,
-            "model": {"family": model["params"].get("family", "elo"), "label": "Elo baseline",
+            "model": {"family": model["params"].get("family", "elo"), "label": "cricstat Elo",
                       "version": run["model_version"], "elo": model["params"].get("elo")},
             "assumptions": summary.get("assumptions", []),
             "disclosures": DISCLOSURES}
@@ -272,7 +272,7 @@ def backtest(fdb: ForecastDB) -> Tuple[dict, dict]:
             "backtest": p.get("backtest"),
             "reliability": forecast_repo.reliability(fdb, run["model_version"]),
             "comparison": [
-                {"model": "Elo baseline", "kind": "statistics", "status": "live",
+                {"model": "cricstat Elo (baseline)", "kind": "statistics", "status": "live",
                  "test_a_log_loss": p.get("metrics", {}).get("test_a.log_loss"),
                  "test_b_log_loss": p.get("metrics", {}).get("test_b.log_loss")},
                 {"model": "Win-rate baseline", "kind": "baseline", "status": "reference",
