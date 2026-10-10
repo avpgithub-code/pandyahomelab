@@ -175,6 +175,20 @@
     .panel-card .bottom-tabs { max-width: none; padding: 0; }
     .panel-card .domain-section:last-child { margin-bottom: 0; }
     @media (max-width: 720px) { .panel-card { padding: 1.1rem; } .panel-wrap { padding: 0 1rem; } }
+    /* — Project rows as a horizontal carousel inside each tab (JS adds .tabs-on and the arrows) — */
+    .proj-carousel { position: relative; }
+    .tabs-on .projects-grid { display: flex; gap: 1.25rem; overflow-x: auto; scroll-snap-type: x proximity; scroll-behavior: smooth;
+      padding: .5rem .2rem 1rem; scrollbar-width: thin; scrollbar-color: #3a4256 transparent; }
+    .tabs-on .projects-grid::-webkit-scrollbar { height: 8px; }
+    .tabs-on .projects-grid::-webkit-scrollbar-thumb { background: #3a4256; border-radius: 4px; }
+    .tabs-on .proj-card { flex: 0 0 min(300px, 82vw); scroll-snap-align: start; }
+    .car-arrow { position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; width: 38px; height: 38px; border-radius: 50%;
+      border: 1px solid var(--border); background: rgba(19,22,30,.92); color: var(--text); font-size: 1.3rem; line-height: 1;
+      cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.45); transition: opacity .2s, border-color .2s; }
+    .car-arrow:hover { border-color: var(--text); }
+    .car-arrow.prev { left: -14px; } .car-arrow.next { right: -14px; }
+    .car-arrow:disabled { opacity: 0; pointer-events: none; }
+    .proj-carousel.fits .car-arrow { display: none; }
     /* — PROJECTS — */
     .projects-section { padding-top: 0; }
     .projects-grid {
@@ -552,6 +566,15 @@
       <span class="domain-count">3 live</span>
     </div>
     <div class="projects-grid">
+      <div class="proj-card cric">
+        <div class="part-of">Part of <span class="cs"><i class="cs-sr">cricstat</i><i class="cs-w" aria-hidden="true">cr<i class="cs-i">ı</i>c<b>stat</b></i></span></div>
+        <h3>ODI WC 2027 Predictor</h3>
+        <span class="proj-status status-live">✓ Live</span>
+        <p>cricstat Elo ratings and 50,000 simulated tournaments give every team's World Cup 2027 chances, backtested on the 2019 and 2023 World Cups. ML and DL challengers next.</p>
+        <span class="proj-route">/cricket/predictor/</span>
+        <a href="/cricket/predictor/" class="proj-link cric-link">Open the predictor →</a>
+        <a href="/cricket/methodology/" class="proj-link cric-link" style="margin-top:.5rem">How it works in <span class="cs"><i class="cs-sr">cricstat</i><i class="cs-w" aria-hidden="true">cr<i class="cs-i">ı</i>c<b>stat</b></i></span> →</a>
+      </div>
       <div class="proj-card ml">
         <div class="proj-icon">🎯</div>
         <h3>Iris KNN Classifier</h3>
@@ -576,15 +599,6 @@
         <span class="proj-route">/ml/titanic-automl/</span>
         <a href="/ml/titanic-automl/" class="proj-link ml-link">Try it →</a>
       </div>
-      <div class="proj-card cric">
-        <div class="part-of">Part of <span class="cs"><i class="cs-sr">cricstat</i><i class="cs-w" aria-hidden="true">cr<i class="cs-i">ı</i>c<b>stat</b></i></span></div>
-        <h3>ODI WC 2027 Predictor</h3>
-        <span class="proj-status status-live">✓ Live</span>
-        <p>cricstat Elo ratings and 50,000 simulated tournaments give every team's World Cup 2027 chances, backtested on the 2019 and 2023 World Cups. ML and DL challengers next.</p>
-        <span class="proj-route">/cricket/predictor/</span>
-        <a href="/cricket/predictor/" class="proj-link cric-link">Open the predictor →</a>
-        <a href="/cricket/methodology/" class="proj-link cric-link" style="margin-left:.8rem">How it works in <span class="cs"><i class="cs-sr">cricstat</i><i class="cs-w" aria-hidden="true">cr<i class="cs-i">ı</i>c<b>stat</b></i></span> →</a>
-      </div>
     </div>
   </div>
 
@@ -596,6 +610,14 @@
       <span class="domain-count">2 live · 1 planned</span>
     </div>
     <div class="projects-grid">
+      <div class="proj-card cric">
+        <div class="part-of">Part of <span class="cs"><i class="cs-sr">cricstat</i><i class="cs-w" aria-hidden="true">cr<i class="cs-i">ı</i>c<b>stat</b></i></span></div>
+        <h3>Ball-by-ball Sequence Model</h3>
+        <span class="proj-status status-planned">Planned</span>
+        <p>Live win probability and player-strength ratings for the predictor, learned from 11.6M deliveries.</p>
+        <span class="proj-route">/cricket/</span>
+        <a href="/cricket/about/#predictor" class="proj-link cric-link">How it works in <span class="cs"><i class="cs-sr">cricstat</i><i class="cs-w" aria-hidden="true">cr<i class="cs-i">ı</i>c<b>stat</b></i></span> →</a>
+      </div>
       <div class="proj-card dl">
         <div class="proj-icon">✍️</div>
         <h3>MNIST CNN — Draw a Digit</h3>
@@ -620,14 +642,6 @@
         <span class="proj-route">/dl/object-detection</span>
         <span class="proj-link proj-link-disabled">Planned</span>
       </div>
-      <div class="proj-card cric">
-        <div class="part-of">Part of <span class="cs"><i class="cs-sr">cricstat</i><i class="cs-w" aria-hidden="true">cr<i class="cs-i">ı</i>c<b>stat</b></i></span></div>
-        <h3>Ball-by-ball Sequence Model</h3>
-        <span class="proj-status status-planned">Planned</span>
-        <p>Live win probability and player-strength ratings for the predictor, learned from 11.6M deliveries.</p>
-        <span class="proj-route">/cricket/</span>
-        <a href="/cricket/about/#predictor" class="proj-link cric-link">How it works in <span class="cs"><i class="cs-sr">cricstat</i><i class="cs-w" aria-hidden="true">cr<i class="cs-i">ı</i>c<b>stat</b></i></span> →</a>
-      </div>
     </div>
   </div>
 
@@ -639,6 +653,14 @@
       <span class="domain-count">4 live</span>
     </div>
     <div class="projects-grid">
+      <div class="proj-card cric">
+        <div class="part-of">Part of <span class="cs"><i class="cs-sr">cricstat</i><i class="cs-w" aria-hidden="true">cr<i class="cs-i">ı</i>c<b>stat</b></i></span></div>
+        <h3>Fact-checked Match Reports</h3>
+        <span class="proj-status status-planned">Planned</span>
+        <p>Data-to-text match summaries with every claim verified against the statistics.</p>
+        <span class="proj-route">/cricket/</span>
+        <a href="/cricket/about/#analyst" class="proj-link cric-link">How it works in <span class="cs"><i class="cs-sr">cricstat</i><i class="cs-w" aria-hidden="true">cr<i class="cs-i">ı</i>c<b>stat</b></i></span> →</a>
+      </div>
       <div class="proj-card nlp">
         <div class="proj-icon">🔁</div>
         <h3>Duplicate Question Pairs</h3>
@@ -671,14 +693,6 @@
         <span class="proj-route">/nlp/ewt-hmm/</span>
         <a href="/nlp/ewt-hmm/" class="proj-link nlp-link">Try it →</a>
       </div>
-      <div class="proj-card cric">
-        <div class="part-of">Part of <span class="cs"><i class="cs-sr">cricstat</i><i class="cs-w" aria-hidden="true">cr<i class="cs-i">ı</i>c<b>stat</b></i></span></div>
-        <h3>Fact-checked Match Reports</h3>
-        <span class="proj-status status-planned">Planned</span>
-        <p>Data-to-text match summaries with every claim verified against the statistics.</p>
-        <span class="proj-route">/cricket/</span>
-        <a href="/cricket/about/#analyst" class="proj-link cric-link">How it works in <span class="cs"><i class="cs-sr">cricstat</i><i class="cs-w" aria-hidden="true">cr<i class="cs-i">ı</i>c<b>stat</b></i></span> →</a>
-      </div>
     </div>
   </div>
 
@@ -690,14 +704,6 @@
       <span class="domain-count">0 live · 1 planned</span>
     </div>
     <div class="projects-grid">
-      <div class="proj-card ag">
-        <div class="proj-icon">🧩</div>
-        <h3>Claude AI Agent</h3>
-        <span class="proj-status status-planned">Planned</span>
-        <p>Autonomous AI agent powered by Claude API. Multi-step reasoning, tool use, and structured outputs.</p>
-        <span class="proj-route">/agentic/claude-agent</span>
-        <span class="proj-link proj-link-disabled">Planned</span>
-      </div>
       <div class="proj-card cric">
         <div class="part-of">Part of <span class="cs"><i class="cs-sr">cricstat</i><i class="cs-w" aria-hidden="true">cr<i class="cs-i">ı</i>c<b>stat</b></i></span></div>
         <h3>Ask the Analyst</h3>
@@ -705,6 +711,14 @@
         <p>LangGraph agent with typed tools over the stats API and published evaluation scores.</p>
         <span class="proj-route">/cricket/</span>
         <a href="/cricket/about/#analyst" class="proj-link cric-link">How it works in <span class="cs"><i class="cs-sr">cricstat</i><i class="cs-w" aria-hidden="true">cr<i class="cs-i">ı</i>c<b>stat</b></i></span> →</a>
+      </div>
+      <div class="proj-card ag">
+        <div class="proj-icon">🧩</div>
+        <h3>Claude AI Agent</h3>
+        <span class="proj-status status-planned">Planned</span>
+        <p>Autonomous AI agent powered by Claude API. Multi-step reasoning, tool use, and structured outputs.</p>
+        <span class="proj-route">/agentic/claude-agent</span>
+        <span class="proj-link proj-link-disabled">Planned</span>
       </div>
     </div>
   </div>
@@ -900,6 +914,7 @@
     const select = (i, focus) => {
       tabs.forEach((t, j) => { const on = i === j; t.setAttribute("aria-selected", String(on)); t.tabIndex = on ? 0 : -1; sections[j].hidden = !on; });
       if (focus) tabs[i].focus();
+      window.dispatchEvent(new Event("resize"));   // carousels re-measure once their tab is visible
     };
     tabs.forEach((t, i) => {
       t.addEventListener("click", () => select(i));
@@ -909,6 +924,27 @@
         else if (e.key === "Home") { e.preventDefault(); select(0, true); }
         else if (e.key === "End") { e.preventDefault(); select(tabs.length - 1, true); }
       });
+    });
+    // Each tab's cards scroll sideways; ‹ › arrows at the sides (hidden when everything fits or at an end).
+    sections.forEach((sec) => {
+      const grid = sec.querySelector(".projects-grid"); if (!grid) return;
+      const wrap = document.createElement("div"); wrap.className = "proj-carousel";
+      grid.parentNode.insertBefore(wrap, grid); wrap.appendChild(grid);
+      const mk = (cls, label, sym, dir) => {
+        const b = document.createElement("button"); b.type = "button"; b.className = "car-arrow " + cls;
+        b.setAttribute("aria-label", label); b.textContent = sym;
+        b.addEventListener("click", () => grid.scrollBy({ left: dir * Math.max(grid.clientWidth * 0.8, 280), behavior: "smooth" }));
+        wrap.appendChild(b); return b;
+      };
+      const prev = mk("prev", "Previous projects", "‹", -1), next = mk("next", "More projects", "›", 1);
+      const update = () => {
+        const max = grid.scrollWidth - grid.clientWidth;
+        wrap.classList.toggle("fits", max <= 4);
+        prev.disabled = grid.scrollLeft <= 4; next.disabled = grid.scrollLeft >= max - 4;
+      };
+      grid.addEventListener("scroll", update, { passive: true });
+      window.addEventListener("resize", update);
+      update();
     });
     const ids = sections.map((s) => s.id);
     const open = (hash, scroll) => {
