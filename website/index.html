@@ -189,6 +189,14 @@
       .tabs-on .projects-grid > .proj-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
     }
     @media (max-width: 760px) { .tabs-on .projects-grid { grid-template-columns: 1fr; } }
+    /* — Compact card headers: eyebrow + title left, one-line description right — */
+    .panel-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: .3rem 2rem; margin-bottom: 1.1rem; }
+    .panel-head .section-label { flex-basis: 100%; margin-bottom: 0; }
+    .panel-head .section-title { font-size: clamp(1.35rem, 2.2vw, 1.6rem); margin: 0; }
+    .panel-head .section-desc { margin: 0; max-width: 520px; font-size: .9rem; color: var(--muted); text-align: right; }
+    @media (max-width: 720px) { .panel-head .section-desc { text-align: left; } }
+    .panel-card .domain-tabs { margin-bottom: 1.2rem; }
+    section.tabbed .panel-head .section-label { display: none; }
     /* — PROJECTS — */
     .projects-section { padding-top: 0; }
     .projects-grid {
@@ -554,9 +562,9 @@
 
 <section id="projects" class="projects-section">
   <div class="panel-card">
-  <div class="section-label">Live Deployments</div>
+  <div class="panel-head"><div class="section-label">Live Deployments</div>
   <h2 class="section-title">Featured Projects</h2>
-  <p class="section-desc">Each project is a containerized microservice — built and tested on NAS, deployed to AWS.</p>
+  <p class="section-desc">Each project is a containerized microservice — built and tested on NAS, deployed to AWS.</p></div>
 
   <!-- ML -->
   <div class="domain-section" id="ml">
@@ -727,9 +735,9 @@
 
 <div class="panel-wrap"><div class="panel-card">
 <section id="stack">
-  <div class="section-label">Technology Stack</div>
+  <div class="panel-head"><div class="section-label">Technology Stack</div>
   <h2 class="section-title">Built With</h2>
-  <p class="section-desc">Production-grade tools across all domains.</p>
+  <p class="section-desc">Production-grade tools across all domains.</p></div>
   <div class="stack-grid">
     <div class="stack-chip"><span class="chip-icon">📊</span>scikit-learn</div>
     <div class="stack-chip"><span class="chip-icon">🔥</span>PyTorch</div>
@@ -747,9 +755,9 @@
 </section>
 
 <section id="tools">
-  <div class="section-label">Platform Tools</div>
+  <div class="panel-head"><div class="section-label">Platform Tools</div>
   <h2 class="section-title">MLOps Infrastructure</h2>
-  <p class="section-desc">Shared services powering all ML experiments and model tracking.</p>
+  <p class="section-desc">Shared services powering all ML experiments and model tracking.</p></div>
   <div class="tools-grid">
 
     <div class="tool-card">
