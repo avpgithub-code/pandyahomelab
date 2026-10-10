@@ -448,7 +448,12 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   intro** (bowler seal — final, owner 2026-10-10; batter kept via `PLAYERS_FIGURE` in gen_wc_badges.py — + live player
   count; hidden on profiles by pages.py + players.js), **Countries hero** (globe seal + "cricket nations" count;
   subtitle follows PREDICTOR_LIVE — the live subtitle still mentions ratings/WC chances until the next copy).
-  **Next:** team-page ratings card, hub teaser, then the full P1.6 deploy (API publish needed for pages.py).
+  Then (owner-approved 2026-10-10, V=106): **team-page "cricstat Elo & ODI World Cup 2027" card** (rating, rank, 12-month
+  change and 2-year line from the data date, win chance v #1/#2, "What does 1615 mean?", proof line), **"cricstat Elo"
+  branding** (our-model pill + wordmark + "not the ICC ranking"; shared `C.ourModel()`/`C.wordmark()` in cricstat.js),
+  **favourite rank + 🏠 host note** (+75 from the forecast's model.elo.home), **hub teaser** answers for the followed
+  country's men's side (else India) and links to the predictor. All behind PREDICTOR_LIVE.
+  **Next: the full P1.6 deploy** (API publish needed for pages.py + models publish; see deploy order above).
 - **(Superseded 2026-10-10: owner resumed P1.6.) Was ON HOLD 2026-10-09 evening:** predictor-page approval, methodology page (`/cricket/methodology/`,
   data from `/v1/models/predictor/backtest`), live "Ratings & ODI World Cup 2027" card on men's team pages (countries.js
   `ratingsCard`), hub teaser with the real number, and the P1.6 deploy. Don't start them until the owner says so.

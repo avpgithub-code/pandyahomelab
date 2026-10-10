@@ -21,7 +21,7 @@ else:
     WEB = os.path.join(CRICSTAT, "tools", "staging", "web")
     if not os.path.isdir(WEB):
         shutil.copytree(os.path.join(CRICSTAT, "web"), WEB)
-V = "105"
+V = "106"
 # P1.6 ships in two parts: False = the approved non-predictor pages only (nav "ODI WC 2027 soon", no predictor page,
 # no model numbers on the map, no predictor rows on the licences page). True at the full P1.6 deploy.
 PREDICTOR_LIVE = os.environ.get("CRICSTAT_PREDICTOR_LIVE") == "1"   # preview: CRICSTAT_PREDICTOR_LIVE=1
@@ -231,6 +231,14 @@ HUB_DESC = ("Cricket statistics for men's and women's cricket across Tests, ODIs
             "open ball-by-ball data — and an ODI World Cup 2027 predictor that compares Elo, machine-learning and "
             "deep-learning models.")
 HUB = HUB.replace("@@MANHATTAN@@", manhattan_svg())
+if PREDICTOR_LIVE:   # the teaser answers its own question (hub.js fills #wc-answer from the live forecast)
+    HUB = (HUB.replace('<a class="wc-tease" href="#about" data-about="predictor">', '<a class="wc-tease" href="/cricket/predictor/" id="wc-tease">', 1)
+           .replace("</svg> What are the chances of India lifting the 2027 ODI World Cup?</span>",
+                    '</svg> <span id="wc-qtext">What are the chances of India lifting the 2027 ODI World Cup?</span></span>\n'
+                    '      <span class="wc-a" id="wc-answer" aria-live="polite"></span>', 1)
+           .replace("Three models — Elo ratings (statistics), machine learning and deep learning — are about to compete to answer that",
+                    "Today: cricstat Elo and 50,000 simulated tournaments. Machine-learning and deep-learning challengers are coming", 1))
+    assert 'id="wc-answer"' in HUB and 'id="wc-tease"' in HUB, "hub teaser markers moved"
 page("index.html", "/cricket/", "cricstat — cricket stats, ODI World Cup 2027 predictor & AI analyst | pandyaHomeLab",
      HUB_DESC, "hub", HUB, ["/cricket/assets/hub.js?v=" + V],
      extra_head=ld_json({"@context": "https://schema.org", "@type": "WebApplication", "@id": SITE + "/cricket/#app",

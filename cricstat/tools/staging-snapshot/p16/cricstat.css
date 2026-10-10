@@ -710,3 +710,7 @@ a.about-trigger[aria-current="page"] { background: rgba(255,153,51,.22); border-
              color: var(--saffron); border: 1px solid rgba(255,153,51,.5); background: rgba(255,153,51,.1); border-radius: 99px; padding: .12rem .5rem; }
 .r-proof { margin: .35rem 0 0; }
 .wc-host { margin-left: .3rem; font-size: .85em; cursor: help; }
+/* Hub teaser answer (full P1.6 build) */
+.wc-tease .wc-a { font-size: 1rem; color: var(--soft); }
+.wc-tease .wc-a b { color: var(--saffron); font-size: 1.15rem; }
+.wc-tease .wc-a:empty { display: none; }
