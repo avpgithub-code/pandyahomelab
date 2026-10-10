@@ -547,6 +547,14 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   in the HTML. In each project tab the cricstat card is first and all cards sit in one row (`--cols` = card count:
   4/4/5/2; two per row < 1100px, one < 760px). Tried and dropped: sideways carousel, Flagship-vs-Featured tabs.
   Edit `cricstat/tools/staging/homepage.html`, test in jsdom, then copy to `website/index.html`.
+  Later the same day (owner): flagship card = four compact cards in one row (Players & Countries · ODI WC 2027
+  Predictor · Ask the Analyst · **How I built it** → /cricket/about/; two per row < 900px, one < 520px; the old
+  text link is gone) and the Explore button centred (`.flagship-cta`); hero ~5% shorter (spacing only); gap below
+  Featured Projects = 1rem like above it; **no "deployed to AWS" claims** (the site runs only on the NAS; AWS is a
+  planned stage — the "AWS EC2" stack chip is still there, owner to decide). Homepage HTML is not cached by
+  Cloudflare (`cf-cache-status: DYNAMIC`, browser `max-age=3600`): no purge needed, Ctrl+F5 to see a change.
+  Methodology › Calibration "The numbers" (V=122): grouped header (Elo (live) | Win-rate model over Predicted /
+  Happened, `calTable()` + `.m-cal-table`) so the table fits its card without a scroll bar.
   **Predictor answers up top (2026-10-10, V=117, API de595530cc46):** hero sentence "On <data_as_of>, cricstat's model
   makes <#1> the favourite at <x%>, ahead of <#2> and <#3>" is server-rendered into `#wc-answer` by
   `pages.predictor_answer` (predictor.js writes the same); caveats strip under the follow card; "Jump to" links

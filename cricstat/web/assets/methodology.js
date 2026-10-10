@@ -137,6 +137,22 @@
 
   // ── 🎯 Calibration ──
   let calChart = null;
+  // Grouped header (Elo | Win-rate model over Predicted / Happened) keeps the table inside its card without a scroll bar.
+  function calTable(rel) {
+    const wrap = C.table(["Favourite's chance", "Matches", "Predicted", "Happened", "Predicted", "Happened"],
+      (rel.elo || []).map((b, i) => { const w = (rel.win_rate || [])[i] || {}; return [b.bin.replace("-", "–"), b.n, pct(b.predicted), pct(b.observed), pct(w.predicted), pct(w.observed)]; }), { textCols: [0] });
+    const table = wrap.querySelector("table");
+    table.classList.add("m-cal-table");
+    const sub = table.querySelector("thead tr");
+    const cells = sub.querySelectorAll("th");
+    cells[0].setAttribute("rowspan", "2");
+    cells[1].setAttribute("rowspan", "2");
+    const top = h("tr", {}, [cells[0], cells[1],
+      h("th", { scope: "colgroup", colspan: "2", class: "grp" }, "Elo (live)"),
+      h("th", { scope: "colgroup", colspan: "2", class: "grp" }, "Win-rate model")]);
+    sub.parentNode.insertBefore(top, sub);
+    return wrap;
+  }
   function cal(d) {
     const rel = d.backtest.test_a.reliability || {};
     const ta = d.backtest.test_a;
@@ -146,8 +162,7 @@
         h("div", { class: "card" }, [h("div", { class: "chart m-chart" }, h("canvas", { id: "m-rel", role: "img", "aria-label": "Reliability chart: predicted against observed win rate for the favourite, Elo and win-rate models" })),
           h("p", { class: "tiny muted" }, "Each point groups the ODIs since 2019 by the favourite's predicted chance (0.5–0.6 … 0.9–1.0). On the diagonal = perfectly calibrated; above it = the favourite won more often than predicted.")]),
         h("div", { class: "card" }, [h("h3", {}, "The numbers"),
-          h("div", { class: "scroll" }, C.table(["Favourite's chance", "Matches", "Elo predicted", "Happened", "Win-rate predicted", "Happened"],
-            (rel.elo || []).map((b, i) => { const w = (rel.win_rate || [])[i] || {}; return [b.bin.replace("-", "–"), b.n, pct(b.predicted), pct(b.observed), pct(w.predicted), pct(w.observed)]; }), { textCols: [0] })),
+          calTable(rel),
           facts([["Calibration slope (Elo)", f2(ta.elo.calibration_slope) + " (1.00 ideal; the bar is 0.8–1.2)"],
             ["Calibration slope (win-rate)", f2(ta.win_rate.calibration_slope)],
             ["Gate", d.gates.gate2_slope_in_range && d.gates.gate2_bins_within_tolerance ? "passed: slope in range, no well-filled bin more than 8 points off" : "not passed"]])])])]);
