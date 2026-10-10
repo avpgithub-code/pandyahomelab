@@ -21,7 +21,7 @@ else:
     WEB = os.path.join(CRICSTAT, "tools", "staging", "web")
     if not os.path.isdir(WEB):
         shutil.copytree(os.path.join(CRICSTAT, "web"), WEB)
-V = "89"
+V = "90"
 # P1.6 ships in two parts: False = the approved non-predictor pages only (nav "ODI WC 2027 soon", no predictor page,
 # no model numbers on the map, no predictor rows on the licences page). True at the full P1.6 deploy.
 PREDICTOR_LIVE = os.environ.get("CRICSTAT_PREDICTOR_LIVE") == "1"   # preview: CRICSTAT_PREDICTOR_LIVE=1
@@ -298,8 +298,11 @@ page("countries/index.html", "/cricket/countries/", "Cricket world map and team 
 PREDICTOR = '''<header class="hero left wc-hero">
   <div class="wrap wc-hero-grid">
    <div class="wc-hero-main">
-    <div class="eyebrow"><span class="dot"></span>ODI World Cup 2027 · South Africa, Zimbabwe &amp; Namibia · 2 Oct – 21 Nov 2027</div>
-    <h1 class="wc-title" style="font-size:clamp(2rem,5vw,3.2rem)">%s Who will lift the 2027 ODI World&nbsp;Cup?</h1>
+    <div class="wc-head">@@SEAL@@
+     <div class="wc-head-text"><div class="eyebrow"><span class="dot"></span>ODI World Cup 2027 · South Africa, Zimbabwe &amp; Namibia · 2 Oct – 21 Nov 2027</div>
+    <h1 class="wc-title" style="font-size:clamp(2rem,4.4vw,3rem)">Who will lift the 2027 ODI World&nbsp;Cup?</h1></div>
+     <figure class="wc-hosts-fig">@@HOSTS@@<figcaption>12 grounds · 3 hosts</figcaption></figure>
+    </div>
     <p class="subtitle">Every team's chances, from Elo ratings and 50,000 simulated tournaments in the published format. One model for every team: following a team changes what you see first, never the numbers.</p>
     <p class="wc-stamp tiny muted" id="wc-stamp">Loading the latest forecast…</p>
     <div id="wc-follow" class="wc-follow" aria-live="polite"></div>
@@ -328,9 +331,9 @@ PREDICTOR = '''<header class="hero left wc-hero">
 </div></section>
 <section class="section panel" aria-label="What this forecast can and can't tell you"><div class="wrap wc-limits" id="wc-limits"></div></section>
 '''
-# Our own trophy icon (the hub teaser's): the official tournament logo is non-free (ICC trademark).
-TROPHY = HUB[HUB.index('<svg class="wc-icon"'):HUB.index("</svg>", HUB.index('<svg class="wc-icon"')) + 6]
-PREDICTOR = PREDICTOR % TROPHY.replace('id="wcGold"', 'id="wcGoldH"').replace("url(#wcGold)", "url(#wcGoldH)")
+# Our own marks (tools/gen_wc_badges.py): a seal and the hosts' map; the official logo is non-free (ICC trademark).
+from gen_wc_badges import hosts as wc_hosts, seal as wc_seal  # noqa: E402
+PREDICTOR = PREDICTOR.replace("@@SEAL@@", wc_seal()).replace("@@HOSTS@@", wc_hosts())
 PRED_DESC = ("ODI World Cup 2027 predictor: each team's chances of the Super 7, semi-finals, final and title, from Elo ratings "
              "and 50,000 simulated tournaments in the published format — with backtests on the 2019 and 2023 World Cups.")
 if PREDICTOR_LIVE:
