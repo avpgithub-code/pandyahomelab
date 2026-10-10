@@ -87,6 +87,7 @@
       model = Promise.all([C.api("/v1/ratings?scope=ODI&gender=male"), C.api("/v1/ratings/" + team.slug + "/history").catch(() => null),
         C.api("/v1/forecasts/wc-2027/latest").catch(() => null)])
         .then(([r, hist, wc]) => ({ rating: r.data.find((x) => x.slug === team.slug) || null, ranked: r.data.filter((x) => x.rank).length,
+          all: r.data,
           points: hist ? hist.data.points : [], wc: wc ? wc.data.teams.find((t) => t.slug === team.slug) || null : null,
           asOf: wc ? wc.data.forecast.data_as_of : null }));
     }
@@ -110,6 +111,22 @@
     return svg;
   }
   const pctTxt = (p) => (p === null || p === undefined ? "—" : p === 0 ? "0%" : p < 0.001 ? "<0.1%" : (100 * p).toFixed(1) + "%");
+  // What a rating means: the scale, and the win chance against a team people know (#1, or #2 for the #1),
+  // from the model's own formula E = 1 / (1 + 10^(−gap/400)) on neutral ground.
+  function explain(r, all) {
+    const ranked = all.filter((x) => x.rank).sort((a, b) => a.rank - b.rank);
+    const other = r.rank === 1 ? ranked[1] : ranked[0];
+    const line = [];
+    if (other) {
+      const e = 1 / (1 + Math.pow(10, -(r.rating - other.rating) / 400));
+      line.push("v " + other.team + " (#" + other.rank + ", " + Math.round(other.rating) + "): " + team.name + " win " + Math.round(100 * e) + "% on neutral ground");
+    }
+    const tip = h("details", { class: "r-what" }, [h("summary", {}, "ⓘ What does " + Math.round(r.rating) + " mean?"),
+      h("p", {}, "An Elo rating: every Full Member starts at 1500, and each ODI moves the two teams' ratings up or down — more for beating a stronger side, a little for beating a weaker one. Only the gap matters: 100 points ahead ≈ 64% to win on neutral ground, 200 ≈ 76%, 0 = 50/50."),
+      h("p", {}, ["The same numbers drive the World Cup forecast. ", h("a", { href: "/cricket/methodology/" }, "How it works →")])]);
+    return h("div", { class: "r-explain" }, [line.length ? h("p", { class: "small", style: "margin:0 0 .3rem" }, line[0]) : null, tip]);
+  }
+
   async function liveRatings() {
     const target = C.fill("f-ratings", [h("div", { class: "card-head" }, [h("h2", {}, "Ratings & ODI World Cup 2027"), h("span", { class: "badge live" }, "Live")]),
       h("div", { class: "skeleton", style: "height:120px" })]);
@@ -139,6 +156,7 @@
             delta !== null ? h("small", { class: delta >= 0 ? "up" : "down" }, (delta >= 0 ? "▲ " : "▼ ") + Math.abs(delta) + " in 12 months")
               : h("small", { class: "dim" }, "no ODIs in the last 12 months · last " + C.date(r.last_match))]),
           spark(pts)]),
+        explain(r, m.all),
         w ? h("div", { class: "r-wc" }, [
           h("div", {}, [h("b", {}, pctTxt(p.champion)), h("span", {}, "title")]),
           h("div", {}, [h("b", {}, pctTxt(p.final)), h("span", {}, "final")]),
