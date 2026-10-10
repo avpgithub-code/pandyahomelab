@@ -705,3 +705,7 @@ a.about-trigger[aria-current="page"] { background: rgba(255,153,51,.22); border-
 .r-what summary { cursor: pointer; color: var(--saffron); font-size: .8rem; list-style: none; }
 .r-what summary::-webkit-details-marker { display: none; }
 .r-what p { font-size: .82rem; color: var(--soft); margin: .4rem 0 0; }
+/* "our model" pill next to cricstat Elo */
+.our-model { display: inline-block; vertical-align: middle; font-size: .62rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+             color: var(--saffron); border: 1px solid rgba(255,153,51,.5); background: rgba(255,153,51,.1); border-radius: 99px; padding: .12rem .5rem; }
+.r-proof { margin: .35rem 0 0; }

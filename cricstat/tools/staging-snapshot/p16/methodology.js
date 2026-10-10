@@ -31,7 +31,7 @@
       head("The short version", "Rate every team, then play the World Cup " + sims + " times"),
       h("ol", { class: "m-steps" }, [
         step(1, "Every men's ODI since 2002 updates two ratings.",
-          "Beat a stronger team and your rating rises a lot; beat a weaker one and it rises a little. Home teams get a head start, big wins count a bit more. That's an Elo rating, the same idea chess uses."),
+          "Beat a stronger team and your rating rises a lot; beat a weaker one and it rises a little. Home teams get a head start, big wins count a bit more. That's an Elo rating, the same idea chess uses; ours is called cricstat Elo, and it is not the ICC ranking."),
         step(2, "Ratings turn into a win chance for any match.",
           "A 100-point gap makes the higher-rated team about a 64% favourite on neutral ground. Every team is rated by the same rule, with no hand adjustments."),
         step(3, "The 2027 tournament is simulated " + sims + " times.",
@@ -51,7 +51,7 @@
   function elo(d) {
     const e = d.champion.elo;
     C.fill("pane-m-elo", [
-      head("Elo ratings", "The rating rule, and every setting"),
+      head("cricstat Elo", "Our own rating: the rule, and every setting"),
       h("div", { class: "grid" }, [
         h("div", { class: "card" }, [h("h3", {}, "The formulas"),
           h("p", { class: "small" }, ["Expected result for team A against team B:"]),

@@ -11,6 +11,7 @@ and `cricstat/web/` is bind-mounted LIVE, so the branch can't hold them there). 
   `assets/world-map.json` is generated: `python3 cricstat/tools/fetch_world_map.py` (Natural Earth, public domain)
 - `players.js` → `staging/web/assets/players.js` (Players page intro: seal + live player count)
 - `methodology.js` → `staging/web/assets/methodology.js` (methodology page)
+- `cricstat.js` → `staging/web/assets/cricstat.js` (shared helpers; adds `ourModel()` pill)
 - `venues/*.jpg` → `staging/web/venues/` (8 venue photos; credits in
   `cricstat-models/tournaments/wc2027/venues.csv`; 7 from Commons via `tools/fetch_venue_photos.py`,
   Centurion from Flickr by hand: Dave Morton, Public Domain Mark 1.0, flickr.com/photos/forwarddefensive/49404965312)

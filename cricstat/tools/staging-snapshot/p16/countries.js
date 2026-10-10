@@ -122,9 +122,10 @@
       line.push("v " + other.team + " (#" + other.rank + ", " + Math.round(other.rating) + "): " + team.name + " win " + Math.round(100 * e) + "% on neutral ground");
     }
     const tip = h("details", { class: "r-what" }, [h("summary", {}, "ⓘ What does " + Math.round(r.rating) + " mean?"),
-      h("p", {}, "An Elo rating: every Full Member starts at 1500, and each ODI moves the two teams' ratings up or down — more for beating a stronger side, a little for beating a weaker one. Only the gap matters: 100 points ahead ≈ 64% to win on neutral ground, 200 ≈ 76%, 0 = 50/50."),
+      h("p", {}, "cricstat Elo is our own Elo rating — not the ICC ranking. Every Full Member starts at 1500, and each ODI moves the two teams' ratings up or down — more for beating a stronger side, a little for beating a weaker one. Only the gap matters: 100 points ahead ≈ 64% to win on neutral ground, 200 ≈ 76%, 0 = 50/50."),
       h("p", {}, ["The same numbers drive the World Cup forecast. ", h("a", { href: "/cricket/methodology/" }, "How it works →")])]);
-    return h("div", { class: "r-explain" }, [line.length ? h("p", { class: "small", style: "margin:0 0 .3rem" }, line[0]) : null, tip]);
+    return h("div", { class: "r-explain" }, [line.length ? h("p", { class: "small", style: "margin:0 0 .3rem" }, line[0]) : null, tip,
+      h("p", { class: "tiny muted r-proof" }, "Our own rating, updated daily from every men's ODI since 2002 · tested on every ODI since 2019 before it was played · not the ICC ranking.")]);
   }
 
   async function liveRatings() {
@@ -150,7 +151,7 @@
       const where = !w ? "Not in the 2027 race." : w.direct_qualifier ? "Qualified · group " + w.group + "."
         : pctTxt(p.qualified) + " to get through the Qualifier (Feb–Mar 2027).";
       C.fill(target, [
-        h("div", { class: "card-head" }, [h("h2", {}, "Ratings & ODI World Cup 2027"), h("span", { class: "badge live" }, "Live")]),
+        h("div", { class: "card-head" }, [h("h2", {}, [C.wordmark(), " Elo & ODI World Cup 2027 ", C.ourModel()]), h("span", { class: "badge live" }, "Live")]),
         h("div", { class: "r-top" }, [
           h("div", { class: "r-big" }, [h("b", {}, String(Math.round(r.rating))), h("span", {}, r.rank ? "#" + r.rank + " of " + m.ranked + " ranked" : "unranked (no recent ODIs)"),
             delta !== null ? h("small", { class: delta >= 0 ? "up" : "down" }, (delta >= 0 ? "▲ " : "▼ ") + Math.abs(delta) + " in 12 months")

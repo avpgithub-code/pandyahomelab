@@ -21,7 +21,7 @@ else:
     WEB = os.path.join(CRICSTAT, "tools", "staging", "web")
     if not os.path.isdir(WEB):
         shutil.copytree(os.path.join(CRICSTAT, "web"), WEB)
-V = "101"
+V = "103"
 # P1.6 ships in two parts: False = the approved non-predictor pages only (nav "ODI WC 2027 soon", no predictor page,
 # no model numbers on the map, no predictor rows on the licences page). True at the full P1.6 deploy.
 PREDICTOR_LIVE = os.environ.get("CRICSTAT_PREDICTOR_LIVE") == "1"   # preview: CRICSTAT_PREDICTOR_LIVE=1
@@ -288,7 +288,7 @@ MAP_BOARD = '''<div id="c-landing" data-model="@@MODEL@@">
 '''
 from gen_wc_badges import countries_seal  # noqa: E402
 MAP_BOARD = MAP_BOARD.replace("@@CSEAL@@", countries_seal()).replace("@@CSUB@@",
-    "Every international team in our data on one map. Colour it by " + ("ODI rating, ODI World Cup 2027 chances, " if PREDICTOR_LIVE else "")
+    "Every international team in our data on one map. Colour it by " + ("cricstat Elo (our own ODI rating), ODI World Cup 2027 chances, " if PREDICTOR_LIVE else "")
     + "recent win % or matches played, then pick a team for its record and latest form.")
 MAP_BOARD = (MAP_BOARD.replace("@@MODEL@@", "on" if PREDICTOR_LIVE else "off")
              .replace("@@AFG_MAP@@", "Afghanistan men's matches are withheld by Cricsheet; their rating comes from our reviewed results list."

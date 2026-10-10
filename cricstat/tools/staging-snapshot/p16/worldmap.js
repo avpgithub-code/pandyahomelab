@@ -36,7 +36,7 @@
     "Zambia": ["ZMB"], "Zimbabwe": ["ZWE"], "Afghanistan": ["AFG"],
   };
   const METRICS = {
-    rating: { label: "ODI rating", men: true, breaks: [1100, 1250, 1400, 1500], fmt: (v) => String(Math.round(v)),
+    rating: { label: "cricstat Elo (ODI)", men: true, breaks: [1100, 1250, 1400, 1500], fmt: (v) => String(Math.round(v)),
               legend: ["< 1100", "1100–1249", "1250–1399", "1400–1499", "1500+"] },
     wc: { label: "ODI WC 2027 title chance", men: true, breaks: [0.001, 0.01, 0.05, 0.10], fmt: (v) => pct(v),
           legend: ["< 0.1%", "0.1–1%", "1–5%", "5–10%", "10%+"] },
@@ -204,7 +204,7 @@
     const where = w.direct_qualifier ? "qualified · group " + w.group : pct(p.qualified) + " to get through the Qualifier";
     return ["ODI WC 2027", pct(p.champion) + " title · " + pct(p.final) + " final · " + pct(p.semi) + " semi", where];
   }
-  const ROW = { rating: "ODI rating", wc: "ODI WC 2027", matches: "In our data", odiwin: "ODIs · 2 yrs", t20win: "T20Is · 2 yrs" };
+  const ROW = { rating: "cricstat Elo", wc: "ODI WC 2027", matches: "In our data", odiwin: "ODIs · 2 yrs", t20win: "T20Is · 2 yrs" };
   function formLine(r) {
     if (!r) return "none";
     return r.won + "–" + r.lost + (r.tied ? "–" + r.tied + "T" : "") + " in " + r.matches +
@@ -212,7 +212,7 @@
   }
   function tipBody(t) {
     const rows = [];
-    if (gender === "male" && MODEL) rows.push(["ODI rating", t.rating ? Math.round(t.rating.rating) + (t.rating.rank ? " · #" + t.rating.rank : " · unranked (no recent ODIs)") : "not rated"]);
+    if (gender === "male" && MODEL) rows.push(["cricstat Elo", t.rating ? Math.round(t.rating.rating) + (t.rating.rank ? " · #" + t.rating.rank : " · unranked (no recent ODIs)") : "not rated"]);
     const wc = wcLine(t);
     if (wc) rows.push(wc);
     if (!t.withheld) { rows.push(["ODIs · 2 yrs", formLine(t.odi)]); rows.push(["T20Is · 2 yrs", formLine(t.t20)]); }
@@ -300,7 +300,7 @@
     const panel = document.getElementById("wm-panel");
     if (!t) { C.fill(panel, h("p", { class: "muted" }, "Pick a team on the map.")); return; }
     const facts = [];
-    if (t.rating) facts.push(["ODI rating", Math.round(t.rating.rating) + (t.rating.rank ? " · #" + t.rating.rank : " · unranked (no recent ODIs)")]);
+    if (t.rating) facts.push(["cricstat Elo", Math.round(t.rating.rating) + (t.rating.rank ? " · #" + t.rating.rank : " · unranked (no recent ODIs)")]);
     if (t.wc) facts.push(["ODI WC 2027", pct(t.wc.probabilities.champion) + " title chance" + (t.wc.direct_qualifier ? " · qualified (group " + t.wc.group + ")" : " · via the Qualifier")]);
     if (!t.withheld) { facts.push(["ODIs · 2 yrs", formLine(t.odi)]); facts.push(["T20Is · 2 yrs", formLine(t.t20)]); }
     const hh = h2hLine(t);
