@@ -116,6 +116,34 @@ def players_seal():
             '</svg>')
 
 
+def countries_seal():
+    """Countries landing: the same seal family, a globe with a cricket ball."""
+    return ('<svg class="wc-seal" viewBox="0 0 200 200" role="img" aria-label="cricstat countries">'
+            '<defs>' + GOLD % "cGold" +
+            '<radialGradient id="cBall" cx="35%" cy="32%" r="70%"><stop offset="0" stop-color="#e2544b"/>'
+            '<stop offset=".65" stop-color="#b3201c"/><stop offset="1" stop-color="#6e1210"/></radialGradient>'
+            '<clipPath id="cClip"><circle cx="96" cy="94" r="30"/></clipPath>'
+            '<path id="cTop" d="M30 100a70 70 0 0 1 140 0"/><path id="cBot" d="M24 100a76 76 0 0 0 152 0"/></defs>'
+            '<circle cx="100" cy="100" r="96" fill="#13161e" stroke="url(#cGold)" stroke-width="3"/>'
+            '<circle cx="100" cy="100" r="86" fill="none" stroke="#F5B82E" stroke-opacity=".35" stroke-width="1"/>'
+            '<circle cx="100" cy="100" r="58" fill="none" stroke="#F5B82E" stroke-opacity=".35" stroke-width="1"/>'
+            '<text font-family="system-ui, sans-serif" font-weight="800" font-size="12.5" letter-spacing="2.2" fill="#F5B82E">'
+            '<textPath href="#cTop" startOffset="50%" text-anchor="middle">COUNTRIES · TEAMS</textPath></text>'
+            '<text font-family="system-ui, sans-serif" font-weight="700" font-size="9" letter-spacing="1.4" fill="#cbd5e1">'
+            '<textPath href="#cBot" startOffset="50%" text-anchor="middle">MEN &amp; WOMEN · EVERY FORMAT</textPath></text>'
+            '<circle cx="31" cy="100" r="2.4" fill="#FF9933"/><circle cx="169" cy="100" r="2.4" fill="#FF9933"/>'
+            # globe: sea, meridians and parallels in gold, ball resting at its lower right
+            '<circle cx="96" cy="94" r="30" fill="#1a2440"/>'
+            '<g clip-path="url(#cClip)" fill="none" stroke="url(#cGold)" stroke-width="1.6" opacity=".9">'
+            '<ellipse cx="96" cy="94" rx="13" ry="30"/><path d="M96 64v60M66 84h60M66 104h60M70 74h52M70 114h52"/></g>'
+            '<circle cx="96" cy="94" r="30" fill="none" stroke="url(#cGold)" stroke-width="3"/>'
+            '<circle cx="124" cy="119" r="10" fill="url(#cBall)" stroke="#13161e" stroke-width="2"/>'
+            '<path d="M119.2 112.6c2.2 2.1 3 7.3 1.1 11.7M128.8 112.6c-2.2 2.1-3 7.3-1.1 11.7" stroke="#f5efe6" stroke-width="1.2" fill="none" stroke-linecap="round"/>'
+            '<text x="100" y="146" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="700" font-size="7.5" '
+            'letter-spacing="1.5" fill="#94a3b8">cric<tspan fill="#FF9933">stat</tspan></text>'
+            '</svg>')
+
+
 def hosts():
     with open(os.path.join(WEB, "assets", "world-map.json"), encoding="utf-8") as f:
         world = json.load(f)

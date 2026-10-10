@@ -338,6 +338,12 @@
         C.api("/v1/teams?type=international"), MODEL ? C.api("/v1/ratings?scope=ODI&gender=male").catch(() => ({ data: [] })) : { data: [] },
         MODEL ? C.api("/v1/forecasts/wc-2027/latest").catch(() => null) : null]);
       MAP = map; TEAMS = teams.data;
+      // Hero tile: countries on the map (distinct names with a men's or women's international side)
+      const tile = document.getElementById("c-count");
+      if (tile) {
+        const names = new Set(TEAMS.filter((t) => CODES[t.name]).map((t) => t.name));
+        C.countUp(tile, names.size);
+      }
       // last two years up to the newest match we hold
       const newest = TEAMS.reduce((m, t) => (t.last_date > m ? t.last_date : m), "");
       SINCE = (Number(newest.slice(0, 4)) - 2) + newest.slice(4);

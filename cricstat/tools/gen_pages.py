@@ -21,7 +21,7 @@ else:
     WEB = os.path.join(CRICSTAT, "tools", "staging", "web")
     if not os.path.isdir(WEB):
         shutil.copytree(os.path.join(CRICSTAT, "web"), WEB)
-V = "95"
+V = "96"
 # P1.6 ships in two parts: False = the approved non-predictor pages only (nav "ODI WC 2027 soon", no predictor page,
 # no model numbers on the map, no predictor rows on the licences page). True at the full P1.6 deploy.
 PREDICTOR_LIVE = os.environ.get("CRICSTAT_PREDICTOR_LIVE") == "1"   # preview: CRICSTAT_PREDICTOR_LIVE=1
@@ -269,8 +269,11 @@ page("players/index.html", "/cricket/players/", "Player statistics — cricstat 
 MAP_BOARD = '''<div id="c-landing" data-model="@@MODEL@@">
 <header class="hero left"><div class="wrap">
   <div class="eyebrow"><span class="dot"></span>Countries</div>
-  <h1 style="font-size:clamp(2rem,5vw,3rem)">Cricket around the world</h1>
-  <p class="subtitle">Every international team in our data on one map. Colour it by ODI rating, ODI World Cup 2027 chances, recent win % or matches played, then pick a team for its record and latest form.</p>
+  <div class="wc-head">@@CSEAL@@
+   <div class="wc-head-text"><h1 class="wc-title" style="font-size:clamp(2rem,4.4vw,3rem);margin:0">Cricket around the world</h1>
+    <p class="subtitle" style="margin-top:.6rem">@@CSUB@@</p></div>
+   <figure class="wc-hosts-fig"><div class="p-count"><b id="c-count" class="sb">—</b><span>cricket nations</span><small id="c-count-sub">men &amp; women · internationals</small></div><figcaption>on the map, updated daily</figcaption></figure>
+  </div>
 </div></header>
 <section class="section panel" aria-label="Cricket world map"><div class="wrap scoreboard wm-board">
   <div class="sb-head board-head" aria-hidden="true"><span class="bulb"></span>Cricket world map<span class="bulb"></span></div>
@@ -283,6 +286,10 @@ MAP_BOARD = '''<div id="c-landing" data-model="@@MODEL@@">
 </div></section>
 </div>
 '''
+from gen_wc_badges import countries_seal  # noqa: E402
+MAP_BOARD = MAP_BOARD.replace("@@CSEAL@@", countries_seal()).replace("@@CSUB@@",
+    "Every international team in our data on one map. Colour it by " + ("ODI rating, ODI World Cup 2027 chances, " if PREDICTOR_LIVE else "")
+    + "recent win % or matches played, then pick a team for its record and latest form.")
 MAP_BOARD = (MAP_BOARD.replace("@@MODEL@@", "on" if PREDICTOR_LIVE else "off")
              .replace("@@AFG_MAP@@", "Afghanistan men's matches are withheld by Cricsheet; their rating comes from our reviewed results list."
                       if PREDICTOR_LIVE else "Afghanistan men's matches are withheld by Cricsheet, so they are not on the men's map."))
