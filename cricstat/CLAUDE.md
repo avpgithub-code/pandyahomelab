@@ -504,8 +504,8 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
 ## Next up and open TODOs (updated 2026-10-09, after the partial P1.6 deploy)
 - **State (2026-10-10):** **P1 baseline complete and LIVE** (P1.1–P1.6: predictor, methodology, cricstat Elo,
   world map, hub teaser). **Next: P1b, the gradient-boosting challenger** (squad features), then the DL challenger; then P2.
-  Small open items: Korogi Sports Park venue_map row (next pipeline publish); predictor stamp says "Elo baseline"
-  (model.label) — consider "cricstat Elo".
+  Polish deployed 2026-10-10 04:08 UTC: "cricstat Elo" label everywhere (API dec23852e626), Korogi Sports Park name
+  variant → Japan (pipeline bd2a79a96866, build 10: 971/971 venues mapped), models 8fb57dc53b42.
 - **Previous state (2026-10-09):** P0, P0.5, P0.6 and P1.1–P1.5 live; **partial P1.6 live** (world map Countries landing with
   win %/matches, Following Men/Women, team-page tabs, hub Manhattan; API f974fb246adb; web commit 54ce200; owner
   checked it). Everything is merged to `main` and pushed. **On hold until the owner says so:** predictor page,
@@ -531,8 +531,7 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   pipeline 176a2d29e92e, build 9. Pages V=73: "★ WC 2027" on match cards at the 2027 grounds and ★ in player
   "Most-played venues" (list `WC2027_VENUES` in assets/cricstat.js, matched on name + city). cd-pull from a
   shell needs `DOCKER="sudo -n docker"` (without it, it wrongly reports "not published yet").
-- **Small open items:** New venue Korogi Sports Park, Nisshin (Japan) has no country in venue_map.csv: add it with the
-  next pipeline publish. Later (P1b): Wikidata bowling style coverage check for squad features. Ecclestone T20I runs-conceded check (see Golden follow-up); 19 golden blocks with a few missing
+- **Small open items:** Later (P1b): Wikidata bowling style coverage check for squad features. Ecclestone T20I runs-conceded check (see Golden follow-up); 19 golden blocks with a few missing
   matches to review.
 - **Workflow:** feature branch per sub-phase, `--no-ff` merge, push, user approves publishes on GitHub, then
   `cd-pull.sh` (schema changes: `CRICSTAT_SERVICES=cricstat-pipeline` first, build, then the API). Docker via
