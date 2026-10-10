@@ -510,7 +510,7 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   win %/matches, Following Men/Women, team-page tabs, hub Manhattan; API f974fb246adb; web commit 54ce200; owner
   checked it). Everything is merged to `main` and pushed. **On hold until the owner says so:** predictor page,
   methodology, team-page ratings card, hub teaser, `PREDICTOR_LIVE = True`, models publish (run 38003122609 waiting).
-  LinkedIn follow-up post published 2026-10-08.
+  LinkedIn follow-up post published 2026-10-08; predictor launch post (with share card, docs/linkedin/) published 2026-10-10.
 - **Next: P1, the ODI World Cup 2027 predictor** (plan in "Plan" above): (1) Elo team ratings + Monte Carlo tournament
   simulation as the baseline (ships first), backtested on WC 2019 and 2023 with calibration; (2) gradient-boosting
   challenger with squad features; (3) DL player embeddings from a ball-by-ball sequence model (also live win
