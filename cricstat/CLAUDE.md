@@ -544,7 +544,7 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   `pages.predictor_answer` (predictor.js writes the same); caveats strip under the follow card; "Jump to" links
   (since V=118: two saffron capsules under the answer, "⚠️ Read this first ↓" and "📝 The forecast in words ↓",
   replacing the text line). **Since V=119 the board's title bar is three top-level tabs:** "ODI World Cup 2027 · <date>"
-  (the board) · "⚖️ Strengths & limits" (#wc-limits; was "Read this first" until V=120) · "📝 The forecast in words" (#wc-seo, same opening tag so the API
+  (the board) · "🔍 Strengths & limits" (#wc-limits; was "Read this first" until V=120) · "📝 The forecast in words" (#wc-seo, same opening tag so the API
   still fills it; text stays in the HTML inside a hidden tab panel); links/URLs with those hashes open the tab. The
   two bottom cards are gone. V=120: capsules dropped (owner's call); the card is "Strengths" (tested before it was
   played, with LIVE backtest numbers from /v1/models/predictor/backtest; one model for everyone; kept current) +
