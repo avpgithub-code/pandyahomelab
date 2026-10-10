@@ -436,8 +436,8 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   API only; `cricstat-models-publish` run 38003122609 left unapproved on purpose) → staging copied to cricstat/web
   WITHOUT predictor/, venues/, assets/predictor.js (commit 54ce200). Live: Countries = world map (win % + matches only),
   hub Following Men/Women + Manhattan, team-page H2H/top-performers tabs, Natural Earth licence row, nav "ODI WC 2027
-  soon". Switch: `PREDICTOR_LIVE = False` in gen_pages.py (owner chose: no model numbers — ratings, WC chances — on
-  the map until the predictor page and its disclosures launch). **Full P1.6 deploy later:** set PREDICTOR_LIVE = True,
+  soon". Switch: `PREDICTOR_LIVE` in gen_pages.py, off by default; `CRICSTAT_PREDICTOR_LIVE=1 python3 cricstat/tools/gen_pages.py` builds the full version for the preview (and for the full deploy). A partial copy to cricstat/web must be generated WITHOUT it (owner chose: no model numbers — ratings, WC chances — on
+  the map until the predictor page and its disclosures launch). **Full P1.6 deploy later:** regenerate with CRICSTAT_PREDICTOR_LIVE=1 (or flip the default),
   regenerate (map `data-model="on"`, nav link, predictor page, predictor licence rows), approve models publish,
   cd-pull models → `forecast --force` → copy predictor/, venues/, predictor.js too.
 - **ON HOLD by the owner (2026-10-09 evening):** predictor-page approval, methodology page (`/cricket/methodology/`,
