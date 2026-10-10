@@ -38,6 +38,24 @@ log = get_logger("http")
 PROBLEM = "application/problem+json"
 
 
+class HeadAsGet:
+    """Answer HEAD like GET, minus the body (RFC 9110 §9.3.2). FastAPI routes are GET-only, so
+    HEAD used to get 405, which link checkers and some crawlers treat as a broken page."""
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http" or scope["method"] != "HEAD":
+            return await self.app(scope, receive, send)
+
+        async def headers_only(message):
+            if message["type"] == "http.response.body":
+                message = dict(message, body=b"")
+            await send(message)
+        await self.app(dict(scope, method="GET"), receive, headers_only)
+
+
 def create_app(cfg: Optional[Config] = None) -> FastAPI:
     cfg = cfg or Config()
     setup_logging(cfg.LOG_LEVEL)
@@ -58,6 +76,7 @@ def create_app(cfg: Optional[Config] = None) -> FastAPI:
                   openapi_url="/openapi.json", lifespan=lifespan,
                   description="Cricket statistics from Cricsheet ball-by-ball data. " + ATTRIBUTION)
     app.state.db, app.state.fdb, app.state.cfg = db, fdb, cfg
+    app.add_middleware(HeadAsGet)
 
     def build() -> dict:
         return db.cached("build", lambda: meta_repo.latest_build(db) or {})
