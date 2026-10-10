@@ -21,7 +21,7 @@ else:
     WEB = os.path.join(CRICSTAT, "tools", "staging", "web")
     if not os.path.isdir(WEB):
         shutil.copytree(os.path.join(CRICSTAT, "web"), WEB)
-V = "107"
+V = "108"
 # P1.6 ships in two parts: False = the approved non-predictor pages only (nav "ODI WC 2027 soon", no predictor page,
 # no model numbers on the map, no predictor rows on the licences page). True at the full P1.6 deploy.
 PREDICTOR_LIVE = os.environ.get("CRICSTAT_PREDICTOR_LIVE", "1") == "1"   # live since the P1.6 launch; CRICSTAT_PREDICTOR_LIVE=0 builds the old partial set
@@ -40,7 +40,7 @@ HEAD = '''<!DOCTYPE html>
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{desc}">
 <meta property="og:url" content="https://pandyahomelab.com{path}">
-<meta property="og:image" content="https://pandyahomelab.com/og-image.png">
+<meta property="og:image" content="{og_image}">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/cricket/assets/cricstat.css?v={v}">
 {extra_head}</head>
@@ -75,14 +75,14 @@ FOOT = '''</main>
 </body>
 </html>
 '''
-def page(rel, path, title, desc, cur, body, scripts, og_type="website", extra_head=""):
+def page(rel, path, title, desc, cur, body, scripts, og_type="website", extra_head="", og_image=SITE + "/og-image.png"):
     c = {k: "" for k in ("c_hub", "c_countries", "c_players", "c_licences", "c_about", "c_predictor", "c_method")}
     c["c_" + cur] = ' aria-current="page"'
     c["nav_method"] = ('<li><a href="/cricket/methodology/"%s>Methodology</a></li>' % c["c_method"] if PREDICTOR_LIVE else
                        '<li><span class="soon" title="Coming in a later phase">Methodology <span class="soon-tag">soon</span></span></li>')
     c["nav_predictor"] = ('<li><a href="/cricket/predictor/"%s>ODI WC 2027</a></li>' % c["c_predictor"] if PREDICTOR_LIVE else
                           '<li><span class="soon" title="Coming in a later phase">ODI WC 2027 <span class="soon-tag">soon</span></span></li>')
-    html = HEAD.format(title=title, desc=desc, path=path, v=V, og_type=og_type, extra_head=extra_head, **c) + body + FOOT.format(
+    html = HEAD.format(title=title, desc=desc, path=path, v=V, og_type=og_type, extra_head=extra_head, og_image=og_image, **c) + body + FOOT.format(
         v=V, scripts="\n".join('<script src="%s"></script>' % s for s in scripts))
     os.makedirs(os.path.dirname(os.path.join(WEB, rel)) or WEB, exist_ok=True)
     open(os.path.join(WEB, rel), "w").write(html)
@@ -354,16 +354,22 @@ PREDICTOR = '''<header class="hero left wc-hero">
   <div class="sec-pane" role="tabpanel" id="pane-good" aria-labelledby="tab-good" hidden></div>
 </div></section>
 <section class="section panel" aria-label="What this forecast can and can't tell you"><div class="wrap wc-limits" id="wc-limits"></div></section>
+<section class="section panel" aria-label="The forecast in words"><div class="wrap wc-seo" id="wc-seo">
+  <div class="section-label">The forecast in words</div>
+  <h2 class="section-title">Who will win the 2027 Cricket World Cup?</h2>
+  <p>cricstat's model rates every team with cricstat Elo, its own rating built from every men's ODI since 2002 (not the ICC ranking), then plays the 2027 tournament in South Africa, Zimbabwe and Namibia 50,000 times. Each team's title chance is the share of those runs it wins; the forecast updates daily as teams play. <a href="/cricket/methodology/">How it works</a>.</p>
+</div></section>
 '''
 # Our own marks (tools/gen_wc_badges.py): a seal and the hosts' map; the official logo is non-free (ICC trademark).
 from gen_wc_badges import hosts as wc_hosts, seal as wc_seal  # noqa: E402
 PREDICTOR = PREDICTOR.replace("@@SEAL@@", wc_seal()).replace("@@HOSTS@@", wc_hosts())
-PRED_DESC = ("ODI World Cup 2027 predictor: each team's chances of the Super 7, semi-finals, final and title, from Elo ratings "
-             "and 50,000 simulated tournaments in the published format — with backtests on the 2019 and 2023 World Cups.")
+PRED_DESC = ("Who will win the 2027 Cricket World Cup? Every team's chances of the semi-finals, final and title from cricstat Elo "
+             "and 50,000 simulated tournaments in the published format, updated daily, with backtests on the 2019 and 2023 World Cups.")
 if PREDICTOR_LIVE:
   page("predictor/index.html", "/cricket/predictor/",
-       "ODI World Cup 2027 predictor: every team's chances — cricstat | pandyaHomeLab", PRED_DESC, "predictor", PREDICTOR,
+       "Cricket World Cup 2027 prediction: who will win? Every team's chances | cricstat", PRED_DESC, "predictor", PREDICTOR,
        ["/vendor/chart.js-4.4.0/chart.umd.min.js", "/cricket/assets/predictor.js?v=" + V],
+       og_image=SITE + "/cricket/og/predictor.png",
        extra_head=ld_json({"@context": "https://schema.org", "@type": "WebPage", "name": "ODI World Cup 2027 predictor",
                            "description": PRED_DESC, "url": SITE + "/cricket/predictor/", "isPartOf": {"@id": SITE + "/#site"},
                            "about": ["ODI World Cup 2027", "Elo rating", "Monte Carlo simulation"], "author": ARCHIT}))

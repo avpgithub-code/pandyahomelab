@@ -57,6 +57,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
         m = DYNAMIC.match(path)
         if m:                                   # like Nginx since P0.6: the API renders the head
             return self.page(path[len("/cricket"):], os.path.join(WEB, m.group(1), "index.html"))
+        if path == "/cricket/predictor/":       # like Nginx: the API writes the live forecast in
+            return self.page("/predictor/", os.path.join(WEB, "predictor", "index.html"))
         if path == "/cricket/sitemap.xml":
             return self.page("/sitemap.xml", "")
         m = PHOTO.match(path)
