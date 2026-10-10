@@ -88,7 +88,7 @@ def method_seal():
 
 
 def players_seal():
-    """Players page: the same seal family, a bat and ball."""
+    """Players page: the same seal family, a batter playing a drive."""
     return ('<svg class="wc-seal" viewBox="0 0 200 200" role="img" aria-label="cricstat players">'
             '<defs>' + GOLD % "pGold" +
             '<radialGradient id="pBall" cx="35%" cy="32%" r="70%"><stop offset="0" stop-color="#e2544b"/>'
@@ -102,15 +102,8 @@ def players_seal():
             '<text font-family="system-ui, sans-serif" font-weight="700" font-size="9" letter-spacing="1.4" fill="#cbd5e1">'
             '<textPath href="#pBot" startOffset="50%" text-anchor="middle">MEN &amp; WOMEN · EVERY FORMAT</textPath></text>'
             '<circle cx="31" cy="100" r="2.4" fill="#FF9933"/><circle cx="169" cy="100" r="2.4" fill="#FF9933"/>'
-            # a bat, diagonal: blade + shoulder + handle with grip lines
-            '<g transform="rotate(-38 100 98)">'
-            '<rect x="93" y="62" width="14" height="46" rx="5" fill="url(#pGold)"/>'
-            '<path d="M95 62q5-6 10 0" fill="url(#pGold)"/>'
-            '<rect x="97.6" y="40" width="4.8" height="21" rx="2.2" fill="#e2e8f0"/>'
-            '<path d="M97.6 45h4.8M97.6 49h4.8M97.6 53h4.8M97.6 57h4.8" stroke="#64748b" stroke-width=".8"/>'
-            '<path d="M100 66v38" stroke="#fff" stroke-opacity=".35" stroke-width="1.4" stroke-linecap="round"/></g>'
-            '<circle cx="125" cy="116" r="9" fill="url(#pBall)"/>'
-            '<path d="M120.6 110.2c2 1.9 2.7 6.6 1 10.6M129.4 110.2c-2 1.9-2.7 6.6-1 10.6" stroke="#f5efe6" stroke-width="1.1" fill="none" stroke-linecap="round"/>'
+            # a batter driving the ball (pictogram: thick round strokes)
+            '<g fill="none" stroke="url(#pGold)" stroke-linecap="round" stroke-linejoin="round"><polyline points="101.4,69.0 112.4,95.2" stroke-width="15.2"/><polyline points="112.4,95.2 95.9,111.7 87.6,131.1" stroke-width="11.0"/><polyline points="112.4,95.2 126.2,113.1 137.3,129.7" stroke-width="11.0"/><polyline points="101.4,71.7 89.0,86.9" stroke-width="8.3"/><polyline points="104.1,74.5 93.1,89.7" stroke-width="8.3"/></g><circle cx="94.5" cy="55.2" r="10.3" fill="url(#pGold)"/><line x1="80.0" y1="56.5" x2="91.7" y2="56.5" stroke="url(#pGold)" stroke-width="4.1"/><line x1="91.7" y1="86.9" x2="89.0" y2="95.2" stroke="#e2e8f0" stroke-width="4.1" stroke-linecap="round"/><line x1="89.0" y1="95.2" x2="72.4" y2="125.5" stroke="#e8d3a0" stroke-width="11"/><circle cx="60.0" cy="131.1" r="6.2" fill="url(#pBall)"/>'
             '<text x="100" y="146" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="700" font-size="7.5" '
             'letter-spacing="1.5" fill="#94a3b8">cric<tspan fill="#FF9933">stat</tspan></text>'
             '</svg>')
