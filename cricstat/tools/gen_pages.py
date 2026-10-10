@@ -21,7 +21,7 @@ else:
     WEB = os.path.join(CRICSTAT, "tools", "staging", "web")
     if not os.path.isdir(WEB):
         shutil.copytree(os.path.join(CRICSTAT, "web"), WEB)
-V = "120"
+V = "121"
 # P1.6 ships in two parts: False = the approved non-predictor pages only (nav "ODI WC 2027 soon", no predictor page,
 # no model numbers on the map, no predictor rows on the licences page). True at the full P1.6 deploy.
 PREDICTOR_LIVE = os.environ.get("CRICSTAT_PREDICTOR_LIVE", "1") == "1"   # live since the P1.6 launch; CRICSTAT_PREDICTOR_LIVE=0 builds the old partial set
@@ -341,7 +341,7 @@ PREDICTOR = '''<header class="hero left wc-hero">
        #wc-seo keeps its exact opening tag: the API fills it wherever it sits (pages.predictor_page). -->
   <div class="board-head wc-top-tabs" role="tablist" aria-label="Predictor">
     <button class="top-tab" type="button" role="tab" id="top-board" aria-controls="top-pane-board" aria-selected="true"><span class="bulb" aria-hidden="true"></span>ODI World Cup 2027<span class="mc-asof" id="wc-asof"></span></button>
-    <button class="top-tab" type="button" role="tab" id="top-limits" aria-controls="top-pane-limits" aria-selected="false" tabindex="-1">⚖️ Strengths &amp; limits</button>
+    <button class="top-tab" type="button" role="tab" id="top-limits" aria-controls="top-pane-limits" aria-selected="false" tabindex="-1">🔍 Strengths &amp; limits</button>
     <button class="top-tab" type="button" role="tab" id="top-words" aria-controls="top-pane-words" aria-selected="false" tabindex="-1">📝 The forecast in words</button>
   </div>
   <div role="tabpanel" id="top-pane-board" aria-labelledby="top-board">
