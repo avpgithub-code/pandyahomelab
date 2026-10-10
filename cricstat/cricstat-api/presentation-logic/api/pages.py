@@ -203,10 +203,10 @@ def predictor_text(data: dict) -> Tuple[str, str, list]:
         return _pct(t["probabilities"].get(stage))
 
     a, b, c = teams[:3]
-    lead = "%s %s, %s %s and %s %s" % (a["team"], p(a), b["team"], p(b), c["team"], p(c))
-    desc = ("Who will win the 2027 Cricket World Cup? cricstat's model: %s (updated %s). "
-            "Chances for all %d teams from %s simulated tournaments, with the backtests behind "
-            "them." % (lead, as_of, len(teams), sims))
+    # ~155 characters: Google cuts longer descriptions, so the numbers come first.
+    desc = ("%s %s, %s %s, %s %s: every team's chances to win the 2027 Cricket World Cup, from "
+            "%s simulations. Updated %s." % (a["team"], p(a), b["team"], p(b), c["team"], p(c),
+                                             sims, as_of))
     host_chances = ", ".join("%s %s (%s favourite)" % (t["team"], p(t), _nth(i + 1))
                              for i, t in enumerate(teams) if t["team"] in hosts)
     faq = [
@@ -357,8 +357,7 @@ def register(app: FastAPI, cfg: Config) -> None:
             return Response(status_code=304, headers=headers)
         url = "%s%s/predictor/" % (site, prefix)
         desc, section, faq = predictor_text(data)
-        title = ("Cricket World Cup 2027 prediction: who will win? Every team's chances "
-                 "| cricstat")
+        title = "Cricket World Cup 2027 Prediction: Who Will Win? | cricstat"   # ≤ 60 characters
         ld = [{"@context": "https://schema.org", "@type": "WebPage", "name": title, "url": url,
                "description": desc, "dateModified": data["forecast"]["data_as_of"],
                "isPartOf": {"@id": site + "/#site"}, "author": author,

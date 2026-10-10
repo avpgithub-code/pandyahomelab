@@ -363,11 +363,11 @@ PREDICTOR = '''<header class="hero left wc-hero">
 # Our own marks (tools/gen_wc_badges.py): a seal and the hosts' map; the official logo is non-free (ICC trademark).
 from gen_wc_badges import hosts as wc_hosts, seal as wc_seal  # noqa: E402
 PREDICTOR = PREDICTOR.replace("@@SEAL@@", wc_seal()).replace("@@HOSTS@@", wc_hosts())
-PRED_DESC = ("Who will win the 2027 Cricket World Cup? Every team's chances of the semi-finals, final and title from cricstat Elo "
-             "and 50,000 simulated tournaments in the published format, updated daily, with backtests on the 2019 and 2023 World Cups.")
+PRED_DESC = ("Who will win the 2027 Cricket World Cup? Every team's chances from cricstat Elo and 50,000 simulated "
+             "tournaments, updated daily, with backtests on the 2019 and 2023 World Cups.")
 if PREDICTOR_LIVE:
   page("predictor/index.html", "/cricket/predictor/",
-       "Cricket World Cup 2027 prediction: who will win? Every team's chances | cricstat", PRED_DESC, "predictor", PREDICTOR,
+       "Cricket World Cup 2027 Prediction: Who Will Win? | cricstat", PRED_DESC, "predictor", PREDICTOR,
        ["/vendor/chart.js-4.4.0/chart.umd.min.js", "/cricket/assets/predictor.js?v=" + V],
        og_image=SITE + "/cricket/og/predictor.png",
        extra_head=ld_json({"@context": "https://schema.org", "@type": "WebPage", "name": "ODI World Cup 2027 predictor",

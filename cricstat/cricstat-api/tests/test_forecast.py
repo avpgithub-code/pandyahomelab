@@ -204,7 +204,7 @@ def test_predictor_page_has_the_live_forecast_in_words(home, forecast_db, tmp_pa
             r = c.get("/pages/predictor/")
             assert r.status_code == 200, r.text
             h = r.text
-            assert "<title>Cricket World Cup 2027 prediction: who will win?" in h
+            assert "<title>Cricket World Cup 2027 Prediction: Who Will Win? | cricstat</title>" in h
             assert "India 60.0%" in h and "generic text" not in h   # live numbers, not the fallback
             assert '"@type": "FAQPage"' in h and '"dateModified": "2026-10-07"' in h
             assert '"static": true' not in h                      # the shell's JSON-LD is replaced
