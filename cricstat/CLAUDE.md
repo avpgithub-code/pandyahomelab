@@ -128,7 +128,7 @@ Background: `docs/llm-strategy-research-2026-10-05.md`.
 | P0 | Ingestion → serving-DB build → cricstat-api → first live pages (+F8) | **Done; public 2026-10-07.** P0.1 build + register, P0.2 golden figures, P0.3 cricstat-api, P0.3b `/admin/cricket` (2026-10-06); P0.4 pages + F8 texts live and linked from the homepage 2026-10-07 (+ `/cricket/about/` page) |
 | P0.6 | Search-engine pages: server-rendered player/team heads, real 404/301, `/cricket/sitemap.xml` | **Done 2026-10-07** (4,840 players + 176 teams indexable; submitted in Search Console) |
 | P0.5 | Wikidata enrichment: full names, birth details, Commons photos | **Done 2026-10-08** (7,192 on Wikidata; 1,364 credited photos incl. GODL-India/PDM-owner; weekly `enrich`; search + cards use names/photos) |
-| P1 | ODI World Cup 2027 predictor: Elo + Monte Carlo baseline first, then ML and DL challengers, backtests on WC 2019/2023, live win probability | **In progress:** P1.1–P1.5 live (2026-10-08: models + API deployed, champion elo-v2, daily forecast in DSM); **P1.6 partly live 2026-10-09** (world map Countries landing, records API, review tweaks; owner checked the live site); predictor page, methodology page, team-page ratings card, hub teaser and `PREDICTOR_LIVE` **on hold by the owner** on `feat/cricstat-p16-pages` |
+| P1 | ODI World Cup 2027 predictor: Elo + Monte Carlo baseline first, then ML and DL challengers, backtests on WC 2019/2023, live win probability | **In progress:** P1.1–P1.5 live (2026-10-08: models + API deployed, champion elo-v2, daily forecast in DSM); **P1.6 LIVE 2026-10-10** (predictor, methodology, world map, cricstat Elo team card, hub teaser; models 012e086f288a, API 27c53f4bd4cb, forecast #3). Next: P1b ML challenger |
 | P2–P6 | Tools → test set → agent → public demo → extras | Later |
 | Later | Men's T20 World Cup 2028 forecast + T20I team ratings (decided 2026-10-06; shown as "Later" on team pages) | **Not started until the ODI World Cup 2027 is finished** |
 
@@ -423,7 +423,12 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
 - **P0.5 player photos** (own branch, after the deploy): Wikidata P18 → Commons thumbnails fetched by the pipeline,
   self-hosted, per-image licence + author credit (CC BY-SA needs attribution) on the profile and the licences page.
 
-## P1.6 pages (in progress, branch `feat/cricstat-p16-pages`; state at end of the 2026-10-09 evening session, V=88)
+## P1.6 pages (**LIVE 2026-10-10 03:30 UTC**, merge df3bc66 + deploy 0dedc54, V=106)
+- **Launch (2026-10-10):** models publish (run 38003122609) + API publish approved → cd-pull models 012e086f288a →
+  `forecast --force` (forecast #3, MLflow 3e84c060, venues/fixtures meta written) → cd-pull API 27c53f4bd4cb → full
+  build (`PREDICTOR_LIVE` now defaults ON) → page tests on the new shells (15 pass) → cricstat/web (incl. predictor/,
+  methodology/, venues/) → sitemap (+predictor, +methodology) → public pages checked in jsdom (no errors). The staging
+  snapshot was removed (files now tracked in cricstat/web). The history below is kept for reference.
 - **Predictor page `/cricket/predictor/`** built in STAGING (not live), V=79. Hero: our own gold trophy icon (the official
   2027 logo is non-free/ICC trademark: never use), stamp, "Following" strip, **donut** (top 5 + "all other teams", ≤ 6
   slices, centre = followed team). Board tabs: 🏆 Title odds (direct qualifiers + Qualifier candidates tables) · 📈 Odds
@@ -497,7 +502,11 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   methodology page not started.** Women's team ratings = a later step with its own backtest (not in P1.6).
 
 ## Next up and open TODOs (updated 2026-10-09, after the partial P1.6 deploy)
-- **State (2026-10-09):** P0, P0.5, P0.6 and P1.1–P1.5 live; **partial P1.6 live** (world map Countries landing with
+- **State (2026-10-10):** **P1 baseline complete and LIVE** (P1.1–P1.6: predictor, methodology, cricstat Elo,
+  world map, hub teaser). **Next: P1b, the gradient-boosting challenger** (squad features), then the DL challenger; then P2.
+  Small open items: Korogi Sports Park venue_map row (next pipeline publish); predictor stamp says "Elo baseline"
+  (model.label) — consider "cricstat Elo".
+- **Previous state (2026-10-09):** P0, P0.5, P0.6 and P1.1–P1.5 live; **partial P1.6 live** (world map Countries landing with
   win %/matches, Following Men/Women, team-page tabs, hub Manhattan; API f974fb246adb; web commit 54ce200; owner
   checked it). Everything is merged to `main` and pushed. **On hold until the owner says so:** predictor page,
   methodology, team-page ratings card, hub teaser, `PREDICTOR_LIVE = True`, models publish (run 38003122609 waiting).
