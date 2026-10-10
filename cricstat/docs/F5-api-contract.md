@@ -233,3 +233,11 @@ The **MCP server** (P6) exposes the same tools, except `run_sql`, by calling the
 - **Docs:** decision 7.1 is pending a self-hosted docs page (P0.4): Swagger/ReDoc load scripts from a CDN, which the
   privacy promise rules out, so only `/openapi.json` is served for now.
 - **Time limit:** a query over 10 s is interrupted → 503 "Query took too long".
+
+## 9. Additions (2026-10-10)
+- `GET /pages/predictor/` (not part of `/v1`, like the P0.6 player/team pages): the predictor's static shell with
+  the live forecast written in — search title, description with the top-3 chances, "The forecast in words"
+  (4 Q&A + every team's chances), WebPage `dateModified` + FAQPage JSON-LD, own og:image. Nginx `location =
+  /cricket/predictor/` proxies it and serves the static page on 502/503/504. ETag = forecast id + shell mtime.
+- `GET /pages/sitemap.xml` also lists `/cricket/predictor/` and `/cricket/methodology/`, dated by the latest forecast.
+- **HEAD** is answered like GET without a body on every route (`HeadAsGet` middleware); before, HEAD got 405.
