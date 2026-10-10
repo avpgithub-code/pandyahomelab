@@ -429,12 +429,16 @@
     .flagship-item strong { display: block; margin-bottom: .25rem; }
     .flagship-item span { color: #94a3b8; font-size: .88rem; }
     .flagship-item .proj-status { margin: .5rem 0 0; }
+    .flagship-item .fi-head { display: flex; align-items: center; gap: .6rem; margin-bottom: .35rem; }
+    .flagship-item .fi-head strong { margin: 0; }
+    .flagship-item .fi-icon { width: 34px; height: 34px; flex: none; }
     .flagship-about { display: inline-block; margin: .6rem 0 0 1rem; color: var(--accent-cric); font-size: .92rem; font-weight: 600; }
     @media (max-width: 640px) { .flagship-about { display: block; margin: .8rem 0 0; } }
     .proj-card.cric { border-top: 3px solid var(--accent-cric); }
     .proj-card.cric:hover { border-color: var(--accent-cric); }
     .cric-link { color: var(--accent-cric); }
     .cs { color: #fff; white-space: nowrap; } .cs b { color: var(--accent-cric); font-weight: inherit; }
+    .cs i { font-style: normal; } .cs-sr { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } .cs-i { position: relative; display: inline-block; line-height: 1.05; } .cs-i::after { content: ""; position: absolute; left: 50%; top: .03em; width: .3em; height: .3em; transform: translateX(-50%); border-radius: 50%; background: radial-gradient(circle at 35% 32%, #e2544b, #b3201c 65%, #6e1210); box-shadow: inset -.03em -.03em .04em rgba(0,0,0,.35); }
     .part-of b { color: var(--accent-cric); }
     .part-of { font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: .3rem; }
   </style>
@@ -496,14 +500,14 @@
 <section class="flagship" aria-labelledby="flagship-title">
   <div class="flagship-card">
     <div class="flagship-eyebrow">Flagship project · New</div>
-    <h2 id="flagship-title"><span class="cs">cric<b>stat</b></span> — end-to-end cricket analytics &amp; LLM project</h2>
+    <h2 id="flagship-title"><span class="cs"><i class="cs-sr">cricstat</i><i class="cs-w" aria-hidden="true">cr<i class="cs-i">ı</i>c<b>stat</b></i></span> — end-to-end cricket analytics &amp; LLM project</h2>
     <p>One product across the whole stack: a daily data pipeline over 22,000+ men's and women's matches and a statistics API are live now; ML forecasting and an LLM analyst with published accuracy scores come next.</p>
     <div class="flagship-grid">
-      <div class="flagship-item"><strong>Players &amp; Countries</strong><span>Men's and women's, all formats and major leagues</span><div class="proj-status status-live">✓ Live</div></div>
-      <div class="flagship-item"><strong>ODI WC 2027 Predictor</strong><span>Title chances, updated as matches are played</span><div class="proj-status status-planned">Next</div></div>
-      <div class="flagship-item"><strong>Ask the Analyst</strong><span>Plain-English stats questions, every answer sourced</span><div class="proj-status status-planned">Planned</div></div>
+      <div class="flagship-item"><div class="fi-head"><svg class="fi-icon" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><defs><radialGradient id="fiBall" cx="35%" cy="32%" r="70%"><stop offset="0" stop-color="#e2544b"/><stop offset=".65" stop-color="#b3201c"/><stop offset="1" stop-color="#6e1210"/></radialGradient></defs><circle cx="18" cy="18" r="14" fill="#1a2440" stroke="#4F7FD6" stroke-width="1.6"/><ellipse cx="18" cy="18" rx="6.5" ry="14" fill="none" stroke="#4F7FD6" stroke-width="1.1" opacity=".8"/><path d="M4.5 13h27M4.5 23h27" stroke="#4F7FD6" stroke-width="1.1" opacity=".8"/><circle cx="29" cy="29" r="7.5" fill="url(#fiBall)" stroke="#13161e" stroke-width="1.5"/><path d="M25.6 25.2c1.6 1.5 2.1 5.2.8 8.2M32.4 25.2c-1.6 1.5-2.1 5.2-.8 8.2" stroke="#f5efe6" stroke-width=".9" fill="none" stroke-linecap="round"/></svg><strong>Players &amp; Countries</strong></div><span>Men's and women's, all formats and major leagues</span><div class="proj-status status-live">✓ Live</div></div>
+      <div class="flagship-item"><div class="fi-head"><svg class="fi-icon" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><defs><linearGradient id="fiGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE38A"/><stop offset=".5" stop-color="#F5B82E"/><stop offset="1" stop-color="#C98500"/></linearGradient></defs><circle cx="20" cy="20" r="18" fill="#13161e" stroke="url(#fiGold)" stroke-width="2"/><circle cx="20" cy="20" r="14.5" fill="none" stroke="#F5B82E" stroke-opacity=".35" stroke-width=".8"/><g transform="translate(10.4 8.6) scale(.3)" fill="url(#fiGold)"><path d="M18 8h28v14c0 9-6 16-14 16s-14-7-14-16z"/><path d="M18 12H10c0 9 4 14 10 15M46 12h8c0 9-4 14-10 15" fill="none" stroke="url(#fiGold)" stroke-width="3.5"/><rect x="29" y="37" width="6" height="9" rx="1"/><path d="M21 52c0-4 5-6 11-6s11 2 11 6v3H21z"/><rect x="18" y="55" width="28" height="4" rx="1.5"/></g><circle cx="3.6" cy="20" r="1.2" fill="#FF9933"/><circle cx="36.4" cy="20" r="1.2" fill="#FF9933"/></svg><strong>ODI WC 2027 Predictor</strong></div><span>Title chances, updated as matches are played</span><div class="proj-status status-planned">Next</div></div>
+      <div class="flagship-item"><div class="fi-head"><svg class="fi-icon" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><path d="M6 7h24a4 4 0 0 1 4 4v13a4 4 0 0 1-4 4H16l-7 6v-6H6a4 4 0 0 1-4-4V11a4 4 0 0 1 4-4z" fill="#1a2440" stroke="#4F7FD6" stroke-width="1.6" stroke-linejoin="round"/><rect x="9" y="18" width="3.4" height="6" rx="1" fill="#4F7FD6"/><rect x="15" y="14" width="3.4" height="10" rx="1" fill="#FF9933"/><rect x="21" y="16.5" width="3.4" height="7.5" rx="1" fill="#4F7FD6"/><path d="M33 2.5l1.2 2.8 2.8 1.2-2.8 1.2L33 10.5l-1.2-2.8L29 6.5l2.8-1.2z" fill="#F5B82E"/></svg><strong>Ask the Analyst</strong></div><span>Plain-English stats questions, every answer sourced</span><div class="proj-status status-planned">Planned</div></div>
     </div>
-    <a href="/cricket/" class="btn btn-ghost-cric">Explore <span class="cs">cric<b>stat</b></span> — cricket stats &amp; ODI World Cup 2027 predictor →</a>
+    <a href="/cricket/" class="btn btn-ghost-cric">Explore <span class="cs"><i class="cs-sr">cricstat</i><i class="cs-w" aria-hidden="true">cr<i class="cs-i">ı</i>c<b>stat</b></i></span> — cricket stats &amp; ODI World Cup 2027 predictor →</a>
     <a href="/cricket/about/" class="flagship-about">How I built it: the story, the three models and the architecture →</a>
   </div>
 </section>
@@ -546,12 +550,12 @@
         <a href="/ml/titanic-automl/" class="proj-link ml-link">Try it →</a>
       </div>
       <div class="proj-card cric">
-        <div class="part-of">Part of <span class="cs">cric<b>stat</b></span></div>
+        <div class="part-of">Part of <span class="cs"><i class="cs-sr">cricstat</i><i class="cs-w" aria-hidden="true">cr<i class="cs-i">ı</i>c<b>stat</b></i></span></div>
         <h3>ODI WC 2027 Predictor</h3>
         <span class="proj-status status-planned">Planned</span>
         <p>Elo baseline vs ML and DL challengers, backtested on the 2019 and 2023 ODI World Cups.</p>
         <span class="proj-route">/cricket/</span>
-        <a href="/cricket/about/#predictor" class="proj-link cric-link">How it works in <span class="cs">cric<b>stat</b></span> →</a>
+        <a href="/cricket/about/#predictor" class="proj-link cric-link">How it works in <span class="cs"><i class="cs-sr">cricstat</i><i class="cs-w" aria-hidden="true">cr<i class="cs-i">ı</i>c<b>stat</b></i></span> →</a>
       </div>
     </div>
   </div>
@@ -589,12 +593,12 @@
         <span class="proj-link proj-link-disabled">Planned</span>
       </div>
       <div class="proj-card cric">
-        <div class="part-of">Part of <span class="cs">cric<b>stat</b></span></div>
+        <div class="part-of">Part of <span class="cs"><i class="cs-sr">cricstat</i><i class="cs-w" aria-hidden="true">cr<i class="cs-i">ı</i>c<b>stat</b></i></span></div>
         <h3>Ball-by-ball Sequence Model</h3>
         <span class="proj-status status-planned">Planned</span>
         <p>Live win probability and player-strength ratings for the predictor, learned from 11.6M deliveries.</p>
         <span class="proj-route">/cricket/</span>
-        <a href="/cricket/about/#predictor" class="proj-link cric-link">How it works in <span class="cs">cric<b>stat</b></span> →</a>
+        <a href="/cricket/about/#predictor" class="proj-link cric-link">How it works in <span class="cs"><i class="cs-sr">cricstat</i><i class="cs-w" aria-hidden="true">cr<i class="cs-i">ı</i>c<b>stat</b></i></span> →</a>
       </div>
     </div>
   </div>
@@ -640,12 +644,12 @@
         <a href="/nlp/ewt-hmm/" class="proj-link nlp-link">Try it →</a>
       </div>
       <div class="proj-card cric">
-        <div class="part-of">Part of <span class="cs">cric<b>stat</b></span></div>
+        <div class="part-of">Part of <span class="cs"><i class="cs-sr">cricstat</i><i class="cs-w" aria-hidden="true">cr<i class="cs-i">ı</i>c<b>stat</b></i></span></div>
         <h3>Fact-checked Match Reports</h3>
         <span class="proj-status status-planned">Planned</span>
         <p>Data-to-text match summaries with every claim verified against the statistics.</p>
         <span class="proj-route">/cricket/</span>
-        <a href="/cricket/about/#analyst" class="proj-link cric-link">How it works in <span class="cs">cric<b>stat</b></span> →</a>
+        <a href="/cricket/about/#analyst" class="proj-link cric-link">How it works in <span class="cs"><i class="cs-sr">cricstat</i><i class="cs-w" aria-hidden="true">cr<i class="cs-i">ı</i>c<b>stat</b></i></span> →</a>
       </div>
     </div>
   </div>
@@ -667,12 +671,12 @@
         <span class="proj-link proj-link-disabled">Planned</span>
       </div>
       <div class="proj-card cric">
-        <div class="part-of">Part of <span class="cs">cric<b>stat</b></span></div>
+        <div class="part-of">Part of <span class="cs"><i class="cs-sr">cricstat</i><i class="cs-w" aria-hidden="true">cr<i class="cs-i">ı</i>c<b>stat</b></i></span></div>
         <h3>Ask the Analyst</h3>
         <span class="proj-status status-planned">Planned</span>
         <p>LangGraph agent with typed tools over the stats API and published evaluation scores.</p>
         <span class="proj-route">/cricket/</span>
-        <a href="/cricket/about/#analyst" class="proj-link cric-link">How it works in <span class="cs">cric<b>stat</b></span> →</a>
+        <a href="/cricket/about/#analyst" class="proj-link cric-link">How it works in <span class="cs"><i class="cs-sr">cricstat</i><i class="cs-w" aria-hidden="true">cr<i class="cs-i">ı</i>c<b>stat</b></i></span> →</a>
       </div>
     </div>
   </div>

@@ -17,6 +17,7 @@
            margin-bottom:1.5rem; padding-bottom:1rem; border-bottom:1px solid var(--border); }
   h1 { font-size:1.5rem; font-weight:800; } h1 em { font-style:normal; color:var(--accent); }
   .cs { color:#fff; white-space:nowrap; } .cs b { color:var(--saffron); font-weight:inherit; }
+  .cs i { font-style: normal; } .cs-sr { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } .cs-i { position: relative; display: inline-block; line-height: 1.05; } .cs-i::after { content: ""; position: absolute; left: 50%; top: .03em; width: .3em; height: .3em; transform: translateX(-50%); border-radius: 50%; background: radial-gradient(circle at 35% 32%, #e2544b, #b3201c 65%, #6e1210); box-shadow: inset -.03em -.03em .04em rgba(0,0,0,.35); }
   .meta { color:var(--muted); font-size:.85rem; display:flex; gap:.8rem; flex-wrap:wrap; align-items:center; }
   .meta a, a { color:var(--accent); text-decoration:none; }
   h2 { font-size:.75rem; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); font-weight:700;
@@ -56,7 +57,7 @@
 <body>
 <div class="container">
   <header>
-    <h1>pandya<em>HomeLab</em> · <span class="cs">cric<b>stat</b></span></h1>
+    <h1>pandya<em>HomeLab</em> · <span class="cs"><i class="cs-sr">cricstat</i><i class="cs-w" aria-hidden="true">cr<i class="cs-i">ı</i>c<b>stat</b></i></span></h1>
     <div class="meta">Signed in as <strong>archit (preview snapshot)</strong>
       <a href="/admin/">← Visitors dashboard</a> <a href="/admin/cricket/golden">Golden figures →</a></div>
   </header>
