@@ -681,3 +681,4 @@ a.about-trigger[aria-current="page"] { background: rgba(255,153,51,.22); border-
 .m-gates { list-style: none; margin: .3rem 0 0; padding: 0; font-size: .9rem; } .m-gates li { display: flex; gap: .5rem; margin: .35rem 0; }
 .m-gate { flex: none; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: .75rem; font-weight: 800; }
 .m-gate.ok { background: rgba(34,197,94,.15); color: #22c55e; } .m-gate.no { background: rgba(239,68,68,.15); color: #ef4444; }
+.m-calmini { width: 132px; height: 132px; display: block; filter: drop-shadow(0 8px 22px rgba(57,135,229,.15)); }

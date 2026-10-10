@@ -60,6 +60,33 @@ def seal():
             '</svg>')
 
 
+def method_seal():
+    """Methodology hero: the same seal family, a balance scale (Elo weighs one team against another)."""
+    return ('<svg class="wc-seal" viewBox="0 0 200 200" role="img" aria-label="Methodology of the cricstat predictor">'
+            '<defs>' + GOLD % "mGold" +
+            '<path id="mTop" d="M30 100a70 70 0 0 1 140 0"/><path id="mBot" d="M24 100a76 76 0 0 0 152 0"/></defs>'
+            '<circle cx="100" cy="100" r="96" fill="#13161e" stroke="url(#mGold)" stroke-width="3"/>'
+            '<circle cx="100" cy="100" r="86" fill="none" stroke="#F5B82E" stroke-opacity=".35" stroke-width="1"/>'
+            '<circle cx="100" cy="100" r="58" fill="none" stroke="#F5B82E" stroke-opacity=".35" stroke-width="1"/>'
+            '<text font-family="system-ui, sans-serif" font-weight="800" font-size="12.5" letter-spacing="2.2" fill="#F5B82E">'
+            '<textPath href="#mTop" startOffset="50%" text-anchor="middle">HOW IT WORKS · METHODOLOGY</textPath></text>'
+            '<text font-family="system-ui, sans-serif" font-weight="700" font-size="9" letter-spacing="1.4" fill="#cbd5e1">'
+            '<textPath href="#mBot" startOffset="50%" text-anchor="middle">ELO · 50,000 SIMULATIONS · BACKTESTS</textPath></text>'
+            '<circle cx="31" cy="100" r="2.4" fill="#FF9933"/><circle cx="169" cy="100" r="2.4" fill="#FF9933"/>'
+            # balance scale: post, beam tilted slightly, two pans; a red ball on the lower pan
+            '<g fill="none" stroke="url(#mGold)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">'
+            '<path d="M100 66v52M86 121h28"/><path d="M70 82l60-6"/>'
+            '<path d="M70 82l-11 22M70 82l11 22M130 76l-11 22M130 76l11 22"/>'
+            '<path d="M56 104q14 10 28 0M116 98q14 10 28 0"/></g>'
+            '<circle cx="100" cy="64" r="3.6" fill="url(#mGold)"/>'
+            '<circle cx="70" cy="99" r="5.2" fill="#b3201c"/><path d="M67.4 95.6c1.2 1.1 1.6 3.9.6 6.2M72.6 95.6c-1.2 1.1-1.6 3.9-.6 6.2" stroke="#f5efe6" stroke-width=".8" fill="none"/>'
+            '<text x="100" y="140" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="900" font-size="17" '
+            'letter-spacing="1" fill="url(#mGold)">Elo</text>'
+            '<text x="100" y="152" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="700" font-size="7.5" '
+            'letter-spacing="1.5" fill="#94a3b8">cric<tspan fill="#FF9933">stat</tspan></text>'
+            '</svg>')
+
+
 def hosts():
     with open(os.path.join(WEB, "assets", "world-map.json"), encoding="utf-8") as f:
         world = json.load(f)

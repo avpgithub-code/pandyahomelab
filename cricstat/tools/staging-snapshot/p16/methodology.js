@@ -205,6 +205,24 @@
         ", and where every number comes from on ", h("a", { href: "/cricket/licences/" }, "Data & licences"), "."])]);
   }
 
+  // Hero mini calibration plot: the live model's real reliability bins on the perfect-calibration diagonal.
+  function calMini(d) {
+    const svg = document.getElementById("m-calmini"), bins = (d.backtest.test_a.reliability || {}).elo || [];
+    if (!svg || !bins.length) return;
+    const NS = "http://www.w3.org/2000/svg", lo = 0.5, x0 = 16, x1 = 110, y0 = 110, y1 = 16;
+    const X = (v) => x0 + (Math.max(lo, Math.min(1, v)) - lo) / (1 - lo) * (x1 - x0);
+    const Y = (v) => y0 - (Math.max(lo, Math.min(1, v)) - lo) / (1 - lo) * (y0 - y1);
+    const el = (tag, attrs) => { const e = document.createElementNS(NS, tag); Object.keys(attrs).forEach((k) => e.setAttribute(k, attrs[k])); svg.appendChild(e); return e; };
+    el("rect", { x: 1, y: 1, width: 118, height: 118, rx: 14, fill: "#13161e", stroke: "#F5B82E", "stroke-opacity": ".55", "stroke-width": 1.5 });
+    el("path", { d: "M" + x0 + " " + y0 + "H" + x1 + "M" + x0 + " " + y0 + "V" + y1, stroke: "#334155", "stroke-width": 1 });
+    el("line", { x1: X(lo), y1: Y(lo), x2: X(1), y2: Y(1), stroke: "#F5B82E", "stroke-width": 1.4, "stroke-dasharray": "4 3", "stroke-opacity": ".8" });
+    el("polyline", { points: bins.map((b) => X(b.predicted) + "," + Y(b.observed)).join(" "), fill: "none", stroke: "#3987e5", "stroke-width": 2 });
+    bins.forEach((b) => { const c = el("circle", { cx: X(b.predicted), cy: Y(b.observed), r: 4.2, fill: "#3987e5", stroke: "#13161e", "stroke-width": 1.5 });
+      const t = document.createElementNS(NS, "title"); t.textContent = "Said " + pct(b.predicted) + ", happened " + pct(b.observed) + " (" + b.n + " matches)"; c.appendChild(t); });
+    svg.setAttribute("aria-label", "Calibration of the live model: when it gave the favourite " + bins.map((b) => pct(b.predicted, 0) + ", the favourite won " + pct(b.observed, 0)).join("; "));
+    document.getElementById("m-calcap").textContent = "said vs happened · " + C.num(d.backtest.test_a.elo.n) + " ODIs";
+  }
+
   async function init() {
     try {
       const [{ data: d }, latest] = await Promise.all([C.api("/v1/models/predictor/backtest"),
@@ -213,7 +231,7 @@
       document.getElementById("m-stamp").textContent = "Live model " + d.champion.model_version + " · trained " + C.date(String(d.champion.trained_at).slice(0, 10)) +
         " on data to " + C.date(d.champion.data_as_of) + (F ? " · forecast updated " + C.date(F.forecast.data_as_of) : "");
       document.getElementById("m-asof").textContent = " · " + d.champion.model_version;
-      plain(d, F); elo(d); sim(d, F); tests(d); cal(d); models(d); limits(d);
+      calMini(d); plain(d, F); elo(d); sim(d, F); tests(d); cal(d); models(d); limits(d);
       C.sectionTabs(document.querySelector(".m-board .sec-tabs"));
       // the chart may be drawn while its tab is hidden
       document.getElementById("tab-m-cal").addEventListener("click", () => { if (calChart) { try { calChart.resize(); } catch (e) { /* not drawable */ } } });

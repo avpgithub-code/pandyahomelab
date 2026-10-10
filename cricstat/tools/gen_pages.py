@@ -21,7 +21,7 @@ else:
     WEB = os.path.join(CRICSTAT, "tools", "staging", "web")
     if not os.path.isdir(WEB):
         shutil.copytree(os.path.join(CRICSTAT, "web"), WEB)
-V = "93"
+V = "94"
 # P1.6 ships in two parts: False = the approved non-predictor pages only (nav "ODI WC 2027 soon", no predictor page,
 # no model numbers on the map, no predictor rows on the licences page). True at the full P1.6 deploy.
 PREDICTOR_LIVE = os.environ.get("CRICSTAT_PREDICTOR_LIVE") == "1"   # preview: CRICSTAT_PREDICTOR_LIVE=1
@@ -348,9 +348,12 @@ if PREDICTOR_LIVE:
 
 METHOD = '''<header class="hero left"><div class="wrap">
   <div class="eyebrow"><span class="dot"></span>Methodology · ODI World Cup 2027 predictor</div>
-  <h1 style="font-size:clamp(2rem,5vw,3rem)">How the predictor works — and how well</h1>
-  <p class="subtitle">The model in plain words and in formulas, every setting and how it was chosen, and the tests it had to pass
-  on matches it had never seen. One model for every team; every number below comes from the same files the forecast uses.</p>
+  <div class="wc-head">@@MSEAL@@
+   <div class="wc-head-text"><h1 class="wc-title" style="font-size:clamp(2rem,4.4vw,3rem);margin:0">How the predictor works — and how well</h1>
+  <p class="subtitle" style="margin-top:.6rem">The model in plain words and in formulas, every setting and how it was chosen, and the tests it had to pass
+  on matches it had never seen. One model for every team; every number below comes from the same files the forecast uses.</p></div>
+   <figure class="wc-hosts-fig m-calfig"><svg class="m-calmini" id="m-calmini" viewBox="0 0 120 120" role="img" aria-label="Calibration: predicted against observed win rate (loading)"></svg><figcaption id="m-calcap">said vs happened</figcaption></figure>
+  </div>
   <p class="tiny muted" id="m-stamp">Loading…</p>
 </div></header>
 <section class="section panel" aria-label="Methodology"><div class="wrap scoreboard m-board">
@@ -373,6 +376,8 @@ METHOD = '''<header class="hero left"><div class="wrap">
   <div class="sec-pane" role="tabpanel" id="pane-m-limits" aria-labelledby="tab-m-limits" hidden></div>
 </div></section>
 '''
+from gen_wc_badges import method_seal  # noqa: E402
+METHOD = METHOD.replace("@@MSEAL@@", method_seal())
 METHOD_DESC = ("How cricstat's ODI World Cup 2027 predictor works: Elo ratings from every men's ODI, 50,000 simulated "
                "tournaments, and backtests on the 2019 and 2023 World Cups with calibration, baselines and model versions.")
 if PREDICTOR_LIVE:
