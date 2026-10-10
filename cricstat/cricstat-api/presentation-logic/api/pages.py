@@ -248,6 +248,16 @@ def predictor_text(data: dict) -> Tuple[str, str, list]:
     return desc, section, faq
 
 
+def predictor_answer(data: dict) -> str:
+    """One-sentence answer for the top of the predictor page (the first thing readers and search
+    engines see); predictor.js writes the same sentence."""
+    teams = sorted(data["teams"], key=lambda t: -(t["probabilities"].get("champion") or 0))
+    a, b, c = (esc(t["team"]) for t in teams[:3])
+    pa, pb, pc = (esc(_pct(t["probabilities"].get("champion"))) for t in teams[:3])
+    return ("On %s, cricstat's model makes <b>%s</b> the favourite at <b>%s</b>, ahead of %s (%s) "
+            "and %s (%s)." % (esc(_day(data["forecast"]["data_as_of"])), a, pa, b, pb, c, pc))
+
+
 def register(app: FastAPI, cfg: Config) -> None:
     db = app.state.db
     shells = Shells(cfg.WEB_DIR)
@@ -370,6 +380,8 @@ def register(app: FastAPI, cfg: Config) -> None:
                      count=1, flags=re.S)
         out = set_head(out, title, desc, url, "index,follow", "".join(ld_json(x) for x in ld))
         out = fill(out, '<div class="wrap wc-seo" id="wc-seo">', section)
+        if '<p class="wc-answer" id="wc-answer">' in out:
+            out = fill(out, '<p class="wc-answer" id="wc-answer">', predictor_answer(data))
         return HTMLResponse(out, headers=headers)
 
     @app.get("/pages/sitemap.xml", include_in_schema=False)
