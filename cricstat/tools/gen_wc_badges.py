@@ -29,6 +29,15 @@ GOLD = '<linearGradient id="%s" x1="0" y1="0" x2="1" y2="1"><stop offset="0" sto
        '<stop offset=".5" stop-color="#F5B82E"/><stop offset="1" stop-color="#C98500"/></linearGradient>'
 
 
+# Centre of the Players seal (pictograms, thick round strokes). Owner tried both on 2026-10-10;
+# switch back by setting PLAYERS_FIGURE = "batter".
+PLAYERS_FIGURE = "bowler"
+PLAYER_FIGURES = {
+    "batter": '<g fill="none" stroke="url(#pGold)" stroke-linecap="round" stroke-linejoin="round"><polyline points="101.4,69.0 112.4,95.2" stroke-width="15.2"/><polyline points="112.4,95.2 95.9,111.7 87.6,131.1" stroke-width="11.0"/><polyline points="112.4,95.2 126.2,113.1 137.3,129.7" stroke-width="11.0"/><polyline points="101.4,71.7 89.0,86.9" stroke-width="8.3"/><polyline points="104.1,74.5 93.1,89.7" stroke-width="8.3"/></g><circle cx="94.5" cy="55.2" r="10.3" fill="url(#pGold)"/><line x1="80.0" y1="56.5" x2="91.7" y2="56.5" stroke="url(#pGold)" stroke-width="4.1"/><line x1="91.7" y1="86.9" x2="89.0" y2="95.2" stroke="#e2e8f0" stroke-width="4.1" stroke-linecap="round"/><line x1="89.0" y1="95.2" x2="72.4" y2="125.5" stroke="#e8d3a0" stroke-width="11"/><circle cx="60.0" cy="131.1" r="6.2" fill="url(#pBall)"/>',   # a batter playing a drive
+    "bowler": '<g fill="none" stroke="url(#pGold)" stroke-linecap="round" stroke-linejoin="round"><polyline points="92.8,85.0 102.4,107.8" stroke-width="13.2"/><polyline points="102.4,107.8 92.8,122.2 85.6,135.4" stroke-width="9.6"/><polyline points="102.4,107.8 116.8,117.4 128.8,121.0" stroke-width="9.6"/><polyline points="96.4,85.0 106.0,69.4 112.0,56.2" stroke-width="7.2"/><polyline points="91.6,87.4 80.8,93.4 72.4,101.8" stroke-width="7.2"/></g><circle cx="87.4" cy="74.8" r="9.0" fill="url(#pGold)"/><circle cx="114.4" cy="51.4" r="5.5" fill="url(#pBall)"/>',   # a bowler in delivery stride
+}
+
+
 def trophy(gid, x, y, s):
     """Our trophy (same shape family as the hub teaser's icon), drawn in a 64-unit box at (x, y), scale s."""
     return ('<g transform="translate(%.1f %.1f) scale(%.3f)" fill="url(#%s)">'
@@ -87,8 +96,9 @@ def method_seal():
             '</svg>')
 
 
-def players_seal():
-    """Players page: the same seal family, a batter playing a drive."""
+def players_seal(figure=None):
+    """Players page: the same seal family; the centre is a batter or a bowler (PLAYERS_FIGURE)."""
+    figure = figure or PLAYERS_FIGURE
     return ('<svg class="wc-seal" viewBox="0 0 200 200" role="img" aria-label="cricstat players">'
             '<defs>' + GOLD % "pGold" +
             '<radialGradient id="pBall" cx="35%" cy="32%" r="70%"><stop offset="0" stop-color="#e2544b"/>'
@@ -102,8 +112,7 @@ def players_seal():
             '<text font-family="system-ui, sans-serif" font-weight="700" font-size="9" letter-spacing="1.4" fill="#cbd5e1">'
             '<textPath href="#pBot" startOffset="50%" text-anchor="middle">MEN &amp; WOMEN · EVERY FORMAT</textPath></text>'
             '<circle cx="31" cy="100" r="2.4" fill="#FF9933"/><circle cx="169" cy="100" r="2.4" fill="#FF9933"/>'
-            # a batter driving the ball (pictogram: thick round strokes)
-            '<g fill="none" stroke="url(#pGold)" stroke-linecap="round" stroke-linejoin="round"><polyline points="101.4,69.0 112.4,95.2" stroke-width="15.2"/><polyline points="112.4,95.2 95.9,111.7 87.6,131.1" stroke-width="11.0"/><polyline points="112.4,95.2 126.2,113.1 137.3,129.7" stroke-width="11.0"/><polyline points="101.4,71.7 89.0,86.9" stroke-width="8.3"/><polyline points="104.1,74.5 93.1,89.7" stroke-width="8.3"/></g><circle cx="94.5" cy="55.2" r="10.3" fill="url(#pGold)"/><line x1="80.0" y1="56.5" x2="91.7" y2="56.5" stroke="url(#pGold)" stroke-width="4.1"/><line x1="91.7" y1="86.9" x2="89.0" y2="95.2" stroke="#e2e8f0" stroke-width="4.1" stroke-linecap="round"/><line x1="89.0" y1="95.2" x2="72.4" y2="125.5" stroke="#e8d3a0" stroke-width="11"/><circle cx="60.0" cy="131.1" r="6.2" fill="url(#pBall)"/>'
+            + PLAYER_FIGURES[figure] +
             '<text x="100" y="146" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="700" font-size="7.5" '
             'letter-spacing="1.5" fill="#94a3b8">cric<tspan fill="#FF9933">stat</tspan></text>'
             '</svg>')
