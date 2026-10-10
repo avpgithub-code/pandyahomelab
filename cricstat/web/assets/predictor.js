@@ -313,26 +313,29 @@
       const [list, hist, base] = await Promise.all([ratingList || C.api("/v1/ratings?scope=ODI&gender=male"),
         ratingHist(pick), pick !== follow ? ratingHist(follow) : null]);
       ratingList = list;
-      const h2h = base && hist ? await ratingH2h(pick, follow) : null;
-      const rec = h2h && h2h.data && h2h.data[0];
       const rOf = (uid) => (list.data.find((r) => r.team_uid === uid) || {}).rating;
-      const pFollow = base && hist ? 1 / (1 + Math.pow(10, -(rOf(follow) - rOf(pick)) / 400)) : null;
-      // Followed team charted: compare it with its rivals = the five highest-rated other active teams.
-      const rivals = !base && hist ? list.data.filter((r) => r.active && r.team_uid !== follow)
-        .sort((a, b) => b.rating - a.rating).slice(0, 5) : [];
+      // Every charted team gets the same panel: it v five rivals = the big five (RIVALS) minus itself,
+      // topped up with the highest-rated other active team(s).
+      const RIVALS = ["india-men", "australia-men", "south-africa-men", "pakistan-men", "england-men"];
+      const byUid = (uid) => list.data.find((r) => r.team_uid === uid);
+      const rivals = !hist ? [] : RIVALS.filter((u) => u !== pick).map(byUid).filter(Boolean);
+      list.data.filter((r) => r.active && r.team_uid !== pick && !rivals.includes(r)).sort((a, b) => b.rating - a.rating)
+        .slice(0, Math.max(0, 5 - rivals.length)).forEach((r) => rivals.push(r));
+      rivals.sort((a, b) => b.rating - a.rating);
       const rivalData = rivals.length ? await Promise.all(rivals.map((r) =>
-        Promise.all([ratingHist(r.team_uid), ratingH2h(follow, r.team_uid)]).then(([hh, hd]) => ({ r, hh, rec: hd && hd.data && hd.data[0] })))) : [];
-      const pickRival = (uid) => { ratingSel = uid; renderRatings(); };
-      const compare = !hist ? null : !base
-        ? h("div", { class: "wc-cmp" }, [
-          h("h3", { class: "wc-sub" }, hist.data.team + " v rivals"),
-          h("p", { class: "tiny muted", style: "margin:.2rem 0 .5rem" }, "Rivals: the five highest-rated other teams with an ODI in the last two years. Click one for the head-to-head chart."),
+        Promise.all([ratingHist(r.team_uid), ratingH2h(pick, r.team_uid)]).then(([hh, hd]) => ({ r, hh, rec: hd && hd.data && hd.data[0] })))) : [];
+      const pickRival = (uid) => { ratingSel = uid === follow ? null : uid; renderRatings(); };
+      const T = hist ? hist.data.team : "";
+      const compare = !hist ? null : h("div", { class: "wc-cmp" }, [
+          h("h3", { class: "wc-sub" }, T + " vs rivals"),
+          h("p", { class: "tiny muted", style: "margin:.2rem 0 .5rem" }, "Rivals: India, Australia, South Africa, Pakistan and England, plus the next highest-rated team when " +
+            T + " is one of them. Click a rival to chart it."),
           h("div", { class: "scroll" }, h("table", { class: "wc-table" }, [
-            h("thead", {}, h("tr", {}, ["Rival", "Rating", hist.data.team + " win chance", "ODIs · W–L", "Last met"].map((x, i) =>
+            h("thead", {}, h("tr", {}, ["Rival", "Rating", T + " win chance", "ODIs · W–L", "Last met"].map((x, i) =>
               h("th", { scope: "col", class: i === 0 ? "txt" : null }, x)))),
             h("tbody", {}, rivalData.map(({ r, rec }) => {
-              const pw = 1 / (1 + Math.pow(10, -(rOf(follow) - r.rating) / 400));
-              const tr = h("tr", { class: "wc-pick", tabindex: "0", "aria-label": r.team + ": head-to-head chart" }, [
+              const pw = 1 / (1 + Math.pow(10, -(rOf(pick) - r.rating) / 400));
+              const tr = h("tr", { class: "wc-pick" + (r.team_uid === follow ? " me" : ""), tabindex: "0", "aria-label": r.team + ": chart this team" }, [
                 h("td", { class: "txt" }, h("span", { class: "wc-team" }, [C.teamBadge(r.team, "sm"), h("span", { class: "tname" }, r.team)])),
                 h("td", {}, String(Math.round(r.rating))), h("td", {}, Math.round(100 * pw) + "%"),
                 h("td", {}, rec ? C.num(rec.matches) + " · " + rec.won + "–" + rec.lost : "–"),
@@ -342,20 +345,9 @@
               return tr;
             }))])),
           h("div", { class: "chart-box", style: "height:240px;margin-top:.6rem" }, h("canvas", { id: "wc-gap", role: "img",
-            "aria-label": "Rating gap, " + hist.data.team + " minus each rival" })),
-          h("p", { class: "tiny muted" }, "Each line: " + hist.data.team + "'s rating minus the rival's. Above zero: " + hist.data.team + " rated higher. Win chance: neutral ground, no home edge.")])
-        : h("div", { class: "wc-cmp" }, [
-          h("h3", { class: "wc-sub" }, hist.data.team + " v " + base.data.team),
-          h("p", { class: "small", style: "margin:.2rem 0" }, ["Today: ", h("b", {}, hist.data.team + " " + Math.round(rOf(pick))), " v ",
-            h("b", {}, base.data.team + " " + Math.round(rOf(follow))), " → ", h("b", {}, base.data.team + " " + Math.round(100 * pFollow) + "%"),
-            " to win on a neutral ground (", C.wordmark(), " Elo)."]),
-          rec ? h("p", { class: "small muted", style: "margin:.2rem 0" }, "ODIs in our data: " + C.num(rec.matches) + " played · " +
-            hist.data.team + " won " + rec.won + " · " + base.data.team + " won " + rec.lost +
-            (rec.tied ? " · " + rec.tied + " tied" : "") + (rec.no_result ? " · " + rec.no_result + " no result" : "") +
-            (rec.last_played ? " · last met " + day(rec.last_played) + " (" + hist.data.team + " " + String(rec.last_outcome).replace("_", " ") + ")" : "")) : null,
-          h("div", { class: "chart-box", style: "height:220px" }, h("canvas", { id: "wc-gap", role: "img",
-            "aria-label": "Rating gap, " + hist.data.team + " minus " + base.data.team })),
-          h("p", { class: "tiny muted" }, "Above zero: " + hist.data.team + " rated higher; below: " + base.data.team + ". Dots: their rated meetings (no results don't move ratings); hover for who gained.")]);
+            "aria-label": "Rating gap, " + T + " minus each rival" })),
+          h("p", { class: "tiny muted" }, "Each line: " + T + "'s rating minus the rival's. Above zero: " + T + " rated higher. W–L and win chance are " +
+            T + "'s; win chance on a neutral ground, no home edge.")]);
       const rows = list.data.filter((r) => showAll || r.active);
       const toggle = h("button", { class: "tab sm", type: "button", "aria-pressed": String(showAll) }, showAll ? "Active teams only" : "Show inactive teams too");
       toggle.addEventListener("click", () => { showAll = !showAll; renderRatings(); });
@@ -400,7 +392,7 @@
                 label: (c) => (base ? c.dataset.label + ": " : "Rating ") + Math.round(c.parsed.y) } } },
             scales: { x: { type: "linear", ticks: { maxTicksLimit: 8, callback: (v) => String(new Date(v).getUTCFullYear()) }, grid: { display: false } },
               y: { grid: { color: "#1c2130" } } } } });
-        if (!base && rivalData.length) {
+        if (rivalData.length) {
           const A = hist.data.team;
           charts.gap = new window.Chart(document.getElementById("wc-gap"), { type: "line",
             data: { datasets: rivalData.filter((x) => x.hh).map((x, i) => ({ label: x.r.team, data: ratingGap(hist, x.hh).line,
@@ -410,26 +402,6 @@
               plugins: { legend: { position: "bottom", labels: { boxWidth: 12, boxHeight: 3 } },
                 tooltip: { callbacks: { title: (c) => day(new Date(c[0].parsed.x).toISOString().slice(0, 10)),
                   label: (c) => { const y = Math.round(c.parsed.y); return "v " + c.dataset.label + ": " + (y === 0 ? "level" : (y > 0 ? A : c.dataset.label) + " +" + Math.abs(y)); } } } },
-              scales: { x: { type: "linear", ticks: { maxTicksLimit: 8, callback: (v) => String(new Date(v).getUTCFullYear()) }, grid: { display: false } },
-                y: { grid: { color: (c) => (c.tick.value === 0 ? "#4b5563" : "#1c2130") } } } } });
-        }
-        if (base) {
-          const g = ratingGap(hist, base), A = hist.data.team, B = base.data.team;
-          charts.gap = new window.Chart(document.getElementById("wc-gap"), { type: "line",
-            data: { datasets: [
-              { label: "Gap", data: g.line, borderColor: PAL[0], borderWidth: 1.5, pointRadius: 0, pointHoverRadius: 3, tension: 0.15,
-                fill: { target: { value: 0 }, above: "rgba(79,127,214,.25)", below: "rgba(107,114,128,.3)" } },
-              { label: "Meetings", data: g.meets, showLine: false, pointRadius: 3, pointHoverRadius: 5,
-                pointBackgroundColor: "#e5e7eb", pointBorderColor: "#0b0f17", borderColor: "#e5e7eb" }] },
-            options: { responsive: true, maintainAspectRatio: false, interaction: { mode: "nearest", axis: "x", intersect: false },
-              plugins: { legend: { display: false },
-                tooltip: { callbacks: { title: (c) => day(new Date(c[0].parsed.x).toISOString().slice(0, 10)),
-                  label: (c) => {
-                    const y = Math.round(c.parsed.y), lead = y === 0 ? "level" : (y > 0 ? A : B) + " +" + Math.abs(y);
-                    if (c.datasetIndex !== 1) return lead;
-                    const gn = Math.round(c.raw.gain);
-                    return ["Meeting: " + (gn === 0 ? "no rating change" : (gn > 0 ? A : B) + " gained " + Math.abs(gn)), "Gap after: " + lead];
-                  } } } },
               scales: { x: { type: "linear", ticks: { maxTicksLimit: 8, callback: (v) => String(new Date(v).getUTCFullYear()) }, grid: { display: false } },
                 y: { grid: { color: (c) => (c.tick.value === 0 ? "#4b5563" : "#1c2130") } } } } });
         }
