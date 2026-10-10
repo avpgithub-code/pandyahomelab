@@ -44,6 +44,11 @@
     C.fill("wc-stamp", ["cricstat Elo · " + C.num(f.n_simulations) + " simulated tournaments · results to " + day(f.data_as_of) +
       " · model " + f.model_version + " · last run " + day(f.created_at.slice(0, 10))]);
     C.fill("wc-asof", " · " + day(f.data_as_of));
+    // Same sentence the server writes into #wc-answer for search engines (pages.predictor_answer).
+    const top = F.teams.slice().sort((a, b) => b.probabilities.champion - a.probabilities.champion);
+    if (top.length >= 3) C.fill("wc-answer", ["On " + day(f.data_as_of) + ", ", C.wordmark(), "'s model makes ", h("b", {}, top[0].team),
+      " the favourite at ", h("b", {}, pct(top[0].probabilities.champion)), ", ahead of " + top[1].team + " (" + pct(top[1].probabilities.champion) +
+      ") and " + top[2].team + " (" + pct(top[2].probabilities.champion) + ")."]);
   }
   function followStrip() {
     const t = F.teams.find((x) => x.team_uid === follow) || F.teams.find((x) => x.team_uid === "india-men");
@@ -516,6 +521,11 @@
 
   async function init() {
     C.sectionTabs(document.querySelector(".wc-board .sec-tabs"));
+    // Hero "Jump to" links that name a tab open it, then scroll to the board.
+    document.querySelectorAll("a[data-tab]").forEach((a) => a.addEventListener("click", (e) => {
+      const tab = document.getElementById(a.dataset.tab); if (!tab) return;
+      e.preventDefault(); tab.click(); tab.scrollIntoView({ behavior: "smooth", block: "start" });
+    }));
     // Hero map: a ground opens the Venues tab (dots are keyboard-reachable too).
     document.querySelectorAll(".wc-hosts .h-ground").forEach((dot) => {
       const name = (dot.querySelector("title") || {}).textContent || "a 2027 ground";

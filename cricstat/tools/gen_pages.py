@@ -21,7 +21,7 @@ else:
     WEB = os.path.join(CRICSTAT, "tools", "staging", "web")
     if not os.path.isdir(WEB):
         shutil.copytree(os.path.join(CRICSTAT, "web"), WEB)
-V = "116"
+V = "117"
 # P1.6 ships in two parts: False = the approved non-predictor pages only (nav "ODI WC 2027 soon", no predictor page,
 # no model numbers on the map, no predictor rows on the licences page). True at the full P1.6 deploy.
 PREDICTOR_LIVE = os.environ.get("CRICSTAT_PREDICTOR_LIVE", "1") == "1"   # live since the P1.6 launch; CRICSTAT_PREDICTOR_LIVE=0 builds the old partial set
@@ -328,8 +328,11 @@ PREDICTOR = '''<header class="hero left wc-hero">
      <figure class="wc-hosts-fig">@@HOSTS@@<figcaption>12 grounds · 3 hosts</figcaption></figure>
     </div>
     <p class="subtitle">Every team's chances, from Elo ratings and 50,000 simulated tournaments in the published format. One model for every team: following a team changes what you see first, never the numbers.</p>
+    <p class="wc-answer" id="wc-answer"></p>
     <p class="wc-stamp tiny muted" id="wc-stamp">Loading the latest forecast…</p>
     <div id="wc-follow" class="wc-follow" aria-live="polite"></div>
+    <p class="wc-caveats tiny">Our model, not a tip · it doesn't know squads, injuries or pitches yet · Afghanistan's results come from a reviewed list · <a href="#wc-limits">Read this first ↓</a></p>
+    <nav class="wc-jump tiny" aria-label="On this page">Jump to: <a href="#wc-seo">The forecast in words</a> · <a href="#tab-good" data-tab="tab-good">How good is it?</a> · <a href="#wc-limits">Read this first</a></nav>
    </div>
    <figure class="wc-donut" id="wc-donut" aria-label="Share of simulated tournaments won, by team"></figure>
   </div>

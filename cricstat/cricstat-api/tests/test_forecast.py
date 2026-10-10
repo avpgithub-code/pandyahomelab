@@ -183,6 +183,7 @@ SHELL = """<!DOCTYPE html><html><head><title>x</title>
 <meta property="og:url" content="x">
 <script type="application/ld+json">{"static": true}</script>
 </head><body><h1>Who will lift</h1>
+<p class="wc-answer" id="wc-answer"></p>
 <section><div class="wrap wc-seo" id="wc-seo"><p>generic text</p></div></section></body></html>"""
 
 
@@ -206,6 +207,9 @@ def test_predictor_page_has_the_live_forecast_in_words(home, forecast_db, tmp_pa
             h = r.text
             assert "<title>Cricket World Cup 2027 Prediction: Who Will Win? | cricstat</title>" in h
             assert "India 60.0%" in h and "generic text" not in h   # live numbers, not the fallback
+            # the one-sentence answer is written into the hero (top of the page)
+            assert '<p class="wc-answer" id="wc-answer">On 7 Oct 2026, cric' in h
+            assert "makes <b>India</b> the favourite at <b>60.0%</b>" in h
             assert '"@type": "FAQPage"' in h and '"dateModified": "2026-10-07"' in h
             assert '"static": true' not in h                      # the shell's JSON-LD is replaced
             assert 'name="robots" content="index,follow"' in h
