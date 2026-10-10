@@ -517,7 +517,9 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   with the top-3 chances + date (≤ 155), "The forecast in words" (4 Q&A + 20-team table), WebPage `dateModified` +
   FAQPage JSON-LD, og:image `/cricket/og/predictor.png` (no numbers; `tools/gen_og_card.py --fonts DIR`). Predictor +
   methodology now in the API sitemap with the forecast date (removed from the static sitemap). Homepage: predictor card
-  "✓ Live" + 3 direct links. API 018fcac516be. Crawler-visible words 181 → 553.
+  "✓ Live" + 3 direct links. API 018fcac516be. Crawler-visible words 181 → 553. HEAD fix (API f515baf28e51): pages,
+  sitemap and /v1 answered HEAD with 405, now 200 (HeadAsGet middleware). Cricket sitemap resubmitted in Search
+  Console 2026-10-10 ("Couldn't fetch" before its first read is normal; recheck ~2026-10-13).
 - **Previous state (2026-10-09):** P0, P0.5, P0.6 and P1.1–P1.5 live; **partial P1.6 live** (world map Countries landing with
   win %/matches, Following Men/Women, team-page tabs, hub Manhattan; API f974fb246adb; web commit 54ce200; owner
   checked it). Everything is merged to `main` and pushed. **On hold until the owner says so:** predictor page,
