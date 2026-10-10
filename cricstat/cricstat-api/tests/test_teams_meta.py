@@ -122,3 +122,10 @@ def test_source_freshness():
     unknown = source_freshness([{"mode": "recent", "status": "success", "finished_at": "x",
                                  "source_last_modified": None}])
     assert unknown["last_updated"] is None and not unknown["stale"]
+
+
+def test_head_is_answered_like_get_without_a_body(client):
+    for path in ("/v1/teams", "/v1/teams/india-men/record", "/pages/sitemap.xml"):
+        get, head = client.get(path), client.head(path)
+        assert head.status_code == get.status_code == 200, path
+        assert head.content == b"" and head.headers.get("etag") == get.headers.get("etag")
