@@ -516,6 +516,15 @@ a.about-trigger[aria-current="page"] { background: rgba(255,153,51,.22); border-
 .wc-table tr.me td { background: rgba(255,153,51,.08); }
 .wc-table tr.me td:first-child { box-shadow: inset 3px 0 0 var(--saffron); }
 .wc-table tr.wc-pick { cursor: pointer; }
+/* Ratings: list and chart column side by side; the list scrolls so both columns end level. Stacked on narrow screens. */
+.wc-rate-grid { display: grid; gap: 1.25rem; grid-template-columns: 1fr; }
+.wc-rate-scroll { max-height: 70vh; overflow: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+.wc-rate-scroll thead th { position: sticky; top: 0; z-index: 1; }
+@media (min-width: 900px) {
+  .wc-rate-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: stretch; }
+  .wc-rate-list { position: relative; min-height: 320px; }
+  .wc-rate-scroll { position: absolute; inset: 0; max-height: none; }
+}
 .wc-team-open { color: var(--muted); text-decoration: none; font-size: .8rem; padding: 0 .3rem; opacity: .7; }
 .wc-team-open:hover, .wc-team-open:focus-visible { color: var(--saffron); opacity: 1; }
 .wc-table tr.sel td { background: rgba(79,127,214,.14); }
