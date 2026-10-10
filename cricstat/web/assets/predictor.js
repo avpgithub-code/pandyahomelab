@@ -36,9 +36,11 @@
   // ── Header: stamp + the followed team's line ──
   function stamp() {
     const f = F.forecast;
-    C.fill("wc-stamp", ["cricstat Elo · " + C.num(f.n_simulations) + " simulated tournaments · updated " + day(f.created_at.slice(0, 10)) +
-      " · results to " + day(f.data_as_of) + " · model " + f.model_version]);
-    C.fill("wc-asof", " · " + day(f.created_at.slice(0, 10)));
+    // Date the forecast by its results (as the hub teaser does); the run date is secondary: a re-run on the same
+    // results (deploy, model switch) changes it without changing what the forecast knows.
+    C.fill("wc-stamp", ["cricstat Elo · " + C.num(f.n_simulations) + " simulated tournaments · results to " + day(f.data_as_of) +
+      " · model " + f.model_version + " · last run " + day(f.created_at.slice(0, 10))]);
+    C.fill("wc-asof", " · " + day(f.data_as_of));
   }
   function followStrip() {
     const t = F.teams.find((x) => x.team_uid === follow) || F.teams.find((x) => x.team_uid === "india-men");
@@ -138,22 +140,25 @@
     try {
       const [all, mine] = await Promise.all([C.api("/v1/forecasts/wc-2027/history"),
         C.api("/v1/forecasts/wc-2027/history?team=" + encodeURIComponent(follow))]);
-      const series = all.data.series;
+      // One point per results date: a re-run on the same results replaces its point (the API keeps every run).
+      const byDay = new Map();
+      all.data.series.forEach((s) => byDay.set(s.data_as_of, s));
+      const series = [...byDay.values()];
       const latest = series[series.length - 1].probabilities;
       const top = Object.keys(latest).sort((a, b) => latest[b] - latest[a]).slice(0, 5);
       if (!top.includes(follow) && latest[follow] !== undefined) top.push(follow);
       const name = (uid) => (F.teams.find((t) => t.team_uid === uid) || { team: uid }).team;
-      const labels = series.map((s) => day(s.created_at.slice(0, 10)) + (series.length > 1 ? " #" + s.forecast_id : ""));
+      const labels = series.map((s) => day(s.data_as_of));
       const moves = mine.data.series.filter((s) => s.moved_by.length).slice(-8).reverse();
       C.fill(target, [
         h("div", { class: "section-head" }, [h("div", {}, [h("div", { class: "section-label" }, "Odds over time"),
           h("h2", { class: "section-title" }, "How the title chances have moved")]),
-          h("p", { class: "tiny muted", style: "max-width:420px;margin:0" }, "A new point appears each morning Cricsheet adds a men's ODI. The history starts on 8 October 2026.")]),
+          h("p", { class: "tiny muted", style: "max-width:420px;margin:0" }, "A new point appears each morning Cricsheet adds a men's ODI. The history starts with results to 7 October 2026.")]),
         h("div", { class: "chart-box", style: "height:320px" }, h("canvas", { id: "wc-time", role: "img",
           "aria-label": "Title chances per forecast for " + top.map(name).join(", ") })),
         h("h3", { class: "wc-sub" }, "What moved " + name(follow) + "'s chances"),
         moves.length ? h("ul", { class: "wc-moves" }, moves.map((s) => h("li", {}, [
-          h("b", {}, day(s.created_at.slice(0, 10)) + ": " + pct(s.probabilities.champion)), " after ",
+          h("b", {}, day(s.data_as_of) + ": " + pct(s.probabilities.champion)), " after ",
           s.moved_by.map((m) => m.team1 + " v " + m.team2 + (m.winner ? " (" + m.winner + " won)" : " (" + m.result.replace("_", " ") + ")")).join("; ")])))
           : h("p", { class: "muted small" }, "No match involving " + name(follow) + " has moved the forecast yet.")]);
       if (charts.time) charts.time.destroy();
