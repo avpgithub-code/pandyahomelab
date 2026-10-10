@@ -50,7 +50,7 @@
     const sel = h("select", { id: "wc-follow-sel", autocomplete: "off", "aria-label": "Team to follow" },
       F.teams.slice().sort((a, b) => a.team.localeCompare(b.team)).map((x) =>
         h("option", { value: x.team_uid, selected: x.team_uid === t.team_uid ? "selected" : null }, x.team)));
-    sel.addEventListener("change", () => { follow = sel.value; ratingSel = null; C.setFollow(follow); followStrip(); renderDonut(); renderOdds(); renderTime(); renderRatings(); if (SCHED) renderFixtures(); });
+    sel.addEventListener("change", () => { follow = sel.value; ratingSel = null; rivalFocus = null; C.setFollow(follow); followStrip(); renderDonut(); renderOdds(); renderTime(); renderRatings(); if (SCHED) renderFixtures(); });
     const p = t.probabilities;
     C.fill("wc-follow", h("div", { class: "wc-follow-card" }, [
       h("div", { class: "row", style: "gap:.8rem" }, [C.teamBadge(t.team), h("div", {}, [
@@ -277,7 +277,7 @@
   }
 
   // ── ⚖️ Ratings ──
-  let showAll = false, ratingSel = null, ratingList = null;       // ratingSel: team charted (null = followed team)
+  let showAll = false, ratingSel = null, ratingList = null, rivalFocus = null;   // rivalFocus: rival shown alone (null = all)       // ratingSel: team charted (null = followed team)
   const histCache = {};
   const ratingHist = (uid) => histCache[uid] || (histCache[uid] =
     C.api("/v1/ratings/" + encodeURIComponent(uid) + "/history?scope=ODI").catch(() => { delete histCache[uid]; return null; }));
@@ -324,7 +324,7 @@
       rivals.sort((a, b) => b.rating - a.rating);
       const rivalData = rivals.length ? await Promise.all(rivals.map((r) =>
         Promise.all([ratingHist(r.team_uid), ratingH2h(pick, r.team_uid)]).then(([hh, hd]) => ({ r, hh, rec: hd && hd.data && hd.data[0] })))) : [];
-      const pickRival = (uid) => { ratingSel = uid === follow ? null : uid; renderRatings(); };
+      if (rivalFocus && !rivals.some((r) => r.team_uid === rivalFocus)) rivalFocus = null;
       const T = hist ? hist.data.team : "";
       const compare = !hist ? null : h("div", { class: "wc-cmp" }, [
           h("h3", { class: "wc-sub" }, T + " vs rivals"),
@@ -335,19 +335,65 @@
               h("th", { scope: "col", class: i === 0 ? "txt" : null }, x)))),
             h("tbody", {}, rivalData.map(({ r, rec }) => {
               const pw = 1 / (1 + Math.pow(10, -(rOf(pick) - r.rating) / 400));
-              const tr = h("tr", { class: "wc-pick" + (r.team_uid === follow ? " me" : ""), tabindex: "0", "aria-label": r.team + ": chart this team" }, [
+              const tr = h("tr", { class: "wc-pick" + (r.team_uid === follow ? " me" : "") + (r.team_uid === rivalFocus ? " sel" : ""), tabindex: "0",
+                "data-rival": r.team_uid, "aria-pressed": String(r.team_uid === rivalFocus), "aria-label": T + " vs " + r.team + ": show only this rival in the chart" }, [
                 h("td", { class: "txt" }, h("span", { class: "wc-team" }, [C.teamBadge(r.team, "sm"), h("span", { class: "tname" }, r.team)])),
                 h("td", {}, String(Math.round(r.rating))), h("td", {}, Math.round(100 * pw) + "%"),
                 h("td", {}, rec ? C.num(rec.matches) + " · " + rec.won + "–" + rec.lost : "–"),
                 h("td", {}, rec && rec.last_played ? day(rec.last_played) + " (" + String(rec.last_outcome).replace("_", " ") + ")" : "–")]);
-              tr.addEventListener("click", () => pickRival(r.team_uid));
-              tr.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pickRival(r.team_uid); } });
+              tr.addEventListener("click", () => focusRival(r.team_uid === rivalFocus ? null : r.team_uid));
+              tr.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); focusRival(r.team_uid === rivalFocus ? null : r.team_uid); } });
               return tr;
             }))])),
-          h("div", { class: "chart-box", style: "height:240px;margin-top:.6rem" }, h("canvas", { id: "wc-gap", role: "img",
+          h("div", { class: "wc-gap-head" }, [h("span", { class: "small", id: "wc-gap-label" }),
+            h("button", { class: "tab sm", type: "button", id: "wc-gap-all", "aria-pressed": "true" }, "All rivals")]),
+          h("div", { class: "chart-box", style: "height:240px" }, h("canvas", { id: "wc-gap", role: "img",
             "aria-label": "Rating gap, " + T + " minus each rival" })),
-          h("p", { class: "tiny muted" }, "Each line: " + T + "'s rating minus the rival's. Above zero: " + T + " rated higher. W–L and win chance are " +
-            T + "'s; win chance on a neutral ground, no home edge.")]);
+          h("p", { class: "tiny muted" }, "Each line: " + T + "'s rating minus the rival's; above zero: " + T + " rated higher. Click a rival to show it alone, " +
+            "with dots on their meetings; ‘All rivals’ brings every line back. W–L and win chance are " + T + "'s; win chance on a neutral ground, no home edge.")]);
+      // Bottom chart: every rival's gap line, or one rival alone (shaded, with meeting dots). Redraws without re-rendering.
+      function drawGap() {
+        if (!window.Chart || !document.getElementById("wc-gap")) return;
+        if (charts.gap) charts.gap.destroy();
+        const one = rivalFocus && rivalData.find((x) => x.r.team_uid === rivalFocus && x.hh);
+        const A = T, ax = { x: { type: "linear", ticks: { maxTicksLimit: 8, callback: (v) => String(new Date(v).getUTCFullYear()) }, grid: { display: false } },
+          y: { grid: { color: (c) => (c.tick.value === 0 ? "#4b5563" : "#1c2130") } } };
+        const title = (c) => day(new Date(c[0].parsed.x).toISOString().slice(0, 10));
+        const lead = (y, B) => (y === 0 ? "level" : (y > 0 ? A : B) + " +" + Math.abs(y));
+        let datasets, tip;
+        if (one) {
+          const g = ratingGap(hist, one.hh), B = one.r.team;
+          datasets = [
+            { label: "Gap", data: g.line, borderColor: PAL[0], borderWidth: 1.5, pointRadius: 0, pointHoverRadius: 3, tension: 0.15,
+              fill: { target: { value: 0 }, above: "rgba(79,127,214,.25)", below: "rgba(107,114,128,.3)" } },
+            { label: "Meetings", data: g.meets, showLine: false, pointRadius: 3, pointHoverRadius: 5,
+              pointBackgroundColor: "#e5e7eb", pointBorderColor: "#0b0f17", borderColor: "#e5e7eb" }];
+          tip = (c) => {
+            const y = Math.round(c.parsed.y);
+            if (c.datasetIndex !== 1) return lead(y, B);
+            const gn = Math.round(c.raw.gain);
+            return ["Meeting: " + (gn === 0 ? "no rating change" : (gn > 0 ? A : B) + " gained " + Math.abs(gn)), "Gap after: " + lead(y, B)];
+          };
+        } else {
+          datasets = rivalData.filter((x) => x.hh).map((x, i) => ({ label: x.r.team, data: ratingGap(hist, x.hh).line,
+            borderColor: PAL[(i + 1) % PAL.length], backgroundColor: PAL[(i + 1) % PAL.length], borderWidth: 1.5,
+            pointRadius: 0, pointHoverRadius: 3, tension: 0.15 }));
+          tip = (c) => "v " + c.dataset.label + ": " + lead(Math.round(c.parsed.y), c.dataset.label);
+        }
+        const lbl = document.getElementById("wc-gap-label"), all = document.getElementById("wc-gap-all");
+        if (lbl) C.fill(lbl, one ? [h("b", {}, A + " vs " + one.r.team), " · above zero: " + A + " ahead"] : [h("b", {}, A + " vs all five rivals")]);
+        if (all) { all.setAttribute("aria-pressed", String(!one)); all.disabled = !one; }
+        charts.gap = new window.Chart(document.getElementById("wc-gap"), { type: "line", data: { datasets },
+          options: { responsive: true, maintainAspectRatio: false, interaction: { mode: "nearest", axis: "x", intersect: false },
+            plugins: { legend: { display: !one, position: "bottom", labels: { boxWidth: 12, boxHeight: 3 } },
+              tooltip: { callbacks: { title, label: tip } } }, scales: ax } });
+      }
+      function focusRival(uid) {
+        rivalFocus = uid;
+        target.querySelectorAll("tr[data-rival]").forEach((tr) => {
+          const on = tr.dataset.rival === uid; tr.classList.toggle("sel", on); tr.setAttribute("aria-pressed", String(on)); });
+        drawGap();
+      }
       const rows = list.data.filter((r) => showAll || r.active);
       const toggle = h("button", { class: "tab sm", type: "button", "aria-pressed": String(showAll) }, showAll ? "Active teams only" : "Show inactive teams too");
       toggle.addEventListener("click", () => { showAll = !showAll; renderRatings(); });
@@ -366,7 +412,7 @@
                 "aria-label": r.team + ": show rating history" }, [
                 h("td", { class: "num" }, r.rank ? String(r.rank) : "–"), h("td", { class: "txt" }, teamCell(r, true)),
                 h("td", {}, String(Math.round(r.rating))), h("td", {}, C.num(r.matches)), h("td", {}, day(r.last_match))]);
-              const choose = (kb) => { if (r.team_uid === pick) return; ratingSel = r.team_uid === follow ? null : r.team_uid; renderRatings(kb ? r.team_uid : null); };
+              const choose = (kb) => { if (r.team_uid === pick) return; ratingSel = r.team_uid === follow ? null : r.team_uid; rivalFocus = null; renderRatings(kb ? r.team_uid : null); };
               tr.addEventListener("click", (e) => { if (!e.target.closest("a")) choose(false); });
               tr.addEventListener("keydown", (e) => { if ((e.key === "Enter" || e.key === " ") && e.target === tr) { e.preventDefault(); choose(true); } });
               return tr;
@@ -377,6 +423,8 @@
               ". 1500 = an average Full Member when the data starts (2002). Ranked: teams with an ODI in the last two years."), compare])]),
       ]);
       if (focusRow) { const el = target.querySelector('tr[data-uid="' + focusRow + '"]'); if (el) el.focus(); }
+      const allBtn = document.getElementById("wc-gap-all");
+      if (allBtn) allBtn.addEventListener("click", () => focusRival(null));
       if (charts.rating) charts.rating.destroy();
       if (charts.gap) { charts.gap.destroy(); charts.gap = null; }
       if (hist && window.Chart) {
@@ -392,19 +440,7 @@
                 label: (c) => (base ? c.dataset.label + ": " : "Rating ") + Math.round(c.parsed.y) } } },
             scales: { x: { type: "linear", ticks: { maxTicksLimit: 8, callback: (v) => String(new Date(v).getUTCFullYear()) }, grid: { display: false } },
               y: { grid: { color: "#1c2130" } } } } });
-        if (rivalData.length) {
-          const A = hist.data.team;
-          charts.gap = new window.Chart(document.getElementById("wc-gap"), { type: "line",
-            data: { datasets: rivalData.filter((x) => x.hh).map((x, i) => ({ label: x.r.team, data: ratingGap(hist, x.hh).line,
-              borderColor: PAL[(i + 1) % PAL.length], backgroundColor: PAL[(i + 1) % PAL.length], borderWidth: 1.5,
-              pointRadius: 0, pointHoverRadius: 3, tension: 0.15 })) },
-            options: { responsive: true, maintainAspectRatio: false, interaction: { mode: "nearest", axis: "x", intersect: false },
-              plugins: { legend: { position: "bottom", labels: { boxWidth: 12, boxHeight: 3 } },
-                tooltip: { callbacks: { title: (c) => day(new Date(c[0].parsed.x).toISOString().slice(0, 10)),
-                  label: (c) => { const y = Math.round(c.parsed.y); return "v " + c.dataset.label + ": " + (y === 0 ? "level" : (y > 0 ? A : c.dataset.label) + " +" + Math.abs(y)); } } } },
-              scales: { x: { type: "linear", ticks: { maxTicksLimit: 8, callback: (v) => String(new Date(v).getUTCFullYear()) }, grid: { display: false } },
-                y: { grid: { color: (c) => (c.tick.value === 0 ? "#4b5563" : "#1c2130") } } } } });
-        }
+        if (rivalData.length) drawGap();
       }
     } catch (e) { C.showError(target, e, "the ratings"); }
   }
