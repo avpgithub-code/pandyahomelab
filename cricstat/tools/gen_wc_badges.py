@@ -29,6 +29,15 @@ GOLD = '<linearGradient id="%s" x1="0" y1="0" x2="1" y2="1"><stop offset="0" sto
        '<stop offset=".5" stop-color="#F5B82E"/><stop offset="1" stop-color="#C98500"/></linearGradient>'
 
 
+# Centre of the Players seal (pictograms, thick round strokes). Owner tried both on 2026-10-10;
+# switch back by setting PLAYERS_FIGURE = "batter".
+PLAYERS_FIGURE = "bowler"
+PLAYER_FIGURES = {
+    "batter": '<g fill="none" stroke="url(#pGold)" stroke-linecap="round" stroke-linejoin="round"><polyline points="101.4,69.0 112.4,95.2" stroke-width="15.2"/><polyline points="112.4,95.2 95.9,111.7 87.6,131.1" stroke-width="11.0"/><polyline points="112.4,95.2 126.2,113.1 137.3,129.7" stroke-width="11.0"/><polyline points="101.4,71.7 89.0,86.9" stroke-width="8.3"/><polyline points="104.1,74.5 93.1,89.7" stroke-width="8.3"/></g><circle cx="94.5" cy="55.2" r="10.3" fill="url(#pGold)"/><line x1="80.0" y1="56.5" x2="91.7" y2="56.5" stroke="url(#pGold)" stroke-width="4.1"/><line x1="91.7" y1="86.9" x2="89.0" y2="95.2" stroke="#e2e8f0" stroke-width="4.1" stroke-linecap="round"/><line x1="89.0" y1="95.2" x2="72.4" y2="125.5" stroke="#e8d3a0" stroke-width="11"/><circle cx="60.0" cy="131.1" r="6.2" fill="url(#pBall)"/>',   # a batter playing a drive
+    "bowler": '<g fill="none" stroke="url(#pGold)" stroke-linecap="round" stroke-linejoin="round"><polyline points="92.8,85.0 102.4,107.8" stroke-width="13.2"/><polyline points="102.4,107.8 92.8,122.2 85.6,135.4" stroke-width="9.6"/><polyline points="102.4,107.8 116.8,117.4 128.8,121.0" stroke-width="9.6"/><polyline points="96.4,85.0 106.0,69.4 112.0,56.2" stroke-width="7.2"/><polyline points="91.6,87.4 80.8,93.4 72.4,101.8" stroke-width="7.2"/></g><circle cx="87.4" cy="74.8" r="9.0" fill="url(#pGold)"/><circle cx="114.4" cy="51.4" r="5.5" fill="url(#pBall)"/>',   # a bowler in delivery stride
+}
+
+
 def trophy(gid, x, y, s):
     """Our trophy (same shape family as the hub teaser's icon), drawn in a 64-unit box at (x, y), scale s."""
     return ('<g transform="translate(%.1f %.1f) scale(%.3f)" fill="url(#%s)">'
@@ -55,6 +64,83 @@ def seal():
             + trophy("sealGold", 74, 52, 0.82) +
             '<text x="100" y="133" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="900" font-size="25" '
             'letter-spacing="1" fill="url(#sealGold)">2027</text>'
+            '<text x="100" y="146" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="700" font-size="7.5" '
+            'letter-spacing="1.5" fill="#94a3b8">cric<tspan fill="#FF9933">stat</tspan></text>'
+            '</svg>')
+
+
+def method_seal():
+    """Methodology hero: the same seal family, a balance scale (Elo weighs one team against another)."""
+    return ('<svg class="wc-seal" viewBox="0 0 200 200" role="img" aria-label="Methodology of the cricstat predictor">'
+            '<defs>' + GOLD % "mGold" +
+            '<path id="mTop" d="M30 100a70 70 0 0 1 140 0"/><path id="mBot" d="M24 100a76 76 0 0 0 152 0"/></defs>'
+            '<circle cx="100" cy="100" r="96" fill="#13161e" stroke="url(#mGold)" stroke-width="3"/>'
+            '<circle cx="100" cy="100" r="86" fill="none" stroke="#F5B82E" stroke-opacity=".35" stroke-width="1"/>'
+            '<circle cx="100" cy="100" r="58" fill="none" stroke="#F5B82E" stroke-opacity=".35" stroke-width="1"/>'
+            '<text font-family="system-ui, sans-serif" font-weight="800" font-size="12.5" letter-spacing="2.2" fill="#F5B82E">'
+            '<textPath href="#mTop" startOffset="50%" text-anchor="middle">HOW IT WORKS · METHODOLOGY</textPath></text>'
+            '<text font-family="system-ui, sans-serif" font-weight="700" font-size="9" letter-spacing="1.4" fill="#cbd5e1">'
+            '<textPath href="#mBot" startOffset="50%" text-anchor="middle">ELO · 50,000 SIMULATIONS · BACKTESTS</textPath></text>'
+            '<circle cx="31" cy="100" r="2.4" fill="#FF9933"/><circle cx="169" cy="100" r="2.4" fill="#FF9933"/>'
+            # balance scale: post, beam tilted slightly, two pans; a red ball on the lower pan
+            '<g fill="none" stroke="url(#mGold)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">'
+            '<path d="M100 66v52M86 121h28"/><path d="M70 82l60-6"/>'
+            '<path d="M70 82l-11 22M70 82l11 22M130 76l-11 22M130 76l11 22"/>'
+            '<path d="M56 104q14 10 28 0M116 98q14 10 28 0"/></g>'
+            '<circle cx="100" cy="64" r="3.6" fill="url(#mGold)"/>'
+            '<circle cx="70" cy="99" r="5.2" fill="#b3201c"/><path d="M67.4 95.6c1.2 1.1 1.6 3.9.6 6.2M72.6 95.6c-1.2 1.1-1.6 3.9-.6 6.2" stroke="#f5efe6" stroke-width=".8" fill="none"/>'
+            '<text x="100" y="140" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="900" font-size="17" '
+            'letter-spacing="1" fill="url(#mGold)">Elo</text>'
+            '<text x="100" y="152" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="700" font-size="7.5" '
+            'letter-spacing="1.5" fill="#94a3b8">cric<tspan fill="#FF9933">stat</tspan></text>'
+            '</svg>')
+
+
+def players_seal(figure=None):
+    """Players page: the same seal family; the centre is a batter or a bowler (PLAYERS_FIGURE)."""
+    figure = figure or PLAYERS_FIGURE
+    return ('<svg class="wc-seal" viewBox="0 0 200 200" role="img" aria-label="cricstat players">'
+            '<defs>' + GOLD % "pGold" +
+            '<radialGradient id="pBall" cx="35%" cy="32%" r="70%"><stop offset="0" stop-color="#e2544b"/>'
+            '<stop offset=".65" stop-color="#b3201c"/><stop offset="1" stop-color="#6e1210"/></radialGradient>'
+            '<path id="pTop" d="M30 100a70 70 0 0 1 140 0"/><path id="pBot" d="M24 100a76 76 0 0 0 152 0"/></defs>'
+            '<circle cx="100" cy="100" r="96" fill="#13161e" stroke="url(#pGold)" stroke-width="3"/>'
+            '<circle cx="100" cy="100" r="86" fill="none" stroke="#F5B82E" stroke-opacity=".35" stroke-width="1"/>'
+            '<circle cx="100" cy="100" r="58" fill="none" stroke="#F5B82E" stroke-opacity=".35" stroke-width="1"/>'
+            '<text font-family="system-ui, sans-serif" font-weight="800" font-size="12.5" letter-spacing="2.2" fill="#F5B82E">'
+            '<textPath href="#pTop" startOffset="50%" text-anchor="middle">PLAYERS · CAREERS</textPath></text>'
+            '<text font-family="system-ui, sans-serif" font-weight="700" font-size="9" letter-spacing="1.4" fill="#cbd5e1">'
+            '<textPath href="#pBot" startOffset="50%" text-anchor="middle">MEN &amp; WOMEN · EVERY FORMAT</textPath></text>'
+            '<circle cx="31" cy="100" r="2.4" fill="#FF9933"/><circle cx="169" cy="100" r="2.4" fill="#FF9933"/>'
+            + PLAYER_FIGURES[figure] +
+            '<text x="100" y="146" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="700" font-size="7.5" '
+            'letter-spacing="1.5" fill="#94a3b8">cric<tspan fill="#FF9933">stat</tspan></text>'
+            '</svg>')
+
+
+def countries_seal():
+    """Countries landing: the same seal family, a globe with a cricket ball."""
+    return ('<svg class="wc-seal" viewBox="0 0 200 200" role="img" aria-label="cricstat countries">'
+            '<defs>' + GOLD % "cGold" +
+            '<radialGradient id="cBall" cx="35%" cy="32%" r="70%"><stop offset="0" stop-color="#e2544b"/>'
+            '<stop offset=".65" stop-color="#b3201c"/><stop offset="1" stop-color="#6e1210"/></radialGradient>'
+            '<clipPath id="cClip"><circle cx="96" cy="94" r="30"/></clipPath>'
+            '<path id="cTop" d="M30 100a70 70 0 0 1 140 0"/><path id="cBot" d="M24 100a76 76 0 0 0 152 0"/></defs>'
+            '<circle cx="100" cy="100" r="96" fill="#13161e" stroke="url(#cGold)" stroke-width="3"/>'
+            '<circle cx="100" cy="100" r="86" fill="none" stroke="#F5B82E" stroke-opacity=".35" stroke-width="1"/>'
+            '<circle cx="100" cy="100" r="58" fill="none" stroke="#F5B82E" stroke-opacity=".35" stroke-width="1"/>'
+            '<text font-family="system-ui, sans-serif" font-weight="800" font-size="12.5" letter-spacing="2.2" fill="#F5B82E">'
+            '<textPath href="#cTop" startOffset="50%" text-anchor="middle">COUNTRIES · TEAMS</textPath></text>'
+            '<text font-family="system-ui, sans-serif" font-weight="700" font-size="9" letter-spacing="1.4" fill="#cbd5e1">'
+            '<textPath href="#cBot" startOffset="50%" text-anchor="middle">MEN &amp; WOMEN · EVERY FORMAT</textPath></text>'
+            '<circle cx="31" cy="100" r="2.4" fill="#FF9933"/><circle cx="169" cy="100" r="2.4" fill="#FF9933"/>'
+            # globe: sea, meridians and parallels in gold, ball resting at its lower right
+            '<circle cx="96" cy="94" r="30" fill="#1a2440"/>'
+            '<g clip-path="url(#cClip)" fill="none" stroke="url(#cGold)" stroke-width="1.6" opacity=".9">'
+            '<ellipse cx="96" cy="94" rx="13" ry="30"/><path d="M96 64v60M66 84h60M66 104h60M70 74h52M70 114h52"/></g>'
+            '<circle cx="96" cy="94" r="30" fill="none" stroke="url(#cGold)" stroke-width="3"/>'
+            '<circle cx="124" cy="119" r="10" fill="url(#cBall)" stroke="#13161e" stroke-width="2"/>'
+            '<path d="M119.2 112.6c2.2 2.1 3 7.3 1.1 11.7M128.8 112.6c-2.2 2.1-3 7.3-1.1 11.7" stroke="#f5efe6" stroke-width="1.2" fill="none" stroke-linecap="round"/>'
             '<text x="100" y="146" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="700" font-size="7.5" '
             'letter-spacing="1.5" fill="#94a3b8">cric<tspan fill="#FF9933">stat</tspan></text>'
             '</svg>')

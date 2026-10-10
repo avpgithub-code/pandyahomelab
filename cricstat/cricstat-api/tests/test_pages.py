@@ -96,6 +96,14 @@ def test_player_redirect_and_not_found(strict):
         assert 'rel="canonical"' not in r.text and "og:url" not in r.text
 
 
+def test_player_page_hides_the_players_intro(lenient):
+    """P1.6 shell: the Players intro (heading, seal, count) shows only on the plain Players page."""
+    if 'id="p-intro"' not in open(os.path.join(WEB, "players", "index.html")).read():
+        return                                  # older shell, before the intro existed
+    h = lenient.get("/pages/players/v-kohli-%s/" % KOHLI).text
+    assert 'id="p-intro" hidden' in h
+
+
 def test_team_pages(lenient):
     h = lenient.get("/pages/countries/india-men/").text
     assert head(h, r"<title>(.*?)</title>") == \

@@ -231,6 +231,9 @@ def register(app: FastAPI, cfg: Config) -> None:
                            "index,follow" if page["indexable"] else "noindex,follow",
                            ld_json(ld), og_type="profile",
                            image=site + page["photo"]["url"] if page["photo"] else None)
+            # The intro (heading, seal, player count) is for the plain Players page only.
+            out = out.replace('<div class="wc-head p-intro" id="p-intro">',
+                              '<div class="wc-head p-intro" id="p-intro" hidden>', 1)
             return fill(out, '<div id="p-profile" aria-live="polite">',
                         player_summary(page, as_of))
         return respond(request, "players", page, render)

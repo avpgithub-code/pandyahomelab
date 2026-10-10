@@ -294,5 +294,25 @@
   wireCarousel();
   document.querySelectorAll("[data-leaders]").forEach((b) => b.addEventListener("click", () => leaders(b.dataset.leaders)));
   C.sectionTabs(document.querySelector(".sec-tabs"));
+  // ODI World Cup 2027 teaser (full P1.6 build only): the followed country's men's side, else India.
+  async function wcTeaser() {
+    const out = document.getElementById("wc-answer");
+    if (!out) return;
+    try {
+      const [{ data }, { data: teams }] = await Promise.all([C.api("/v1/forecasts/wc-2027/latest"), C.api("/v1/teams?type=international&gender=male")]);
+      const followed = (teams.find((t) => t.slug === C.getFollow()) || {}).name
+        || (C.getFollow().endsWith("-women") ? C.getFollow().replace(/-women$/, "") : null);
+      const ranked = data.teams.slice().sort((a, b) => (b.probabilities.champion || 0) - (a.probabilities.champion || 0));
+      const pick = (name) => ranked.find((t) => t.team === name || (name && t.slug === name + "-men"));
+      const t = pick(followed) || pick("India");
+      const rank = ranked.indexOf(t) + 1, p = t.probabilities.champion || 0;
+      const nth = (n) => n + ([, "st", "nd", "rd"][(n % 100 >> 3 ^ 1) && n % 10] || "th");
+      document.getElementById("wc-qtext").textContent = "What are the chances of " + t.team + " lifting the 2027 ODI World Cup?";
+      C.fill(out, [h("b", {}, t.team + ": " + (p < 0.001 ? "<0.1%" : (100 * p).toFixed(1) + "%")),
+        " · " + nth(rank) + " favourite · ", C.wordmark(), " Elo forecast · updated " + C.date(data.forecast.data_as_of)]);
+    } catch (e) { out.hidden = true; }   // the question still links to the predictor
+  }
+
+  wcTeaser();
   counters().then((d) => { if (!d) asOf = new Date().toISOString().slice(0, 10); latest(); follow(); leaders("ODI"); leagues(); });
 })();

@@ -21,10 +21,10 @@ else:
     WEB = os.path.join(CRICSTAT, "tools", "staging", "web")
     if not os.path.isdir(WEB):
         shutil.copytree(os.path.join(CRICSTAT, "web"), WEB)
-V = "92"
+V = "106"
 # P1.6 ships in two parts: False = the approved non-predictor pages only (nav "ODI WC 2027 soon", no predictor page,
 # no model numbers on the map, no predictor rows on the licences page). True at the full P1.6 deploy.
-PREDICTOR_LIVE = os.environ.get("CRICSTAT_PREDICTOR_LIVE") == "1"   # preview: CRICSTAT_PREDICTOR_LIVE=1
+PREDICTOR_LIVE = os.environ.get("CRICSTAT_PREDICTOR_LIVE", "1") == "1"   # live since the P1.6 launch; CRICSTAT_PREDICTOR_LIVE=0 builds the old partial set
 SITE = "https://pandyahomelab.com"
 HEAD = '''<!DOCTYPE html>
 <html lang="en">
@@ -54,7 +54,7 @@ HEAD = '''<!DOCTYPE html>
     <li><a href="/cricket/players/"{c_players}>Players</a></li>
     {nav_predictor}
     <li><span class="soon" title="Coming in a later phase">Ask <span class="soon-tag">soon</span></span></li>
-    <li><span class="soon" title="Coming in a later phase">Methodology <span class="soon-tag">soon</span></span></li>
+    {nav_method}
     <li><a href="/cricket/licences/"{c_licences}>Licences</a></li>
   </ul>
   <a class="about-trigger" href="/cricket/about/" data-about{c_about}><span aria-hidden="true">ⓘ</span> About cricstat</a>
@@ -76,8 +76,10 @@ FOOT = '''</main>
 </html>
 '''
 def page(rel, path, title, desc, cur, body, scripts, og_type="website", extra_head=""):
-    c = {k: "" for k in ("c_hub", "c_countries", "c_players", "c_licences", "c_about", "c_predictor")}
+    c = {k: "" for k in ("c_hub", "c_countries", "c_players", "c_licences", "c_about", "c_predictor", "c_method")}
     c["c_" + cur] = ' aria-current="page"'
+    c["nav_method"] = ('<li><a href="/cricket/methodology/"%s>Methodology</a></li>' % c["c_method"] if PREDICTOR_LIVE else
+                       '<li><span class="soon" title="Coming in a later phase">Methodology <span class="soon-tag">soon</span></span></li>')
     c["nav_predictor"] = ('<li><a href="/cricket/predictor/"%s>ODI WC 2027</a></li>' % c["c_predictor"] if PREDICTOR_LIVE else
                           '<li><span class="soon" title="Coming in a later phase">ODI WC 2027 <span class="soon-tag">soon</span></span></li>')
     html = HEAD.format(title=title, desc=desc, path=path, v=V, og_type=og_type, extra_head=extra_head, **c) + body + FOOT.format(
@@ -229,6 +231,14 @@ HUB_DESC = ("Cricket statistics for men's and women's cricket across Tests, ODIs
             "open ball-by-ball data — and an ODI World Cup 2027 predictor that compares Elo, machine-learning and "
             "deep-learning models.")
 HUB = HUB.replace("@@MANHATTAN@@", manhattan_svg())
+if PREDICTOR_LIVE:   # the teaser answers its own question (hub.js fills #wc-answer from the live forecast)
+    HUB = (HUB.replace('<a class="wc-tease" href="#about" data-about="predictor">', '<a class="wc-tease" href="/cricket/predictor/" id="wc-tease">', 1)
+           .replace("</svg> What are the chances of India lifting the 2027 ODI World Cup?</span>",
+                    '</svg> <span id="wc-qtext">What are the chances of India lifting the 2027 ODI World Cup?</span></span>\n'
+                    '      <span class="wc-a" id="wc-answer" aria-live="polite"></span>', 1)
+           .replace("Three models — Elo ratings (statistics), machine learning and deep learning — are about to compete to answer that",
+                    "Today: cricstat Elo and 50,000 simulated tournaments. Machine-learning and deep-learning challengers are coming", 1))
+    assert 'id="wc-answer"' in HUB and 'id="wc-tease"' in HUB, "hub teaser markers moved"
 page("index.html", "/cricket/", "cricstat — cricket stats, ODI World Cup 2027 predictor & AI analyst | pandyaHomeLab",
      HUB_DESC, "hub", HUB, ["/cricket/assets/hub.js?v=" + V],
      extra_head=ld_json({"@context": "https://schema.org", "@type": "WebApplication", "@id": SITE + "/cricket/#app",
@@ -241,6 +251,11 @@ page("index.html", "/cricket/", "cricstat — cricket stats, ODI World Cup 2027 
 PLAYERS = '''<header class="hero left">
   <div class="wrap">
     <div class="eyebrow"><span class="dot"></span>Players</div>
+    <div class="wc-head p-intro" id="p-intro">@@PSEAL@@
+     <div class="wc-head-text"><h1 class="wc-title" style="font-size:clamp(2rem,4.4vw,3rem);margin:0">Every player, every ball</h1>
+      <p class="subtitle" style="margin-top:.6rem">Careers built ball by ball for men and women in Tests, ODIs, T20Is and the big leagues: batting, bowling and fielding by format, year, phase and opponent. Search any name, surname or initials.</p></div>
+     <figure class="wc-hosts-fig p-countfig"><div class="p-count"><b id="p-count" class="sb">—</b><span>players</span><small id="p-count-sub">men &amp; women · since 2001</small></div><figcaption>in our data, updated daily</figcaption></figure>
+    </div>
     <form class="search-bar" id="p-form" action="/cricket/players/" method="get" role="search">
       <input id="p-search" name="q" type="search" placeholder="Name, surname or initials — e.g. Kohli, S Mandhana" aria-label="Search players" autocomplete="off" minlength="2" required>
       <button class="btn pri" type="submit">Search</button>
@@ -250,6 +265,8 @@ PLAYERS = '''<header class="hero left">
 </header>
 <div id="p-profile" aria-live="polite"></div>
 '''
+from gen_wc_badges import players_seal  # noqa: E402
+PLAYERS = PLAYERS.replace("@@PSEAL@@", players_seal())
 page("players/index.html", "/cricket/players/", "Player statistics — cricstat | pandyaHomeLab",
      "Career, year-by-year, phase and opponent statistics for men's and women's cricketers: Tests, ODIs, T20Is and major leagues, from Cricsheet ball-by-ball data.",
      "players", PLAYERS, ["/vendor/chart.js-4.4.0/chart.umd.min.js", "/cricket/assets/players.js?v=" + V])
@@ -260,8 +277,11 @@ page("players/index.html", "/cricket/players/", "Player statistics — cricstat 
 MAP_BOARD = '''<div id="c-landing" data-model="@@MODEL@@">
 <header class="hero left"><div class="wrap">
   <div class="eyebrow"><span class="dot"></span>Countries</div>
-  <h1 style="font-size:clamp(2rem,5vw,3rem)">Cricket around the world</h1>
-  <p class="subtitle">Every international team in our data on one map. Colour it by ODI rating, ODI World Cup 2027 chances, recent win % or matches played, then pick a team for its record and latest form.</p>
+  <div class="wc-head">@@CSEAL@@
+   <div class="wc-head-text"><h1 class="wc-title" style="font-size:clamp(2rem,4.4vw,3rem);margin:0">Cricket around the world</h1>
+    <p class="subtitle" style="margin-top:.6rem">@@CSUB@@</p></div>
+   <figure class="wc-hosts-fig"><div class="p-count"><b id="c-count" class="sb">—</b><span>cricket nations</span><small id="c-count-sub">men &amp; women · internationals</small></div><figcaption>on the map, updated daily</figcaption></figure>
+  </div>
 </div></header>
 <section class="section panel" aria-label="Cricket world map"><div class="wrap scoreboard wm-board">
   <div class="sb-head board-head" aria-hidden="true"><span class="bulb"></span>Cricket world map<span class="bulb"></span></div>
@@ -274,6 +294,10 @@ MAP_BOARD = '''<div id="c-landing" data-model="@@MODEL@@">
 </div></section>
 </div>
 '''
+from gen_wc_badges import countries_seal  # noqa: E402
+MAP_BOARD = MAP_BOARD.replace("@@CSEAL@@", countries_seal()).replace("@@CSUB@@",
+    "Every international team in our data on one map. Colour it by " + ("cricstat Elo (our own ODI rating), ODI World Cup 2027 chances, " if PREDICTOR_LIVE else "")
+    + "recent win % or matches played, then pick a team for its record and latest form.")
 MAP_BOARD = (MAP_BOARD.replace("@@MODEL@@", "on" if PREDICTOR_LIVE else "off")
              .replace("@@AFG_MAP@@", "Afghanistan men's matches are withheld by Cricsheet; their rating comes from our reviewed results list."
                       if PREDICTOR_LIVE else "Afghanistan men's matches are withheld by Cricsheet, so they are not on the men's map."))
@@ -343,6 +367,48 @@ if PREDICTOR_LIVE:
        extra_head=ld_json({"@context": "https://schema.org", "@type": "WebPage", "name": "ODI World Cup 2027 predictor",
                            "description": PRED_DESC, "url": SITE + "/cricket/predictor/", "isPartOf": {"@id": SITE + "/#site"},
                            "about": ["ODI World Cup 2027", "Elo rating", "Monte Carlo simulation"], "author": ARCHIT}))
+
+METHOD = '''<header class="hero left"><div class="wrap">
+  <div class="eyebrow"><span class="dot"></span>Methodology · ODI World Cup 2027 predictor</div>
+  <div class="wc-head">@@MSEAL@@
+   <div class="wc-head-text"><h1 class="wc-title" style="font-size:clamp(2rem,4.4vw,3rem);margin:0">How the predictor works — and how well</h1>
+  <p class="subtitle" style="margin-top:.6rem">The model in plain words and in formulas, every setting and how it was chosen, and the tests it had to pass
+  on matches it had never seen. One model for every team; every number below comes from the same files the forecast uses.</p></div>
+   <figure class="wc-hosts-fig m-calfig"><svg class="m-calmini" id="m-calmini" viewBox="0 0 120 120" role="img" aria-label="Calibration: predicted against observed win rate (loading)"></svg><figcaption id="m-calcap">said vs happened</figcaption></figure>
+  </div>
+  <p class="tiny muted" id="m-stamp">Loading…</p>
+</div></header>
+<section class="section panel" aria-label="Methodology"><div class="wrap scoreboard m-board">
+  <div class="sb-head board-head" aria-hidden="true"><span class="bulb"></span>Methodology<span class="mc-asof" id="m-asof"></span><span class="bulb"></span></div>
+  <div class="sec-tabs" role="tablist" aria-label="Methodology sections">
+    <button class="sec-tab" type="button" role="tab" id="tab-m-plain" aria-controls="pane-m-plain" aria-selected="true">🧭 In plain words</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-m-elo" aria-controls="pane-m-elo" aria-selected="false" tabindex="-1">📐 Ratings</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-m-sim" aria-controls="pane-m-sim" aria-selected="false" tabindex="-1">🎲 Simulation</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-m-tests" aria-controls="pane-m-tests" aria-selected="false" tabindex="-1">✅ Backtests</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-m-cal" aria-controls="pane-m-cal" aria-selected="false" tabindex="-1">🎯 Calibration</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-m-models" aria-controls="pane-m-models" aria-selected="false" tabindex="-1">🏁 Models &amp; versions</button>
+    <button class="sec-tab" type="button" role="tab" id="tab-m-limits" aria-controls="pane-m-limits" aria-selected="false" tabindex="-1">⚠️ Limits</button>
+  </div>
+  <div class="sec-pane" role="tabpanel" id="pane-m-plain" aria-labelledby="tab-m-plain"><div class="skeleton"></div></div>
+  <div class="sec-pane" role="tabpanel" id="pane-m-elo" aria-labelledby="tab-m-elo" hidden></div>
+  <div class="sec-pane" role="tabpanel" id="pane-m-sim" aria-labelledby="tab-m-sim" hidden></div>
+  <div class="sec-pane" role="tabpanel" id="pane-m-tests" aria-labelledby="tab-m-tests" hidden></div>
+  <div class="sec-pane" role="tabpanel" id="pane-m-cal" aria-labelledby="tab-m-cal" hidden></div>
+  <div class="sec-pane" role="tabpanel" id="pane-m-models" aria-labelledby="tab-m-models" hidden></div>
+  <div class="sec-pane" role="tabpanel" id="pane-m-limits" aria-labelledby="tab-m-limits" hidden></div>
+</div></section>
+'''
+from gen_wc_badges import method_seal  # noqa: E402
+METHOD = METHOD.replace("@@MSEAL@@", method_seal())
+METHOD_DESC = ("How cricstat's ODI World Cup 2027 predictor works: Elo ratings from every men's ODI, 50,000 simulated "
+               "tournaments, and backtests on the 2019 and 2023 World Cups with calibration, baselines and model versions.")
+if PREDICTOR_LIVE:
+    page("methodology/index.html", "/cricket/methodology/",
+         "Methodology: how the ODI World Cup 2027 predictor works and how well — cricstat | pandyaHomeLab", METHOD_DESC,
+         "method", METHOD, ["/vendor/chart.js-4.4.0/chart.umd.min.js", "/cricket/assets/methodology.js?v=" + V],
+         extra_head=ld_json({"@context": "https://schema.org", "@type": "TechArticle", "headline": "How the ODI World Cup 2027 predictor works",
+                             "description": METHOD_DESC, "url": SITE + "/cricket/methodology/", "isPartOf": {"@id": SITE + "/#site"},
+                             "about": ["Elo rating", "Monte Carlo simulation", "Calibration", "Backtesting"], "author": ARCHIT}))
 
 LIC = '''<header class="hero left"><div class="wrap">
   <div class="eyebrow"><span class="dot"></span>Data &amp; licences</div>

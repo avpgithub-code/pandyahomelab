@@ -24,7 +24,8 @@
     const name = t.slug ? h("a", { href: "/cricket/countries/" + t.slug + "/", class: "tname" }, t.team)
       : h("span", { class: "tname" }, t.team);
     return h("span", { class: "wc-team" }, [C.teamBadge(t.team, "sm"), name,
-      t.team === "Afghanistan" ? h("sup", { class: "wc-note-mark", title: "Results from a reviewed list: see 'What this forecast can and can't tell you'" }, "†") : null]);
+      t.team === "Afghanistan" ? h("sup", { class: "wc-note-mark", title: "Results from a reviewed list: see 'What this forecast can and can't tell you'" }, "†") : null,
+      F && (F.tournament.hosts || []).includes(t.team) ? h("span", { class: "wc-host", title: "Host: +" + (((F.model || {}).elo || {}).home || "") + " Elo home advantage in its home matches" }, "🏠") : null]);
   }
   function bar(p, max) {
     return h("span", { class: "wc-bar" }, [h("span", { class: "wc-bar-fill", style: "width:" + Math.max(1.5, 100 * p / (max || 1)).toFixed(1) + "%" }),
@@ -116,7 +117,8 @@
       h("div", { class: "section-head" }, [h("div", {}, [h("div", { class: "section-label" }, "Title odds"),
         h("h2", { class: "section-title" }, "Every team's chances")]),
         h("p", { class: "tiny muted", style: "max-width:420px;margin:0" }, "Share of " + C.num(F.forecast.n_simulations) +
-          " simulated tournaments in which each team reached the stage. Title chances add up to 100%, semi-finals to 400% (four places).")]),
+          " simulated tournaments in which each team reached the stage. Title chances add up to 100%, semi-finals to 400% (four places)."
+          + ((F.tournament.hosts || []).length ? " 🏠 = host, +" + (((F.model || {}).elo || {}).home || "") + " Elo in its home matches." : ""))]),
       tabs].concat(body));
   }
 
@@ -278,7 +280,8 @@
       toggle.addEventListener("click", () => { showAll = !showAll; renderRatings(); });
       C.fill(target, [
         h("div", { class: "section-head" }, [h("div", {}, [h("div", { class: "section-label" }, "Ratings"),
-          h("h2", { class: "section-title" }, "Men's ODI Elo ratings")]), toggle]),
+          h("h2", { class: "section-title" }, [C.wordmark(), " Elo · men's ODIs ", C.ourModel()]),
+          h("p", { class: "tiny muted", style: "margin:.2rem 0 0" }, [C.wordmark(), " own rating, updated daily from every men's ODI since 2002 · tested on every ODI since 2019 before it was played · not the ICC ranking."])]), toggle]),
         h("div", { class: "grid", style: "grid-template-columns:repeat(auto-fit,minmax(320px,1fr));align-items:start" }, [
           h("div", { class: "scroll" }, h("table", { class: "wc-table" }, [
             h("thead", {}, h("tr", {}, ["Rank", "Team", "Rating", "ODIs", "Last ODI"].map((x, i) => h("th", { scope: "col", class: i === 1 ? "txt" : null }, x)))),
@@ -374,6 +377,19 @@
 
   async function init() {
     C.sectionTabs(document.querySelector(".wc-board .sec-tabs"));
+    // Hero map: a ground opens the Venues tab (dots are keyboard-reachable too).
+    document.querySelectorAll(".wc-hosts .h-ground").forEach((dot) => {
+      const name = (dot.querySelector("title") || {}).textContent || "a 2027 ground";
+      dot.setAttribute("tabindex", "0");
+      dot.setAttribute("role", "button");
+      dot.setAttribute("aria-label", name + " — show the venues");
+      const go = () => {
+        const tab = document.getElementById("tab-venues");
+        if (tab) { tab.click(); document.querySelector(".wc-board").scrollIntoView({ behavior: "smooth", block: "start" }); }
+      };
+      dot.addEventListener("click", go);
+      dot.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
+    });
     try {
       F = (await C.api("/v1/forecasts/wc-2027/latest")).data;
     } catch (e) { C.showError("pane-odds", e, "the forecast"); return; }
