@@ -21,7 +21,7 @@ else:
     WEB = os.path.join(CRICSTAT, "tools", "staging", "web")
     if not os.path.isdir(WEB):
         shutil.copytree(os.path.join(CRICSTAT, "web"), WEB)
-V = "118"
+V = "119"
 # P1.6 ships in two parts: False = the approved non-predictor pages only (nav "ODI WC 2027 soon", no predictor page,
 # no model numbers on the map, no predictor rows on the licences page). True at the full P1.6 deploy.
 PREDICTOR_LIVE = os.environ.get("CRICSTAT_PREDICTOR_LIVE", "1") == "1"   # live since the P1.6 launch; CRICSTAT_PREDICTOR_LIVE=0 builds the old partial set
@@ -337,8 +337,15 @@ PREDICTOR = '''<header class="hero left wc-hero">
    <figure class="wc-donut" id="wc-donut" aria-label="Share of simulated tournaments won, by team"></figure>
   </div>
 </header>
-<section class="section panel" aria-label="ODI World Cup 2027 forecast"><div class="wrap scoreboard wc-board">
-  <div class="sb-head board-head" aria-hidden="true"><span class="bulb"></span>ODI World Cup 2027<span class="mc-asof" id="wc-asof"></span><span class="bulb"></span></div>
+<section class="section panel" aria-label="ODI World Cup 2027 forecast"><div class="wrap scoreboard wc-board" id="wc-board">
+  <!-- Top-level tabs on the board's title bar: the forecast board, Read this first, The forecast in words.
+       #wc-seo keeps its exact opening tag: the API fills it wherever it sits (pages.predictor_page). -->
+  <div class="board-head wc-top-tabs" role="tablist" aria-label="Predictor">
+    <button class="top-tab" type="button" role="tab" id="top-board" aria-controls="top-pane-board" aria-selected="true"><span class="bulb" aria-hidden="true"></span>ODI World Cup 2027<span class="mc-asof" id="wc-asof"></span></button>
+    <button class="top-tab" type="button" role="tab" id="top-limits" aria-controls="top-pane-limits" aria-selected="false" tabindex="-1">⚠️ Read this first</button>
+    <button class="top-tab" type="button" role="tab" id="top-words" aria-controls="top-pane-words" aria-selected="false" tabindex="-1">📝 The forecast in words</button>
+  </div>
+  <div role="tabpanel" id="top-pane-board" aria-labelledby="top-board">
   <div class="sec-tabs" role="tablist" aria-label="Forecast sections">
     <button class="sec-tab" type="button" role="tab" id="tab-odds" aria-controls="pane-odds" aria-selected="true">🏆 Title odds</button>
     <button class="sec-tab" type="button" role="tab" id="tab-time" aria-controls="pane-time" aria-selected="false" tabindex="-1">📈 Odds over time</button>
@@ -355,12 +362,13 @@ PREDICTOR = '''<header class="hero left wc-hero">
   <div class="sec-pane" role="tabpanel" id="pane-ratings" aria-labelledby="tab-ratings" hidden></div>
   <div class="sec-pane" role="tabpanel" id="pane-format" aria-labelledby="tab-format" hidden></div>
   <div class="sec-pane" role="tabpanel" id="pane-good" aria-labelledby="tab-good" hidden></div>
-</div></section>
-<section class="section panel" aria-label="What this forecast can and can't tell you"><div class="wrap wc-limits" id="wc-limits"></div></section>
-<section class="section panel" aria-label="The forecast in words"><div class="wrap wc-seo" id="wc-seo">
+  </div>
+  <div role="tabpanel" id="top-pane-limits" aria-labelledby="top-limits" hidden><div class="wrap wc-limits" id="wc-limits"></div></div>
+  <div role="tabpanel" id="top-pane-words" aria-labelledby="top-words" hidden><div class="wrap wc-seo" id="wc-seo">
   <div class="section-label">The forecast in words</div>
   <h2 class="section-title">Who will win the 2027 Cricket World Cup?</h2>
   <p>cricstat's model rates every team with cricstat Elo, its own rating built from every men's ODI since 2002 (not the ICC ranking), then plays the 2027 tournament in South Africa, Zimbabwe and Namibia 50,000 times. Each team's title chance is the share of those runs it wins; the forecast updates daily as teams play. <a href="/cricket/methodology/">How it works</a>.</p>
+</div></div>
 </div></section>
 '''
 # Our own marks (tools/gen_wc_badges.py): a seal and the hosts' map; the official logo is non-free (ICC trademark).
