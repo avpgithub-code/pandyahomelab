@@ -756,3 +756,9 @@ a.about-trigger[aria-current="page"] { background: rgba(255,153,51,.22); border-
 .wc-seo-table table { margin-top: .6rem; border-collapse: collapse; font-size: .88rem; }
 .wc-seo-table th, .wc-seo-table td { padding: .3rem .8rem; border-bottom: 1px solid var(--border); text-align: right; }
 .wc-seo-table th:nth-child(2), .wc-seo-table td:nth-child(2), .wc-seo-table th:nth-child(3), .wc-seo-table td:nth-child(3) { text-align: left; }
+/* Methodology › Calibration: grouped header, compact cells so the six columns fit the card */
+.m-cal-table th, .m-cal-table td { padding: .5rem .5rem; }
+.m-cal-table th { letter-spacing: .05em; }
+.m-cal-table th.grp { text-align: center; border-bottom: 1px solid var(--border); color: var(--text); }
+.m-cal-table thead tr:last-child th:nth-child(odd), .m-cal-table tbody td:nth-child(5) { border-left: 1px solid var(--border); }
+.m-cal-table tbody td:nth-child(3) { border-left: 1px solid var(--border); }
