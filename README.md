@@ -4,17 +4,20 @@
 
 Live at: **[pandyahomelab.com](https://pandyahomelab.com)** _(served from the NAS through a Cloudflare Tunnel)_. An AWS mirror is planned for Phase 6 and is not live yet.
 
+**Flagship: [cricstat](https://pandyahomelab.com/cricket/)**, cricket statistics for men's and women's cricket with a live
+[2027 ODI World Cup predictor](https://pandyahomelab.com/cricket/predictor/) ([how it works](https://pandyahomelab.com/cricket/methodology/)).
+
 ---
 
 ## What this is
 
 pandyaHomeLab is the platform behind the live site. It hosts hands-on demos across four AI domains, each accessible through a structured URL hierarchy:
 
-- `/ml/` — Machine Learning (classification, regression, AutoML)
-- `/dl/` — Deep Learning (CNN image classification, LSTM forecasting)
-- `/nlp/` — Natural Language Processing (classical NLP: engineered features, text representations, word embeddings, sequence labelling)
+- [`/ml/`](https://pandyahomelab.com/ml/) — Machine Learning (classification, regression, AutoML)
+- [`/dl/`](https://pandyahomelab.com/dl/) — Deep Learning (CNN image classification, LSTM forecasting)
+- [`/nlp/`](https://pandyahomelab.com/nlp/) — Natural Language Processing (classical NLP: engineered features, text representations, word embeddings, sequence labelling)
 - `/agentic/` — Agentic AI (planned)
-- `/cricket/` — **cricstat**, a cross-domain flagship project (live since Oct 2026): cricket statistics for men's and women's cricket, with a 2027 ODI World Cup predictor and an LLM analyst to come, built end to end on open Cricsheet data
+- [`/cricket/`](https://pandyahomelab.com/cricket/) — **cricstat**, a cross-domain flagship project (live since Oct 2026): cricket statistics for men's and women's cricket and a [2027 ODI World Cup predictor](https://pandyahomelab.com/cricket/predictor/), with an LLM analyst to come, built end to end on open Cricsheet data
 
 The platform itself — its network topology, service layout, deployment model, and operational discipline — is **the portfolio artifact**. The live site is what audiences interact with; this repository is the source of truth for how it works.
 
@@ -22,15 +25,15 @@ The platform itself — its network topology, service layout, deployment model, 
 
 | Domain | Demo | Route | What it shows |
 |---|---|---|---|
-| ML | ml-iris-knn | `/ml/iris-knn/` | K-nearest neighbours, multi-class classification |
-| ML | ml-housing-linear | `/ml/housing-linear/` | Linear regression on California housing |
-| ML | ml-titanic-automl | `/ml/titanic-automl/` | PyCaret AutoML on imbalanced data |
-| DL | dl-mnist-cnn | `/dl/mnist-cnn/` | PyTorch CNN, draw-a-digit UI |
-| DL | dl-lstm-forecast | `/dl/lstm-forecast/` | LSTM 14-day bike-share forecast with an uncertainty band |
-| NLP | nlp-quora-randomforest | `/nlp/quora-randomforest/` | Duplicate question pairs: 22 engineered features + bag-of-words → Random Forest |
-| NLP | nlp-imdb-textrep | `/nlp/imdb-textrep/` | Preprocessing, stems vs lemmas, one-hot / BoW / n-grams / TF-IDF compared on IMDB |
-| NLP | nlp-text8-word2vec | `/nlp/text8-word2vec/` | Word2Vec CBOW vs skip-gram vs fastText, with GloVe as reference |
-| NLP | nlp-ewt-hmm | `/nlp/ewt-hmm/` | Part-of-speech tagging: hand-built HMM + Viterbi trellis vs spaCy on UD English EWT |
+| ML | ml-iris-knn | [`/ml/iris-knn/`](https://pandyahomelab.com/ml/iris-knn/) | K-nearest neighbours, multi-class classification |
+| ML | ml-housing-linear | [`/ml/housing-linear/`](https://pandyahomelab.com/ml/housing-linear/) | Linear regression on California housing |
+| ML | ml-titanic-automl | [`/ml/titanic-automl/`](https://pandyahomelab.com/ml/titanic-automl/) | PyCaret AutoML on imbalanced data |
+| DL | dl-mnist-cnn | [`/dl/mnist-cnn/`](https://pandyahomelab.com/dl/mnist-cnn/) | PyTorch CNN, draw-a-digit UI |
+| DL | dl-lstm-forecast | [`/dl/lstm-forecast/`](https://pandyahomelab.com/dl/lstm-forecast/) | LSTM 14-day bike-share forecast with an uncertainty band |
+| NLP | nlp-quora-randomforest | [`/nlp/quora-randomforest/`](https://pandyahomelab.com/nlp/quora-randomforest/) | Duplicate question pairs: 22 engineered features + bag-of-words → Random Forest |
+| NLP | nlp-imdb-textrep | [`/nlp/imdb-textrep/`](https://pandyahomelab.com/nlp/imdb-textrep/) | Preprocessing, stems vs lemmas, one-hot / BoW / n-grams / TF-IDF compared on IMDB |
+| NLP | nlp-text8-word2vec | [`/nlp/text8-word2vec/`](https://pandyahomelab.com/nlp/text8-word2vec/) | Word2Vec CBOW vs skip-gram vs fastText, with GloVe as reference |
+| NLP | nlp-ewt-hmm | [`/nlp/ewt-hmm/`](https://pandyahomelab.com/nlp/ewt-hmm/) | Part-of-speech tagging: hand-built HMM + Viterbi trellis vs spaCy on UD English EWT |
 
 Every training run is logged to its domain's MLflow tracker, each publicly browsable and read-only:
 [`/mlflow/`](https://pandyahomelab.com/mlflow/) (ML), [`mlflow-dl`](https://mlflow-dl.pandyahomelab.com/) (DL)
@@ -137,7 +140,7 @@ Demos are built in phases, one domain at a time:
 | 2 | Deep Learning | 2 of 3 live (May 2026); object detection not started |
 | 3 | Natural Language Processing | 4 of 4 live (September 2026); transformer demos deferred to v2 |
 | 4 | Agentic AI | Planned (the cricstat analyst agent is planned as its first demo) |
-| — | cricstat (flagship, cross-domain) | Live (Oct 2026): stats API, player/team pages (search-indexable), Wikidata names + Commons photos, daily pipeline with CI/CD; next P1 (ODI World Cup 2027 predictor) |
+| — | cricstat (flagship, cross-domain) | Live (Oct 2026): stats API, player/team pages (search-indexable), Wikidata names + Commons photos, daily pipeline with CI/CD; ODI World Cup 2027 predictor live (Oct 2026); next an ML challenger model |
 | 6 | AWS mirror | Planned |
 
 Platform stages:
@@ -158,4 +161,4 @@ This is a personal portfolio platform. The architecture, decisions, and code are
 
 **Author:** Archit Pandya
 **Brand:** pandyaHomeLab
-**Last updated:** 2026-10-05 (9 live demos across ML, DL and NLP; 21 ADRs; cricstat in development)
+**Last updated:** 2026-10-19 (9 live demos across ML, DL and NLP; 21 ADRs; cricstat live with the World Cup predictor)

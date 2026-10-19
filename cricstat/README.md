@@ -1,13 +1,14 @@
 # cricstat
 
 Cricket statistics, a 2027 ODI World Cup winner predictor, and an LLM "Ask the Analyst" agent, built end to end
-on open ball-by-ball data. cricstat is the flagship cross-domain project of [pandyaHomeLab](../README.md) and will
-is served at `pandyahomelab.com/cricket/`.
+on open ball-by-ball data. cricstat is the flagship cross-domain project of [pandyaHomeLab](../README.md) and is
+served at [pandyahomelab.com/cricket/](https://pandyahomelab.com/cricket/).
 
 **Status:** live at [pandyahomelab.com/cricket/](https://pandyahomelab.com/cricket/) since 2026-10-07: player and team
 statistics for men's and women's cricket (Tests, ODIs, T20Is, major leagues), search-indexable pages, Wikidata names and
 credited Commons photos, refreshed daily on the NAS with CI/CD (GitHub Actions → GHCR → pull-based deploy).
-Next: P1, the ODI World Cup 2027 predictor.
+Since 2026-10-10 the [ODI World Cup 2027 predictor](https://pandyahomelab.com/cricket/predictor/) is live, with its
+[methodology](https://pandyahomelab.com/cricket/methodology/). Next: an ML challenger model (P1b).
 
 | Path | What it is |
 |---|---|
