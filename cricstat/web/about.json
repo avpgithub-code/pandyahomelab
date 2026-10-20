@@ -28,6 +28,11 @@
    "after": [
     "All three are backtested on the 2019 and 2023 World Cups. The best-calibrated one powers the live forecast: when it says 30%, it should be right about 30% of the time.",
     "Title chances for every team are re-simulated after each new ODI and live through the tournament. Afghanistan men's matches aren't in the source data; the forecast will say how it handles that."
+   ],
+   "links": [
+    { "label": "See the forecast", "href": "/cricket/predictor/" },
+    { "label": "How it works", "href": "/cricket/methodology/" },
+    { "label": "Read the write-up on DEV", "href": "https://dev.to/architpandya/i-built-a-cricket-world-cup-2027-predictor-on-a-home-nas-and-backtested-it-honestly-38l0" }
    ]
   },
   {
@@ -74,8 +79,8 @@
    "title": "Roadmap",
    "icon": "🗺️",
    "bullets": [
-    { "label": "Now", "text": "Player and team statistics for men's and women's cricket, every format and the major leagues." },
-    { "label": "Next", "text": "The ODI World Cup 2027 predictor and live win probability, plus India at the ODI World Cups 2003–2023 (earlier editions predate the data)." },
+    { "label": "Now", "text": "Player and team statistics for men's and women's cricket, every format and the major leagues, and the ODI World Cup 2027 predictor (cricstat Elo, live since October 2026)." },
+    { "label": "Next", "text": "Machine-learning and deep-learning challengers for the predictor and live win probability, plus India at the ODI World Cups 2003–2023 (earlier editions predate the data)." },
     { "label": "Then", "text": "The AI analyst: tools, a public test set, the agent, then a public demo with published evals." },
     { "label": "After 2027", "text": "T20I team ratings and a T20 World Cup 2028 forecast, once the ODI World Cup 2027 is over." }
    ]
