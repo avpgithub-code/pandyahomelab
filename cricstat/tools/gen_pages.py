@@ -511,7 +511,7 @@ page("licences/index.html", "/cricket/licences/", "Data & licences — cricstat 
 
 # /cricket/about/ — the About drawer's story as a real page, rendered from the same about.json at build time,
 # so search engines (which never open the drawer) can read it. Section ids are anchors (#predictor, #analyst…).
-ABOUT_UPDATED = "2026-10-07"
+ABOUT_UPDATED = "2026-10-20"
 
 
 def rich(text):

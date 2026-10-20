@@ -24,7 +24,7 @@
  "mainEntityOfPage": "https://pandyahomelab.com/cricket/about/",
  "image": "https://pandyahomelab.com/og-image.png",
  "datePublished": "2026-10-07",
- "dateModified": "2026-10-07",
+ "dateModified": "2026-10-20",
  "inLanguage": "en",
  "author": {
   "@type": "Person",
@@ -71,7 +71,7 @@
   <div class="eyebrow"><span class="dot"></span>About cricstat</div>
   <h1 style="font-size:clamp(2rem,5vw,3rem)">How I built <span class="cs"><i class="cs-sr">cricstat</i><i class="cs-w" aria-hidden="true">cr<i class="cs-i">ı</i>c<b>stat</b></i></span></h1>
   <p class="subtitle">A cricket fan&#x27;s question, answered with open data, measured models and an honest AI analyst. Part of pandyaHomeLab.</p>
-  <p class="byline">By <a href="/">Archit Pandya</a> · Updated <time datetime="2026-10-07">7 October 2026</time></p>
+  <p class="byline">By <a href="/">Archit Pandya</a> · Updated <time datetime="2026-10-20">20 October 2026</time></p>
   <nav class="about-toc" aria-label="On this page"><a href="#story">The story</a> · <a href="#predictor">The headline: ODI World Cup 2027 predictor</a> · <a href="#analyst">The AI analyst</a> · <a href="#architecture">How it&#x27;s built</a> · <a href="#honesty">Honest by design</a> · <a href="#roadmap">Roadmap</a> · <a href="#built-with">Built with an AI pair-programmer</a></nav>
 </div></header>
 <section class="section about-page" style="padding-top:0"><div class="wrap stack" style="max-width:860px">
@@ -88,6 +88,7 @@
 <ul class="about-bullets"><li><b>Elo + Monte Carlo</b> — A rating for every team, updated after each match, then the tournament simulated thousands of times. The honest baseline; it ships first.</li><li><b>Machine-learning challenger</b> — Gradient boosting with squad features: who is actually playing, in form, at home or away.</li><li><b>Deep learning with transfer learning</b> — About 2,600 men&#x27;s ODIs are too few to learn from directly, but 11.6 million deliveries are plenty. A sequence model learns player strength ball by ball, and that learned knowledge is transferred to match and tournament forecasts. The same model gives live in-match win probability.</li></ul>
 <p>All three are backtested on the 2019 and 2023 World Cups. The best-calibrated one powers the live forecast: when it says 30%, it should be right about 30% of the time.</p>
 <p>Title chances for every team are re-simulated after each new ODI and live through the tournament. Afghanistan men&#x27;s matches aren&#x27;t in the source data; the forecast will say how it handles that.</p>
+<div class="about-links"><a class="about-link" href="/cricket/predictor/">See the forecast →</a><a class="about-link" href="/cricket/methodology/">How it works →</a><a class="about-link" href="https://dev.to/architpandya/i-built-a-cricket-world-cup-2027-predictor-on-a-home-nas-and-backtested-it-honestly-38l0">Read the write-up on DEV →</a></div>
 </section>
 <section class="about-section card" id="analyst">
 <h2><span class="icon" aria-hidden="true">🤖</span>The AI analyst</h2>
@@ -115,7 +116,7 @@
 </section>
 <section class="about-section card" id="roadmap">
 <h2><span class="icon" aria-hidden="true">🗺️</span>Roadmap</h2>
-<ul class="about-bullets"><li><b>Now</b> — Player and team statistics for men&#x27;s and women&#x27;s cricket, every format and the major leagues.</li><li><b>Next</b> — The ODI World Cup 2027 predictor and live win probability, plus India at the ODI World Cups 2003–2023 (earlier editions predate the data).</li><li><b>Then</b> — The AI analyst: tools, a public test set, the agent, then a public demo with published evals.</li><li><b>After 2027</b> — T20I team ratings and a T20 World Cup 2028 forecast, once the ODI World Cup 2027 is over.</li></ul>
+<ul class="about-bullets"><li><b>Now</b> — Player and team statistics for men&#x27;s and women&#x27;s cricket, every format and the major leagues, and the ODI World Cup 2027 predictor (cricstat Elo, live since October 2026).</li><li><b>Next</b> — Machine-learning and deep-learning challengers for the predictor and live win probability, plus India at the ODI World Cups 2003–2023 (earlier editions predate the data).</li><li><b>Then</b> — The AI analyst: tools, a public test set, the agent, then a public demo with published evals.</li><li><b>After 2027</b> — T20I team ratings and a T20 World Cup 2028 forecast, once the ODI World Cup 2027 is over.</li></ul>
 </section>
 <section class="about-section card" id="built-with">
 <h2><span class="icon" aria-hidden="true">🤝</span>Built with an AI pair-programmer</h2>
