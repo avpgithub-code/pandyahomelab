@@ -74,7 +74,9 @@ The NAS listening-port review turned up services bound to every interface that t
 | 21, 55536–55899 | FTP and FTPS | Both disabled | Closed |
 | 3306 | MariaDB 10 | Package **stopped**, not uninstalled. Only user database belonged to a retired personal site; data kept on disk | Closed; no `mysqld` |
 
-SSH (22) remains enabled; it is the operator's access path. SFTP was already off.
+SSH (22) remains enabled; it is the operator's access path. SFTP was already off. OpenVPN (VPN Server), the operator's external access path, was verified unaffected: running, on its own UDP port, with no dependency on any removed package.
+
+Package Center was also moved from the **beta** to the **stable** update channel. Auto-update stays on for **important** versions only, so security fixes like this one land unattended. Host-package guidance now lives in the runbook ([§4.14](../DEVELOPMENT_RUNBOOK.md)).
 
 ### 3.2 Side finding: Container Manager alerts were a reboot, not a crash loop
 
@@ -86,7 +88,7 @@ DSM showed 20 grouped "container stopped unexpectedly" alerts, including `analyt
 
 | # | Item | Owner | Status |
 |---|---|---|---|
-| 1 | DSM built-in PHP 8.1.32 is fixed only by a DSM update. CLI-only, so low exposure | Operator | Watch Control Panel → Update & Restore |
+| 1 | DSM built-in PHP 8.1.32 is fixed only by a DSM update. CLI-only, so low exposure. Installed: DSM 7.3.2-86009 Update 5 (built 2 Oct 2026, before disclosure) | Operator | Watch Control Panel → Update & Restore → DSM Update |
 | 2 | Root cause of the 22 Oct reboot (manual, DSM auto-update, or power) not yet confirmed | Operator | Check Log Center → System |
 | 3 | No external uptime monitoring; an unplanned reboot is only noticed by chance | — | Carried into the spec review |
 
