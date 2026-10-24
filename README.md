@@ -61,6 +61,8 @@ pandya-homelab/
 └── docs/
     ├── adr/                   # Architecture decision records
     ├── archive/               # Historical artifacts (deliberation memos, designs)
+    ├── postmortems/           # Incident write-ups
+    ├── security/              # CVE impact assessments
     └── *.md                   # Phase plans, NETWORK_CIDR_SUMMARY, DEVELOPMENT_RUNBOOK, walkthroughs
 ```
 

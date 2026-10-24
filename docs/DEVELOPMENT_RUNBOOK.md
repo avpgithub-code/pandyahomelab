@@ -406,6 +406,27 @@ same commit.
 token error". Control Panel → Notification → Email → Sender **Set Up** → **Sign Out** → sign
 in again with the owner's Gmail → Allow → **Save**, then **Send Test Email**.
 
+### 4.14 NAS Host Hygiene
+
+**"Container stopped unexpectedly" alerts** (Container Manager, often many at once) are usually
+a NAS reboot or a Container Manager auto-update, not a crash. Check before debugging:
+
+```bash
+uptime                                                   # rebooted recently?
+sudo docker inspect -f 'restarts={{.RestartCount}} exit={{.State.ExitCode}} oom={{.State.OOMKilled}}' <container>
+```
+
+Exit 0 with a low restart count is an orderly stop; a crash loop shows a climbing restart
+count and a `Restarting` / `unhealthy` status. Log Center → System says whether the reboot
+was manual or an update.
+
+**Host packages are attack surface the repo cannot see.** The platform needs none of PHP,
+Web Station, MariaDB, FTP or Telnet; all were removed, stopped or disabled on 2026-10-23
+(see [the php2shell assessment](security/2026-10-23-php2shell-impact-assessment.md)). Do not
+install DSM web apps (WordPress, phpMyAdmin, Web Station) without a reason: QuickConnect is
+on, so they would not be LAN-only. Package Center is on the **stable** channel and
+auto-installs **important** updates only. Remote access is OpenVPN (VPN Server) plus SSH.
+
 ---
 
 ## 5. New Project Checklist (Phase 1b+)
@@ -550,9 +571,12 @@ sudo netstat -tlnp | grep <port>
 curl -k https://localhost:8443/health
 curl -k https://localhost:8443/ml/iris-knn/health
 
-# Check cloudflared
-ps aux | grep cloudflared | grep -v grep
-tail -20 ~/cloudflared.log
+# Check cloudflared (a container since 2026-08-27, see §4.6)
+sudo docker ps --filter name=pandya-cloudflared
+sudo docker logs --tail 20 pandya-cloudflared
+
+# From Windows: sudo there is unrelated; run on the NAS over SSH (prompts for the NAS password)
+ssh -t SynologyNAS "sudo /usr/local/bin/docker ps -a"
 
 # Purge Cloudflare cache (when page not updating)
 # Cloudflare Dashboard → Caching → Purge Everything
