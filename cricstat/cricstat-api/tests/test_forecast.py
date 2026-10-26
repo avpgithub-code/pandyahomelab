@@ -210,6 +210,9 @@ def test_predictor_page_has_the_live_forecast_in_words(home, forecast_db, tmp_pa
             # the one-sentence answer is written into the hero (top of the page)
             assert '<p class="wc-answer" id="wc-answer">On 7 Oct 2026, cric' in h
             assert "makes <b>India</b> the favourite at <b>60.0%</b>" in h
+            # finalists + winner in one line ("finalists" / "winner" are real search words)
+            assert "Our prediction: the most likely finalists are India and " in h
+            assert "India is the most likely winner at 60.0%." in h
             assert '"@type": "FAQPage"' in h and '"dateModified": "2026-10-07"' in h
             assert '"static": true' not in h                      # the shell's JSON-LD is replaced
             assert 'name="robots" content="index,follow"' in h

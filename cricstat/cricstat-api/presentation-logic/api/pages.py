@@ -239,8 +239,14 @@ def predictor_text(data: dict) -> Tuple[str, str, list]:
              '%s)</summary><table><thead><tr><th>#</th><th>Team</th><th>Group</th>'
              '<th>Semi-final</th><th>Final</th><th>Title</th></tr></thead><tbody>%s</tbody>'
              '</table></details>' % (len(teams), esc(as_of), rows))
+    # Searchers ask for "finalists" and the "winner": answer both in one line.
+    f1, f2 = sorted(teams, key=lambda t: -(t["probabilities"].get("final") or 0))[:2]
+    win = max(teams, key=lambda t: t["probabilities"].get("champion") or 0)
+    verdict = ("Our prediction: the most likely finalists are %s and %s, and %s is the most likely "
+               "winner at %s." % (f1["team"], f2["team"], win["team"], p(win)))
     section = ('<div class="section-label">The forecast in words</div>'
                '<h2 class="section-title">Who will win the 2027 Cricket World Cup?</h2>'
+               + "<p>%s</p>" % esc(verdict)
                + "".join("<h3>%s</h3><p>%s</p>" % (esc(q), esc(ans)) for q, ans in faq)
                + table
                + '<p class="tiny muted">A statistical estimate for fun and learning, not betting '
