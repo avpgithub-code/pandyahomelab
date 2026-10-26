@@ -73,12 +73,44 @@ Specific parts:
 - **Country:** won/lost/tied/NR per format, home/away/neutral split, last 10 results, top run-scorers and
   wicket-takers in the fixture.
 
+### The landing page: picker + popular head-to-heads (`/cricket/h2h/`, owner's idea, approved 2026-10-26)
+
+```
+ Head to Head        [ Players | Countries ]        [ Men | Women ]
+
+ [ Virat Kohli         ▾ ]   vs   [ James Anderson      ▾ ]     [ Compare ]
+
+ ── Popular head-to-heads ─────────────────────────────────────
+  Warner v Broad · Stokes v Ashwin · Kohli v Anderson · Root v Bumrah …
+  India v Australia · India v Pakistan · The Ashes …
+```
+
+- **Picker, for visitors (any pair):**
+  - **Players:** two search-as-you-type boxes (4,800+ players, so search rather than a dropdown), reusing the
+    Players search. The second box offers only the same gender and ranks first the players the first one actually
+    met (most balls between them).
+  - **Countries:** two dropdowns; the second lists only opponents the first has played, with the match count.
+  - **Compare** opens the pair's own page (`/cricket/h2h/<a>-vs-<b>/`), so every result has a shareable link. The
+    page shows a **comparison** always, the **matchup** section when one bowled to the other (both directions when
+    both bowl), and the **country** layout for teams.
+- **Popular head-to-heads, for search engines:** the curated ~150 pairs are listed under the picker as plain
+  links. Only these are indexed; picker-built pairs work for visitors but are `noindex`.
+- No-JS fallback: the popular links still work.
+- Entry points: a "Head to Head" item in the cricstat nav, and a "Compare with…" button on player and team pages
+  that pre-fills the first side.
+
+| | Picker | Popular list |
+|---|---|---|
+| Serves | fans exploring | search traffic |
+| Covers | any pair | ~150 strong pairs |
+| Indexed | no | yes |
+
 ## 5. How it's built
 
 | Layer | Change |
 |---|---|
 | **Pipeline (build)** | New mart `matchups(batter_key, bowler_key, scope, balls, runs, dots, fours, sixes, outs, first_match, last_match)` + a small `matchup_outs(…, kind, n)` for dismissal types. Same scopes as `player_career`, international scopes only at first. Every pair is kept (H1 measured +26 s, +26 MB); page thresholds are applied when pairs are chosen. |
-| **API** | `GET /v1/h2h/players/{a}/{b}?scope=` (both careers + matchup both ways + situations), `GET /v1/players/{id}/matchups?as=batter\|bowler&scope=&limit=`, and the existing team head-to-head for countries. Read-only and cached like the rest. |
+| **API** | `GET /v1/h2h/opponents/{player_id}?scope=` (who this player met most, for the picker), `GET /v1/h2h/players/{a}/{b}?scope=` (both careers + matchup both ways + situations), `GET /v1/players/{id}/matchups?as=batter\|bowler&scope=&limit=`, and the existing team head-to-head for countries. Read-only and cached like the rest. |
 | **Pages** | Server-rendered heads like the player and predictor pages: title ≤ 60 chars (e.g. "Bumrah vs Smith: Head to Head Stats \| cricstat"), description ≤ 155 with numbers first, canonical, JSON-LD, the words section, and the static shell when the API is down. Templates are built by `gen_pages.py`. |
 | **Sitemap** | Indexed pairs only, with the data date as `lastmod`. |
 | **Existing pages** | Player pages get a "Head to head" row (top rivals as batter and as bowler) + "Compare with…"; team pages link their head-to-head tab to the new country page. |
@@ -108,7 +140,7 @@ Specific parts:
 | H1 | `matchups` mart + consistency tests; build time and DB size measured |
 | H2 | Golden head-to-heads (you check the references) |
 | H3 | API endpoints + tests |
-| H4 | Page templates + "Compare with…" + player/team page links, previewed in staging |
+| H4 | Landing page (picker + popular list) + result templates (matchup, comparison, country) + nav and "Compare with…" entry points, previewed in staging |
 | H5 | Pair selection (you edit the hand-picked lists), SEO heads, sitemap, share cards, then the deploy |
 
 Runs alongside P1b: it touches the pipeline build and the API, not the models.
