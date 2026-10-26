@@ -28,6 +28,10 @@ data modelling over 11.6M rows and search-ready pages.
 - **97,484** batter-v-bowler pairs have ≥ 30 balls between them (all formats and competitions).
 - A single pair computed live takes **2.3–4.7 s** on the NAS disks (cold). That is too slow for a page, so matchups
   are **precomputed at build time** (§5).
+- **H1 trial on a copy of the live DB (2026-10-26):** the mart adds **26 s** to the build and **+26 MB**
+  (326,350 pairs, 122,748 dismissal-kind rows). All pairs are kept, with no minimum, so the build checks can prove
+  that the sums equal the batting atoms. Both checks were **0** on the full data. T20I has few long duels (197 pairs
+  with ≥ 60 balls), so T20I matchups need a lower bar when pairs are chosen (H5).
 - Country head to head already exists: `GET /v1/teams/{slug}/head-to-head?scope=&opponent=` (`v_head_to_head`),
   shown as a tab on team pages. Country pages reuse it.
 
@@ -73,7 +77,7 @@ Specific parts:
 
 | Layer | Change |
 |---|---|
-| **Pipeline (build)** | New mart `matchups(batter_key, bowler_key, scope, balls, runs, dots, fours, sixes, outs, first_match, last_match)` + a small `matchup_outs(…, kind, n)` for dismissal types. Same scopes as `player_career`, international scopes only at first. Pairs with ≥ 6 balls only, to keep it small. **Measure** the extra build time and DB size in step H1. |
+| **Pipeline (build)** | New mart `matchups(batter_key, bowler_key, scope, balls, runs, dots, fours, sixes, outs, first_match, last_match)` + a small `matchup_outs(…, kind, n)` for dismissal types. Same scopes as `player_career`, international scopes only at first. Every pair is kept (H1 measured +26 s, +26 MB); page thresholds are applied when pairs are chosen. |
 | **API** | `GET /v1/h2h/players/{a}/{b}?scope=` (both careers + matchup both ways + situations), `GET /v1/players/{id}/matchups?as=batter\|bowler&scope=&limit=`, and the existing team head-to-head for countries. Read-only and cached like the rest. |
 | **Pages** | Server-rendered heads like the player and predictor pages: title ≤ 60 chars (e.g. "Bumrah vs Smith: Head to Head Stats \| cricstat"), description ≤ 155 with numbers first, canonical, JSON-LD, the words section, and the static shell when the API is down. Templates are built by `gen_pages.py`. |
 | **Sitemap** | Indexed pairs only, with the data date as `lastmod`. |

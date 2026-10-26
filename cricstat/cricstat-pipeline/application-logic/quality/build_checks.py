@@ -17,6 +17,8 @@ _ZERO = {
     "bowl_runs_diff": "bowling atoms' runs conceded differ from deliveries",
     "bowl_balls_diff": "bowling atoms' legal balls differ from deliveries",
     "bowl_wkts_diff": "bowling atoms' wickets differ from credited dismissals",
+    "matchup_bat_diff": "batters whose matchup balls or runs differ from their batting innings",
+    "matchup_outs_diff": "matchup outs differ from dismissals credited to bowlers",
 }
 
 

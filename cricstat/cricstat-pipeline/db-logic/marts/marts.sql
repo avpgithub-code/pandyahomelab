@@ -137,6 +137,52 @@ FROM match_players mp JOIN matches m USING (match_key)
 WHERE m.has_deliveries = 1
 GROUP BY mp.player_key, mp.team_key;
 
+-- Batter v bowler (Head to Head matchups), official international formats only (decided 2026-10-26).
+-- Balls = every delivery except wides (R3); runs off the bat; 4s/6s exclude non-boundary runs (R10);
+-- dots = legal balls with no run off the bat; outs = the batter's dismissals credited to that bowler.
+-- Every pair is kept (no minimum), so build_checks can prove the sums equal the batting atoms.
+DROP TABLE IF EXISTS temp.mu_scope;
+CREATE TEMP TABLE mu_scope (match_key INTEGER PRIMARY KEY, scope TEXT NOT NULL, start_date TEXT);
+INSERT INTO mu_scope
+SELECT match_key, format_key, start_date FROM matches
+WHERE has_deliveries = 1 AND format_key IN ('TEST', 'ODI', 'T20I');
+
+DROP TABLE IF EXISTS temp.mart_mu_outs;
+CREATE TEMP TABLE mart_mu_outs AS
+SELECT s.scope, x.player_out_key AS batter_key, x.bowler_key, x.kind, COUNT(*) AS n
+FROM dismissals x JOIN mu_scope s USING (match_key)
+JOIN innings i ON i.match_key = x.match_key AND i.innings_no = x.innings_no
+WHERE i.is_super_over = 0 AND x.credited_to_bowler = 1 AND x.counts_as_out = 1
+GROUP BY 1, 2, 3, 4;
+
+DROP TABLE IF EXISTS temp.mart_mu;
+CREATE TEMP TABLE mart_mu AS
+SELECT s.scope, d.batter_key, d.bowler_key,
+       SUM(d.wides = 0) AS balls, SUM(d.runs_batter) AS runs,
+       SUM(d.is_legal = 1 AND d.runs_batter = 0) AS dots,
+       SUM(d.runs_batter = 4 AND d.non_boundary = 0) AS fours,
+       SUM(d.runs_batter = 6 AND d.non_boundary = 0) AS sixes,
+       COUNT(DISTINCT d.match_key) AS matches, MIN(s.start_date) AS first_date,
+       MAX(s.start_date) AS last_date
+FROM deliveries d JOIN mu_scope s USING (match_key)
+JOIN innings i ON i.match_key = d.match_key AND i.innings_no = d.innings_no
+WHERE i.is_super_over = 0
+GROUP BY 1, 2, 3;
+
+DELETE FROM matchups;
+INSERT INTO matchups (scope, batter_key, bowler_key, balls, runs, dots, fours, sixes, outs, matches,
+                      first_date, last_date)
+SELECT u.scope, u.batter_key, u.bowler_key, u.balls, u.runs, u.dots, u.fours, u.sixes,
+       COALESCE(o.outs, 0), u.matches, u.first_date, u.last_date
+FROM mart_mu u
+LEFT JOIN (SELECT scope, batter_key, bowler_key, SUM(n) AS outs FROM mart_mu_outs GROUP BY 1, 2, 3) o
+  ON o.scope = u.scope AND o.batter_key = u.batter_key AND o.bowler_key = u.bowler_key;
+DELETE FROM matchup_outs;
+INSERT INTO matchup_outs SELECT scope, batter_key, bowler_key, kind, n FROM mart_mu_outs;
+
+DROP TABLE temp.mart_mu;
+DROP TABLE temp.mart_mu_outs;
+DROP TABLE temp.mu_scope;
 DROP TABLE temp.mart_app;
 DROP TABLE temp.mart_bat;
 DROP TABLE temp.mart_bowl;

@@ -193,6 +193,16 @@ CREATE TABLE player_year (player_key INTEGER NOT NULL, scope TEXT NOT NULL, year
 CREATE TABLE player_teams (                     -- who a player has represented (players have no country field)
   player_key INTEGER NOT NULL, team_key INTEGER NOT NULL, matches INTEGER NOT NULL, first_date TEXT, last_date TEXT,
   PRIMARY KEY (player_key, team_key));
+CREATE TABLE matchups (                         -- batter v bowler per official international format (Head to Head
+  scope TEXT NOT NULL,                          -- pages); counts only, ratios live in the API. scope = TEST/ODI/T20I
+  batter_key INTEGER NOT NULL, bowler_key INTEGER NOT NULL,
+  balls INTEGER NOT NULL, runs INTEGER NOT NULL, dots INTEGER NOT NULL, fours INTEGER NOT NULL,
+  sixes INTEGER NOT NULL, outs INTEGER NOT NULL, matches INTEGER NOT NULL, first_date TEXT, last_date TEXT,
+  PRIMARY KEY (scope, batter_key, bowler_key)) WITHOUT ROWID;
+CREATE INDEX ix_matchups_bowler ON matchups(scope, bowler_key);
+CREATE TABLE matchup_outs (                     -- how the batter got out to that bowler (dismissal kind)
+  scope TEXT NOT NULL, batter_key INTEGER NOT NULL, bowler_key INTEGER NOT NULL, kind TEXT NOT NULL,
+  n INTEGER NOT NULL, PRIMARY KEY (scope, batter_key, bowler_key, kind)) WITHOUT ROWID;
 
 CREATE TABLE team_results (                     -- one row per team per match: base for records, H2H, form, Elo
   match_key INTEGER NOT NULL, team_key INTEGER NOT NULL, opponent_key INTEGER NOT NULL, format_key TEXT NOT NULL,
