@@ -23,7 +23,7 @@
   }
 
   // ── Picker ──
-  const state = { mode: "players", gender: "male", a: null, b: null };
+  const state = { mode: "players", gender: "male", a: null, b: null, formatTabs: null };
 
   function seg(options, current, onPick, label) {
     return h("div", { class: "tabs", role: "group", "aria-label": label }, options.map(([k, text]) =>
@@ -46,6 +46,7 @@
             (k) => { if (k !== state.mode) { state.mode = k; state.a = state.b = null; picker(); } }, "Compare players or countries"),
         seg(GENDERS, state.gender,
             (k) => { if (k !== state.gender) { state.gender = k; state.a = state.b = null; picker(); } }, "Men or women"),
+        state.formatTabs && state.mode === "players" && state.a && state.b ? state.formatTabs : null,
       ]),
       h("div", { class: "h-row" }, sides.concat([go])),
       h("p", { class: "tiny dim", style: "margin-top:.5rem" }, state.mode === "players"
@@ -195,8 +196,9 @@
   function inWords(d, fmt) {
     const A = d.a.player.full_name, B = d.b.player.full_name, F = FMT_PLURAL[fmt], out = [];
     const ra = d.a.batting && d.a.batting.runs, rb = d.b.batting && d.b.batting.runs;
-    if (ra || rb) out.push("In " + F + ", " + A + " has " + C.num(ra || 0) + " runs" + (d.a.batting && d.a.batting.average ? " at an average of " + C.ratio(d.a.batting.average) : "") +
-      " and " + B + " has " + C.num(rb || 0) + (d.b.batting && d.b.batting.average ? " at " + C.ratio(d.b.batting.average) : "") + ".");
+    const runs = (n) => C.num(n || 0) + (n === 1 ? " run" : " runs");
+    if (ra || rb) out.push("In " + F + ", " + A + " has " + runs(ra) + (d.a.batting && d.a.batting.average ? " at an average of " + C.ratio(d.a.batting.average) : "") +
+      " and " + B + " has " + runs(rb) + (d.b.batting && d.b.batting.average ? " at " + C.ratio(d.b.batting.average) : "") + ".");
     [[d.matchup.a_batting, A, B], [d.matchup.b_batting, B, A]].forEach(([m, bat, bowl]) => {
       if (m) out.push(bowl + " has bowled " + C.num(m.balls) + " balls to " + bat + " in " + F + ", conceding " + C.num(m.runs) +
         " runs and taking " + (m.outs === 1 ? "1 wicket" : C.num(m.outs) + " wickets") + ".");
@@ -226,12 +228,14 @@
                b: { slug: sb, name: B.full_name || B.name, team: B.main_team && B.main_team.name, photo: B.photo && B.photo.url } });
       const body = h("div", { class: "wrap stack" });
       C.fill(res, h("section", { class: "section", style: "padding-top:0" }, body));
-      const tabs = h("div", { class: "tabs", role: "group", "aria-label": "Format" });
+      const tabs = h("div", { class: "tabs h-formats", role: "group", "aria-label": "Format" });
+      state.formatTabs = tabs;                      // shown in the picker row, next to Men | Women
+      picker();
       const pane = h("div", { class: "stack" });
       const cards = h("div", { class: "grid-2 h-who" }, [A, B].map((p) => h("a", { class: "card", href: "/cricket/players/" + p.slug + "/", style: "padding:1rem" },
         C.who(p.full_name || p.name, C.teamLine(p.main_team && p.main_team.name, [p.main_team && p.main_team.name, C.roleLabel(p.role)].filter(Boolean).join(" · ")),
               p.main_team && p.main_team.name, null, p.role ? C.roleIcon(p.role) : null, p.photo && p.photo.url))));
-      C.fill(body, [cards, tabs, pane, h("p", { class: "tiny dim" }, "Our data covers men's Tests and ODIs from 2002–03, T20Is from 2005 and women's internationals mostly from 2016 (Cricsheet). Afghanistan men's matches are withheld by Cricsheet, so they are missing here. ",
+      C.fill(body, [cards, pane, h("p", { class: "tiny dim" }, "Our data covers men's Tests and ODIs from 2002–03, T20Is from 2005 and women's internationals mostly from 2016 (Cricsheet). Afghanistan men's matches are withheld by Cricsheet, so they are missing here. ",
         h("a", { href: "/cricket/licences/" }, "Data & licences"))]);
       const show = async (k) => {
         fmt = k;

@@ -766,6 +766,8 @@ a.about-trigger[aria-current="page"] { background: rgba(255,153,51,.22); border-
 /* ── Head to Head (docs/h2h-plan.md, H4) ── */
 .h-picker { margin-top: 1.4rem; max-width: 980px; }
 .h-switches { display: flex; flex-wrap: wrap; gap: .8rem 1.4rem; margin-bottom: .9rem; }
+.h-formats { padding-left: 1.4rem; border-left: 1px solid var(--border); }
+@media (max-width: 640px) { .h-formats { padding-left: 0; border-left: 0; } }
 .h-row { display: flex; flex-wrap: wrap; align-items: center; gap: .7rem; }
 .h-box { position: relative; flex: 1 1 260px; min-width: 0; }
 .h-input, .h-select { width: 100%; min-height: 48px; padding: .6rem .9rem; border-radius: var(--radius); border: 1px solid var(--border);
