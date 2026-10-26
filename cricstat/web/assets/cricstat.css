@@ -26,7 +26,7 @@ h1, h2, h3, p { margin: 0; }
 .brand em { font-style: normal; color: var(--blue); }
 .brand .sep { color: var(--muted); font-weight: 400; margin: 0 .35rem; }
 .cs { color: #fff; font-weight: inherit; white-space: nowrap; } .cs b { color: var(--saffron); font-weight: inherit; }
-.cs i { font-style: normal; } .cs-sr { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } .cs-i { position: relative; display: inline-block; line-height: 1.05; } .cs-i::after { content: ""; position: absolute; left: 50%; top: .03em; width: .3em; height: .3em; transform: translateX(-50%); border-radius: 50%; background: radial-gradient(circle at 35% 32%, #e2544b, #b3201c 65%, #6e1210); box-shadow: inset -.03em -.03em .04em rgba(0,0,0,.35); }
+.cs i { font-style: normal; } .cs [data-t]::before { content: attr(data-t); } .cs-sr { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } .cs-i { position: relative; display: inline-block; line-height: 1.05; } .cs-i::after { content: ""; position: absolute; left: 50%; top: .03em; width: .3em; height: .3em; transform: translateX(-50%); border-radius: 50%; background: radial-gradient(circle at 35% 32%, #e2544b, #b3201c 65%, #6e1210); box-shadow: inset -.03em -.03em .04em rgba(0,0,0,.35); }
 .brand:hover { text-decoration: none; }
 .nav-links { display: flex; gap: .25rem; list-style: none; margin: 0; padding: 0; overflow-x: auto;
              scrollbar-width: none; }

@@ -426,7 +426,8 @@
   // The cricstat wordmark (white "cric", saffron "stat", a ball for the i's dot); screen readers get "cricstat".
   function wordmark() {
     return h("span", { class: "cs" }, [h("i", { class: "cs-sr" }, "cricstat"),
-      h("i", { class: "cs-w", "aria-hidden": "true" }, ["cr", h("i", { class: "cs-i" }, "ı"), "c", h("b", {}, "stat")])]);
+      h("i", { class: "cs-w", "aria-hidden": "true" }, [h("i", { "data-t": "cr" }), h("i", { class: "cs-i", "data-t": "ı" }),
+        h("i", { "data-t": "c" }), h("b", { "data-t": "stat" })])]);
   }
 
   // "cricstat Elo" is our own rating (P1): this pill marks it wherever it appears, and says it isn't the ICC's.
