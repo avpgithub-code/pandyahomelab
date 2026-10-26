@@ -20,6 +20,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from application_logic.services import (
     admin_service,
     forecast_service,
+    h2h_service,
     matches_service,
     meta_service,
     players_service,
@@ -197,6 +198,19 @@ def create_app(cfg: Optional[Config] = None) -> FastAPI:
         data, defs, more = players_service.innings(db, player_id, scope, date_from, date_to,
                                                    limit, offset)
         return envelope(request, data, defs, more, extra_filters={"scope": scope})
+
+    # ── Head to Head (docs/h2h-plan.md) ──
+    @app.get("/v1/h2h/players/{a_id}/{b_id}")
+    def h2h_players(request: Request, a_id: str, b_id: str, scope: str = "ODI"):
+        return envelope(request, *h2h_service.players(db, a_id, b_id, scope),
+                        extra_filters={"scope": scope})
+
+    @app.get("/v1/h2h/opponents/{player_id}")
+    def h2h_opponents(request: Request, player_id: str, scope: str = "ODI",
+                      role: str = Query("any", alias="as"),
+                      limit: Optional[int] = Query(None, ge=1, le=50)):
+        return envelope(request, *h2h_service.opponents(db, player_id, scope, role, limit),
+                        extra_filters={"scope": scope, "as": role})
 
     # ── Teams ──
     @app.get("/v1/teams")
