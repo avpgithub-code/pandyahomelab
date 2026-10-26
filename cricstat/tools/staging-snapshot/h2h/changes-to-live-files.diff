@@ -1,0 +1,61 @@
+--- live/assets/cricstat.css
++++ staging/assets/cricstat.css
+@@ -762,3 +762,33 @@
+ .m-cal-table th.grp { text-align: center; border-bottom: 1px solid var(--border); color: var(--text); }
+ .m-cal-table thead tr:last-child th:nth-child(odd), .m-cal-table tbody td:nth-child(5) { border-left: 1px solid var(--border); }
+ .m-cal-table tbody td:nth-child(3) { border-left: 1px solid var(--border); }
++
++/* ── Head to Head (docs/h2h-plan.md, H4) ── */
++.h-picker { margin-top: 1.4rem; max-width: 980px; }
++.h-switches { display: flex; flex-wrap: wrap; gap: .8rem 1.4rem; margin-bottom: .9rem; }
++.h-row { display: flex; flex-wrap: wrap; align-items: center; gap: .7rem; }
++.h-box { position: relative; flex: 1 1 260px; min-width: 0; }
++.h-input, .h-select { width: 100%; min-height: 48px; padding: .6rem .9rem; border-radius: var(--radius); border: 1px solid var(--border);
++                      background: var(--surface); color: var(--text); font: inherit; }
++.h-input:focus, .h-select:focus { border-color: var(--saffron); box-shadow: 0 0 0 4px rgba(255,153,51,.12); outline: none; }
++.h-select:disabled { opacity: .5; }
++.h-vs { color: var(--saffron); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; font-size: .8rem; }
++.h-suggest { position: absolute; z-index: 20; left: 0; right: 0; top: calc(100% + 4px); margin: 0; padding: .3rem; list-style: none;
++             background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); max-height: 360px; overflow: auto;
++             box-shadow: 0 14px 40px rgba(0,0,0,.45); }
++.h-suggest li[role="option"] { padding: .45rem .6rem; border-radius: 8px; cursor: pointer; }
++.h-suggest li[role="option"]:hover, .h-suggest li[role="option"]:focus { background: var(--surface3); outline: none; }
++.h-suggest-title { padding: .35rem .6rem; font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
++.h-chosen { display: flex; align-items: center; justify-content: space-between; gap: .6rem; min-height: 48px; padding: .35rem .5rem .35rem .7rem;
++            border-radius: var(--radius); border: 1px solid rgba(255,153,51,.45); background: rgba(255,153,51,.06); }
++.h-clear { border: 0; background: transparent; color: var(--dim); font-size: 1rem; cursor: pointer; padding: .3rem .5rem; border-radius: 8px; }
++.h-clear:hover { color: var(--text); background: var(--surface3); }
++.h-who .card { display: block; }
++.h-words p { color: var(--soft); margin-top: .3rem; }
++.h-mu .card-head { display: flex; align-items: center; justify-content: space-between; gap: .6rem; }
++.h-sbs { width: 100%; } .h-sbs th[scope="row"] { color: var(--dim); font-weight: 600; text-align: center; }
++.h-sbs td.num, .h-sbs th.num { text-align: center; font-variant-numeric: tabular-nums; }
++.h-best { color: var(--saffron); font-weight: 800; }
++.h-pop { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem 1.4rem; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
++.grid-2 { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
++.grid-3 { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+--- live/assets/players.js
++++ staging/assets/players.js
+@@ -265,7 +265,9 @@
+               h("div", { class: "row", style: "gap:.4rem" }, chips),
+               playedFor(p.teams),
+               bornLine(p), photoCredit(p)]),
+-            team && team.team_type === "international" && team.slug ? h("a", { class: "btn ghost", href: "/cricket/countries/" + team.slug + "/" }, [C.teamBadge(team.name, "sm"), team.name + " team page"]) : null]),
++            h("div", { class: "stack", style: "gap:.5rem" }, [
++              team && team.team_type === "international" && team.slug ? h("a", { class: "btn ghost", href: "/cricket/countries/" + team.slug + "/" }, [C.teamBadge(team.name, "sm"), team.name + " team page"]) : null,
++              h("a", { class: "btn ghost", href: "/cricket/h2h/?a=" + p.slug }, "⚔ Compare with…")])]),
+           h("div", { class: "kpis", id: "p-kpis", style: "margin-top:1.6rem;padding-top:1.2rem;border-top:1px solid var(--border)" })]))),
+         h("section", { class: "section panel" }, h("div", { class: "wrap stack" }, [
+           h("div", { class: "tabs", role: "group", "aria-label": "Format" }, tabs.map(([k, n]) =>
+--- live/assets/countries.js
++++ staging/assets/countries.js
+@@ -26,6 +26,9 @@
+     if (!back && document.getElementById("c-landing")) {
+       document.getElementById("c-gender").before(h("a", { id: "c-maplink", class: "tab", href: "/cricket/countries/" }, "🌍 World map"));
+     }
++    const cmp = document.getElementById("c-h2hlink");
++    if (cmp) cmp.href = "/cricket/h2h/?a=" + team.slug;
++    else document.getElementById("c-gender").before(h("a", { id: "c-h2hlink", class: "tab", href: "/cricket/h2h/?a=" + team.slug }, "⚔ Head to head"));
+     C.fill("c-gender", ["male", "female"].map((g) => {
+       const slug = slugFor(team.name, g);
+       return slug ? h("a", { class: "tab", href: "/cricket/countries/" + slug + "/", "aria-pressed": String(g === team.gender) }, GENDER[g])
