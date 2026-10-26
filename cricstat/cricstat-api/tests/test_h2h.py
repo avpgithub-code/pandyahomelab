@@ -109,3 +109,11 @@ def test_bad_requests_are_problem_json(client, url, status):
     r = client.get(url)
     assert r.status_code == status, r.text
     assert r.headers["content-type"].startswith("application/problem+json")
+
+
+def test_team_results_filter_by_opponent(client):
+    every = data(client, "/v1/teams/india-men/results?limit=100")
+    only = data(client, "/v1/teams/india-men/results?opponent=australia-men&limit=100")
+    assert only and all(r["opponent"]["slug"] == "australia-men" for r in only)
+    assert len(only) == sum(r["opponent"]["slug"] == "australia-men" for r in every)
+    assert client.get("/v1/teams/india-men/results?opponent=nowhere-men").status_code == 404

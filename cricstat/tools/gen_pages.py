@@ -21,7 +21,7 @@ else:
     WEB = os.path.join(CRICSTAT, "tools", "staging", "web")
     if not os.path.isdir(WEB):
         shutil.copytree(os.path.join(CRICSTAT, "web"), WEB)
-V = "123"
+V = "124"
 # P1.6 ships in two parts: False = the approved non-predictor pages only (nav "ODI WC 2027 soon", no predictor page,
 # no model numbers on the map, no predictor rows on the licences page). True at the full P1.6 deploy.
 PREDICTOR_LIVE = os.environ.get("CRICSTAT_PREDICTOR_LIVE", "1") == "1"   # live since the P1.6 launch; CRICSTAT_PREDICTOR_LIVE=0 builds the old partial set
@@ -52,6 +52,7 @@ HEAD = '''<!DOCTYPE html>
     <li><a href="/cricket/"{c_hub}>Overview</a></li>
     <li><a href="/cricket/countries/"{c_countries}>Countries</a></li>
     <li><a href="/cricket/players/"{c_players}>Players</a></li>
+    <li><a href="/cricket/h2h/"{c_h2h}>Head to Head</a></li>
     {nav_predictor}
     <li><span class="soon" title="Coming in a later phase">Ask <span class="soon-tag">soon</span></span></li>
     {nav_method}
@@ -76,7 +77,7 @@ FOOT = '''</main>
 </html>
 '''
 def page(rel, path, title, desc, cur, body, scripts, og_type="website", extra_head="", og_image=SITE + "/og-image.png"):
-    c = {k: "" for k in ("c_hub", "c_countries", "c_players", "c_licences", "c_about", "c_predictor", "c_method")}
+    c = {k: "" for k in ("c_hub", "c_countries", "c_players", "c_h2h", "c_licences", "c_about", "c_predictor", "c_method")}
     c["c_" + cur] = ' aria-current="page"'
     c["nav_method"] = ('<li><a href="/cricket/methodology/"%s>Methodology</a></li>' % c["c_method"] if PREDICTOR_LIVE else
                        '<li><span class="soon" title="Coming in a later phase">Methodology <span class="soon-tag">soon</span></span></li>')
@@ -573,6 +574,45 @@ def about_page():
           "about": [{"@id": SITE + "/cricket/#app"}, "ODI World Cup 2027", "Cricket analytics", "Machine learning"]}
     page("about/index.html", "/cricket/about/", title, desc, "about", body, [], og_type="article", extra_head=ld_json(ld))
 
+
+# Head to Head (docs/h2h-plan.md, H4): one shell for the landing page (/cricket/h2h/: picker + popular
+# head-to-heads) and every pair page (/cricket/h2h/<a>-vs-<b>/); h2h.js reads the path. The popular links are plain
+# HTML so crawlers and no-JS visitors can follow them. Starter list for the preview; H5 replaces it with the
+# curated ~150 (matchups, comparisons, countries).
+H2H_POPULAR = [
+    ("Warner v Broad", "da-warner-dcce6f09-vs-scj-broad-eba6a852", "Test matchup"),
+    ("Stokes v Ashwin", "ba-stokes-e087956b-vs-r-ashwin-495d42a5", "Test matchup"),
+    ("Kohli v Anderson", "jm-anderson-d12143bf-vs-v-kohli-ba607b88", "Test matchup"),
+    ("Root v Bumrah", "je-root-a343262c-vs-jj-bumrah-462411b3", "Test matchup"),
+    ("Pujara v Lyon", "ca-pujara-d4f9dbd4-vs-nm-lyon-96a6a7ad", "Test matchup"),
+    ("Smith v Bumrah", "jj-bumrah-462411b3-vs-spd-smith-30a45b23", "matchup"),
+    ("Mandhana v Ecclestone", "s-ecclestone-cdb82f1c-vs-s-mandhana-5d2eda89", "T20I matchup"),
+    ("Kohli v Root", "je-root-a343262c-vs-v-kohli-ba607b88", "comparison"),
+    ("India v Australia", "australia-men-vs-india-men", "men"),
+    ("India v Pakistan", "india-men-vs-pakistan-men", "men"),
+    ("The Ashes: Australia v England", "australia-men-vs-england-men", "men"),
+    ("India v Australia", "australia-women-vs-india-women", "women"),
+]
+H2H = '''<header class="hero left">
+  <div class="wrap">
+    <div class="eyebrow"><span class="dot"></span>Head to Head</div>
+    <h1 class="wc-title" id="h-title" style="font-size:clamp(2rem,4.4vw,3rem);margin:0">Head to Head</h1>
+    <p class="subtitle" id="h-sub" style="margin-top:.6rem">Pick two players or two countries and see them side by side: careers, the balls between a batter and a bowler, and every meeting of two teams. Built ball by ball from the same data as the rest of cricstat.</p>
+    <div id="h-picker" class="h-picker" aria-live="polite"></div>
+  </div>
+</header>
+<div id="h-result" aria-live="polite"></div>
+<section class="section panel" id="h-popular"><div class="wrap">
+  <div class="section-label">Popular</div><h2 class="section-title">Popular head-to-heads</h2>
+  <ul class="h-pop">@@POPULAR@@</ul>
+</div></section>
+'''.replace("@@POPULAR@@", "".join(
+    '<li><a href="/cricket/h2h/%s/">%s</a> <span class="dim tiny">%s</span></li>' % (s_, H.escape(n), H.escape(k))
+    for n, s_, k in H2H_POPULAR))
+page("h2h/index.html", "/cricket/h2h/", "Head to Head: player and country comparisons — cricstat | pandyaHomeLab",
+     "Compare two cricketers or two countries side by side: careers by format, batter v bowler matchups (balls, runs, "
+     "dismissals) and every meeting of two teams, from ball-by-ball data.",
+     "h2h", H2H, ["/cricket/assets/h2h.js?v=" + V])
 
 about_page()
 print("pages written to", WEB)

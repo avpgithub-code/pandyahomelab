@@ -239,9 +239,10 @@ def create_app(cfg: Optional[Config] = None) -> FastAPI:
     def team_results(request: Request, slug: str, scope: Optional[str] = None,
                      date_from: Optional[str] = Query(None, alias="from"),
                      date_to: Optional[str] = Query(None, alias="to"),
-                     limit: Optional[int] = None, offset: Optional[int] = None):
+                     limit: Optional[int] = None, offset: Optional[int] = None,
+                     opponent: Optional[str] = None):
         data, defs, more = teams_service.results(db, slug, scope, date_from, date_to, limit,
-                                                 offset)
+                                                 offset, opponent)
         return envelope(request, data, defs, more)
 
     @app.get("/v1/teams/{slug}/head-to-head")

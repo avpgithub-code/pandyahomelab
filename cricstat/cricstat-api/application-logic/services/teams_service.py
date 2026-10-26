@@ -101,13 +101,14 @@ def records(db: ServingDB, scope: Optional[str], g: Optional[str], team_type: Op
 
 
 def results(db: ServingDB, slug: str, scope: Optional[str], date_from: Optional[str],
-            date_to: Optional[str], limit: Optional[int], offset: Optional[int]
-            ) -> Tuple[List[dict], dict, bool]:
+            date_to: Optional[str], limit: Optional[int], offset: Optional[int],
+            opponent: Optional[str] = None) -> Tuple[List[dict], dict, bool]:
     t = _team(db, slug)
     scope = _scope(db, scope)
     d_from, d_to = dates(date_from, date_to)
     limit, offset = page(limit, offset)
-    rows = teams_repo.results(db, t["team_key"], scope, d_from, d_to, limit + 1, offset)
+    opp_key = _team(db, opponent)["team_key"] if opponent else None
+    rows = teams_repo.results(db, t["team_key"], scope, d_from, d_to, limit + 1, offset, opp_key)
     slugs = team_slugs(db)
     scores = matches_repo.innings_scores(db, [r["match_id"] for r in rows[:limit]])
     out = [{"match_id": r["match_id"], "date": r["start_date"], "format": r["format_key"],
