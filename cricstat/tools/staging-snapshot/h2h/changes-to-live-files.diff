@@ -1,6 +1,6 @@
---- live/assets/cricstat.css
-+++ staging/assets/cricstat.css
-@@ -762,3 +762,35 @@
+--- web/assets/cricstat.css	2026-10-26 11:04:26.066658177 -0500
++++ tools/staging/web/assets/cricstat.css	2026-10-27 18:15:28.719029349 -0500
+@@ -762,3 +762,40 @@
  .m-cal-table th.grp { text-align: center; border-bottom: 1px solid var(--border); color: var(--text); }
  .m-cal-table thead tr:last-child th:nth-child(odd), .m-cal-table tbody td:nth-child(5) { border-left: 1px solid var(--border); }
  .m-cal-table tbody td:nth-child(3) { border-left: 1px solid var(--border); }
@@ -36,8 +36,13 @@
 +.h-pop { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem 1.4rem; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
 +.grid-2 { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
 +.grid-3 { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
---- live/assets/players.js
-+++ staging/assets/players.js
++.h-more { border: 1px solid var(--border); background: transparent; color: var(--saffron); font: inherit; font-weight: 700;
++  padding: .15rem .6rem; border-radius: 999px; cursor: pointer; margin-left: .2rem; }
++.h-more:hover, .h-more:focus-visible { border-color: var(--saffron); background: rgba(255,153,51,.08); }
++.h-outs { margin-top: .7rem; }
++.h-outs td, .h-outs th { white-space: nowrap; }
+--- web/assets/players.js	2026-10-09 21:36:15.837468758 -0500
++++ tools/staging/web/assets/players.js	2026-10-26 12:53:42.707536923 -0500
 @@ -265,7 +265,9 @@
                h("div", { class: "row", style: "gap:.4rem" }, chips),
                playedFor(p.teams),
@@ -49,8 +54,8 @@
            h("div", { class: "kpis", id: "p-kpis", style: "margin-top:1.6rem;padding-top:1.2rem;border-top:1px solid var(--border)" })]))),
          h("section", { class: "section panel" }, h("div", { class: "wrap stack" }, [
            h("div", { class: "tabs", role: "group", "aria-label": "Format" }, tabs.map(([k, n]) =>
---- live/assets/countries.js
-+++ staging/assets/countries.js
+--- web/assets/countries.js	2026-10-09 22:12:54.034522907 -0500
++++ tools/staging/web/assets/countries.js	2026-10-26 12:53:42.720537155 -0500
 @@ -26,6 +26,9 @@
      if (!back && document.getElementById("c-landing")) {
        document.getElementById("c-gender").before(h("a", { id: "c-maplink", class: "tab", href: "/cricket/countries/" }, "🌍 World map"));

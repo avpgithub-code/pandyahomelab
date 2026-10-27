@@ -49,3 +49,30 @@ def opponents(db: ServingDB, player_key: int, scope: str, role: str, limit: int)
         " FROM (%s) u JOIN players p ON p.player_key = u.other"
         " GROUP BY p.player_key ORDER BY balls DESC, p.name LIMIT ?" % " UNION ALL ".join(parts),
         args + [limit])
+
+
+def dismissal_list(db: ServingDB, scope: str, batter_key: int, bowler_key: int) -> List[dict]:
+    """Each time the bowler dismissed the batter (the same rule as matchup_outs), oldest first,
+    with the match, the ball, the fielders and the batter's score in that innings."""
+    return db.all(
+        "SELECT m.match_id, m.start_date, v.name AS venue, v.city, x.innings_no, d.ball_label,"
+        " x.kind, bi.runs, bi.balls_faced, bi.team_key, m.result, m.winner_key,"
+        " (SELECT GROUP_CONCAT(f.fielder_name"
+        "  || CASE f.is_substitute WHEN 1 THEN ' (sub)' ELSE '' END, ' / ')"
+        "  FROM dismissal_fielders f WHERE f.match_key = x.match_key"
+        "  AND f.innings_no = x.innings_no AND f.over_no = x.over_no AND f.seq = x.seq"
+        "  AND f.wicket_seq = x.wicket_seq) AS fielders,"
+        " t.name AS team, o.name AS opponent"
+        " FROM dismissals x JOIN matches m ON m.match_key = x.match_key"
+        " JOIN venues v ON v.venue_key = m.venue_key"
+        " JOIN innings i ON i.match_key = x.match_key AND i.innings_no = x.innings_no"
+        " LEFT JOIN deliveries d ON d.match_key = x.match_key AND d.innings_no = x.innings_no"
+        "  AND d.over_no = x.over_no AND d.seq = x.seq"
+        " LEFT JOIN batting_innings bi ON bi.match_key = x.match_key"
+        "  AND bi.innings_no = x.innings_no AND bi.player_key = x.player_out_key"
+        " LEFT JOIN teams t ON t.team_key = bi.team_key"
+        " LEFT JOIN teams o ON o.team_key = bi.opponent_key"
+        " WHERE x.player_out_key = ? AND x.bowler_key = ? AND m.format_key = ?"
+        " AND x.credited_to_bowler = 1 AND x.counts_as_out = 1 AND i.is_super_over = 0"
+        " ORDER BY m.start_date, x.innings_no, x.over_no, x.seq",
+        (batter_key, bowler_key, scope))

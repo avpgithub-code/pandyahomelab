@@ -6,7 +6,7 @@ into `cricstat/web/` (assets first) and this folder is deleted.
 
 | File | Change |
 |---|---|
-| `assets/h2h.js` | New: picker (players / countries, men / women), player pair page, country pair page |
+| `assets/h2h.js` | New: picker (players / countries, men / women), player pair page (with each dismissal listed on request), country pair page |
 | `assets/cricstat.css` | Head to Head styles at the end (+ `.grid-2`, `.grid-3`) |
 | `assets/players.js` | "⚔ Compare with…" button on player profiles |
 | `assets/countries.js` | "⚔ Head to head" link on team pages |
@@ -14,5 +14,5 @@ into `cricstat/web/` (assets first) and this folder is deleted.
 
 `changes-to-live-files.diff` shows only what changed in the three existing files.
 
-Every other page changes only by the new "Head to Head" nav item and the asset version (V=124);
+Every other page changes only by the new "Head to Head" nav item and the asset version (V=125);
 `gen_pages.py` regenerates them.

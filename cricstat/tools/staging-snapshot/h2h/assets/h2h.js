@@ -176,8 +176,36 @@
     return h("div", { class: "grid-2 h-sbs-grid" }, [block("Batting", BAT_ROWS), anyBowl ? block("Bowling", BOWL_ROWS) : null]);
   }
 
-  function matchupCard(m, batter, bowler, fmt) {
+  // Every dismissal behind the count, loaded when the reader opens it (one small request).
+  const ORD = ["", "1st", "2nd", "3rd", "4th"];
+  function dismissalList(ids, fmt, n, batter) {
+    const box = h("div", { class: "h-outs", hidden: "" });
+    let loaded = false;
+    const btn = h("button", { type: "button", class: "h-more", "aria-expanded": "false" }, "See all " + n + " ▾");
+    btn.onclick = async () => {
+      const open = btn.getAttribute("aria-expanded") !== "true";
+      btn.setAttribute("aria-expanded", String(open));
+      btn.textContent = open ? "Hide the list ▴" : "See all " + n + " ▾";
+      box.hidden = !open;
+      if (!open || loaded) return;
+      loaded = true;
+      C.fill(box, h("p", { class: "loading" }, "Loading…"));
+      try {
+        const { data } = await C.api("/v1/h2h/dismissals/" + ids[0] + "/" + ids[1] + "?scope=" + fmt);
+        const ground = (r) => r.city && r.venue.indexOf(r.city) < 0 ? r.venue + ", " + r.city : r.venue;
+        const result = (r) => r.outcome === "won" || r.outcome === "lost" ? r.team + " " + r.outcome : r.outcome[0].toUpperCase() + r.outcome.slice(1);
+        C.fill(box, C.table(["#", "Date", "Ground", "Inns", batter.split(" ").pop(), "How out", "Ball", "Result"],
+          data.map((r, i) => [i + 1, C.date(r.date), ground(r), ORD[r.innings] || r.innings,
+            r.score.runs + " (" + r.score.balls + ")", r.how, r.ball || "—", result(r)]),
+          { textCols: [1, 2, 5, 7], minWidth: "720px" }));
+      } catch (e) { loaded = false; C.showError(box, e, "the dismissals"); }
+    };
+    return [btn, box];
+  }
+
+  function matchupCard(m, batter, bowler, fmt, ids) {
     if (!m) return null;
+    const [more, outs] = m.outs ? dismissalList(ids, fmt, m.outs, batter) : [null, null];
     const kp = (v, label) => h("div", { class: "kpi" }, [h("b", {}, v), h("span", {}, label)]);
     return h("div", { class: "card h-mu" }, [
       h("div", { class: "card-head" }, [h("h2", {}, bowler + " bowling to " + batter),
@@ -185,8 +213,9 @@
       h("div", { class: "kpis" }, [kp(C.num(m.balls), "balls"), kp(C.num(m.runs), "runs"), kp(C.num(m.outs), "dismissals"),
         kp(C.ratio(m.average), "average"), kp(C.ratio(m.strike_rate), "strike rate"),
         kp(m.dot_pct === null ? "—" : Math.round(m.dot_pct) + "%", "dot balls"), kp(m.fours + " / " + m.sixes, "4s / 6s")]),
-      m.dismissals.length ? h("p", { class: "small", style: "margin-top:.8rem" }, "How " + batter + " got out: " +
-        m.dismissals.map((x) => x.n + " " + x.kind).join(", ") + ".") : null,
+      m.dismissals.length ? h("p", { class: "small", style: "margin-top:.8rem" }, ["How " + batter + " got out: " +
+        m.dismissals.map((x) => x.n + " " + x.kind).join(", ") + ". ", more]) : null,
+      outs,
       h("p", { class: "tiny dim", style: "margin-top:.4rem" }, "In " + C.num(m.matches) + " " + (m.matches === 1 ? FMT_PLURAL[fmt].slice(0, -1) : FMT_PLURAL[fmt]) +
         " from " + C.date(m.first_date) + " to " + C.date(m.last_date) + "."),
     ]);
@@ -249,7 +278,8 @@
         try {
           const d = k === "ODI" ? first.data : (await C.api("/v1/h2h/players/" + pidOf(sa) + "/" + pidOf(sb) + "?scope=" + k)).data;
           const An = d.a.player.full_name, Bn = d.b.player.full_name;
-          const mus = [matchupCard(d.matchup.a_batting, An, Bn, k), matchupCard(d.matchup.b_batting, Bn, An, k)].filter(Boolean);
+          const mus = [matchupCard(d.matchup.a_batting, An, Bn, k, [d.a.player.player_id, d.b.player.player_id]),
+            matchupCard(d.matchup.b_batting, Bn, An, k, [d.b.player.player_id, d.a.player.player_id])].filter(Boolean);
           C.fill(pane, [
             h("div", { class: "card h-words" }, [h("div", { class: "section-label" }, "Head to head in words"), h("p", {}, inWords(d, k))]),
             mus.length ? h("div", { class: mus.length > 1 ? "grid-2" : "" }, mus)

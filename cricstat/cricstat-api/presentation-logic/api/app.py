@@ -205,6 +205,11 @@ def create_app(cfg: Optional[Config] = None) -> FastAPI:
         return envelope(request, *h2h_service.players(db, a_id, b_id, scope),
                         extra_filters={"scope": scope})
 
+    @app.get("/v1/h2h/dismissals/{batter_id}/{bowler_id}")
+    def h2h_dismissals(request: Request, batter_id: str, bowler_id: str, scope: str = "ODI"):
+        return envelope(request, *h2h_service.dismissals(db, batter_id, bowler_id, scope),
+                        extra_filters={"scope": scope})
+
     @app.get("/v1/h2h/opponents/{player_id}")
     def h2h_opponents(request: Request, player_id: str, scope: str = "ODI",
                       role: str = Query("any", alias="as"),

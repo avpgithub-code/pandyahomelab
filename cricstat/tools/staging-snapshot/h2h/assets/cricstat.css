@@ -794,3 +794,8 @@ a.about-trigger[aria-current="page"] { background: rgba(255,153,51,.22); border-
 .h-pop { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem 1.4rem; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
 .grid-2 { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
 .grid-3 { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.h-more { border: 1px solid var(--border); background: transparent; color: var(--saffron); font: inherit; font-weight: 700;
+  padding: .15rem .6rem; border-radius: 999px; cursor: pointer; margin-left: .2rem; }
+.h-more:hover, .h-more:focus-visible { border-color: var(--saffron); background: rgba(255,153,51,.08); }
+.h-outs { margin-top: .7rem; }
+.h-outs td, .h-outs th { white-space: nowrap; }

@@ -114,3 +114,41 @@ def opponents(db: ServingDB, player_id: str, scope: str, role: str, limit: Optio
         r["full_name"] = names.get(r["player_id"], {}).get("full_name", r["name"])
     return out, {"balls": DEFS["balls"], "outs": DEFS["outs"],
                  "roles": "batter = this player batted against them; bowler = bowled to them."}
+
+
+def _how_out(kind: str, fielders: Optional[str], bowler: str) -> str:
+    """Scorecard notation: 'c Cook b Anderson', 'lbw b Anderson', 'st Dhoni b Swann'."""
+    if kind == "caught and bowled":
+        return "c & b " + bowler
+    prefix = {"caught": "c ", "stumped": "st "}.get(kind)
+    if prefix and fielders:
+        return prefix + fielders + " b " + bowler
+    lead = {"bowled": "b ", "lbw": "lbw b ", "hit wicket": "hit wicket b "}
+    return lead.get(kind, kind + " b ") + bowler
+
+
+def _outcome(r: dict) -> str:
+    if r["result"] != "win":
+        return {"draw": "drawn", "tie": "tied"}.get(r["result"], "no result")
+    return "won" if r["winner_key"] == r["team_key"] else "lost"
+
+
+def dismissals(db: ServingDB, batter_id: str, bowler_id: str, scope: str
+               ) -> Tuple[List[dict], dict]:
+    """Every time the bowler dismissed the batter: the rows behind the matchup's outs."""
+    _ready(db)
+    scope = _scope(scope)
+    if batter_id == bowler_id:
+        raise BadFilter("pick two different players")
+    bat, bowl = _player(db, batter_id), _player(db, bowler_id)
+    rows = h2h_repo.dismissal_list(db, scope, bat["player_key"], bowl["player_key"])
+    out = [{"match_id": r["match_id"], "date": r["start_date"], "venue": r["venue"],
+            "city": r["city"], "innings": r["innings_no"], "ball": r["ball_label"],
+            "kind": r["kind"], "fielders": r["fielders"],
+            "how": _how_out(r["kind"], r["fielders"], bowl["name"]),
+            "score": {"runs": r["runs"], "balls": r["balls_faced"]},
+            "team": r["team"], "opponent": r["opponent"], "outcome": _outcome(r)} for r in rows]
+    return out, {"how": "Scorecard notation: c = caught by, st = stumped by, b = bowler.",
+                 "score": "The batter's runs (balls) in that innings.",
+                 "ball": "Over.ball of the dismissal as the scorers numbered it.",
+                 "outcome": "The match result for the batter's team."}

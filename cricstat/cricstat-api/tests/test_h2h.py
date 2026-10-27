@@ -117,3 +117,20 @@ def test_team_results_filter_by_opponent(client):
     assert only and all(r["opponent"]["slug"] == "australia-men" for r in only)
     assert len(only) == sum(r["opponent"]["slug"] == "australia-men" for r in every)
     assert client.get("/v1/teams/india-men/results?opponent=nowhere-men").status_code == 404
+
+
+@pytest.mark.parametrize("scope", ["ODI", "TEST", "T20I"])
+def test_dismissal_list_adds_up_to_the_outs(client, pair, scope):
+    m = data(client, "/v1/h2h/players/%s/%s?scope=%s" % (pair[0], pair[1], scope))["matchup"]
+    rows = data(client, "/v1/h2h/dismissals/%s/%s?scope=%s" % (pair[0], pair[1], scope))
+    outs = m["a_batting"]["outs"] if m["a_batting"] else 0
+    assert len(rows) == outs
+    kinds = {}
+    for r in rows:
+        kinds[r["kind"]] = kinds.get(r["kind"], 0) + 1
+        assert r["outcome"] in ("won", "lost", "drawn", "tied", "no result")
+        assert " b " in r["how"] or r["how"].startswith("c & b ")
+        assert r["score"]["balls"] is not None
+    want = (m["a_batting"] or {"dismissals": []})["dismissals"]
+    assert kinds == {k["kind"]: k["n"] for k in want}
+    assert [r["date"] for r in rows] == sorted(r["date"] for r in rows)
