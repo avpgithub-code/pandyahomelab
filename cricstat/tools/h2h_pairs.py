@@ -261,7 +261,7 @@ def main() -> int:
     order = {"matchup": 0, "comparison": 1, "country": 2}
     rows.sort(key=lambda r: (order[r["kind"]], r["gender"] != "male", r["source"] != "picked"))
     with open(OUT, "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=COLUMNS)
+        w = csv.DictWriter(f, fieldnames=COLUMNS, lineterminator="\n")
         w.writeheader()
         w.writerows(rows)
     count = defaultdict(int)
