@@ -143,7 +143,10 @@ Specific parts:
 | H2 | Golden head-to-heads (you check the references) | **List ready** d9bfb9f (`docs/validation/h2h-golden.csv`, 70 rows); **owner filling references** |
 | H3 | API endpoints + tests | **Done** 28c232d: 2 endpoints + `opponent` filter on team results; 95 API tests |
 | H4 | Landing page (picker + popular list) + result templates (matchup, comparison, country) + nav and "Compare with…" entry points, previewed in staging | **Built** 81816b1, b3f6039 (format tabs in the picker row, owner request), d8b68e4 ("See all N" dismissal list on each matchup, owner idea; liked 2026-10-27); **owner reviewing** |
-| H5 | Pair selection (you edit the hand-picked lists), SEO heads, sitemap, share cards, then the deploy | Not started |
+| H5a | Pair selection: your list `docs/h2h/picked.csv` + data rules → `docs/h2h/pairs.csv` (`tools/h2h_pairs.py`); landing page lists it | **Built** 2026-10-27: 154 pairs (92 matchups, 30 comparisons, 32 countries); **owner editing picks** |
+| H5b | Server-rendered pair pages (title, description, canonical, JSON-LD, "in words"), `index` only for `pairs.csv`, sitemap, reverse-order 301, nginx route | Not started |
+| H5c | Share cards (1200 × 627) | Not started |
+| Deploy | §10 deploy order | Not started |
 
 Runs alongside P1b: it touches the pipeline build and the API, not the models.
 
@@ -164,6 +167,7 @@ Runs alongside P1b: it touches the pipeline build and the API, not the models.
 | Matchup marts (H1) | `cricstat/sql/serving_schema.sql` (`matchups`, `matchup_outs`), `cricstat-pipeline/db-logic/marts/marts.sql` (section "Batter v bowler"), checks `matchup_bat_diff` / `matchup_outs_diff` in `serving_store.measure` + `build_checks.py`, tests `tests/serving/test_matchups.py` |
 | Golden list (H2) | `cricstat/tools/h2h_golden.py` → `docs/validation/h2h-golden.csv` (re-runs keep the owner's columns; uses the mart when present, else the same rules on deliveries) |
 | API (H3) | `cricstat-api/db-logic/repository/h2h_repo.py`, `application-logic/services/h2h_service.py`, routes in `presentation-logic/api/app.py`, tests `tests/test_h2h.py`; documented in `docs/F5-api-contract.md` |
+| Pairs (H5a) | `docs/h2h/picked.csv` (owner's list: kind, a, b, note; slugs, never names) → `python3 cricstat/tools/h2h_pairs.py [--db …]` → `docs/h2h/pairs.csv` (the indexed set; prints `NOT USED` lines for picks that fail a rule, exit 1). Rules and quotas are constants at the top of the tool. Re-run, then `gen_pages.py`, after editing picks |
 | Pages (H4) | `tools/staging/web/assets/h2h.js` + CSS at the end of `cricstat.css`; shell from `tools/gen_pages.py` (`H2H`, `H2H_POPULAR`, nav item, V=124); "Compare with…" in `players.js`, "⚔ Head to head" in `countries.js`. `tools/staging/` is gitignored, so the tracked copy is `tools/staging-snapshot/h2h/` (README + `changes-to-live-files.diff`). Refresh the snapshot after every staging edit. |
 
 **Private preview (what the owner reviews)**

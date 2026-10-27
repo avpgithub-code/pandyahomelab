@@ -1,0 +1,35 @@
+kind,a,b,note
+matchup,da-warner-dcce6f09,scj-broad-eba6a852,Warner v Broad (Ashes)
+matchup,ba-stokes-e087956b,r-ashwin-495d42a5,Stokes v Ashwin
+matchup,sr-tendulkar-d2c2b2d5,jm-anderson-d12143bf,Tendulkar v Anderson
+matchup,v-kohli-ba607b88,jm-anderson-d12143bf,Kohli v Anderson
+matchup,ca-pujara-d4f9dbd4,nm-lyon-96a6a7ad,Pujara v Lyon
+matchup,da-warner-dcce6f09,r-ashwin-495d42a5,Warner v Ashwin
+matchup,spd-smith-30a45b23,jj-bumrah-462411b3,Smith v Bumrah
+matchup,je-root-a343262c,jj-bumrah-462411b3,Root v Bumrah
+matchup,v-kohli-ba607b88,jr-hazlewood-03806cf8,Kohli v Hazlewood
+matchup,v-kohli-ba607b88,tg-southee-13c35c9e,Kohli v Southee
+matchup,rg-sharma-740742ef,ma-starc-3fb19989,Rohit v Starc
+matchup,rg-sharma-740742ef,shaheen-shah-afridi-45a7e761,Rohit v Shaheen
+matchup,s-mandhana-5d2eda89,s-ecclestone-cdb82f1c,Mandhana v Ecclestone
+matchup,s-mandhana-5d2eda89,ea-perry-be150fc8,Mandhana v Perry
+matchup,h-kaur-53cd8da6,ea-perry-be150fc8,Harmanpreet v Perry
+matchup,spd-smith-30a45b23,scj-broad-eba6a852,Smith v Broad (Ashes)
+matchup,je-root-a343262c,pj-cummins-ded9240e,Root v Cummins (Ashes)
+matchup,v-kohli-ba607b88,pj-cummins-ded9240e,Kohli v Cummins
+matchup,spd-smith-30a45b23,r-ashwin-495d42a5,Smith v Ashwin
+matchup,je-root-a343262c,r-ashwin-495d42a5,Root v Ashwin
+matchup,tm-head-12b610c2,mohammed-siraj-2f49c897,Head v Siraj
+matchup,babar-azam-8a75e999,ma-starc-3fb19989,Babar v Starc
+comparison,v-kohli-ba607b88,je-root-a343262c,Kohli v Root
+comparison,v-kohli-ba607b88,spd-smith-30a45b23,Kohli v Smith
+comparison,je-root-a343262c,spd-smith-30a45b23,Root v Smith
+comparison,v-kohli-ba607b88,ks-williamson-d027ba9f,Kohli v Williamson
+comparison,v-kohli-ba607b88,babar-azam-8a75e999,Kohli v Babar
+comparison,v-kohli-ba607b88,rg-sharma-740742ef,Kohli v Rohit
+comparison,shubman-gill-b4b99816,babar-azam-8a75e999,Gill v Babar
+comparison,jj-bumrah-462411b3,ma-starc-3fb19989,Bumrah v Starc
+comparison,jm-anderson-d12143bf,scj-broad-eba6a852,Anderson v Broad
+comparison,s-mandhana-5d2eda89,mm-lanning-27e003ce,Mandhana v Lanning
+country,india-men,pakistan-men,India v Pakistan (few bilateral meetings, so the data rule alone misses it)
+country,india-women,pakistan-women,India v Pakistan women

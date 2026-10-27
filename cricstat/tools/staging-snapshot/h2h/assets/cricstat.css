@@ -799,3 +799,8 @@ a.about-trigger[aria-current="page"] { background: rgba(255,153,51,.22); border-
 .h-more:hover, .h-more:focus-visible { border-color: var(--saffron); background: rgba(255,153,51,.08); }
 .h-outs { margin-top: .7rem; }
 .h-outs td, .h-outs th { white-space: nowrap; }
+.h-pop-kind { margin-top: 1.6rem; }
+.h-pop-kind h3 { margin: 0 0 .2rem; font-size: 1.15rem; }
+.h-pop-g { margin: .9rem 0 .45rem; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--saffron); }
+.h-pop li { line-height: 1.35; }
+.h-pop li .tiny { display: block; }

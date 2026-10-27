@@ -1,0 +1,155 @@
+kind,path,a,b,a_name,b_name,gender,source,why
+matchup,da-warner-dcce6f09-vs-scj-broad-eba6a852,da-warner-dcce6f09,scj-broad-eba6a852,David Warner,Stuart Broad,male,picked,"Test: 862 balls, 17 dismissals"
+matchup,ba-stokes-e087956b-vs-r-ashwin-495d42a5,ba-stokes-e087956b,r-ashwin-495d42a5,Ben Stokes,Ravichandran Ashwin,male,picked,"Test: 757 balls, 15 dismissals"
+matchup,jm-anderson-d12143bf-vs-sr-tendulkar-d2c2b2d5,jm-anderson-d12143bf,sr-tendulkar-d2c2b2d5,James Anderson,Sachin Tendulkar,male,picked,"Test: 332 balls, 8 dismissals"
+matchup,jm-anderson-d12143bf-vs-v-kohli-ba607b88,jm-anderson-d12143bf,v-kohli-ba607b88,James Anderson,Virat Kohli,male,picked,"Test: 710 balls, 7 dismissals"
+matchup,ca-pujara-d4f9dbd4-vs-nm-lyon-96a6a7ad,ca-pujara-d4f9dbd4,nm-lyon-96a6a7ad,Cheteshwar Pujara,Nathan Lyon,male,picked,"Test: 1296 balls, 13 dismissals"
+matchup,da-warner-dcce6f09-vs-r-ashwin-495d42a5,da-warner-dcce6f09,r-ashwin-495d42a5,David Warner,Ravichandran Ashwin,male,picked,"Test: 428 balls, 11 dismissals"
+matchup,jj-bumrah-462411b3-vs-spd-smith-30a45b23,jj-bumrah-462411b3,spd-smith-30a45b23,Jasprit Bumrah,Steve Smith,male,picked,"Test: 227 balls, 4 dismissals"
+matchup,je-root-a343262c-vs-jj-bumrah-462411b3,je-root-a343262c,jj-bumrah-462411b3,Joe Root,Jasprit Bumrah,male,picked,"Test: 684 balls, 13 dismissals"
+matchup,jr-hazlewood-03806cf8-vs-v-kohli-ba607b88,jr-hazlewood-03806cf8,v-kohli-ba607b88,Josh Hazlewood,Virat Kohli,male,picked,"Test: 367 balls, 5 dismissals"
+matchup,tg-southee-13c35c9e-vs-v-kohli-ba607b88,tg-southee-13c35c9e,v-kohli-ba607b88,Tim Southee,Virat Kohli,male,picked,"Test: 276 balls, 3 dismissals"
+matchup,ma-starc-3fb19989-vs-rg-sharma-740742ef,ma-starc-3fb19989,rg-sharma-740742ef,Mitchell Starc,Rohit Sharma,male,picked,"Test: 219 balls, 0 dismissals"
+matchup,rg-sharma-740742ef-vs-shaheen-shah-afridi-45a7e761,rg-sharma-740742ef,shaheen-shah-afridi-45a7e761,Rohit Sharma,Shaheen Shah Afridi,male,picked,"ODI: 60 balls, 3 dismissals"
+matchup,scj-broad-eba6a852-vs-spd-smith-30a45b23,scj-broad-eba6a852,spd-smith-30a45b23,Stuart Broad,Steve Smith,male,picked,"Test: 1101 balls, 11 dismissals"
+matchup,je-root-a343262c-vs-pj-cummins-ded9240e,je-root-a343262c,pj-cummins-ded9240e,Joe Root,Pat Cummins,male,picked,"Test: 614 balls, 15 dismissals"
+matchup,pj-cummins-ded9240e-vs-v-kohli-ba607b88,pj-cummins-ded9240e,v-kohli-ba607b88,Pat Cummins,Virat Kohli,male,picked,"Test: 356 balls, 5 dismissals"
+matchup,r-ashwin-495d42a5-vs-spd-smith-30a45b23,r-ashwin-495d42a5,spd-smith-30a45b23,Ravichandran Ashwin,Steve Smith,male,picked,"Test: 765 balls, 8 dismissals"
+matchup,je-root-a343262c-vs-r-ashwin-495d42a5,je-root-a343262c,r-ashwin-495d42a5,Joe Root,Ravichandran Ashwin,male,picked,"Test: 798 balls, 10 dismissals"
+matchup,mohammed-siraj-2f49c897-vs-tm-head-12b610c2,mohammed-siraj-2f49c897,tm-head-12b610c2,Mohammed Siraj,Travis Head,male,picked,"Test: 186 balls, 5 dismissals"
+matchup,babar-azam-8a75e999-vs-ma-starc-3fb19989,babar-azam-8a75e999,ma-starc-3fb19989,Babar Azam,Mitchell Starc,male,picked,"Test: 259 balls, 3 dismissals"
+matchup,je-root-a343262c-vs-ra-jadeja-fe93fd9d,je-root-a343262c,ra-jadeja-fe93fd9d,Joe Root,Ravindra Jadeja,male,data,"Test: 1602 balls, 11 dismissals"
+matchup,kc-sangakkara-6b71e6cf-vs-saeed-ajmal-05d74535,kc-sangakkara-6b71e6cf,saeed-ajmal-05d74535,Kumar Sangakkara,Saeed Ajmal,male,data,"Test: 1224 balls, 4 dismissals"
+matchup,nm-lyon-96a6a7ad-vs-v-kohli-ba607b88,nm-lyon-96a6a7ad,v-kohli-ba607b88,Nathan Lyon,Virat Kohli,male,data,"Test: 1106 balls, 7 dismissals"
+matchup,jm-anderson-d12143bf-vs-spd-smith-30a45b23,jm-anderson-d12143bf,spd-smith-30a45b23,James Anderson,Steve Smith,male,data,"Test: 1086 balls, 8 dismissals"
+matchup,ba-stokes-e087956b-vs-nm-lyon-96a6a7ad,ba-stokes-e087956b,nm-lyon-96a6a7ad,Ben Stokes,Nathan Lyon,male,data,"Test: 1031 balls, 10 dismissals"
+matchup,je-root-a343262c-vs-nm-lyon-96a6a7ad,je-root-a343262c,nm-lyon-96a6a7ad,Joe Root,Nathan Lyon,male,data,"Test: 892 balls, 9 dismissals"
+matchup,je-root-a343262c-vs-ma-starc-3fb19989,je-root-a343262c,ma-starc-3fb19989,Joe Root,Mitchell Starc,male,data,"Test: 865 balls, 13 dismissals"
+matchup,ad-mathews-896d78ad-vs-saeed-ajmal-05d74535,ad-mathews-896d78ad,saeed-ajmal-05d74535,Angelo Mathews,Saeed Ajmal,male,data,"Test: 820 balls, 5 dismissals"
+matchup,azhar-ali-211de69f-vs-hmrkb-herath-d2fcce2f,azhar-ali-211de69f,hmrkb-herath-d2fcce2f,Azhar Ali,HMRKB Herath,male,data,"Test: 819 balls, 10 dismissals"
+matchup,an-cook-f41598c1-vs-r-ashwin-495d42a5,an-cook-f41598c1,r-ashwin-495d42a5,Alastair Cook,Ravichandran Ashwin,male,data,"Test: 819 balls, 9 dismissals"
+matchup,ca-pujara-d4f9dbd4-vs-jm-anderson-d12143bf,ca-pujara-d4f9dbd4,jm-anderson-d12143bf,Cheteshwar Pujara,James Anderson,male,data,"Test: 812 balls, 12 dismissals"
+matchup,ra-jadeja-fe93fd9d-vs-spd-smith-30a45b23,ra-jadeja-fe93fd9d,spd-smith-30a45b23,Ravindra Jadeja,Steve Smith,male,data,"Test: 806 balls, 8 dismissals"
+matchup,hmrkb-herath-d2fcce2f-vs-misbah-ul-haq-7eae4418,hmrkb-herath-d2fcce2f,misbah-ul-haq-7eae4418,HMRKB Herath,Misbah-ul-Haq,male,data,"Test: 797 balls, 9 dismissals"
+matchup,hm-amla-e798611a-vs-jm-anderson-d12143bf,hm-amla-e798611a,jm-anderson-d12143bf,Hashim Amla,James Anderson,male,data,"Test: 786 balls, 2 dismissals"
+matchup,hm-amla-e798611a-vs-scj-broad-eba6a852,hm-amla-e798611a,scj-broad-eba6a852,Hashim Amla,Stuart Broad,male,data,"Test: 768 balls, 8 dismissals"
+matchup,ca-pujara-d4f9dbd4-vs-jr-hazlewood-03806cf8,ca-pujara-d4f9dbd4,jr-hazlewood-03806cf8,Cheteshwar Pujara,Josh Hazlewood,male,data,"Test: 761 balls, 6 dismissals"
+matchup,an-cook-f41598c1-vs-m-morkel-5bb5a915,an-cook-f41598c1,m-morkel-5bb5a915,Alastair Cook,Morné Morkel,male,data,"Test: 735 balls, 12 dismissals"
+matchup,hmrkb-herath-d2fcce2f-vs-younis-khan-33cb3411,hmrkb-herath-d2fcce2f,younis-khan-33cb3411,HMRKB Herath,Younis Khan,male,data,"Test: 727 balls, 8 dismissals"
+matchup,ba-stokes-e087956b-vs-jo-holder-0f721006,ba-stokes-e087956b,jo-holder-0f721006,Ben Stokes,Jason Holder,male,data,"Test: 691 balls, 6 dismissals"
+matchup,gp-swann-221ad9d9-vs-mj-clarke-f842c2cf,gp-swann-221ad9d9,mj-clarke-f842c2cf,Graeme Swann,Michael Clarke,male,data,"Test: 665 balls, 4 dismissals"
+matchup,ba-stokes-e087956b-vs-ra-jadeja-fe93fd9d,ba-stokes-e087956b,ra-jadeja-fe93fd9d,Ben Stokes,Ravindra Jadeja,male,data,"Test: 649 balls, 11 dismissals"
+matchup,an-cook-f41598c1-vs-i-sharma-5bb1a1c4,an-cook-f41598c1,i-sharma-5bb1a1c4,Alastair Cook,Ishant Sharma,male,data,"Test: 646 balls, 11 dismissals"
+matchup,e-chigumbura-d2babdd5-vs-shakib-al-hasan-7dc35884,e-chigumbura-d2babdd5,shakib-al-hasan-7dc35884,Elton Chigumbura,Shakib Al Hasan,male,data,"ODI: 426 balls, 11 dismissals"
+matchup,dpmd-jayawardene-d18f9182-vs-shahid-afridi-0dc00542,dpmd-jayawardene-d18f9182,shahid-afridi-0dc00542,DPMD Jayawardene,Shahid Afridi,male,data,"ODI: 317 balls, 5 dismissals"
+matchup,p-utseya-9de271ef-vs-shakib-al-hasan-7dc35884,p-utseya-9de271ef,shakib-al-hasan-7dc35884,Prosper Utseya,Shakib Al Hasan,male,data,"ODI: 311 balls, 4 dismissals"
+matchup,brm-taylor-53597be1-vs-shakib-al-hasan-7dc35884,brm-taylor-53597be1,shakib-al-hasan-7dc35884,Brendan Taylor,Shakib Al Hasan,male,data,"ODI: 300 balls, 8 dismissals"
+matchup,a-zampa-14f96089-vs-v-kohli-ba607b88,a-zampa-14f96089,v-kohli-ba607b88,Adam Zampa,Virat Kohli,male,data,"ODI: 295 balls, 6 dismissals"
+matchup,kc-sangakkara-6b71e6cf-vs-z-khan-91a4a398,kc-sangakkara-6b71e6cf,z-khan-91a4a398,Kumar Sangakkara,Zaheer Khan,male,data,"ODI: 281 balls, 5 dismissals"
+matchup,kc-sangakkara-6b71e6cf-vs-shahid-afridi-0dc00542,kc-sangakkara-6b71e6cf,shahid-afridi-0dc00542,Kumar Sangakkara,Shahid Afridi,male,data,"ODI: 277 balls, 6 dismissals"
+matchup,m-muralitharan-4ba44e19-vs-ms-dhoni-4a8a2e3b,m-muralitharan-4ba44e19,ms-dhoni-4a8a2e3b,Muttiah Muralitharan,MS Dhoni,male,data,"ODI: 276 balls, 2 dismissals"
+matchup,kaj-roach-78eb4223-vs-v-kohli-ba607b88,kaj-roach-78eb4223,v-kohli-ba607b88,Kemar Roach,Virat Kohli,male,data,"ODI: 275 balls, 2 dismissals"
+matchup,mohammad-hafeez-9ab63e7b-vs-nltc-perera-0f12f9df,mohammad-hafeez-9ab63e7b,nltc-perera-0f12f9df,Mohammad Hafeez,NLTC Perera,male,data,"ODI: 274 balls, 6 dismissals"
+matchup,ad-mathews-896d78ad-vs-mohammad-hafeez-9ab63e7b,ad-mathews-896d78ad,mohammad-hafeez-9ab63e7b,Angelo Mathews,Mohammad Hafeez,male,data,"ODI: 274 balls, 4 dismissals"
+matchup,ab-de-villiers-c4487b84-vs-shahid-afridi-0dc00542,ab-de-villiers-c4487b84,shahid-afridi-0dc00542,AB de Villiers,Shahid Afridi,male,data,"ODI: 268 balls, 5 dismissals"
+matchup,wu-tharanga-7ed9fd56-vs-z-khan-91a4a398,wu-tharanga-7ed9fd56,z-khan-91a4a398,Upul Tharanga,Zaheer Khan,male,data,"ODI: 264 balls, 8 dismissals"
+matchup,tm-dilshan-5bdcdb72-vs-z-khan-91a4a398,tm-dilshan-5bdcdb72,z-khan-91a4a398,Tillakaratne Dilshan,Zaheer Khan,male,data,"ODI: 259 balls, 6 dismissals"
+matchup,kaj-roach-78eb4223-vs-rg-sharma-740742ef,kaj-roach-78eb4223,rg-sharma-740742ef,Kemar Roach,Rohit Sharma,male,data,"ODI: 257 balls, 4 dismissals"
+matchup,kuldeep-yadav-8d2c70ad-vs-sd-hope-1fc6ef83,kuldeep-yadav-8d2c70ad,sd-hope-1fc6ef83,Kuldeep Yadav,Shai Hope,male,data,"ODI: 256 balls, 4 dismissals"
+matchup,mehedi-hasan-miraz-c58b0108-vs-sd-hope-1fc6ef83,mehedi-hasan-miraz-c58b0108,sd-hope-1fc6ef83,Mehedi Hasan Miraz,Shai Hope,male,data,"ODI: 249 balls, 2 dismissals"
+matchup,aj-finch-b8d490fd-vs-b-kumar-2e81a32d,aj-finch-b8d490fd,b-kumar-2e81a32d,Aaron Finch,Bhuvneshwar Kumar,male,data,"ODI: 234 balls, 4 dismissals"
+matchup,au-rashid-249d60c9-vs-lrpl-taylor-b61a3e1a,au-rashid-249d60c9,lrpl-taylor-b61a3e1a,Adil Rashid,LRPL Taylor,male,data,"ODI: 233 balls, 1 dismissals"
+matchup,pj-cummins-ded9240e-vs-rg-sharma-740742ef,pj-cummins-ded9240e,rg-sharma-740742ef,Pat Cummins,Rohit Sharma,male,data,"ODI: 232 balls, 2 dismissals"
+matchup,aj-hosein-4d7f517e-vs-pd-salt-3d284ca3,aj-hosein-4d7f517e,pd-salt-3d284ca3,Akeal Hosein,Philip Salt,male,data,"T20I: 97 balls, 3 dismissals"
+matchup,shaheen-shah-afridi-45a7e761-vs-tl-seifert-4663bd23,shaheen-shah-afridi-45a7e761,tl-seifert-4663bd23,Shaheen Shah Afridi,Tim Seifert,male,data,"T20I: 91 balls, 5 dismissals"
+matchup,aj-hosein-4d7f517e-vs-jc-buttler-99b75528,aj-hosein-4d7f517e,jc-buttler-99b75528,Akeal Hosein,Jos Buttler,male,data,"T20I: 89 balls, 4 dismissals"
+matchup,au-rashid-249d60c9-vs-r-powell-650d5e49,au-rashid-249d60c9,r-powell-650d5e49,Adil Rashid,Rovman Powell,male,data,"T20I: 85 balls, 4 dismissals"
+matchup,mohammad-rizwan-2f26ac1a-vs-tg-southee-13c35c9e,mohammad-rizwan-2f26ac1a,tg-southee-13c35c9e,Mohammad Rizwan,Tim Southee,male,data,"T20I: 79 balls, 3 dismissals"
+matchup,au-rashid-249d60c9-vs-n-pooran-3241e3fd,au-rashid-249d60c9,n-pooran-3241e3fd,Adil Rashid,Nicolas Pooran,male,data,"T20I: 75 balls, 4 dismissals"
+matchup,ak-markram-6a26221c-vs-arshdeep-singh-244048f6,ak-markram-6a26221c,arshdeep-singh-244048f6,Aiden Markram,Arshdeep Singh,male,data,"T20I: 74 balls, 5 dismissals"
+matchup,mj-santner-e4a0deae-vs-sa-yadav-271f83cd,mj-santner-e4a0deae,sa-yadav-271f83cd,Mitchell Santner,Suryakumar Yadav,male,data,"T20I: 73 balls, 3 dismissals"
+matchup,s-ecclestone-cdb82f1c-vs-s-mandhana-5d2eda89,s-ecclestone-cdb82f1c,s-mandhana-5d2eda89,Sophie Ecclestone,Smriti Mandhana,female,picked,"ODI: 142 balls, 4 dismissals"
+matchup,ea-perry-be150fc8-vs-s-mandhana-5d2eda89,ea-perry-be150fc8,s-mandhana-5d2eda89,Ellyse Perry,Smriti Mandhana,female,picked,"ODI: 78 balls, 0 dismissals"
+matchup,ea-perry-be150fc8-vs-h-kaur-53cd8da6,ea-perry-be150fc8,h-kaur-53cd8da6,Ellyse Perry,Harmanpreet Kaur,female,picked,"ODI: 89 balls, 1 dismissals"
+matchup,ac-kerr-7673c908-vs-nr-sciver-f3a18a0c,ac-kerr-7673c908,nr-sciver-f3a18a0c,Amelia Kerr,Natalie Sciver,female,data,"ODI: 275 balls, 5 dismissals"
+matchup,ea-perry-be150fc8-vs-nr-sciver-f3a18a0c,ea-perry-be150fc8,nr-sciver-f3a18a0c,Ellyse Perry,Natalie Sciver,female,data,"ODI: 260 balls, 2 dismissals"
+matchup,db-sharma-201fef33-vs-m-kapp-63e3b6b3,db-sharma-201fef33,m-kapp-63e3b6b3,Deepti Sharma,Marizanne Kapp,female,data,"ODI: 214 balls, 4 dismissals"
+matchup,ea-perry-be150fc8-vs-sw-bates-89bbc67a,ea-perry-be150fc8,sw-bates-89bbc67a,Ellyse Perry,Suzie Bates,female,data,"ODI: 208 balls, 1 dismissals"
+matchup,a-king-83558266-vs-nr-sciver-f3a18a0c,a-king-83558266,nr-sciver-f3a18a0c,Alana King,Natalie Sciver,female,data,"ODI: 204 balls, 2 dismissals"
+matchup,bl-mooney-52d1dbc8-vs-db-sharma-201fef33,bl-mooney-52d1dbc8,db-sharma-201fef33,Beth Mooney,Deepti Sharma,female,data,"ODI: 203 balls, 4 dismissals"
+matchup,ac-jayangani-ac56b5a7-vs-db-sharma-201fef33,ac-jayangani-ac56b5a7,db-sharma-201fef33,AC Jayangani,Deepti Sharma,female,data,"ODI: 197 balls, 4 dismissals"
+matchup,ml-schutt-17608a6f-vs-tt-beaumont-b2664905,ml-schutt-17608a6f,tt-beaumont-b2664905,Megan Schutt,Tammy Beaumont,female,data,"ODI: 196 balls, 3 dismissals"
+matchup,l-wolvaardt-e60f81c9-vs-nashra-sandhu-c981d3c2,l-wolvaardt-e60f81c9,nashra-sandhu-c981d3c2,Laura Wolvaardt,Nashra Sandhu,female,data,"ODI: 196 balls, 2 dismissals"
+matchup,ac-jayangani-ac56b5a7-vs-m-kapp-63e3b6b3,ac-jayangani-ac56b5a7,m-kapp-63e3b6b3,AC Jayangani,Marizanne Kapp,female,data,"ODI: 194 balls, 3 dismissals"
+matchup,nashra-sandhu-c981d3c2-vs-sr-taylor-92cf79a8,nashra-sandhu-c981d3c2,sr-taylor-92cf79a8,Nashra Sandhu,Stafanie Taylor,female,data,"ODI: 190 balls, 5 dismissals"
+matchup,j-goswami-84f1ae7f-vs-tt-beaumont-b2664905,j-goswami-84f1ae7f,tt-beaumont-b2664905,Jhulan Goswami,Tammy Beaumont,female,data,"ODI: 185 balls, 6 dismissals"
+matchup,bl-mooney-52d1dbc8-vs-renuka-singh-7298db76,bl-mooney-52d1dbc8,renuka-singh-7298db76,Beth Mooney,Renuka Singh,female,data,"T20I: 131 balls, 4 dismissals"
+matchup,hk-matthews-d32cf49a-vs-m-kapp-63e3b6b3,hk-matthews-d32cf49a,m-kapp-63e3b6b3,Hayley Matthews,Marizanne Kapp,female,data,"T20I: 129 balls, 8 dismissals"
+matchup,dn-wyatt-a139c379-vs-ml-schutt-17608a6f,dn-wyatt-a139c379,ml-schutt-17608a6f,Danielle Wyatt,Megan Schutt,female,data,"T20I: 115 balls, 5 dismissals"
+matchup,d-van-niekerk-8c5775f3-vs-sfm-devine-de69af96,d-van-niekerk-8c5775f3,sfm-devine-de69af96,Dane van Niekerk,Sophie Devine,female,data,"T20I: 113 balls, 0 dismissals"
+matchup,ac-kerr-7673c908-vs-g-wareham-f0b4e47d,ac-kerr-7673c908,g-wareham-f0b4e47d,Amelia Kerr,Georgia Wareham,female,data,"T20I: 112 balls, 3 dismissals"
+matchup,d-van-niekerk-8c5775f3-vs-hasd-siriwardene-dbd79036,d-van-niekerk-8c5775f3,hasd-siriwardene-dbd79036,Dane van Niekerk,HASD Siriwardene,female,data,"T20I: 112 balls, 3 dismissals"
+matchup,a-gardner-bc969efb-vs-ac-kerr-7673c908,a-gardner-bc969efb,ac-kerr-7673c908,Ashleigh Gardner,Amelia Kerr,female,data,"T20I: 111 balls, 5 dismissals"
+matchup,cl-tryon-4d4605e6-vs-sfm-devine-de69af96,cl-tryon-4d4605e6,sfm-devine-de69af96,Chloe Tryon,Sophie Devine,female,data,"T20I: 104 balls, 4 dismissals"
+comparison,je-root-a343262c-vs-v-kohli-ba607b88,je-root-a343262c,v-kohli-ba607b88,Joe Root,Virat Kohli,male,picked,
+comparison,spd-smith-30a45b23-vs-v-kohli-ba607b88,spd-smith-30a45b23,v-kohli-ba607b88,Steve Smith,Virat Kohli,male,picked,
+comparison,je-root-a343262c-vs-spd-smith-30a45b23,je-root-a343262c,spd-smith-30a45b23,Joe Root,Steve Smith,male,picked,
+comparison,ks-williamson-d027ba9f-vs-v-kohli-ba607b88,ks-williamson-d027ba9f,v-kohli-ba607b88,Kane Williamson,Virat Kohli,male,picked,
+comparison,babar-azam-8a75e999-vs-v-kohli-ba607b88,babar-azam-8a75e999,v-kohli-ba607b88,Babar Azam,Virat Kohli,male,picked,
+comparison,rg-sharma-740742ef-vs-v-kohli-ba607b88,rg-sharma-740742ef,v-kohli-ba607b88,Rohit Sharma,Virat Kohli,male,picked,
+comparison,babar-azam-8a75e999-vs-shubman-gill-b4b99816,babar-azam-8a75e999,shubman-gill-b4b99816,Babar Azam,Shubman Gill,male,picked,
+comparison,jj-bumrah-462411b3-vs-ma-starc-3fb19989,jj-bumrah-462411b3,ma-starc-3fb19989,Jasprit Bumrah,Mitchell Starc,male,picked,
+comparison,jm-anderson-d12143bf-vs-scj-broad-eba6a852,jm-anderson-d12143bf,scj-broad-eba6a852,James Anderson,Stuart Broad,male,picked,
+comparison,sd-hope-1fc6ef83-vs-shubman-gill-b4b99816,sd-hope-1fc6ef83,shubman-gill-b4b99816,Shai Hope,Shubman Gill,male,data,ODI runs since 2021: #1 v #2
+comparison,dj-mitchell-eade4650-vs-v-kohli-ba607b88,dj-mitchell-eade4650,v-kohli-ba607b88,Daryl Mitchell,Virat Kohli,male,data,ODI runs since 2021: #3 v #4
+comparison,babar-azam-8a75e999-vs-rg-sharma-740742ef,babar-azam-8a75e999,rg-sharma-740742ef,Babar Azam,Rohit Sharma,male,data,ODI runs since 2021: #5 v #6
+comparison,je-root-a343262c-vs-tm-head-12b610c2,je-root-a343262c,tm-head-12b610c2,Joe Root,Travis Head,male,data,Test runs since 2021: #1 v #2
+comparison,hc-brook-4ae1755b-vs-spd-smith-30a45b23,hc-brook-4ae1755b,spd-smith-30a45b23,Harry Brook,Steve Smith,male,data,Test runs since 2021: #3 v #4
+comparison,bm-duckett-5f26f677-vs-m-labuschagne-fa433be6,bm-duckett-5f26f677,m-labuschagne-fa433be6,Ben Duckett,Marnus Labuschagne,male,data,Test runs since 2021: #5 v #6
+comparison,p-nissanka-8ee36b18-vs-sikandar-raza-26d041c4,p-nissanka-8ee36b18,sikandar-raza-26d041c4,Pathum Nissanka,Sikandar Raza,male,data,T20I runs since 2021: #1 v #2
+comparison,babar-azam-8a75e999-vs-jc-buttler-99b75528,babar-azam-8a75e999,jc-buttler-99b75528,Babar Azam,Jos Buttler,male,data,T20I runs since 2021: #3 v #4
+comparison,a-zampa-14f96089-vs-shaheen-shah-afridi-45a7e761,a-zampa-14f96089,shaheen-shah-afridi-45a7e761,Adam Zampa,Shaheen Shah Afridi,male,data,ODI wickets since 2021: #1 v #2
+comparison,haris-rauf-24bb1c2f-vs-kuldeep-yadav-8d2c70ad,haris-rauf-24bb1c2f,kuldeep-yadav-8d2c70ad,Haris Rauf,Kuldeep Yadav,male,data,ODI wickets since 2021: #3 v #4
+comparison,ma-starc-3fb19989-vs-nm-lyon-96a6a7ad,ma-starc-3fb19989,nm-lyon-96a6a7ad,Mitchell Starc,Nathan Lyon,male,data,Test wickets since 2021: #1 v #2
+comparison,pj-cummins-ded9240e-vs-taijul-islam-9d1d34bd,pj-cummins-ded9240e,taijul-islam-9d1d34bd,Pat Cummins,Taijul Islam,male,data,Test wickets since 2021: #3 v #4
+comparison,arshdeep-singh-244048f6-vs-pwh-de-silva-a97c8ec2,arshdeep-singh-244048f6,pwh-de-silva-a97c8ec2,Arshdeep Singh,PWH de Silva,male,data,T20I wickets since 2021: #1 v #2
+comparison,mm-lanning-27e003ce-vs-s-mandhana-5d2eda89,mm-lanning-27e003ce,s-mandhana-5d2eda89,Meg Lanning,Smriti Mandhana,female,picked,
+comparison,l-wolvaardt-e60f81c9-vs-s-mandhana-5d2eda89,l-wolvaardt-e60f81c9,s-mandhana-5d2eda89,Laura Wolvaardt,Smriti Mandhana,female,data,ODI runs since 2021: #1 v #2
+comparison,hk-matthews-d32cf49a-vs-sidra-ameen-72c9ad99,hk-matthews-d32cf49a,sidra-ameen-72c9ad99,Hayley Matthews,Sidra Ameen,female,data,ODI runs since 2021: #3 v #4
+comparison,s-mandhana-5d2eda89-vs-shafali-verma-d8f59089,s-mandhana-5d2eda89,shafali-verma-d8f59089,Smriti Mandhana,Shafali Verma,female,data,T20I runs since 2021: #1 v #2
+comparison,ac-jayangani-ac56b5a7-vs-l-wolvaardt-e60f81c9,ac-jayangani-ac56b5a7,l-wolvaardt-e60f81c9,AC Jayangani,Laura Wolvaardt,female,data,T20I runs since 2021: #3 v #4
+comparison,a-king-83558266-vs-db-sharma-201fef33,a-king-83558266,db-sharma-201fef33,Alana King,Deepti Sharma,female,data,ODI wickets since 2021: #1 v #2
+comparison,an-kelly-397369e0-vs-db-sharma-201fef33,an-kelly-397369e0,db-sharma-201fef33,Arlene Kelly,Deepti Sharma,female,data,T20I wickets since 2021: #1 v #2
+comparison,nahida-akter-66078174-vs-sadia-iqbal-53bb50f0,nahida-akter-66078174,sadia-iqbal-53bb50f0,Nahida Akter,Sadia Iqbal,female,data,T20I wickets since 2021: #3 v #4
+country,india-men-vs-pakistan-men,india-men,pakistan-men,India,Pakistan,male,picked,"6 Tests, 46 ODIs, 18 T20Is"
+country,australia-men-vs-england-men,australia-men,england-men,Australia,England,male,data,"61 Tests, 87 ODIs, 26 T20Is"
+country,australia-men-vs-india-men,australia-men,india-men,Australia,India,male,data,"48 Tests, 86 ODIs, 37 T20Is"
+country,england-men-vs-india-men,england-men,india-men,England,India,male,data,"50 Tests, 66 ODIs, 35 T20Is"
+country,india-men-vs-sri-lanka-men,india-men,sri-lanka-men,India,Sri Lanka,male,data,"23 Tests, 90 ODIs, 33 T20Is"
+country,india-men-vs-west-indies-men,india-men,west-indies-men,India,West Indies,male,data,"24 Tests, 64 ODIs, 36 T20Is"
+country,pakistan-men-vs-sri-lanka-men,pakistan-men,sri-lanka-men,Pakistan,Sri Lanka,male,data,"28 Tests, 60 ODIs, 33 T20Is"
+country,england-men-vs-west-indies-men,england-men,west-indies-men,England,West Indies,male,data,"35 Tests, 46 ODIs, 39 T20Is"
+country,india-men-vs-south-africa-men,india-men,south-africa-men,India,South Africa,male,data,"32 Tests, 50 ODIs, 36 T20Is"
+country,australia-men-vs-south-africa-men,australia-men,south-africa-men,Australia,South Africa,male,data,"32 Tests, 58 ODIs, 28 T20Is"
+country,new-zealand-men-vs-pakistan-men,new-zealand-men,pakistan-men,New Zealand,Pakistan,male,data,"17 Tests, 51 ODIs, 49 T20Is"
+country,india-men-vs-new-zealand-men,india-men,new-zealand-men,India,New Zealand,male,data,"22 Tests, 58 ODIs, 33 T20Is"
+country,england-men-vs-south-africa-men,england-men,south-africa-men,England,South Africa,male,data,"31 Tests, 50 ODIs, 28 T20Is"
+country,england-men-vs-pakistan-men,england-men,pakistan-men,England,Pakistan,male,data,"34 Tests, 43 ODIs, 32 T20Is"
+country,england-men-vs-new-zealand-men,england-men,new-zealand-men,England,New Zealand,male,data,"30 Tests, 46 ODIs, 31 T20Is"
+country,pakistan-men-vs-south-africa-men,pakistan-men,south-africa-men,Pakistan,South Africa,male,data,"24 Tests, 54 ODIs, 26 T20Is"
+country,australia-men-vs-sri-lanka-men,australia-men,sri-lanka-men,Australia,Sri Lanka,male,data,"18 Tests, 57 ODIs, 27 T20Is"
+country,england-men-vs-sri-lanka-men,england-men,sri-lanka-men,England,Sri Lanka,male,data,"25 Tests, 55 ODIs, 20 T20Is"
+country,new-zealand-men-vs-sri-lanka-men,new-zealand-men,sri-lanka-men,New Zealand,Sri Lanka,male,data,"19 Tests, 51 ODIs, 29 T20Is"
+country,bangladesh-men-vs-zimbabwe-men,bangladesh-men,zimbabwe-men,Bangladesh,Zimbabwe,male,data,"13 Tests, 59 ODIs, 27 T20Is"
+country,australia-men-vs-pakistan-men,australia-men,pakistan-men,Australia,Pakistan,male,data,"21 Tests, 45 ODIs, 31 T20Is"
+country,india-women-vs-pakistan-women,india-women,pakistan-women,India women,Pakistan women,female,picked,"4 ODIs, 15 T20Is"
+country,australia-women-vs-england-women,australia-women,england-women,Australia women,England women,female,data,"12 Tests, 29 ODIs, 35 T20Is"
+country,england-women-vs-india-women,england-women,india-women,England women,India women,female,data,"5 Tests, 26 ODIs, 33 T20Is"
+country,australia-women-vs-india-women,australia-women,india-women,Australia women,India women,female,data,"3 Tests, 23 ODIs, 31 T20Is"
+country,australia-women-vs-new-zealand-women,australia-women,new-zealand-women,Australia women,New Zealand women,female,data,"23 ODIs, 30 T20Is"
+country,england-women-vs-new-zealand-women,england-women,new-zealand-women,England women,New Zealand women,female,data,"24 ODIs, 29 T20Is"
+country,india-women-vs-south-africa-women,india-women,south-africa-women,India women,South Africa women,female,data,"1 Tests, 24 ODIs, 24 T20Is"
+country,pakistan-women-vs-south-africa-women,pakistan-women,south-africa-women,Pakistan women,South Africa women,female,data,"22 ODIs, 24 T20Is"
+country,england-women-vs-south-africa-women,england-women,south-africa-women,England women,South Africa women,female,data,"2 Tests, 19 ODIs, 21 T20Is"
+country,south-africa-women-vs-west-indies-women,south-africa-women,west-indies-women,South Africa women,West Indies women,female,data,"20 ODIs, 19 T20Is"
+country,england-women-vs-west-indies-women,england-women,west-indies-women,England women,West Indies women,female,data,"11 ODIs, 26 T20Is"

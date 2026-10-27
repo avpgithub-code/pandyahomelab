@@ -21,7 +21,7 @@ else:
     WEB = os.path.join(CRICSTAT, "tools", "staging", "web")
     if not os.path.isdir(WEB):
         shutil.copytree(os.path.join(CRICSTAT, "web"), WEB)
-V = "125"
+V = "126"
 # P1.6 ships in two parts: False = the approved non-predictor pages only (nav "ODI WC 2027 soon", no predictor page,
 # no model numbers on the map, no predictor rows on the licences page). True at the full P1.6 deploy.
 PREDICTOR_LIVE = os.environ.get("CRICSTAT_PREDICTOR_LIVE", "1") == "1"   # live since the P1.6 launch; CRICSTAT_PREDICTOR_LIVE=0 builds the old partial set
@@ -575,24 +575,32 @@ def about_page():
     page("about/index.html", "/cricket/about/", title, desc, "about", body, [], og_type="article", extra_head=ld_json(ld))
 
 
-# Head to Head (docs/h2h-plan.md, H4): one shell for the landing page (/cricket/h2h/: picker + popular
-# head-to-heads) and every pair page (/cricket/h2h/<a>-vs-<b>/); h2h.js reads the path. The popular links are plain
-# HTML so crawlers and no-JS visitors can follow them. Starter list for the preview; H5 replaces it with the
-# curated ~150 (matchups, comparisons, countries).
-H2H_POPULAR = [
-    ("Warner v Broad", "da-warner-dcce6f09-vs-scj-broad-eba6a852", "Test matchup"),
-    ("Stokes v Ashwin", "ba-stokes-e087956b-vs-r-ashwin-495d42a5", "Test matchup"),
-    ("Kohli v Anderson", "jm-anderson-d12143bf-vs-v-kohli-ba607b88", "Test matchup"),
-    ("Root v Bumrah", "je-root-a343262c-vs-jj-bumrah-462411b3", "Test matchup"),
-    ("Pujara v Lyon", "ca-pujara-d4f9dbd4-vs-nm-lyon-96a6a7ad", "Test matchup"),
-    ("Smith v Bumrah", "jj-bumrah-462411b3-vs-spd-smith-30a45b23", "matchup"),
-    ("Mandhana v Ecclestone", "s-ecclestone-cdb82f1c-vs-s-mandhana-5d2eda89", "T20I matchup"),
-    ("Kohli v Root", "je-root-a343262c-vs-v-kohli-ba607b88", "comparison"),
-    ("India v Australia", "australia-men-vs-india-men", "men"),
-    ("India v Pakistan", "india-men-vs-pakistan-men", "men"),
-    ("The Ashes: Australia v England", "australia-men-vs-england-men", "men"),
-    ("India v Australia", "australia-women-vs-india-women", "women"),
-]
+# Head to Head (docs/h2h-plan.md, H4/H5): one shell for the landing page (/cricket/h2h/: picker + popular
+# head-to-heads) and every pair page (/cricket/h2h/<a>-vs-<b>/); h2h.js reads the path. The popular links are the
+# indexed set from docs/h2h/pairs.csv (tools/h2h_pairs.py), as plain HTML so crawlers and no-JS visitors follow them.
+H2H_GROUPS = [("matchup", "Batter v bowler", "Balls, runs and dismissals between them"),
+              ("comparison", "Player v player", "Careers side by side"),
+              ("country", "Country v country", "Every meeting of two teams")]
+
+
+def h2h_popular():
+    with open(os.path.join(CRICSTAT, "docs", "h2h", "pairs.csv"), newline="", encoding="utf-8") as f:
+        pairs = list(csv.DictReader(f))
+    out = []
+    for kind, title, sub in H2H_GROUPS:
+        cols = []
+        for g, label in (("male", "Men"), ("female", "Women")):
+            items = "".join('<li><a href="/cricket/h2h/%s/">%s v %s</a>%s</li>' % (
+                r["path"], H.escape(r["a_name"]), H.escape(r["b_name"]),
+                ' <span class="dim tiny">%s</span>' % H.escape(r["why"]) if r["why"] else "")
+                for r in pairs if r["kind"] == kind and r["gender"] == g)
+            if items:
+                cols.append('<h4 class="h-pop-g">%s</h4><ul class="h-pop">%s</ul>' % (label, items))
+        out.append('<div class="h-pop-kind"><h3>%s <span class="dim tiny">%s</span></h3>%s</div>'
+                   % (title, sub, "".join(cols)))
+    return "".join(out)
+
+
 H2H = '''<header class="hero left">
   <div class="wrap">
     <div class="eyebrow"><span class="dot"></span>Head to Head</div>
@@ -604,11 +612,10 @@ H2H = '''<header class="hero left">
 <div id="h-result" aria-live="polite"></div>
 <section class="section panel" id="h-popular"><div class="wrap">
   <div class="section-label">Popular</div><h2 class="section-title">Popular head-to-heads</h2>
-  <ul class="h-pop">@@POPULAR@@</ul>
+  <p class="small dim">The head-to-heads with the most history in our data, plus rivalries fans ask about. Any other pair works from the picker above.</p>
+  @@POPULAR@@
 </div></section>
-'''.replace("@@POPULAR@@", "".join(
-    '<li><a href="/cricket/h2h/%s/">%s</a> <span class="dim tiny">%s</span></li>' % (s_, H.escape(n), H.escape(k))
-    for n, s_, k in H2H_POPULAR))
+'''.replace("@@POPULAR@@", h2h_popular())
 page("h2h/index.html", "/cricket/h2h/", "Head to Head: player and country comparisons — cricstat | pandyaHomeLab",
      "Compare two cricketers or two countries side by side: careers by format, batter v bowler matchups (balls, runs, "
      "dismissals) and every meeting of two teams, from ball-by-ball data.",
