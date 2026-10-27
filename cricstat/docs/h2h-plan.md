@@ -1,7 +1,9 @@
 # cricstat Head to Head — plan
 
-Status: **approved 2026-10-26** (decisions in §9). Branch `feat/cricstat-h2h`. Built step by step with a review
-stop after each step (§8).
+Status (2026-10-26): **H1–H4 built, nothing deployed.** Branch `feat/cricstat-h2h`, draft PR
+[#2](https://github.com/avpgithub-code/pandyahomelab/pull/2). The owner is reviewing the private preview (§10). Next
+is H5, then one deploy. Plan approved 2026-10-26 (decisions in §9). Built step by step with a review stop after each
+step (§8).
 
 ## 1. What it is
 
@@ -134,14 +136,14 @@ Specific parts:
 
 ## 8. Steps (branch `feat/cricstat-h2h`; review stop after each)
 
-| Step | Deliverable |
-|---|---|
-| H0 | This plan (approved 2026-10-26) |
-| H1 | `matchups` mart + consistency tests; build time and DB size measured |
-| H2 | Golden head-to-heads (you check the references) |
-| H3 | API endpoints + tests |
-| H4 | Landing page (picker + popular list) + result templates (matchup, comparison, country) + nav and "Compare with…" entry points, previewed in staging |
-| H5 | Pair selection (you edit the hand-picked lists), SEO heads, sitemap, share cards, then the deploy |
+| Step | Deliverable | Status |
+|---|---|---|
+| H0 | This plan | Approved 2026-10-26 |
+| H1 | `matchups` mart + consistency tests; build time and DB size measured | **Done** 5b5414a: +26 s, +26 MB, checks 0 on live copy |
+| H2 | Golden head-to-heads (you check the references) | **List ready** d9bfb9f (`docs/validation/h2h-golden.csv`, 70 rows); **owner filling references** |
+| H3 | API endpoints + tests | **Done** 28c232d: 2 endpoints + `opponent` filter on team results; 95 API tests |
+| H4 | Landing page (picker + popular list) + result templates (matchup, comparison, country) + nav and "Compare with…" entry points, previewed in staging | **Built** 81816b1, b3f6039 (format tabs in the picker row, owner request); **owner reviewing** |
+| H5 | Pair selection (you edit the hand-picked lists), SEO heads, sitemap, share cards, then the deploy | Not started |
 
 Runs alongside P1b: it touches the pipeline build and the API, not the models.
 
@@ -152,3 +154,46 @@ Runs alongside P1b: it touches the pipeline build and the API, not the models.
 3. Both player and country level (country pages reuse the existing team head-to-head data).
 4. **Internationals only** at launch.
 5. **Start now**, in parallel with P1b.
+
+## 10. Working notes (for picking this up later)
+
+**Where things are**
+
+| What | Where |
+|---|---|
+| Matchup marts (H1) | `cricstat/sql/serving_schema.sql` (`matchups`, `matchup_outs`), `cricstat-pipeline/db-logic/marts/marts.sql` (section "Batter v bowler"), checks `matchup_bat_diff` / `matchup_outs_diff` in `serving_store.measure` + `build_checks.py`, tests `tests/serving/test_matchups.py` |
+| Golden list (H2) | `cricstat/tools/h2h_golden.py` → `docs/validation/h2h-golden.csv` (re-runs keep the owner's columns; uses the mart when present, else the same rules on deliveries) |
+| API (H3) | `cricstat-api/db-logic/repository/h2h_repo.py`, `application-logic/services/h2h_service.py`, routes in `presentation-logic/api/app.py`, tests `tests/test_h2h.py`; documented in `docs/F5-api-contract.md` |
+| Pages (H4) | `tools/staging/web/assets/h2h.js` + CSS at the end of `cricstat.css`; shell from `tools/gen_pages.py` (`H2H`, `H2H_POPULAR`, nav item, V=124); "Compare with…" in `players.js`, "⚔ Head to head" in `countries.js`. `tools/staging/` is gitignored, so the tracked copy is `tools/staging-snapshot/h2h/` (README + `changes-to-live-files.diff`). Refresh the snapshot after every staging edit. |
+
+**Private preview (what the owner reviews)**
+
+1. Preview DB (already built at `cricstat/data/h2h-preview/`, gitignored): a copy of the live `cricstat.sqlite`
+   with the H1 tables added by running the schema block and the marts.sql matchup section, plus a symlink to the
+   live `forecast.sqlite`.
+2. API on 8048, from `cricstat-api/`:
+   `CRICSTAT_HOME=…/cricstat/data/h2h-preview CRICSTAT_WEB_DIR=…/cricstat/tools/staging/web python3 -m uvicorn presentation_logic.api.main:app --host 127.0.0.1 --port 8048`
+3. Site on 8090, from the repo root: `CRICSTAT_API=http://127.0.0.1:8048 python3 cricstat/tools/web_preview.py`
+   (it serves `/cricket/h2h/<a>-vs-<b>/` from the `h2h/index.html` shell).
+4. The owner opens `http://localhost:8090/cricket/h2h/` through VS Code port forwarding.
+5. **Both servers stop when the Claude Code session ends.** Restart them when the page "keeps spinning".
+6. Headless checks: jsdom in the scratchpad (`npm install jsdom@24`, set `window.fetch` in `beforeParse`); canvas
+   errors on the Players page are jsdom limits, not bugs.
+
+**URLs:** a pair is `/cricket/h2h/<slugA>-vs-<slugB>/` with the slugs in alphabetical order. Player slugs end in the
+8-hex Cricsheet id (`v-kohli-ba607b88`), team slugs in `-men` / `-women`; `h2h.js` tells them apart by that.
+`?f=TEST` keeps the format tab; `/cricket/h2h/?a=<slug>` pre-fills the picker.
+
+**Deploy order (after the owner approves the preview and the PR)**
+
+1. Merge `feat/cricstat-h2h` to `main` with `--no-ff` and push. The owner approves the **pipeline** and **API**
+   publishes on GitHub.
+2. `CRICSTAT_SERVICES=cricstat-pipeline DOCKER="sudo -n docker" sh deployment/cricstat/cd-pull.sh`, then a
+   **full** build (the schema changed, so rules_sha forces it; ~12 min; the live site keeps the old DB until the
+   swap).
+3. `CRICSTAT_SERVICES=cricstat-api … cd-pull.sh`. The API answers 503 on `/v1/h2h/*` until the marts exist, so
+   this order is safe either way.
+4. Nginx: add the `/cricket/h2h/<pair>/` route (H5), test it in the live container, then reload.
+5. Copy the changed staging files into `cricstat/web/` (assets first), delete `tools/staging-snapshot/h2h/`, and
+   merge `main` into every open branch (the branch-switch trap in CLAUDE.md).
+

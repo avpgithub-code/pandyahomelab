@@ -129,6 +129,7 @@ Background: `docs/llm-strategy-research-2026-10-05.md`.
 | P0.6 | Search-engine pages: server-rendered player/team heads, real 404/301, `/cricket/sitemap.xml` | **Done 2026-10-07** (4,840 players + 176 teams indexable; submitted in Search Console) |
 | P0.5 | Wikidata enrichment: full names, birth details, Commons photos | **Done 2026-10-08** (7,192 on Wikidata; 1,364 credited photos incl. GODL-India/PDM-owner; weekly `enrich`; search + cards use names/photos) |
 | P1 | ODI World Cup 2027 predictor: Elo + Monte Carlo baseline first, then ML and DL challengers, backtests on WC 2019/2023, live win probability | **In progress:** P1.1–P1.5 live (2026-10-08: models + API deployed, champion elo-v2, daily forecast in DSM); **P1.6 LIVE 2026-10-10** (predictor, methodology, world map, cricstat Elo team card, hub teaser; models 012e086f288a, API 27c53f4bd4cb, forecast #3). Next: P1b ML challenger |
+| H2H | **Head to Head** (`/cricket/h2h/`: batter-v-bowler matchups, player comparisons, country records, picker); plan `docs/h2h-plan.md` | **In progress (2026-10-26):** H1–H4 built on `feat/cricstat-h2h`, draft PR #2, owner reviewing the private preview; H2 references with the owner; next H5, then one deploy. Runs alongside P1b |
 | P2–P6 | Tools → test set → agent → public demo → extras | Later |
 | Later | Men's T20 World Cup 2028 forecast + T20I team ratings (decided 2026-10-06; shown as "Later" on team pages) | **Not started until the ODI World Cup 2027 is finished** |
 
@@ -500,6 +501,26 @@ Build steps added 2026-10-06 (verified with synoschedtask; image 52d427de deploy
   every team's record). Hub pitch: the "stat" half is a **Manhattan of India's 2011 World Cup final chase** (real
   Cricsheet data, match 433606, captioned; last bar = the six; faint by owner request). V=88. **Predictor page approval: paused by the owner;
   methodology page not started.** Women's team ratings = a later step with its own backtest (not in P1.6).
+
+## Head to Head (started 2026-10-26, branch `feat/cricstat-h2h`, draft PR #2)
+- **Source of truth: `docs/h2h-plan.md`.** It has the decisions (§9), step status (§8) and the working notes (§10:
+  file map, private-preview recipe, URL rules, deploy order). Read it before touching this work.
+- Owner's decisions: name **Head to Head** at `/cricket/h2h/` (search words beat a made-up name; ESPNcricinfo already
+  has a Compare Players tool, so the edge is an indexed page per pair plus an "in words" summary). ~150 indexed pages:
+  ~90 matchups, ~30 player comparisons, ~30 country records; internationals only; plus the owner's **picker**
+  (Players | Countries, Men | Women, ODI | Test | T20I in one row). Picker-built pairs are `noindex`.
+- **Nothing is deployed.** The owner reviews in the private preview (8048 API + 8090 site, which stop with the
+  session) and in the PR before any merge, publish or deploy.
+
+## Search and outreach (2026-10-19 → 26)
+- Search Console 2026-10-26: 346 pages indexed; the predictor ranks for "prediction/chances" searches (page 3 in
+  US incognito, higher for some users); the brand "cricstat" isn't found yet (Google reads it as "cricket stats").
+- **Wordmark rule (V=123):** the logo letters come from `data-t` + CSS `::before`, so crawlers read one plain
+  "cricstat". Never type a literal dotless `ı` into a page again (crawlers read "cricstatcrıcstat").
+- Predictor "forecast in words" opens with a live sentence naming the likely finalists and winner (API
+  329d34474b69), because "finalists" and "winner" were real search words the page lacked.
+- dev.to write-up published 2026-10-20 (`docs/devto/`, AI-assisted label; followed links); LinkedIn post 2026-10-20
+  (`docs/linkedin/2026-10-20-devto-writeup-post.md`); About page links the write-up. Show HN waits for P1b.
 
 ## Next up and open TODOs (updated 2026-10-09, after the partial P1.6 deploy)
 - **Start of P1b (next session):** read `docs/P1-predictor-plan.md` §8 (challenger harness), §3 (tests + publish bar)
