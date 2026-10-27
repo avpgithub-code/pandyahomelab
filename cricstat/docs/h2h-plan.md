@@ -142,7 +142,7 @@ Specific parts:
 | H1 | `matchups` mart + consistency tests; build time and DB size measured | **Done** 5b5414a: +26 s, +26 MB, checks 0 on live copy |
 | H2 | Golden head-to-heads (you check the references) | **List ready** d9bfb9f (`docs/validation/h2h-golden.csv`, 70 rows); **owner filling references** |
 | H3 | API endpoints + tests | **Done** 28c232d: 2 endpoints + `opponent` filter on team results; 95 API tests |
-| H4 | Landing page (picker + popular list) + result templates (matchup, comparison, country) + nav and "Compare with…" entry points, previewed in staging | **Built** 81816b1, b3f6039 (format tabs in the picker row, owner request); **owner reviewing** |
+| H4 | Landing page (picker + popular list) + result templates (matchup, comparison, country) + nav and "Compare with…" entry points, previewed in staging | **Built** 81816b1, b3f6039 (format tabs in the picker row, owner request), d8b68e4 ("See all N" dismissal list on each matchup, owner idea; liked 2026-10-27); **owner reviewing** |
 | H5 | Pair selection (you edit the hand-picked lists), SEO heads, sitemap, share cards, then the deploy | Not started |
 
 Runs alongside P1b: it touches the pipeline build and the API, not the models.
