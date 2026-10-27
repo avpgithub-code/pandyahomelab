@@ -57,6 +57,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
         m = DYNAMIC.match(path)
         if m:                                   # like Nginx since P0.6: the API renders the head
             return self.page(path[len("/cricket"):], os.path.join(WEB, m.group(1), "index.html"))
+        if re.match(r"^/cricket/h2h/[a-z0-9-]+-vs-[a-z0-9-]+/$", path):   # H4: pair pages share one shell
+            return self.file(os.path.join(WEB, "h2h", "index.html"))
         if path == "/cricket/predictor/":       # like Nginx: the API writes the live forecast in
             return self.page("/predictor/", os.path.join(WEB, "predictor", "index.html"))
         if path == "/cricket/sitemap.xml":

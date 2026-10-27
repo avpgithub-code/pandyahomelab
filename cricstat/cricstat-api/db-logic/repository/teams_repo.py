@@ -44,9 +44,13 @@ def records(db: ServingDB, scope: str, date_from: Optional[str] = None,
 
 
 def results(db: ServingDB, team_key: int, scope: Optional[str], date_from: Optional[str],
-            date_to: Optional[str], limit: int, offset: int) -> List[dict]:
+            date_to: Optional[str], limit: int, offset: int,
+            opponent_key: Optional[int] = None) -> List[dict]:
     where, args = db.scopes().clause(scope, "r") if scope else ("1", [])
     dates, dargs = _dates("r.start_date", date_from, date_to)
+    if opponent_key:                                    # Head to Head: only meetings with them
+        dates += " AND r.opponent_key = ?"
+        dargs = dargs + [opponent_key]
     return db.all(
         "SELECT m.match_id, r.start_date, r.format_key, o.name AS opponent, o.gender,"
         " o.team_type, r.outcome, r.margin_runs, r.margin_wickets, m.win_by_innings, m.method,"

@@ -1,0 +1,73 @@
+--- web/assets/cricstat.css	2026-10-26 11:04:26.066658177 -0500
++++ tools/staging/web/assets/cricstat.css	2026-10-27 18:33:51.135975521 -0500
+@@ -762,3 +762,45 @@
+ .m-cal-table th.grp { text-align: center; border-bottom: 1px solid var(--border); color: var(--text); }
+ .m-cal-table thead tr:last-child th:nth-child(odd), .m-cal-table tbody td:nth-child(5) { border-left: 1px solid var(--border); }
+ .m-cal-table tbody td:nth-child(3) { border-left: 1px solid var(--border); }
++
++/* ── Head to Head (docs/h2h-plan.md, H4) ── */
++.h-picker { margin-top: 1.4rem; max-width: 980px; }
++.h-switches { display: flex; flex-wrap: wrap; gap: .8rem 1.4rem; margin-bottom: .9rem; }
++.h-formats { padding-left: 1.4rem; border-left: 1px solid var(--border); }
++@media (max-width: 640px) { .h-formats { padding-left: 0; border-left: 0; } }
++.h-row { display: flex; flex-wrap: wrap; align-items: center; gap: .7rem; }
++.h-box { position: relative; flex: 1 1 260px; min-width: 0; }
++.h-input, .h-select { width: 100%; min-height: 48px; padding: .6rem .9rem; border-radius: var(--radius); border: 1px solid var(--border);
++                      background: var(--surface); color: var(--text); font: inherit; }
++.h-input:focus, .h-select:focus { border-color: var(--saffron); box-shadow: 0 0 0 4px rgba(255,153,51,.12); outline: none; }
++.h-select:disabled { opacity: .5; }
++.h-vs { color: var(--saffron); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; font-size: .8rem; }
++.h-suggest { position: absolute; z-index: 20; left: 0; right: 0; top: calc(100% + 4px); margin: 0; padding: .3rem; list-style: none;
++             background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); max-height: 360px; overflow: auto;
++             box-shadow: 0 14px 40px rgba(0,0,0,.45); }
++.h-suggest li[role="option"] { padding: .45rem .6rem; border-radius: 8px; cursor: pointer; }
++.h-suggest li[role="option"]:hover, .h-suggest li[role="option"]:focus { background: var(--surface3); outline: none; }
++.h-suggest-title { padding: .35rem .6rem; font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
++.h-chosen { display: flex; align-items: center; justify-content: space-between; gap: .6rem; min-height: 48px; padding: .35rem .5rem .35rem .7rem;
++            border-radius: var(--radius); border: 1px solid rgba(255,153,51,.45); background: rgba(255,153,51,.06); }
++.h-clear { border: 0; background: transparent; color: var(--dim); font-size: 1rem; cursor: pointer; padding: .3rem .5rem; border-radius: 8px; }
++.h-clear:hover { color: var(--text); background: var(--surface3); }
++.h-who .card { display: block; }
++.h-words p { color: var(--soft); margin-top: .3rem; }
++.h-mu .card-head { display: flex; align-items: center; justify-content: space-between; gap: .6rem; }
++.h-sbs { width: 100%; } .h-sbs th[scope="row"] { color: var(--dim); font-weight: 600; text-align: center; }
++.h-sbs td.num, .h-sbs th.num { text-align: center; font-variant-numeric: tabular-nums; }
++.h-best { color: var(--saffron); font-weight: 800; }
++.h-pop { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem 1.4rem; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
++.grid-2 { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
++.grid-3 { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
++.h-more { border: 1px solid var(--border); background: transparent; color: var(--saffron); font: inherit; font-weight: 700;
++  padding: .15rem .6rem; border-radius: 999px; cursor: pointer; margin-left: .2rem; }
++.h-more:hover, .h-more:focus-visible { border-color: var(--saffron); background: rgba(255,153,51,.08); }
++.h-outs { margin-top: .7rem; }
++.h-outs td, .h-outs th { white-space: nowrap; }
++.h-pop-kind { margin-top: 1.6rem; }
++.h-pop-kind h3 { margin: 0 0 .2rem; font-size: 1.15rem; }
++.h-pop-g { margin: .9rem 0 .45rem; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--saffron); }
++.h-pop li { line-height: 1.35; }
++.h-pop li .tiny { display: block; }
+--- web/assets/players.js	2026-10-09 21:36:15.837468758 -0500
++++ tools/staging/web/assets/players.js	2026-10-26 12:53:42.707536923 -0500
+@@ -265,7 +265,9 @@
+               h("div", { class: "row", style: "gap:.4rem" }, chips),
+               playedFor(p.teams),
+               bornLine(p), photoCredit(p)]),
+-            team && team.team_type === "international" && team.slug ? h("a", { class: "btn ghost", href: "/cricket/countries/" + team.slug + "/" }, [C.teamBadge(team.name, "sm"), team.name + " team page"]) : null]),
++            h("div", { class: "stack", style: "gap:.5rem" }, [
++              team && team.team_type === "international" && team.slug ? h("a", { class: "btn ghost", href: "/cricket/countries/" + team.slug + "/" }, [C.teamBadge(team.name, "sm"), team.name + " team page"]) : null,
++              h("a", { class: "btn ghost", href: "/cricket/h2h/?a=" + p.slug }, "⚔ Compare with…")])]),
+           h("div", { class: "kpis", id: "p-kpis", style: "margin-top:1.6rem;padding-top:1.2rem;border-top:1px solid var(--border)" })]))),
+         h("section", { class: "section panel" }, h("div", { class: "wrap stack" }, [
+           h("div", { class: "tabs", role: "group", "aria-label": "Format" }, tabs.map(([k, n]) =>
+--- web/assets/countries.js	2026-10-09 22:12:54.034522907 -0500
++++ tools/staging/web/assets/countries.js	2026-10-26 12:53:42.720537155 -0500
+@@ -26,6 +26,9 @@
+     if (!back && document.getElementById("c-landing")) {
+       document.getElementById("c-gender").before(h("a", { id: "c-maplink", class: "tab", href: "/cricket/countries/" }, "🌍 World map"));
+     }
++    const cmp = document.getElementById("c-h2hlink");
++    if (cmp) cmp.href = "/cricket/h2h/?a=" + team.slug;
++    else document.getElementById("c-gender").before(h("a", { id: "c-h2hlink", class: "tab", href: "/cricket/h2h/?a=" + team.slug }, "⚔ Head to head"));
+     C.fill("c-gender", ["male", "female"].map((g) => {
+       const slug = slugFor(team.name, g);
+       return slug ? h("a", { class: "tab", href: "/cricket/countries/" + slug + "/", "aria-pressed": String(g === team.gender) }, GENDER[g])

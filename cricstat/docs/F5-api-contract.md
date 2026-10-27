@@ -98,6 +98,16 @@ golden-set checks and the eval harness. If a number appears on the site, it came
 | `GET /v1/players/{id}/splits?by=opponent\|venue\|season&scope=` | Grouped totals and ratios | Top opponents and venues |
 | `GET /v1/players/{id}/innings?scope=&from=&to=&limit=` | Innings-by-innings list (the atoms) | Form, agent follow-ups |
 
+### Head to Head (added 2026-10-26, docs/h2h-plan.md)
+
+| Endpoint | Returns | Used by |
+|---|---|---|
+| `GET /v1/h2h/players/{a}/{b}?scope=ODI\|TEST\|T20I` | Both careers in that format, the matchup each way (balls, runs, outs, dots, 4s/6s, average, SR, dot %, dismissal kinds, `small_sample` under 30 balls), balls between them per format. 400 same player or other scope, 404 unknown, 422 man v woman, 503 before the matchup marts exist | Head to Head pages |
+| `GET /v1/h2h/opponents/{id}?scope=&as=any\|batter\|bowler&limit=` | The players this one met most, by balls (`matchups` mart) | Head to Head picker, player pages |
+| `GET /v1/h2h/dismissals/{batter_id}/{bowler_id}?scope=` | Each time the bowler dismissed the batter, oldest first: date, ground, innings, ball, scorecard notation (`c Cook b Anderson`), the batter's score and the match result for their team. Same rule as the matchup's outs | Head to Head "See all" list |
+
+Country head to head uses `GET /v1/teams/{slug}/head-to-head` (below).
+
 ### Teams
 | Endpoint | Returns | Used by |
 |---|---|---|

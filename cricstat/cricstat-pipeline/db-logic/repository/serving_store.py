@@ -353,6 +353,24 @@ def measure(conn: sqlite3.Connection) -> Dict[str, object]:
                             - (d[3] or 0)),
         "bowl_wkts_diff": (one("SELECT COALESCE(SUM(wickets), 0) FROM bowling_innings")
                            - one("SELECT COUNT(*) FROM dismissals WHERE credited_to_bowler = 1")),
+        # Head to Head: per scope and batter, matchups must add up to the batting atoms, and outs to
+        # the dismissals credited to bowlers (official international formats only, super overs out).
+        "matchup_bat_diff": one(
+            "SELECT COUNT(*) FROM (SELECT m.format_key AS scope, b.player_key,"
+            " SUM(b.balls_faced) AS balls, SUM(b.runs) AS runs FROM batting_innings b"
+            " JOIN matches m USING (match_key) WHERE m.has_deliveries = 1 AND b.is_super_over = 0"
+            " AND m.format_key IN ('TEST', 'ODI', 'T20I') GROUP BY 1, 2) a"
+            " LEFT JOIN (SELECT scope, batter_key, SUM(balls) AS balls, SUM(runs) AS runs"
+            " FROM matchups GROUP BY 1, 2) u ON u.scope = a.scope AND u.batter_key = a.player_key"
+            " WHERE COALESCE(u.balls, 0) <> a.balls OR COALESCE(u.runs, 0) <> a.runs"),
+        "matchup_outs_diff": (one("SELECT COALESCE(SUM(outs), 0) FROM matchups")
+                              - one("SELECT COUNT(*) FROM dismissals x"
+                                    " JOIN matches m USING (match_key)"
+                                    " JOIN innings i ON i.match_key = x.match_key"
+                                    " AND i.innings_no = x.innings_no WHERE m.has_deliveries = 1"
+                                    " AND m.format_key IN ('TEST', 'ODI', 'T20I')"
+                                    " AND i.is_super_over = 0 AND x.credited_to_bowler = 1"
+                                    " AND x.counts_as_out = 1")),
         "atoms_off_team_sheet": one(
             "SELECT COUNT(*) FROM (SELECT match_key, player_key FROM batting_innings UNION"
             " SELECT match_key, player_key FROM bowling_innings) a"

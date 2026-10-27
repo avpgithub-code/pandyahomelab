@@ -20,6 +20,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from application_logic.services import (
     admin_service,
     forecast_service,
+    h2h_service,
     matches_service,
     meta_service,
     players_service,
@@ -198,6 +199,24 @@ def create_app(cfg: Optional[Config] = None) -> FastAPI:
                                                    limit, offset)
         return envelope(request, data, defs, more, extra_filters={"scope": scope})
 
+    # ── Head to Head (docs/h2h-plan.md) ──
+    @app.get("/v1/h2h/players/{a_id}/{b_id}")
+    def h2h_players(request: Request, a_id: str, b_id: str, scope: str = "ODI"):
+        return envelope(request, *h2h_service.players(db, a_id, b_id, scope),
+                        extra_filters={"scope": scope})
+
+    @app.get("/v1/h2h/dismissals/{batter_id}/{bowler_id}")
+    def h2h_dismissals(request: Request, batter_id: str, bowler_id: str, scope: str = "ODI"):
+        return envelope(request, *h2h_service.dismissals(db, batter_id, bowler_id, scope),
+                        extra_filters={"scope": scope})
+
+    @app.get("/v1/h2h/opponents/{player_id}")
+    def h2h_opponents(request: Request, player_id: str, scope: str = "ODI",
+                      role: str = Query("any", alias="as"),
+                      limit: Optional[int] = Query(None, ge=1, le=50)):
+        return envelope(request, *h2h_service.opponents(db, player_id, scope, role, limit),
+                        extra_filters={"scope": scope, "as": role})
+
     # ── Teams ──
     @app.get("/v1/teams")
     def teams(request: Request, gender: Optional[str] = None, type: Optional[str] = None):
@@ -225,9 +244,10 @@ def create_app(cfg: Optional[Config] = None) -> FastAPI:
     def team_results(request: Request, slug: str, scope: Optional[str] = None,
                      date_from: Optional[str] = Query(None, alias="from"),
                      date_to: Optional[str] = Query(None, alias="to"),
-                     limit: Optional[int] = None, offset: Optional[int] = None):
+                     limit: Optional[int] = None, offset: Optional[int] = None,
+                     opponent: Optional[str] = None):
         data, defs, more = teams_service.results(db, slug, scope, date_from, date_to, limit,
-                                                 offset)
+                                                 offset, opponent)
         return envelope(request, data, defs, more)
 
     @app.get("/v1/teams/{slug}/head-to-head")
