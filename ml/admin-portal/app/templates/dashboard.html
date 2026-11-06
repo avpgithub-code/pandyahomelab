@@ -198,7 +198,7 @@
     {%- endif -%}
   {%- endmacro %}
 
-  <h2>👤 Real visitors · last {{ days }} days</h2>
+  <h2>👤 Real visitors · last {{ days }} days · {{ window_label }}</h2>
   <div class="summary-grid eight">
     <div class="card real">
       <div class="card-label">Visitors</div>
@@ -239,6 +239,8 @@
     the visitor was active in the last 30 s. Bounce = one-page visit under 30 s.
     {{ human.js_page_views or 0 }} JS page loads → {{ human.page_views or 0 }} passed the human filter.
     Your own visits from the home IP are not included — see <a href="#home-ip">🏠 Home IP</a>.
+    Windows are whole UTC days and include today, so they move forward once a day at midnight UTC.
+    {% if data_since %}Tracking data starts {{ data_since }}, so this window can't reach further back.{% endif %}
   </p>
 
   <h2>📈 Daily real visitors</h2>

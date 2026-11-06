@@ -30,6 +30,9 @@ count as visits.
 - **Raw server log** (bottom) — `analytics.visitor_events` from the analytics-ingester
   (every nginx request, mostly scanners). Context only.
 
+Every window is whole UTC calendar days including today (`app/window.py`), so "30d" starts at
+00:00 UTC 29 days ago and moves once a day. The daily charts show days with no visits as zeros.
+
 ## Background jobs (in the app process)
 
 | Job | File | Schedule | What |

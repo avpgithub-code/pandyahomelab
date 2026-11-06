@@ -20,6 +20,7 @@ from app.engagement_queries import (
     fetch_engagement_buckets,
     fetch_engagement_daily,
     fetch_engagement_summary,
+    fetch_first_human_day,
     fetch_home_pages,
     fetch_home_summary,
     fetch_human_countries,
@@ -43,6 +44,7 @@ from app.queries import (
     fetch_summary,
     fetch_top_paths,
 )
+from app.window import day_label, fill_days, utc_today, window_label, window_start
 
 router = APIRouter()
 templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
@@ -84,25 +86,29 @@ async def dashboard(
     home = fetch_home_summary(days)
     home_pages = fetch_home_pages(days, limit=10)
 
+    today = utc_today()
+    start = window_start(days, today)
+    first_day = fetch_first_human_day()
+    # A window that reaches back before tracking began has nothing to plot there.
+    human_start = max(start, first_day) if first_day else None
+    data_since = first_day if first_day and first_day > start else None
+
     daily_chart = [
-        {
-            "day": str(r["day"]),
-            "real": int(r["real_events"] or 0),
-            "bots": int(r["bot_events"] or 0),
-        }
-        for r in reversed(daily)
+        {"day": str(r["day"]), "real": r["real_events"], "bots": r["bot_events"]}
+        for r in fill_days(
+            daily,
+            min((r["day"] for r in daily), default=None),
+            today,
+            ["real_events", "bot_events"],
+        )
     ]
     countries_chart = [
         {"country": r["country"], "visitors": int(r["visitors"] or 0)}
         for r in human_countries
     ]
     human_chart = [
-        {
-            "day": str(r["day"]),
-            "visitors": int(r["visitors"] or 0),
-            "page_views": int(r["page_views"] or 0),
-        }
-        for r in reversed(human_daily)
+        {**r, "day": str(r["day"])}
+        for r in fill_days(human_daily, human_start, today, ["visitors", "page_views"])
     ]
 
     return templates.TemplateResponse(
@@ -110,6 +116,8 @@ async def dashboard(
         {
             "request": request,
             "days": days,
+            "window_label": window_label(start, today),
+            "data_since": day_label(data_since) if data_since else None,
             "admin": admin,
             "summary": summary,
             "daily": daily,

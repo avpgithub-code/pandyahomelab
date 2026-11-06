@@ -6,9 +6,11 @@ it didn't come from the owner's home IP, and the visitor either interacted
 Everything on the dashboard's top half uses it. Home-IP visits are reported
 separately (HOME_* queries).
 """
-from typing import Dict, List
+from datetime import date
+from typing import Dict, List, Optional
 
 from app.db import get_cursor
+from app.window import win_param
 
 HOME = "ip_hash IN (SELECT ip_hash FROM analytics.home_ips)"
 HUMAN = f"NOT is_bot AND NOT {HOME} AND (interacted OR engaged_ms >= 10000)"
@@ -91,7 +93,7 @@ def count_recent_starts(ip_hash: str) -> int:
 SUMMARY_SQL = f"""
 WITH all_pv AS (
     SELECT * FROM analytics.page_views
-    WHERE NOT is_bot AND NOT {HOME} AND started_at >= NOW() - %(win)s::interval
+    WHERE NOT is_bot AND NOT {HOME} AND started_at >= date_trunc('day', NOW()) - %(win)s::interval
 ),
 h AS (SELECT * FROM all_pv WHERE {HUMAN}),
 v AS (
@@ -124,15 +126,17 @@ SELECT
     count(*)                                           AS page_views,
     round(sum(engaged_ms) / 1000.0 / NULLIF(count(DISTINCT visit_id), 0)) AS avg_visit_s
 FROM analytics.page_views
-WHERE {HUMAN} AND started_at >= NOW() - %(win)s::interval
+WHERE {HUMAN} AND started_at >= date_trunc('day', NOW()) - %(win)s::interval
 GROUP BY 1
 ORDER BY 1 DESC
 """
 
+FIRST_DAY_SQL = f"SELECT min(started_at)::date AS day FROM analytics.page_views WHERE {HUMAN}"
+
 PAGES_SQL = f"""
 WITH h AS (
     SELECT * FROM analytics.page_views
-    WHERE {HUMAN} AND started_at >= NOW() - %(win)s::interval
+    WHERE {HUMAN} AND started_at >= date_trunc('day', NOW()) - %(win)s::interval
 ),
 runs AS (
     SELECT pv_id, count(*) AS n FROM analytics.page_events
@@ -150,10 +154,10 @@ SELECT
     round(avg(h.max_scroll_pct))                                    AS avg_scroll,
     round(100.0 * count(*) FILTER (WHERE h.max_scroll_pct >= 75) / count(*)) AS read_pct,
     (SELECT count(*) FROM analytics.feedback_likes l
-      WHERE l.page_id = h.page_id AND l.created_at >= NOW() - %(win)s::interval
+      WHERE l.page_id = h.page_id AND l.created_at >= date_trunc('day', NOW()) - %(win)s::interval
         AND NOT l.{HOME}) AS likes,
     (SELECT count(*) FROM analytics.feedback_comments c
-      WHERE c.page_id = h.page_id AND c.created_at >= NOW() - %(win)s::interval
+      WHERE c.page_id = h.page_id AND c.created_at >= date_trunc('day', NOW()) - %(win)s::interval
         AND NOT c.{HOME}) AS comments
 FROM h
 LEFT JOIN runs ON runs.pv_id = h.pv_id
@@ -167,7 +171,7 @@ SOURCES_SQL = f"""
 WITH landing AS (
     SELECT DISTINCT ON (visit_id) *
     FROM analytics.page_views
-    WHERE {HUMAN} AND started_at >= NOW() - %(win)s::interval
+    WHERE {HUMAN} AND started_at >= date_trunc('day', NOW()) - %(win)s::interval
     ORDER BY visit_id, started_at
 )
 SELECT
@@ -188,7 +192,7 @@ LIMIT %(limit)s
 COUNTRIES_SQL = f"""
 SELECT country, count(DISTINCT ip_hash) AS visitors, count(DISTINCT visit_id) AS visits
 FROM analytics.page_views
-WHERE {HUMAN} AND country IS NOT NULL AND started_at >= NOW() - %(win)s::interval
+WHERE {HUMAN} AND country IS NOT NULL AND started_at >= date_trunc('day', NOW()) - %(win)s::interval
 GROUP BY country
 ORDER BY visitors DESC
 LIMIT %(limit)s
@@ -197,7 +201,7 @@ LIMIT %(limit)s
 DEVICES_SQL = f"""
 SELECT coalesce(device, 'unknown') AS device, count(DISTINCT visit_id) AS visits
 FROM analytics.page_views
-WHERE {HUMAN} AND started_at >= NOW() - %(win)s::interval
+WHERE {HUMAN} AND started_at >= date_trunc('day', NOW()) - %(win)s::interval
 GROUP BY 1
 ORDER BY visits DESC
 """
@@ -207,7 +211,7 @@ ENGAGEMENT_BUCKETS_SQL = f"""
 WITH v AS (
     SELECT visit_id, sum(engaged_ms) AS ms
     FROM analytics.page_views
-    WHERE {HUMAN} AND started_at >= NOW() - %(win)s::interval
+    WHERE {HUMAN} AND started_at >= date_trunc('day', NOW()) - %(win)s::interval
     GROUP BY visit_id
 )
 SELECT bucket, count(*) AS visits FROM (
@@ -229,7 +233,7 @@ BUCKET_LABELS = {1: "< 30 s", 2: "30 s – 2 min", 3: "2 – 5 min", 4: "5 – 1
 ACTIONS_SQL = f"""
 SELECT e.page_id, e.name, count(*) AS times, count(DISTINCT e.ip_hash) AS visitors
 FROM analytics.page_events e
-WHERE e.created_at >= NOW() - %(win)s::interval
+WHERE e.created_at >= date_trunc('day', NOW()) - %(win)s::interval
   AND e.pv_id IN (SELECT pv_id FROM analytics.page_views WHERE {HUMAN})
 GROUP BY e.page_id, e.name
 ORDER BY visitors DESC, times DESC
@@ -243,7 +247,7 @@ JOURNEYS_SQL = f"""
 WITH h AS (
     SELECT visit_id, page_id, started_at, engaged_ms
     FROM analytics.page_views
-    WHERE {HUMAN} AND started_at >= NOW() - %(win)s::interval
+    WHERE {HUMAN} AND started_at >= date_trunc('day', NOW()) - %(win)s::interval
 ),
 steps AS (
     SELECT *, lag(page_id) OVER (PARTITION BY visit_id ORDER BY started_at) AS prev
@@ -279,7 +283,7 @@ WITH steps AS (
     SELECT visit_id, page_id,
            lead(page_id) OVER (PARTITION BY visit_id ORDER BY started_at) AS next_page
     FROM analytics.page_views
-    WHERE {HUMAN} AND started_at >= NOW() - %(win)s::interval
+    WHERE {HUMAN} AND started_at >= date_trunc('day', NOW()) - %(win)s::interval
 )
 SELECT page_id AS from_page,
        coalesce(next_page, '(left the site)')          AS to_page,
@@ -296,7 +300,7 @@ LIMIT %(limit)s
 HOME_SUMMARY_SQL = f"""
 WITH pv AS (
     SELECT * FROM analytics.page_views
-    WHERE {HOME} AND started_at >= NOW() - %(win)s::interval
+    WHERE {HOME} AND started_at >= date_trunc('day', NOW()) - %(win)s::interval
 )
 SELECT
     (SELECT count(*) FROM pv)                                        AS page_views,
@@ -305,9 +309,9 @@ SELECT
     (SELECT count(*) FROM analytics.page_events e
       WHERE e.pv_id IN (SELECT pv_id FROM pv) AND e.name LIKE 'run:%%') AS demo_runs,
     (SELECT count(*) FROM analytics.feedback_likes
-      WHERE {HOME} AND created_at >= NOW() - %(win)s::interval)      AS likes,
+      WHERE {HOME} AND created_at >= date_trunc('day', NOW()) - %(win)s::interval)      AS likes,
     (SELECT count(*) FROM analytics.feedback_comments
-      WHERE {HOME} AND created_at >= NOW() - %(win)s::interval)      AS comments,
+      WHERE {HOME} AND created_at >= date_trunc('day', NOW()) - %(win)s::interval)      AS comments,
     (SELECT max(started_at) FROM pv)                                 AS last_seen,
     (SELECT count(*) FROM analytics.home_ips)                        AS known_ips
 """
@@ -315,7 +319,7 @@ SELECT
 HOME_PAGES_SQL = f"""
 SELECT page_id, count(*) AS views, round(sum(engaged_ms) / 1000.0) AS engaged_s
 FROM analytics.page_views
-WHERE {HOME} AND started_at >= NOW() - %(win)s::interval
+WHERE {HOME} AND started_at >= date_trunc('day', NOW()) - %(win)s::interval
 GROUP BY page_id
 ORDER BY views DESC
 LIMIT %(limit)s
@@ -324,7 +328,7 @@ LIMIT %(limit)s
 
 def _fetch(sql: str, days: int, limit: int = 10) -> List[Dict]:
     with get_cursor() as cur:
-        cur.execute(sql, {"win": f"{days} days", "limit": limit})
+        cur.execute(sql, {"win": win_param(days), "limit": limit})
         return [dict(r) for r in cur.fetchall()]
 
 
@@ -335,6 +339,13 @@ def fetch_engagement_summary(days: int) -> Dict:
 
 def fetch_engagement_daily(days: int) -> List[Dict]:
     return _fetch(DAILY_SQL, days)
+
+
+def fetch_first_human_day() -> Optional[date]:
+    """First day with a real visitor, in any window (None until there is one)."""
+    with get_cursor() as cur:
+        cur.execute(FIRST_DAY_SQL)
+        return cur.fetchone()["day"]
 
 
 def fetch_page_engagement(days: int, limit: int = 20) -> List[Dict]:

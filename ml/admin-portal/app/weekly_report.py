@@ -22,6 +22,7 @@ from app.engagement_queries import (
     fetch_page_engagement,
     fetch_visit_sources,
 )
+from app.window import win_param
 
 PREVIOUS_SQL = f"""
 SELECT count(DISTINCT ip_hash) AS visitors,
@@ -29,27 +30,27 @@ SELECT count(DISTINCT ip_hash) AS visitors,
        count(*)                 AS page_views
 FROM analytics.page_views
 WHERE {HUMAN}
-  AND started_at >= NOW() - 2 * %(win)s::interval
-  AND started_at <  NOW() - %(win)s::interval
+  AND started_at >= date_trunc('day', NOW()) - %(win)s::interval - %(span)s::interval
+  AND started_at <  date_trunc('day', NOW()) - %(win)s::interval
 """
 
 COMMENTS_SQL = f"""
 SELECT page_id, coalesce(name, 'anonymous') AS name, body, created_at, {HOME} AS from_home
 FROM analytics.feedback_comments
-WHERE NOT hidden AND created_at >= NOW() - %(win)s::interval
+WHERE NOT hidden AND created_at >= date_trunc('day', NOW()) - %(win)s::interval
 ORDER BY created_at DESC
 LIMIT 10
 """
 
 LIKES_SQL = f"""
 SELECT count(*) AS n FROM analytics.feedback_likes
-WHERE NOT {HOME} AND created_at >= NOW() - %(win)s::interval
+WHERE NOT {HOME} AND created_at >= date_trunc('day', NOW()) - %(win)s::interval
 """
 
 
 def _query(sql: str, days: int):
     with get_cursor() as cur:
-        cur.execute(sql, {"win": f"{days} days"})
+        cur.execute(sql, {"win": win_param(days), "span": f"{days} days"})
         return [dict(r) for r in cur.fetchall()]
 
 
