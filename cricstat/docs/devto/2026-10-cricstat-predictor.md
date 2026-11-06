@@ -44,7 +44,7 @@ expected_a = 1 / (1 + 10 ** (-(r_a - r_b + HOME * h) / 400))   # h = +1 home, -1
 r_a += K * margin_multiplier * (result_a - expected_a)       # win 1, tie 0.5, loss 0
 ```
 
-The settings were chosen by grid search over 2,016 combinations, scored on log loss. Each backtest only used data from before the period it was tested on, so the model never saw the answers. The winners: K = 20, home advantage = 75 rating points, a margin-of-victory multiplier, and 5% regression toward the mean each 1 January.
+The settings were chosen by grid search over 2,016 combinations, scored on log loss. Each year from 2019 was predicted with settings tuned only on earlier matches, and each World Cup with settings tuned only on data from before it. The final picks, used for the live forecast: K = 20, home advantage = 75 rating points, a margin-of-victory multiplier, and 5% regression toward the mean each 1 January.
 
 Then the tournament itself is played 50,000 times in its published format: Qualifier, groups, Super 7, semi-finals and final. Each run also includes:
 
@@ -79,6 +79,7 @@ The [methodology page](https://pandyahomelab.com/cricket/methodology/) has a ful
 
 - **It rates teams, not players.** It knows nothing about squads, injuries, retirements, the toss or the pitch. A team that rests its stars for a series looks weaker than it is.
 - **It's weaker in 2026 so far:** 56% accuracy on 78 matches, against 69% over the whole test period. Small samples swing, but I'm watching it.
+- **The test matches aren't perfectly untouched.** After one test run I changed how the yearly regression treats teams promoted to Full Member. Log loss moved from 0.6054 to 0.6049, and the calibration slope from 0.91 to 0.97. A reader's question also led me to measure tuning leakage: tuning once on all history would have looked only about 0.003 better than the published score.
 - **Net run rate isn't modelled**, because Elo doesn't predict margins. Teams level on points are split by wins, then at random. It barely changes the title odds, and the page says so.
 
 That first limit is why the next step is a machine-learning challenger: gradient boosting on Elo difference, home advantage, form and squad strength built from the actual playing XIs. After that comes a deep-learning model trained on about 11.6 million deliveries. Whichever is best calibrated on the same backtests takes over the live forecast, and the comparison gets published either way.
