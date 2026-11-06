@@ -68,10 +68,20 @@
             ["Rated matches", "official men's ODIs from 2002; composite XIs left out"]])])]),
       h("div", { class: "card", style: "margin-top:1rem" }, [h("h3", {}, "How the settings were chosen"),
         h("ul", { class: "m-list" }, [
-          h("li", {}, "A grid of 2,016 combinations (K 16–64, H 0–120, margin on/off, the yearly pull 0–30%, Δ) was scored by log loss of each match's prediction made before it was played, from 2007 (the earlier years only warm the ratings up)."),
+          h("li", {}, "A grid of 2,016 combinations (K 12–40, H 0–120, margin on/off, the yearly pull 0–20%, Δ 0–600) was scored by log loss of each match's prediction made before it was played, from 2007 (the earlier years only warm the ratings up)."),
           h("li", {}, "For the backtests the grid only saw data from before the test: before 30 May 2019 for the 2019 World Cup, before 5 Oct 2023 for 2023, and each year since 2019 re-tuned on the years before it. It picked K = 20, H = 75 and margin on almost every time, so the fit is stable."),
           h("li", {}, "Associates start lower by one rule, decided by ICC status at a team's first match, and the yearly pull goes toward the base for its status on that day — so Ireland and Afghanistan aren't dragged back to associate level after becoming Full Members in 2017."),
-          h("li", {}, "No team-specific adjustments, ever: following a team changes what the pages show first, never a number.")])])]);
+          h("li", {}, "No team-specific adjustments, ever: following a team changes what the pages show first, never a number.")])]),
+      h("div", { class: "card", style: "margin-top:1rem" }, [h("h3", {}, "Did the test matches influence the settings?"),
+        h("p", {}, ["A ", h("a", { href: "https://dev.to/botgauntlet/comment/3idle", rel: "noopener" }, "reader on DEV"), " asked, so on 6 Nov 2026 we measured it on the 900 test A matches. Settings chosen with the test matches in view score better, so the gap shows what a leak would be worth."]),
+        C.table(["How the settings were chosen", "Log loss", "Brier"], [
+          ["Re-tuned each year on earlier matches only (published)", "0.6049", "0.2053"],
+          ["Tuned once on all history (the leak)", "0.6021", "0.2046"],
+          ["Best settings for the test matches (worst case)", "0.6001", "0.2037"]], { textCols: [0] }),
+        h("ul", { class: "m-list" }, [
+          h("li", {}, "The published score is the first row. Tuning on all history would have looked about 0.003 better (standard error about 0.0016), all of it from 2019–22. From 2023 both methods chose the same settings."),
+          h("li", {}, "One change did come after seeing a test result: the yearly pull was changed so promoted teams move toward their new base rating. Log loss went from 0.6054 to 0.6049 and the calibration slope from 0.91 to 0.97. We kept it because the rule is right, but those matches aren't perfectly untouched."),
+          h("li", {}, "The grid's ranges and the model's design are our own choices too, and no test can fully remove that.")])])]);
   }
 
   // ── 🎲 Simulation ──
